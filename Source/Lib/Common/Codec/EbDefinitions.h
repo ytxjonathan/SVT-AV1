@@ -2672,6 +2672,9 @@ void(*ErrorHandler)(
 #define MAX_NUMBER_OF_TREEBLOCKS_PER_PICTURE       ((MAX_PICTURE_WIDTH_SIZE + BLOCK_SIZE_64 - 1) / BLOCK_SIZE_64) * \
                                                 ((MAX_PICTURE_HEIGHT_SIZE + BLOCK_SIZE_64 - 1) / BLOCK_SIZE_64)
 
+#define MIN_SUPERRES_DENOM                          8
+#define MAX_SUPERRES_DENOM                          16
+
 //***Prediction Structure***
 #define REF_LIST_MAX_DEPTH                          4 // NM - To be specified
 #define MAX_TEMPORAL_LAYERS                         6

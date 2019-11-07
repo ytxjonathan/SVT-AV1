@@ -2265,6 +2265,10 @@ void CopyApiFromApp(
     sequence_control_set_ptr->static_config.altref_nframes = pComponentParameterStructure->altref_nframes;
     sequence_control_set_ptr->static_config.enable_overlays = pComponentParameterStructure->enable_overlays;
 
+    sequence_control_set_ptr->static_config.superres_mode = pComponentParameterStructure->superres_mode;
+    sequence_control_set_ptr->static_config.superres_denom = pComponentParameterStructure->superres_denom;
+    sequence_control_set_ptr->static_config.superres_qthres = pComponentParameterStructure->superres_qthres;
+
     sequence_control_set_ptr->static_config.sq_weight = pComponentParameterStructure->sq_weight;
     sequence_control_set_ptr->static_config.enable_auto_max_partition = pComponentParameterStructure->enable_auto_max_partition;
 
@@ -2772,6 +2776,18 @@ static EbErrorType VerifySettings(
         return_error = EB_ErrorBadParameter;
     }
 
+    // TODO: add limits for superres-mode when known
+
+    if (config->superres_qthres > 63) {
+        SVT_LOG("Error instance %u: invalid superres-qthres, should be in the range [%d - %d] \n", channelNumber + 1, MIN_QP_VALUE, MAX_QP_VALUE);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->superres_denom < 8 || config->superres_denom > 16) {
+        SVT_LOG("Error instance %u: invalid superres-denom, should be in the range [%d - %d] \n", channelNumber + 1, MIN_SUPERRES_DENOM, MAX_SUPERRES_DENOM);
+        return_error = EB_ErrorBadParameter;
+    }
+
     return return_error;
 }
 
@@ -2914,6 +2930,11 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->altref_nframes = 7;
     config_ptr->altref_strength = 5;
     config_ptr->enable_overlays = EB_FALSE;
+
+    // Super-resolution default values
+    config_ptr->superres_mode = 0;
+    config_ptr->superres_denom = 8;
+    config_ptr->superres_qthres = 43; // random threshold, change
 
     config_ptr->sq_weight = 100;
 
