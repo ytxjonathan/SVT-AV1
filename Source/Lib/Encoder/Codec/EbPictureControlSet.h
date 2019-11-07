@@ -551,6 +551,8 @@ typedef struct PictureControlSet {
     uint16_t tile_row_count;
     uint16_t tile_column_count;
 #endif
+	uint16_t sb_total_count_pix;
+    uint16_t sb_total_count_unscaled;
 } PictureControlSet;
 
 // To optimize based on the max input size
@@ -610,6 +612,8 @@ typedef struct PictureParentControlSet {
     EbObjectWrapper *    reference_picture_wrapper_ptr;
     EbObjectWrapper *    pa_reference_picture_wrapper_ptr;
     EbPictureBufferDesc *enhanced_picture_ptr;
+    EbPictureBufferDesc *enhanced_downscaled_picture_ptr;
+    EbPictureBufferDesc *enhanced_unscaled_picture_ptr;
     EbPictureBufferDesc
         *  chroma_downsampled_picture_ptr; //if 422/444 input, down sample to 420 for MD
     EbBool is_chroma_downsampled_picture_ptr_owner;
@@ -939,6 +943,15 @@ typedef struct PictureParentControlSet {
     uint8_t gm_level;
 #endif
     uint8_t tx_size_early_exit;
+
+    SbParams *sb_params_array;
+    SbGeom *  sb_geom;
+    EbInputResolution input_resolution;
+    uint16_t picture_sb_width;
+    uint16_t picture_sb_height;
+    uint16_t sb_total_count_unscaled;
+
+    EbBool frame_superres_enabled;
 
 } PictureParentControlSet;
 
