@@ -647,7 +647,7 @@ static void read_stat_from_file(PictureParentControlSet *pcs_ptr, SequenceContro
     for (int sb_addr = 0; sb_addr < scs_ptr->sb_total_count; ++sb_addr) {
         referenced_area_avg +=
             (pcs_ptr->stat_struct.referenced_area[sb_addr] /
-             scs_ptr->sb_params_array[sb_addr].width / scs_ptr->sb_params_array[sb_addr].height);
+             pcs_ptr->sb_params_array[sb_addr].width / pcs_ptr->sb_params_array[sb_addr].height);
         referenced_area_has_non_zero += pcs_ptr->stat_struct.referenced_area[sb_addr];
     }
     referenced_area_avg /= scs_ptr->sb_total_count;
@@ -789,6 +789,9 @@ void *resource_coordination_kernel(void *input_ptr) {
             sb_geom_init(scs_ptr);
             scs_ptr->enable_altrefs = scs_ptr->static_config.enable_altrefs ? EB_TRUE : EB_FALSE;
 
+            if(scs_ptr->static_config.superres_mode > SUPERRES_NONE)
+                scs_ptr->seq_header.enable_superres = 1;
+
             if (scs_ptr->static_config.inter_intra_compound == DEFAULT) {
                 // Set inter-intra mode      Settings
                 // 0                 OFF
@@ -847,6 +850,12 @@ void *resource_coordination_kernel(void *input_ptr) {
             pcs_ptr = (PictureParentControlSet *)pcs_wrapper_ptr->object_ptr;
 
             pcs_ptr->p_pcs_wrapper_ptr = pcs_wrapper_ptr;
+
+            pcs_ptr->sb_params_array = scs_ptr->sb_params_array;
+            pcs_ptr->sb_geom = scs_ptr->sb_geom;
+            pcs_ptr->input_resolution = scs_ptr->input_resolution;
+            pcs_ptr->picture_sb_width = scs_ptr->pic_width_in_sb;
+            pcs_ptr->picture_sb_height = scs_ptr->picture_height_in_sb;
 
             pcs_ptr->overlay_ppcs_ptr = NULL;
             pcs_ptr->is_alt_ref       = 0;

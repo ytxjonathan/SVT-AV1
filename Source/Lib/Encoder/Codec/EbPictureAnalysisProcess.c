@@ -21,6 +21,8 @@
 #include "EbReferenceObject.h"
 #include "EbComputeMean_SSE2.h"
 #include "EbUtility.h"
+#include "EbCombinedAveragingSAD_Intrinsic_AVX2.h"
+#include "EbResize.h"
 
 #define VARIANCE_PRECISION 16
 #define SB_LOW_VAR_TH 5
@@ -3238,7 +3240,7 @@ void compute_picture_spatial_statistics(SequenceControlSet *     scs_ptr,
     pic_tot_variance = 0;
 
     for (sb_index = 0; sb_index < pcs_ptr->sb_total_count; ++sb_index) {
-        SbParams *sb_params = &scs_ptr->sb_params_array[sb_index];
+        SbParams *sb_params = &pcs_ptr->sb_params_array[sb_index];
 
         sb_origin_x             = sb_params->origin_x;
         sb_origin_y             = sb_params->origin_y;
@@ -3739,6 +3741,9 @@ void *picture_analysis_kernel(void *input_ptr) {
         in_results_ptr = (ResourceCoordinationResults *)in_results_wrapper_ptr->object_ptr;
         pcs_ptr        = (PictureParentControlSet *)in_results_ptr->pcs_wrapper_ptr->object_ptr;
 
+        // Mariana : save enhanced picture ptr, move this from here
+        pcs_ptr->enhanced_unscaled_picture_ptr = pcs_ptr->enhanced_picture_ptr;
+
         // There is no need to do processing for overlay picture. Overlay and AltRef share the same results.
         if (!pcs_ptr->is_overlay) {
             scs_ptr           = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
@@ -3804,6 +3809,7 @@ void *picture_analysis_kernel(void *input_ptr) {
                     (EbPictureBufferDesc *)pa_ref_obj_->quarter_filtered_picture_ptr,
                     (EbPictureBufferDesc *)pa_ref_obj_->sixteenth_filtered_picture_ptr);
             }
+
             // Gathering statistics of input picture, including Variance Calculation, Histogram Bins
             gathering_picture_statistics(
                 scs_ptr,

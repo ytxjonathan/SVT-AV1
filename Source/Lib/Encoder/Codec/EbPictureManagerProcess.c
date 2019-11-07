@@ -36,13 +36,15 @@ extern MvReferenceFrame svt_get_ref_frame_type(uint8_t list, uint8_t ref_idx);
  ************************************************/
 #define POC_CIRCULAR_ADD(base, offset) (((base) + (offset)))
 
+void largest_coding_unit_dctor(EbPtr p);
+
 /************************************************
   * Configure Picture edges
   ************************************************/
 static void configure_picture_edges(SequenceControlSet *scs_ptr, PictureControlSet *ppsPtr) {
     // Tiles Initialisation
     const uint16_t pic_width_in_sb =
-        (scs_ptr->seq_header.max_frame_width + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
+        (ppsPtr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
     const uint16_t picture_height_in_sb =
         (scs_ptr->seq_header.max_frame_height + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
     unsigned x_sb_index, y_sb_index, sb_index;
@@ -803,9 +805,10 @@ void *picture_manager_kernel(void *input_ptr) {
                         child_pcs_ptr->parent_pcs_ptr->sad_me         = 0;
                         child_pcs_ptr->parent_pcs_ptr->quantized_coeff_num_bits = 0;
                         child_pcs_ptr->enc_mode = entry_pcs_ptr->enc_mode;
+                        child_pcs_ptr->sb_total_count = entry_pcs_ptr->sb_total_count;
 
                         //3.make all  init for ChildPCS
-                        pic_width_in_sb = (uint8_t)((entry_scs_ptr->seq_header.max_frame_width +
+                        pic_width_in_sb = (uint8_t)((child_pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width +
                                                      entry_scs_ptr->sb_size_pix - 1) /
                                                     entry_scs_ptr->sb_size_pix);
                         picture_height_in_sb =
@@ -813,10 +816,35 @@ void *picture_manager_kernel(void *input_ptr) {
                                        entry_scs_ptr->sb_size_pix - 1) /
                                       entry_scs_ptr->sb_size_pix);
 
+                        child_pcs_ptr->sb_total_count_pix = pic_width_in_sb * picture_height_in_sb;
+
+                        // Modify sb_prt_array in child pcs
+                        uint16_t    sb_index;
+                        uint16_t    sb_origin_x = 0;
+                        uint16_t    sb_origin_y = 0;
+                        for (sb_index = 0; sb_index < child_pcs_ptr->sb_total_count_pix; ++sb_index) {
+                            largest_coding_unit_dctor(child_pcs_ptr->sb_ptr_array[sb_index]);
+                            largest_coding_unit_ctor(child_pcs_ptr->sb_ptr_array[sb_index],
+                                                     (uint8_t)scs_ptr->sb_size_pix,
+                                                     (uint16_t)(sb_origin_x * scs_ptr->sb_size_pix),
+                                                     (uint16_t)(sb_origin_y * scs_ptr->max_blk_size),
+                                                     (uint16_t)sb_index,
+                                                     child_pcs_ptr);
+                            // Increment the Order in coding order (Raster Scan Order)
+                            sb_origin_y = (sb_origin_x == pic_width_in_sb - 1) ? sb_origin_y + 1 : sb_origin_y;
+                            sb_origin_x = (sb_origin_x == pic_width_in_sb - 1) ? 0 : sb_origin_x + 1;
+                        }
+
+                        // Update pcs_ptr->mi_stride
+                        child_pcs_ptr->mi_stride = pic_width_in_sb * (scs_ptr->sb_size_pix >> MI_SIZE_LOG2);
+
+                        uint32_t enc_dec_seg_w = (scs_ptr->static_config.super_block_size == 128) ?
+                                                 ((child_pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + 64) / 128) :
+                                                 ((child_pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + 32) / 64);
+
                         // EncDec Segments
                         enc_dec_segments_init(child_pcs_ptr->enc_dec_segment_ctrl,
-                                              entry_scs_ptr->enc_dec_segment_col_count_array
-                                                  [entry_pcs_ptr->temporal_layer_index],
+                                              enc_dec_seg_w,
                                               entry_scs_ptr->enc_dec_segment_row_count_array
                                                   [entry_pcs_ptr->temporal_layer_index],
                                               pic_width_in_sb,

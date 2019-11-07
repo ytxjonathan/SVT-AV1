@@ -1839,13 +1839,14 @@ void product_full_loop(ModeDecisionCandidateBuffer *candidate_buffer,
     uint16_t tx_org_y              = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
     int32_t  cropped_tx_width =
         MIN(context_ptr->blk_geom->tx_width[tx_depth][txb_itr],
-            scs_ptr->seq_header.max_frame_width - (context_ptr->sb_origin_x + tx_org_x));
+            pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - (context_ptr->sb_origin_x + tx_org_x));
     int32_t cropped_tx_height =
         MIN(context_ptr->blk_geom->tx_height[tx_depth][txb_itr],
             scs_ptr->seq_header.max_frame_height - (context_ptr->sb_origin_y + tx_org_y));
     context_ptr->luma_txb_skip_context = 0;
     context_ptr->luma_dc_sign_context  = 0;
     get_txb_ctx(scs_ptr,
+                pcs_ptr,
                 COMPONENT_LUMA,
                 context_ptr->full_loop_luma_dc_sign_level_coeff_neighbor_array,
                 context_ptr->sb_origin_x + tx_org_x,
@@ -2148,6 +2149,7 @@ void product_full_loop_tx_search(ModeDecisionCandidateBuffer *candidate_buffer,
             context_ptr->luma_txb_skip_context = 0;
             context_ptr->luma_dc_sign_context  = 0;
             get_txb_ctx(scs_ptr,
+                        pcs_ptr,
                         COMPONENT_LUMA,
                         context_ptr->luma_dc_sign_level_coeff_neighbor_array,
                         context_ptr->sb_origin_x + txb_origin_x,
@@ -2801,6 +2803,7 @@ void full_loop_r(SuperBlock *sb_ptr, ModeDecisionCandidateBuffer *candidate_buff
         context_ptr->cb_txb_skip_context = 0;
         context_ptr->cb_dc_sign_context  = 0;
         get_txb_ctx(scs_ptr,
+                    pcs_ptr,
                     COMPONENT_CHROMA,
                     context_ptr->cb_dc_sign_level_coeff_neighbor_array,
                     ROUND_UV(context_ptr->sb_origin_x + txb_origin_x) >> 1,
@@ -2813,6 +2816,7 @@ void full_loop_r(SuperBlock *sb_ptr, ModeDecisionCandidateBuffer *candidate_buff
         context_ptr->cr_txb_skip_context = 0;
         context_ptr->cr_dc_sign_context  = 0;
         get_txb_ctx(scs_ptr,
+                    pcs_ptr,
                     COMPONENT_CHROMA,
                     context_ptr->cr_dc_sign_level_coeff_neighbor_array,
                     ROUND_UV(context_ptr->sb_origin_x + txb_origin_x) >> 1,
@@ -3057,7 +3061,7 @@ void cu_full_distortion_fast_txb_mode_r(
         txb_origin_y = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
         int32_t cropped_tx_width_uv =
             MIN(context_ptr->blk_geom->tx_width_uv[tx_depth][txb_itr],
-                pcs_ptr->parent_pcs_ptr->scs_ptr->seq_header.max_frame_width / 2 -
+                pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width / 2 -
                     ((context_ptr->sb_origin_x + ((txb_origin_x >> 3) << 3)) >> 1));
         int32_t cropped_tx_height_uv =
             MIN(context_ptr->blk_geom->tx_height_uv[tx_depth][txb_itr],
@@ -3281,7 +3285,7 @@ uint64_t d1_non_square_block_decision(ModeDecisionContext *context_ptr, uint32_t
     if (context_ptr->blk_geom->bsize > BLOCK_4X4) {
         uint64_t split_cost           = 0;
         uint32_t parent_depth_idx_mds = context_ptr->blk_geom->sqi_mds;
-        av1_split_flag_rate(context_ptr->sb_ptr->pcs_ptr->parent_pcs_ptr->scs_ptr,
+        av1_split_flag_rate(context_ptr->sb_ptr->pcs_ptr->parent_pcs_ptr,
                             context_ptr,
                             &context_ptr->md_blk_arr_nsq[parent_depth_idx_mds],
                             0,
@@ -3308,6 +3312,7 @@ uint64_t d1_non_square_block_decision(ModeDecisionContext *context_ptr, uint32_t
 
 /// compute the cost of curr depth, and the depth above
 void compute_depth_costs(ModeDecisionContext *context_ptr, SequenceControlSet *scs_ptr,
+                         PictureParentControlSet *pcs_ptr,
                          uint32_t curr_depth_mds, uint32_t above_depth_mds, uint32_t step,
                          uint64_t *above_depth_cost, uint64_t *curr_depth_cost) {
     uint64_t above_non_split_rate = 0;
@@ -3351,7 +3356,7 @@ void compute_depth_costs(ModeDecisionContext *context_ptr, SequenceControlSet *s
         *above_depth_cost =
             context_ptr->md_local_blk_unit[above_depth_mds].cost + above_non_split_rate;
         // Compute curr depth  cost
-        av1_split_flag_rate(scs_ptr,
+        av1_split_flag_rate(pcs_ptr,
                             context_ptr,
                             &context_ptr->md_blk_arr_nsq[above_depth_mds],
                             0,
@@ -3365,7 +3370,7 @@ void compute_depth_costs(ModeDecisionContext *context_ptr, SequenceControlSet *s
     if (context_ptr->blk_geom->bsize > BLOCK_4X4) {
         if (context_ptr->md_local_blk_unit[curr_depth_blk0_mds].tested_blk_flag)
             if (context_ptr->md_blk_arr_nsq[curr_depth_blk0_mds].mdc_split_flag == 0)
-                av1_split_flag_rate(scs_ptr,
+                av1_split_flag_rate(pcs_ptr,
                                     context_ptr,
                                     &context_ptr->md_blk_arr_nsq[curr_depth_blk0_mds],
                                     0,
@@ -3377,7 +3382,7 @@ void compute_depth_costs(ModeDecisionContext *context_ptr, SequenceControlSet *s
 
         if (context_ptr->md_local_blk_unit[curr_depth_blk1_mds].tested_blk_flag)
             if (context_ptr->md_blk_arr_nsq[curr_depth_blk1_mds].mdc_split_flag == 0)
-                av1_split_flag_rate(scs_ptr,
+                av1_split_flag_rate(pcs_ptr,
                                     context_ptr,
                                     &context_ptr->md_blk_arr_nsq[curr_depth_blk1_mds],
                                     0,
@@ -3389,7 +3394,7 @@ void compute_depth_costs(ModeDecisionContext *context_ptr, SequenceControlSet *s
 
         if (context_ptr->md_local_blk_unit[curr_depth_blk2_mds].tested_blk_flag)
             if (context_ptr->md_blk_arr_nsq[curr_depth_blk2_mds].mdc_split_flag == 0)
-                av1_split_flag_rate(scs_ptr,
+                av1_split_flag_rate(pcs_ptr,
                                     context_ptr,
                                     &context_ptr->md_blk_arr_nsq[curr_depth_blk2_mds],
                                     0,
@@ -3401,7 +3406,7 @@ void compute_depth_costs(ModeDecisionContext *context_ptr, SequenceControlSet *s
 
         if (context_ptr->md_local_blk_unit[curr_depth_blk3_mds].tested_blk_flag)
             if (context_ptr->md_blk_arr_nsq[curr_depth_blk3_mds].mdc_split_flag == 0)
-                av1_split_flag_rate(scs_ptr,
+                av1_split_flag_rate(pcs_ptr,
                                     context_ptr,
                                     &context_ptr->md_blk_arr_nsq[curr_depth_blk3_mds],
                                     0,
@@ -3465,12 +3470,13 @@ uint32_t d2_inter_depth_block_decision(ModeDecisionContext *context_ptr, uint32_
                 compute_depth_costs(
                     context_ptr,
                     scs_ptr,
+                    pcs_ptr->parent_pcs_ptr,
                     current_depth_idx_mds,
                     parent_depth_idx_mds,
                     ns_depth_offset[scs_ptr->seq_header.sb_size == BLOCK_128X128][blk_geom->depth],
                     &parent_depth_cost,
                     &current_depth_cost);
-            if (!scs_ptr->sb_geom[sb_addr].block_is_allowed[parent_depth_idx_mds])
+            if (!pcs_ptr->parent_pcs_ptr->sb_geom[sb_addr].block_is_allowed[parent_depth_idx_mds])
                 parent_depth_cost = MAX_MODE_COST;
             if (parent_depth_cost <= current_depth_cost) {
                 context_ptr->md_blk_arr_nsq[parent_depth_idx_mds].split_flag = EB_FALSE;
@@ -3490,6 +3496,7 @@ uint32_t d2_inter_depth_block_decision(ModeDecisionContext *context_ptr, uint32_
     return last_blk_index;
 }
 void compute_depth_costs_md_skip(ModeDecisionContext *context_ptr, SequenceControlSet *scs_ptr,
+                                 PictureParentControlSet *pcs_ptr,
                                  uint32_t above_depth_mds, uint32_t step,
                                  uint64_t *above_depth_cost, uint64_t *curr_depth_cost) {
     uint64_t above_non_split_rate = 0;
@@ -3502,7 +3509,7 @@ void compute_depth_costs_md_skip(ModeDecisionContext *context_ptr, SequenceContr
         if (context_ptr->blk_geom->bsize > BLOCK_4X4) {
             if (context_ptr->md_local_blk_unit[curr_depth_cur_blk_mds].tested_blk_flag)
                 if (context_ptr->md_blk_arr_nsq[curr_depth_cur_blk_mds].mdc_split_flag == 0)
-                    av1_split_flag_rate(scs_ptr,
+                    av1_split_flag_rate(pcs_ptr,
                                         context_ptr,
                                         &context_ptr->md_blk_arr_nsq[curr_depth_cur_blk_mds],
                                         0,
@@ -3545,7 +3552,7 @@ void compute_depth_costs_md_skip(ModeDecisionContext *context_ptr, SequenceContr
         *above_depth_cost =
             context_ptr->md_local_blk_unit[above_depth_mds].cost + above_non_split_rate;
         // Compute curr depth  cost
-        av1_split_flag_rate(scs_ptr,
+        av1_split_flag_rate(pcs_ptr,
                             context_ptr,
                             &context_ptr->md_blk_arr_nsq[above_depth_mds],
                             0,
