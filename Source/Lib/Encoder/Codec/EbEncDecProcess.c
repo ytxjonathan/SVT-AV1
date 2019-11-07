@@ -651,6 +651,8 @@ void recon_output(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) {
     eb_release_mutex(encode_context_ptr->total_number_of_recon_frame_mutex);
 }
 
+// TODO: mariana, fix psnr calculations when super-res is used, the width and height of the source pictures are wrong
+// and is not the same as the recon, padding is different
 void psnr_calculations(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) {
     EbBool is_16bit = (scs_ptr->static_config.encoder_bit_depth > EB_8BIT);
 
@@ -665,7 +667,7 @@ void psnr_calculations(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) 
             recon_ptr = pcs_ptr->recon_picture_ptr;
 
         EbPictureBufferDesc *input_picture_ptr =
-            (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr;
+            (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_unscaled_picture_ptr;
 
         uint64_t sse_total[3] = {0};
         uint32_t column_index;
@@ -776,7 +778,7 @@ void psnr_calculations(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) 
         else
             recon_ptr = pcs_ptr->recon_picture16bit_ptr;
         EbPictureBufferDesc *input_picture_ptr =
-            (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr;
+            (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_unscaled_picture_ptr;
 
         uint64_t  sse_total[3] = {0};
         uint32_t  column_index;
@@ -1238,7 +1240,7 @@ void pad_ref_and_set_flags(PictureControlSet *pcs_ptr, SequenceControlSet *scs_p
 void copy_statistics_to_ref_obj_ect(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) {
     pcs_ptr->intra_coded_area =
         (100 * pcs_ptr->intra_coded_area) /
-        (scs_ptr->seq_header.max_frame_width * scs_ptr->seq_header.max_frame_height);
+        (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width * pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height);
     if (pcs_ptr->slice_type == I_SLICE) pcs_ptr->intra_coded_area = 0;
 
     ((EbReferenceObject *)pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)
@@ -2125,7 +2127,7 @@ static void build_cand_block_array(SequenceControlSet *scs_ptr, PictureControlSe
         uint8_t is_blk_allowed =
             pcs_ptr->slice_type != I_SLICE ? 1 : (blk_geom->sq_size < 128) ? 1 : 0;
         //init consider block flag
-        if (scs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
+        if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
             tot_d1_blocks = blk_geom->sq_size == 128
                                 ? 17
                                 : blk_geom->sq_size > 8 ? 25 : blk_geom->sq_size == 8 ? 5 : 1;
@@ -2323,7 +2325,7 @@ static void perform_pred_depth_refinement(SequenceControlSet *scs_ptr, PictureCo
         // derive split_flag
         split_flag = context_ptr->md_blk_arr_nsq[blk_index].split_flag;
 
-        if (scs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
+        if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
             if (blk_geom->shape == PART_N) {
                 if (context_ptr->md_blk_arr_nsq[blk_index].split_flag == EB_FALSE) {
                     int8_t s_depth = 0;
@@ -2605,7 +2607,7 @@ void *enc_dec_kernel(void *input_ptr) {
         sb_sz              = (uint8_t)scs_ptr->sb_size_pix;
         sb_size_log2       = (uint8_t)Log2f(sb_sz);
         context_ptr->sb_sz = sb_sz;
-        pic_width_in_sb    = (scs_ptr->seq_header.max_frame_width + sb_sz - 1) >> sb_size_log2;
+        pic_width_in_sb    = (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + sb_sz - 1) >> sb_size_log2;
 #if TILES_PARALLEL
         tile_group_width_in_sb =
             pcs_ptr->parent_pcs_ptr->tile_group_info[context_ptr->tile_group_index]
@@ -2704,7 +2706,7 @@ void *enc_dec_kernel(void *input_ptr) {
                     sb_ptr          = pcs_ptr->sb_ptr_array[sb_index];
                     sb_origin_x     = x_sb_index << sb_size_log2;
                     sb_origin_y     = y_sb_index << sb_size_log2;
-                    last_sb_flag    = (sb_index == scs_ptr->sb_tot_cnt - 1) ? EB_TRUE : EB_FALSE;
+                    last_sb_flag    = (sb_index == pcs_ptr->sb_total_count_pix - 1) ? EB_TRUE : EB_FALSE;
                     end_of_row_flag = (x_sb_index == pic_width_in_sb - 1) ? EB_TRUE : EB_FALSE;
                     sb_row_index_start =
                         (x_sb_index == pic_width_in_sb - 1 && sb_row_index_count == 0)
@@ -2776,7 +2778,7 @@ void *enc_dec_kernel(void *input_ptr) {
                          pcs_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
                          pcs_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
                          pcs_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_3) &&
-                        scs_ptr->sb_geom[sb_index].is_complete_sb) {
+                        pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].is_complete_sb) {
                         // Save a clean copy of the neighbor arrays
                         copy_neighbour_arrays(pcs_ptr,
                                               context_ptr->md_context,
@@ -2961,7 +2963,7 @@ void *enc_dec_kernel(void *input_ptr) {
             //CHKN these are not needed for DLF
             enc_dec_results_ptr->completed_sb_row_index_start = 0;
             enc_dec_results_ptr->completed_sb_row_count =
-                ((scs_ptr->seq_header.max_frame_height + scs_ptr->sb_size_pix - 1) >> sb_size_log2);
+                ((pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height + scs_ptr->sb_size_pix - 1) >> sb_size_log2);
             // Post EncDec Results
             eb_post_full_object(enc_dec_results_wrapper_ptr);
         }
