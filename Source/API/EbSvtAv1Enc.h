@@ -569,6 +569,11 @@ typedef struct EbSvtAv1EncConfiguration {
     uint8_t altref_nframes;
     EbBool  enable_overlays;
 
+    // super-resolution parameters
+    uint8_t                  superres_mode;
+    uint8_t                  superres_denom;
+    uint8_t                  superres_qthres;
+    
     uint32_t sq_weight;
 
     uint64_t md_stage_1_class_prune_th;
