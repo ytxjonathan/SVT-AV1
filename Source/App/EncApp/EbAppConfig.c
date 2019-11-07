@@ -109,6 +109,12 @@
 #define ALTREF_NFRAMES "-altref-nframes"
 #define ENABLE_OVERLAYS "-enable-overlays"
 // --- end: ALTREF_FILTERING_SUPPORT
+// --- start: ALTREF_FILTERING_SUPPORT
+#define SUPERRES_MODE "-superres-mode"
+#define SUPERRES_DENOM "-superres-denom"
+#define SUPERRES_KF_DENOM "-superres-kf-denom"
+#define SUPERRES_QTHRES "-superres-qthres"
+// --- end: SUPER-RESOLUTION SUPPORT
 #define HBD_MD_ENABLE_TOKEN "-hbd-md"
 #define PALETTE_TOKEN "-palette"
 #define OLPD_REFINEMENT_TOKEN "-olpd-refinement"
@@ -469,6 +475,20 @@ static void set_enable_overlays(const char *value, EbConfig *cfg) {
     cfg->enable_overlays = (EbBool)strtoul(value, NULL, 0);
 };
 // --- end: ALTREF_FILTERING_SUPPORT
+// --- start: SUPER-RESOLUTION SUPPORT
+static void SetSuperresMode(const char *value, EbConfig *cfg) {
+    cfg->superres_mode = (uint8_t)strtoul(value, NULL, 0);
+};
+static void SetSuperresDenom(const char *value, EbConfig *cfg) {
+    cfg->superres_denom = (uint8_t)strtoul(value, NULL, 0);
+};
+static void SetSuperresKfDenom(const char *value, EbConfig *cfg) {
+    cfg->superres_kf_denom = (uint8_t)strtoul(value, NULL, 0);
+};
+static void SetSuperresQthres(const char *value, EbConfig *cfg) {
+    cfg->superres_qthres = (uint8_t)strtoul(value, NULL, 0);
+};
+// --- end: SUPER-RESOLUTION SUPPORT
 static void set_enable_hbd_mode_decision(const char *value, EbConfig *cfg) {
     cfg->enable_hbd_mode_decision = (uint8_t)strtoul(value, NULL, 0);
 };
@@ -809,6 +829,11 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, ALTREF_NFRAMES, "AltRefNframes", set_altref_n_frames},
     {SINGLE_INPUT, ENABLE_OVERLAYS, "EnableOverlays", set_enable_overlays},
     // --- end: ALTREF_FILTERING_SUPPORT
+    // Super-resolution support
+    { SINGLE_INPUT, SUPERRES_MODE, "SuperresMode", SetSuperresMode },
+    { SINGLE_INPUT, SUPERRES_DENOM, "SuperresDenom", SetSuperresDenom },
+    { SINGLE_INPUT, SUPERRES_KF_DENOM, "SuperresKfDenom", SetSuperresKfDenom },
+    { SINGLE_INPUT, SUPERRES_QTHRES, "SuperresQthres", SetSuperresQthres },
 
     {SINGLE_INPUT, SQ_WEIGHT_TOKEN, "SquareWeight", set_square_weight},
     {SINGLE_INPUT, ENABLE_AMP_TOKEN, "AutomaxPartition", set_enable_auto_max_partition},
@@ -911,6 +936,13 @@ void eb_config_ctor(EbConfig *config_ptr) {
     config_ptr->altref_strength = 5;
     config_ptr->altref_nframes  = 7;
     // --- end: ALTREF_FILTERING_SUPPORT
+
+    // start - super-resolution support
+    config_ptr->superres_mode = SUPERRES_NONE; // disabled
+    config_ptr->superres_denom = 8; // no scaling
+    config_ptr->superres_kf_denom = 8; // no scaling
+    config_ptr->superres_qthres = 43; // random threshold for now
+    // end - super-resolution support
 
     config_ptr->sq_weight                 = 100;
     config_ptr->enable_auto_max_partition = 1;

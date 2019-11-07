@@ -3527,6 +3527,7 @@ void tx_type_search(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
     context_ptr->luma_txb_skip_context = 0;
     context_ptr->luma_dc_sign_context  = 0;
     get_txb_ctx(scs_ptr,
+                pcs_ptr,
                 COMPONENT_LUMA,
                 context_ptr->full_loop_luma_dc_sign_level_coeff_neighbor_array,
                 context_ptr->sb_origin_x + txb_origin_x,
@@ -4358,7 +4359,7 @@ void full_loop_core(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, BlkStruct *b
     // end_tx_depth set to zero for blocks which go beyond the picture boundaries
     if ((context_ptr->sb_origin_x + context_ptr->blk_geom->origin_x +
                  context_ptr->blk_geom->bwidth <
-             pcs_ptr->parent_pcs_ptr->scs_ptr->seq_header.max_frame_width &&
+             pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width &&
          context_ptr->sb_origin_y + context_ptr->blk_geom->origin_y +
                  context_ptr->blk_geom->bheight <
              pcs_ptr->parent_pcs_ptr->scs_ptr->seq_header.max_frame_height))
@@ -5019,7 +5020,7 @@ void order_nsq_table(PictureControlSet *pcs_ptr, ModeDecisionContext *context_pt
     if (scs_ptr->seq_header.sb_size == BLOCK_128X128) {
         uint32_t me_sb_size = scs_ptr->sb_sz;
         uint32_t me_pic_width_in_sb =
-            (scs_ptr->seq_header.max_frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
+            (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
         uint32_t me_sb_x = (context_ptr->blk_origin_x / me_sb_size);
         uint32_t me_sb_y = (context_ptr->blk_origin_y / me_sb_size);
         me_sb_addr       = me_sb_x + me_sb_y * me_pic_width_in_sb;
@@ -5625,7 +5626,7 @@ void md_encode_block(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
         }
     }
 
-    uint8_t is_complete_sb = scs_ptr->sb_geom[sb_addr].is_complete_sb;
+    uint8_t is_complete_sb = pcs_ptr->parent_pcs_ptr->sb_geom[sb_addr].is_complete_sb;
 
     if (allowed_ns_cu(is_nsq_table_used,
                       pcs_ptr->parent_pcs_ptr->nsq_max_shapes_md,
@@ -5675,7 +5676,7 @@ void md_encode_block(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
         if (scs_ptr->seq_header.sb_size == BLOCK_128X128) {
             uint32_t me_sb_size = scs_ptr->sb_sz;
             uint32_t me_pic_width_in_sb =
-                (scs_ptr->seq_header.max_frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
+                (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
             uint32_t me_sb_x           = (context_ptr->blk_origin_x / me_sb_size);
             uint32_t me_sb_y           = (context_ptr->blk_origin_y / me_sb_size);
             context_ptr->me_sb_addr    = me_sb_x + me_sb_y * me_pic_width_in_sb;
@@ -6186,7 +6187,7 @@ void av1_get_max_min_partition_features(SequenceControlSet *scs_ptr, PictureCont
 
         uint32_t me_sb_size = scs_ptr->sb_sz;
         uint32_t me_pic_width_in_sb =
-            (scs_ptr->seq_header.max_frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
+            (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
 
         const uint32_t blk_origin_x = sb_origin_x + blk_geom->origin_x;
         const uint32_t blk_origin_y = sb_origin_y + blk_geom->origin_y;
@@ -6411,6 +6412,8 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
                                        ModeDecisionContext *context_ptr) {
     EbErrorType return_error = EB_ErrorNone;
 
+    //printf("sb_origin_x = %d, sb_origin_y = %d\n", sb_origin_x, sb_origin_y);
+
     uint32_t                     blk_index;
     ModeDecisionCandidateBuffer *bestcandidate_buffers[5];
     // Pre Intra Search
@@ -6495,7 +6498,7 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
             ((sb_origin_x + input_picture_ptr->origin_x) >> 1);
 
         uint32_t sb_width =
-            MIN(scs_ptr->sb_size_pix, scs_ptr->seq_header.max_frame_width - sb_origin_x);
+            MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x);
         uint32_t sb_height =
             MIN(scs_ptr->sb_size_pix, scs_ptr->seq_header.max_frame_height - sb_origin_y);
 
@@ -6541,7 +6544,7 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
     if (context_ptr->enable_auto_max_partition == 1)
         if (pcs_ptr->slice_type != I_SLICE && scs_ptr->static_config.super_block_size == 128) {
             if ((sb_origin_x + scs_ptr->static_config.super_block_size) <
-                    pcs_ptr->parent_pcs_ptr->scs_ptr->seq_header.max_frame_width &&
+                    pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width &&
                 (sb_origin_y + scs_ptr->static_config.super_block_size) <
                     pcs_ptr->parent_pcs_ptr->scs_ptr->seq_header.max_frame_height) {
                 float features[FEATURE_SIZE_MAX_MIN_PART_PRED] = {0.0f};
@@ -6716,13 +6719,14 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
                     compute_depth_costs_md_skip(
                         context_ptr,
                         scs_ptr,
+                        pcs_ptr->parent_pcs_ptr,
                         parent_depth_idx_mds,
                         ns_depth_offset[scs_ptr->seq_header.sb_size == BLOCK_128X128]
                                        [context_ptr->blk_geom->depth],
                         &parent_depth_cost,
                         &current_depth_cost);
 
-                if (!scs_ptr->sb_geom[sb_addr].block_is_allowed[parent_depth_idx_mds])
+                if (!pcs_ptr->parent_pcs_ptr->sb_geom[sb_addr].block_is_allowed[parent_depth_idx_mds])
                     parent_depth_cost = MAX_MODE_COST;
 
                 // compare the cost of the parent to the cost of the already encoded child + an estimated cost for the remaining child @ the current depth
@@ -6749,7 +6753,7 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
                  context_ptr->blk_geom->bheight > block_size_high[max_bsize]) &&
                 (mdcResultTbPtr->leaf_data_array[blk_index].split_flag == EB_TRUE);
 
-            if (pcs_ptr->parent_pcs_ptr->scs_ptr->sb_geom[sb_addr]
+            if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_addr]
                     .block_is_allowed[blk_ptr->mds_idx] &&
                 !skip_next_nsq && !skip_next_sq && !auto_max_partition_block_skip) {
                 md_encode_block(scs_ptr,

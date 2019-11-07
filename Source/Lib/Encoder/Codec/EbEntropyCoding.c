@@ -356,7 +356,7 @@ static INLINE void av1_txb_init_levels(int32_t *coeff_buffer_ptr, const uint32_t
 /************************************************************************************************/
 // blockd.h
 
-void get_txb_ctx(SequenceControlSet *scs_ptr, const int32_t plane,
+void get_txb_ctx(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr, const int32_t plane,
                  NeighborArrayUnit *dc_sign_level_coeff_neighbor_array, uint32_t blk_origin_x,
                  uint32_t blk_origin_y, const BlockSize plane_bsize, const TxSize tx_size,
                  int16_t *const txb_skip_ctx, int16_t *const dc_sign_ctx) {
@@ -365,18 +365,20 @@ void get_txb_ctx(SequenceControlSet *scs_ptr, const int32_t plane,
     uint32_t dc_sign_lvl_coeff_top_neighbor_idx =
         get_neighbor_array_unit_top_index(dc_sign_level_coeff_neighbor_array, blk_origin_x);
 
+    //printf("blk_origin_y = %d, blk_origin_x = %d\n", blk_origin_y, blk_origin_x);
+
 #define MAX_TX_SIZE_UNIT 16
     static const int8_t signs[3] = {0, -1, 1};
     int32_t             txb_w_unit;
     int32_t             txb_h_unit;
     if (plane) {
         txb_w_unit = MIN(tx_size_wide_unit[tx_size],
-                         (int32_t)(scs_ptr->seq_header.max_frame_width / 2 - blk_origin_x) >> 2);
+                         (int32_t)(pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width / 2 - blk_origin_x) >> 2);
         txb_h_unit = MIN(tx_size_high_unit[tx_size],
                          (int32_t)(scs_ptr->seq_header.max_frame_height / 2 - blk_origin_y) >> 2);
     } else {
         txb_w_unit = MIN(tx_size_wide_unit[tx_size],
-                         (int32_t)(scs_ptr->seq_header.max_frame_width - blk_origin_x) >> 2);
+                         (int32_t)(pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - blk_origin_x) >> 2);
         txb_h_unit = MIN(tx_size_high_unit[tx_size],
                          (int32_t)(scs_ptr->seq_header.max_frame_height - blk_origin_y) >> 2);
     }
@@ -735,6 +737,7 @@ static EbErrorType av1_encode_tx_coef_y(
             int16_t dc_sign_ctx  = 0;
 
             get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                        pcs_ptr,
                         COMPONENT_LUMA,
                         luma_dc_sign_level_coeff_neighbor_array,
                         blk_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] - blk_geom->origin_x,
@@ -821,6 +824,7 @@ static EbErrorType av1_encode_tx_coef_uv(PictureControlSet *   pcs_ptr,
                 int16_t dc_sign_ctx  = 0;
 
                 get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                            pcs_ptr,
                             COMPONENT_CHROMA,
                             cb_dc_sign_level_coeff_neighbor_array,
                             ROUND_UV(blk_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] -
@@ -858,6 +862,7 @@ static EbErrorType av1_encode_tx_coef_uv(PictureControlSet *   pcs_ptr,
                 int16_t dc_sign_ctx  = 0;
 
                 get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                            pcs_ptr,
                             COMPONENT_CHROMA,
                             cr_dc_sign_level_coeff_neighbor_array,
                             ROUND_UV(blk_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] -
@@ -990,6 +995,7 @@ static EbErrorType av1_encode_coeff_1d(PictureControlSet *   pcs_ptr,
                 int16_t dc_sign_ctx  = 0;
 
                 get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                            pcs_ptr,
                             COMPONENT_LUMA,
                             luma_dc_sign_level_coeff_neighbor_array,
                             blk_origin_x + blk_geom->tx_org_x[blk_ptr->tx_depth][txb_itr] -
@@ -1026,6 +1032,7 @@ static EbErrorType av1_encode_coeff_1d(PictureControlSet *   pcs_ptr,
 
                     get_txb_ctx(
                         pcs_ptr->parent_pcs_ptr->scs_ptr,
+                        pcs_ptr,
                         COMPONENT_CHROMA,
                         cb_dc_sign_level_coeff_neighbor_array,
                         ROUND_UV(blk_origin_x + blk_geom->tx_org_x[blk_ptr->tx_depth][txb_itr] -
@@ -1064,6 +1071,7 @@ static EbErrorType av1_encode_coeff_1d(PictureControlSet *   pcs_ptr,
 
                     get_txb_ctx(
                         pcs_ptr->parent_pcs_ptr->scs_ptr,
+                        pcs_ptr,
                         COMPONENT_CHROMA,
                         cr_dc_sign_level_coeff_neighbor_array,
                         ROUND_UV(blk_origin_x + blk_geom->tx_org_x[blk_ptr->tx_depth][txb_itr] -
@@ -3250,26 +3258,48 @@ static void write_render_size(struct AomWriteBitBuffer *wb, SequenceControlSet *
     eb_aom_wb_write_literal(wb, render_height_minus_1, 16);
 }
 
-static void write_frame_size(PictureParentControlSet *pcs_ptr, int32_t frame_size_override,
+static AOM_INLINE void write_superres_scale(struct AomWriteBitBuffer *wb,
+                                            PictureParentControlSet *pcs_ptr) {
+    SequenceControlSet *scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
+    Av1Common *cm = pcs_ptr->av1_cm;
+    uint8_t superres_denom = cm->frm_size.superres_denominator;
+
+    if (!scs_ptr->seq_header.enable_superres) {
+        assert(cm->frm_size.superres_denominator == SCALE_NUMERATOR);
+        return;
+    }
+
+    // First bit is whether to to scale or not
+    if (superres_denom == SCALE_NUMERATOR) {
+        eb_aom_wb_write_bit(wb, 0); // no scaling
+    } else {
+        eb_aom_wb_write_bit(wb, 1); // scaling, write scale factor
+        assert(superres_denom >= SUPERRES_SCALE_DENOMINATOR_MIN);
+        assert(superres_denom < SUPERRES_SCALE_DENOMINATOR_MIN + (1 << SUPERRES_SCALE_BITS));
+        eb_aom_wb_write_literal(wb,
+                superres_denom - SUPERRES_SCALE_DENOMINATOR_MIN,
+                SUPERRES_SCALE_BITS);
+    }
+}
+
+static void write_frame_size(PictureParentControlSet *pcs_ptr,
+                             int32_t frame_size_override,
                              struct AomWriteBitBuffer *wb) {
     SequenceControlSet *scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
     (void)(*pcs_ptr);
     (void)frame_size_override;
-    //const int32_t coded_width = cm->superres_upscaled_width - 1;
-    //const int32_t coded_height = cm->superres_upscaled_height - 1;
+    Av1Common *cm = pcs_ptr->av1_cm;
+    const int32_t coded_width = cm->frm_size.superres_upscaled_width - 1;
+    const int32_t coded_height = cm->frm_size.superres_upscaled_height - 1;
 
-    //if (frame_size_override) {
-    //    const SequenceHeader *seq_params = &cm->seq_params;
-    //    int32_t num_bits_width = seq_params->num_bits_width;
-    //    int32_t num_bits_height = seq_params->num_bits_height;
-    //    eb_aom_wb_write_literal(wb, coded_width, num_bits_width);
-    //    eb_aom_wb_write_literal(wb, coded_height, num_bits_height);
-    //}
-    if (scs_ptr->seq_header.enable_superres) {
-        SVT_LOG("ERROR[AN]: enable_superres not supported yet\n");
-        //write_superres_scale(cm, wb);
+    if (frame_size_override) {
+        int32_t num_bits_width = scs_ptr->seq_header.frame_width_bits;
+        int32_t num_bits_height = scs_ptr->seq_header.frame_height_bits;
+        eb_aom_wb_write_literal(wb, coded_width, num_bits_width);
+        eb_aom_wb_write_literal(wb, coded_height, num_bits_height);
     }
 
+    write_superres_scale(wb, pcs_ptr);
     write_render_size(wb, scs_ptr);
 }
 
@@ -3971,15 +4001,16 @@ static void write_uncompressed_header_obu(SequenceControlSet *     scs_ptr /*Av1
 
     if (frm_hdr->frame_type == KEY_FRAME) {
         write_frame_size(pcs_ptr, frame_size_override_flag, wb);
-        //assert(av1_superres_unscaled(cm) ||
-        //    !(cm->allow_intrabc && NO_FILTER_FOR_IBC));
-        if (frm_hdr->allow_screen_content_tools) eb_aom_wb_write_bit(wb, frm_hdr->allow_intrabc);
+        assert(av1_superres_unscaled(&(pcs_ptr->av1_cm->frm_size)) || !(frm_hdr->allow_intrabc));
+        if (frm_hdr->allow_screen_content_tools && av1_superres_unscaled(&(pcs_ptr->av1_cm->frm_size)))
+            eb_aom_wb_write_bit(wb, frm_hdr->allow_intrabc);
         // all eight fbs are refreshed, pick one that will live long enough
         pcs_ptr->fb_of_context_type[REGULAR_FRAME] = 0;
     } else {
         if (frm_hdr->frame_type == INTRA_ONLY_FRAME) {
             write_frame_size(pcs_ptr, frame_size_override_flag, wb);
-            if (frm_hdr->allow_screen_content_tools)
+            assert(av1_superres_unscaled(&(pcs_ptr->av1_cm->frm_size)) || !(frm_hdr->allow_intrabc));
+            if (frm_hdr->allow_screen_content_tools && av1_superres_unscaled(&(pcs_ptr->av1_cm->frm_size)))
                 eb_aom_wb_write_bit(wb, frm_hdr->allow_intrabc);
         } else if (frm_hdr->frame_type == INTER_FRAME || frame_is_sframe(pcs_ptr)) {
             MvReferenceFrame ref_frame;
@@ -6093,7 +6124,7 @@ EB_EXTERN EbErrorType write_sb(EntropyCodingContext *context_ptr, SuperBlock *tb
     context_ptr->coded_area_sb_uv = 0;
     EbBool check_blk_out_of_bound = EB_FALSE;
 
-    SbGeom *sb_geom = &scs_ptr->sb_geom[tb_ptr->index]; // .block_is_inside_md_scan[blk_index])
+    SbGeom *sb_geom = &pcs_ptr->parent_pcs_ptr->sb_geom[tb_ptr->index]; // .block_is_inside_md_scan[blk_index])
 
     if (!(sb_geom->is_complete_sb)) check_blk_out_of_bound = EB_TRUE;
     do {
@@ -6110,9 +6141,9 @@ EB_EXTERN EbErrorType write_sb(EntropyCodingContext *context_ptr, SuperBlock *tb
         if (check_blk_out_of_bound) {
             if (blk_geom->shape != PART_N) blk_geom = get_blk_geom_mds(blk_geom->sqi_mds);
             code_blk_cond = EB_FALSE;
-            if (((blk_origin_x + blk_geom->bwidth / 2 < scs_ptr->seq_header.max_frame_width) ||
+            if (((blk_origin_x + blk_geom->bwidth / 2 < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width) ||
                  (blk_origin_y + blk_geom->bheight / 2 < scs_ptr->seq_header.max_frame_height)) &&
-                blk_origin_x < scs_ptr->seq_header.max_frame_width &&
+                blk_origin_x < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width &&
                 blk_origin_y < scs_ptr->seq_header.max_frame_height)
                 code_blk_cond = EB_TRUE;
         }

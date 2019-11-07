@@ -1481,6 +1481,7 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
         context_ptr->md_context->luma_txb_skip_context = 0;
         context_ptr->md_context->luma_dc_sign_context  = 0;
         get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                    pcs_ptr,
                     COMPONENT_LUMA,
                     pcs_ptr->ep_luma_dc_sign_level_coeff_neighbor_array,
                     txb_origin_x,
@@ -1717,6 +1718,7 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
         context_ptr->md_context->cb_txb_skip_context = 0;
         context_ptr->md_context->cb_dc_sign_context  = 0;
         get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                    pcs_ptr,
                     COMPONENT_CHROMA,
                     pcs_ptr->ep_cb_dc_sign_level_coeff_neighbor_array,
                     blk_originx_uv,
@@ -1730,6 +1732,7 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
         context_ptr->md_context->cr_dc_sign_context  = 0;
         get_txb_ctx(
             pcs_ptr->parent_pcs_ptr->scs_ptr,
+            pcs_ptr,
             COMPONENT_CHROMA,
             pcs_ptr->ep_cr_dc_sign_level_coeff_neighbor_array,
             blk_originx_uv,
@@ -2110,7 +2113,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
         (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr;
     // SB Stats
     uint32_t sb_width =
-        MIN(scs_ptr->sb_size_pix, scs_ptr->seq_header.max_frame_width - sb_origin_x);
+        MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x);
     uint32_t sb_height =
         MIN(scs_ptr->sb_size_pix, scs_ptr->seq_header.max_frame_height - sb_origin_y);
     // MV merge mode
@@ -2335,7 +2338,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                               (sb_origin_y + blk_geom->origin_y) >> MI_SIZE_LOG2,
                               (sb_origin_x + blk_geom->origin_x) >> MI_SIZE_LOG2);
         }
-        if (part != PARTITION_SPLIT && scs_ptr->sb_geom[sb_addr].block_is_allowed[blk_it]) {
+        if (part != PARTITION_SPLIT && pcs_ptr->parent_pcs_ptr->sb_geom[sb_addr].block_is_allowed[blk_it]) {
             int32_t offset_d1 = ns_blk_offset[(int32_t)part]; //blk_ptr->best_d1_blk; // TOCKECK
             int32_t num_d1_block =
                 ns_blk_num[(int32_t)part]; // context_ptr->blk_geom->totns; // TOCKECK
@@ -2466,6 +2469,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                             context_ptr->md_context->luma_txb_skip_context = 0;
                             context_ptr->md_context->luma_dc_sign_context  = 0;
                             get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                                        pcs_ptr,
                                         COMPONENT_LUMA,
                                         pcs_ptr->ep_luma_dc_sign_level_coeff_neighbor_array,
                                         context_ptr->blk_origin_x,
@@ -2479,6 +2483,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                 context_ptr->md_context->cb_txb_skip_context = 0;
                                 context_ptr->md_context->cb_dc_sign_context  = 0;
                                 get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                                            pcs_ptr,
                                             COMPONENT_CHROMA,
                                             pcs_ptr->ep_cb_dc_sign_level_coeff_neighbor_array,
                                             blk_originx_uv,
@@ -2491,6 +2496,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                 context_ptr->md_context->cr_txb_skip_context = 0;
                                 context_ptr->md_context->cr_dc_sign_context  = 0;
                                 get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                                            pcs_ptr,
                                             COMPONENT_CHROMA,
                                             pcs_ptr->ep_cr_dc_sign_level_coeff_neighbor_array,
                                             blk_originx_uv,
@@ -3002,6 +3008,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                             context_ptr->md_context->luma_txb_skip_context = 0;
                             context_ptr->md_context->luma_dc_sign_context  = 0;
                             get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                                        pcs_ptr,
                                         COMPONENT_LUMA,
                                         pcs_ptr->ep_luma_dc_sign_level_coeff_neighbor_array,
                                         txb_origin_x,
@@ -3017,6 +3024,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                 context_ptr->md_context->cb_dc_sign_context  = 0;
                                 get_txb_ctx(
                                     pcs_ptr->parent_pcs_ptr->scs_ptr,
+                                    pcs_ptr,
                                     COMPONENT_CHROMA,
                                     pcs_ptr->ep_cb_dc_sign_level_coeff_neighbor_array,
                                     ROUND_UV(txb_origin_x) >> 1,
@@ -3030,6 +3038,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                 context_ptr->md_context->cr_txb_skip_context = 0;
                                 context_ptr->md_context->cr_dc_sign_context  = 0;
                                 get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                                            pcs_ptr,
                                             COMPONENT_CHROMA,
                                             pcs_ptr->ep_cr_dc_sign_level_coeff_neighbor_array,
                                             ROUND_UV(txb_origin_x) >> 1,
@@ -3337,6 +3346,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                         context_ptr->md_context->luma_dc_sign_context  = 0;
                         get_txb_ctx(
                             pcs_ptr->parent_pcs_ptr->scs_ptr,
+                            pcs_ptr,
                             COMPONENT_LUMA,
                             pcs_ptr->ep_luma_dc_sign_level_coeff_neighbor_array,
                             txb_origin_x,
@@ -3351,6 +3361,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                             context_ptr->md_context->cb_dc_sign_context  = 0;
                             get_txb_ctx(
                                 pcs_ptr->parent_pcs_ptr->scs_ptr,
+                                pcs_ptr,
                                 COMPONENT_CHROMA,
                                 pcs_ptr->ep_cb_dc_sign_level_coeff_neighbor_array,
                                 ROUND_UV(txb_origin_x) >> 1,
@@ -3364,6 +3375,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                             context_ptr->md_context->cr_txb_skip_context = 0;
                             context_ptr->md_context->cr_dc_sign_context  = 0;
                             get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
+                                        pcs_ptr,
                                         COMPONENT_CHROMA,
                                         pcs_ptr->ep_cr_dc_sign_level_coeff_neighbor_array,
                                         ROUND_UV(txb_origin_x) >> 1,
@@ -3620,7 +3632,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                                 (context_ptr->mv_unit.mv[REF_LIST_0].y >> 3));
                                     origin_x =
                                         MIN(origin_x,
-                                            scs_ptr->seq_header.max_frame_width - blk_geom->bwidth);
+                                            pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - blk_geom->bwidth);
                                     origin_y = MIN(
                                         origin_y,
                                         scs_ptr->seq_header.max_frame_height - blk_geom->bheight);
@@ -3629,7 +3641,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                     uint16_t sb_origin_y =
                                         origin_y / context_ptr->sb_sz * context_ptr->sb_sz;
                                     uint32_t pic_width_in_sb =
-                                        (scs_ptr->seq_header.max_frame_width + scs_ptr->sb_sz - 1) /
+                                        (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) /
                                         scs_ptr->sb_sz;
                                     uint16_t sb_index =
                                         sb_origin_x / context_ptr->sb_sz +
@@ -3719,7 +3731,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                             (context_ptr->mv_unit.mv[REF_LIST_1].y >> 3));
                                 origin_x =
                                     MIN(origin_x,
-                                        scs_ptr->seq_header.max_frame_width - blk_geom->bwidth);
+                                        pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - blk_geom->bwidth);
                                 origin_y =
                                     MIN(origin_y,
                                         scs_ptr->seq_header.max_frame_height - blk_geom->bheight);
@@ -3728,7 +3740,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                 uint16_t sb_origin_y =
                                     origin_y / context_ptr->sb_sz * context_ptr->sb_sz;
                                 uint32_t pic_width_in_sb =
-                                    (scs_ptr->seq_header.max_frame_width + scs_ptr->sb_sz - 1) /
+                                    (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) /
                                     scs_ptr->sb_sz;
                                 uint16_t sb_index =
                                     sb_origin_x / context_ptr->sb_sz +
@@ -3881,7 +3893,7 @@ if (dlf_enable_flag && pcs_ptr->parent_pcs_ptr->loop_filter_mode == 1) {
     if (pcs_ptr->parent_pcs_ptr->frm_hdr.loop_filter_params.filter_level[0] ||
         pcs_ptr->parent_pcs_ptr->frm_hdr.loop_filter_params.filter_level[1]) {
         uint8_t last_col =
-            ((sb_origin_x) + sb_width == scs_ptr->seq_header.max_frame_width) ? 1 : 0;
+            ((sb_origin_x) + sb_width == pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width) ? 1 : 0;
         loop_filter_sb(
             recon_buffer, pcs_ptr, NULL, sb_origin_y >> 2, sb_origin_x >> 2, 0, 3, last_col);
     }
