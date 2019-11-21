@@ -203,6 +203,7 @@ enum {
 #define ALTREF_MAX_STRENGTH 6
 
 #define PAD_VALUE                                (128+32)
+#define PAD_VALUE_SCALED                         (128+128+32)
 
 /* Use open-loop data to predict the NSQ partitions. */
 #if MULTI_PASS_PD
