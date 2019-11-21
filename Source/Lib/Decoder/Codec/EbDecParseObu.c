@@ -2557,6 +2557,7 @@ EbErrorType read_tile_group_obu(bitstrm_t *bs, EbDecHandle *dec_handle_ptr,
                 svt_cdef_frame(dec_handle_ptr);
 
             if (do_upscale) {
+                // M'notes: this is where the decoder upscales the frame
                 av1_superres_upscale(&dec_handle_ptr->cm, &dec_handle_ptr->frame_header,
                     &dec_handle_ptr->seq_header,
                     dec_handle_ptr->cur_pic_buf[0]->ps_pic_buf);

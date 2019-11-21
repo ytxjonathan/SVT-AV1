@@ -1308,6 +1308,7 @@ EbErrorType picture_parent_control_set_ctor(
     object_ptr->av1_cm->subsampling_y = subsampling_y;
     object_ptr->av1_cm->frm_size.frame_width = initDataPtr->picture_width;
     object_ptr->av1_cm->frm_size.frame_height = initDataPtr->picture_height;
+    // M'note: this is where it is copying the superres_upsacaled dimensions
     object_ptr->av1_cm->frm_size.superres_upscaled_width = initDataPtr->picture_width;
     object_ptr->av1_cm->frm_size.superres_upscaled_height = initDataPtr->picture_height;
 

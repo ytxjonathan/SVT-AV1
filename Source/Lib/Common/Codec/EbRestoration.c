@@ -1237,6 +1237,7 @@ static void filter_frame_on_unit(const RestorationTileLimits *limits,
         ctxt->dst_stride, ctxt->tmpbuf, rsi->optimized_lr);
 }
 
+// M'notes: funtion that applies loop restoration to a frame
 void eb_av1_loop_restoration_filter_frame(Yv12BufferConfig *frame,
     Av1Common *cm, int32_t optimized_lr) {
     // assert(!cm->all_lossless);

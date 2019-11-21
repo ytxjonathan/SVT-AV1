@@ -61,6 +61,37 @@ const int16_t av1_resize_filter_normative[(
 #endif  // UPSCALE_NORMATIVE_TAPS == 8
 };
 
+// Mariana - helper functions from libaom
+// Calculates the scaled dimension given the original dimension and the scale
+// denominator.
+//static void calculate_scaled_size_helper(int *dim, int denom) {
+//    if (denom != SCALE_NUMERATOR) {
+//        // We need to ensure the constraint in "Appendix A" of the spec:
+//        // * FrameWidth is greater than or equal to 16
+//        // * FrameHeight is greater than or equal to 16
+//        // For this, we clamp the downscaled dimension to at least 16. One
+//        // exception: if original dimension itself was < 16, then we keep the
+//        // downscaled dimension to be same as the original, to ensure that resizing
+//        // is valid.
+//        const int min_dim = AOMMIN(16, *dim);
+//        // Use this version if we need *dim to be even
+//        // *width = (*width * SCALE_NUMERATOR + denom) / (2 * denom);
+//        // *width <<= 1;
+//        *dim = (*dim * SCALE_NUMERATOR + denom / 2) / (denom);
+//        *dim = AOMMAX(*dim, min_dim);
+//    }
+//}
+
+// Mariana - helper functions from libaom
+// Returns 1 if a superres upscaled frame is scaled and 0 otherwise.
+//static INLINE int av1_superres_scaled(const AV1_COMMON *cm) {
+//    // Note: for some corner cases (e.g. cm->width of 1), there may be no scaling
+//    // required even though cm->superres_scale_denominator != SCALE_NUMERATOR.
+//    // So, the following check is more accurate.
+//    return !(cm->width == cm->superres_upscaled_width);
+//}
+
+
 int32_t av1_get_upscale_convolve_step(int in_length, int out_length) {
     return ((in_length << RS_SCALE_SUBPEL_BITS) + out_length / 2) / out_length;
 }

@@ -708,11 +708,13 @@ void* rest_kernel(void *input_ptr)
                     picture_control_set_ptr,
                     sequence_control_set_ptr);
             if (sequence_control_set_ptr->static_config.recon_enabled) {
+                // M'notes: the reconstructed frame is set to the output here
                 ReconOutput(
                     picture_control_set_ptr,
                     sequence_control_set_ptr);
             }
-
+            // M'notes: if the picture is used as a reference, it needs to go the reference picture buffer ->
+            // not sure what the code here is doing.
             if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
             {
                 // Get Empty PicMgr Results
