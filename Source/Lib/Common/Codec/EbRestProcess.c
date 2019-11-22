@@ -452,13 +452,6 @@ void downscale_recon_for_test(EbPictureBufferDesc *recon_ptr_half,
     get_recon_pic(picture_control_set_ptr,
               &recon_ptr);
 
-    // debug only
-    save_YUV_to_file("recon_1280x720.yuv", recon_ptr->buffer_y, recon_ptr->buffer_cb, recon_ptr->buffer_cr,
-                     recon_ptr->width, recon_ptr->height,
-                     recon_ptr->stride_y, recon_ptr->stride_cb, recon_ptr->stride_cr,
-                     recon_ptr->origin_y, recon_ptr->origin_x,
-                     1, 1);
-
     EbErrorType return_error = copy_recon_enc(sequence_control_set_ptr, recon_ptr,
                                               recon_ptr_half, num_planes, 1);
     if (return_error != EB_ErrorNone) {
@@ -467,6 +460,13 @@ void downscale_recon_for_test(EbPictureBufferDesc *recon_ptr_half,
     }
 
     downsample_width_YUV(sequence_control_set_ptr, recon_ptr, recon_ptr_half);
+
+    // debug only
+    save_YUV_to_file("recon_640x720.yuv", recon_ptr_half->buffer_y, recon_ptr_half->buffer_cb, recon_ptr_half->buffer_cr,
+                     recon_ptr_half->width >> 1, recon_ptr_half->height,
+                     recon_ptr_half->stride_y, recon_ptr_half->stride_cb, recon_ptr_half->stride_cr,
+                     recon_ptr_half->origin_y, recon_ptr_half->origin_x,
+                     1, 1);
 
     replace_recon_pic(recon_ptr_half,
                   picture_control_set_ptr);
@@ -499,8 +499,8 @@ void eb_av1_superres_upscale_frame(struct Av1Common *cm,
         assert(0);
     }
 
-    EbPictureBufferDesc *src = ps_recon_pic_temp; // test only. the source will be ps_recon_pic_temp
-    EbPictureBufferDesc *dst = recon_ptr; // test only. the source will be recon_ptr
+    EbPictureBufferDesc *src = ps_recon_pic_temp;
+    EbPictureBufferDesc *dst = recon_ptr;
 
     for (int plane = 0; plane < num_planes; ++plane) {
         uint8_t *src_buf, *dst_buf;
@@ -611,11 +611,12 @@ void* rest_kernel(void *input_ptr)
 
                     // TODO: add condition to test if scaling was used for the current picture
                     // TODO: remove the downscaling and YUV output
+                    cm->frm_size.superres_upscaled_width = cm->frm_size.frame_width;
                     cm->frm_size.frame_width = cm->frm_size.frame_width >> 1; // this will be the encoded width (not the source width as it is now)
                     cm->frm_size.superres_denominator = 16; // denominator
 
-                    EbPictureBufferDesc *curr_recon_ptr;
                     EbPictureBufferDesc recon_ptr_half;
+                    EbPictureBufferDesc *curr_recon_ptr;
                     EbPictureBufferDesc *recon_save_ptr;
 
                     get_recon_pic(picture_control_set_ptr,
@@ -635,11 +636,6 @@ void* rest_kernel(void *input_ptr)
                     eb_av1_superres_upscale_frame(picture_control_set_ptr->parent_pcs_ptr->av1_cm,
                                                   picture_control_set_ptr,
                                                   sequence_control_set_ptr);
-
-                    // free the memory
-                    EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_y);
-                    EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_cb);
-                    EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_cr);
 
                     get_recon_pic(picture_control_set_ptr,
                               &curr_recon_ptr);
@@ -663,6 +659,11 @@ void* rest_kernel(void *input_ptr)
                                      curr_recon_ptr->stride_y, curr_recon_ptr->stride_cb, curr_recon_ptr->stride_cr,
                                      curr_recon_ptr->origin_y, curr_recon_ptr->origin_x,
                                      1, 1);
+
+                    // free the memory
+                    EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_y);
+                    EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_cb);
+                    EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_cr);
 
                     // ------- end: Normative upscaling frame - super-resolution tool
 
