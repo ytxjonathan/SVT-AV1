@@ -614,6 +614,8 @@ void* rest_kernel(void *input_ptr)
                     cm->frm_size.superres_upscaled_width = cm->frm_size.frame_width;
                     cm->frm_size.frame_width = cm->frm_size.frame_width >> 1; // this will be the encoded width (not the source width as it is now)
                     cm->frm_size.superres_denominator = 16; // denominator
+                    cm->mi_cols = cm->mi_cols >> 1;
+                    cm->mi_stride = cm->mi_stride >> 1;
 
                     EbPictureBufferDesc recon_ptr_half;
                     EbPictureBufferDesc *curr_recon_ptr;
@@ -633,7 +635,7 @@ void* rest_kernel(void *input_ptr)
                                              picture_control_set_ptr,
                                              sequence_control_set_ptr);
 
-                    eb_av1_superres_upscale_frame(picture_control_set_ptr->parent_pcs_ptr->av1_cm,
+                    eb_av1_superres_upscale_frame(cm,
                                                   picture_control_set_ptr,
                                                   sequence_control_set_ptr);
 

@@ -310,7 +310,7 @@ void av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src,
         Note: The actual location which we start sampling from is
         (downscaled_x0 - 1 + (x0_qn/2^14)), and this quantity increases
         by exactly dst_width * (x_step_qn/2^14) pixels each iteration.*/
-        const int downscaled_x0 = tile_col. mi_col_start << (MI_SIZE_LOG2 - sub_x);
+        const int downscaled_x0 = tile_col.mi_col_start << (MI_SIZE_LOG2 - sub_x);
         const int downscaled_x1 = tile_col.mi_col_end << (MI_SIZE_LOG2 - sub_x);
         const int src_width = downscaled_x1 - downscaled_x0;
 
