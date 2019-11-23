@@ -667,6 +667,12 @@ void* rest_kernel(void *input_ptr)
                     EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_cb);
                     EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_cr);
 
+                    // restore back original info in cm for this test
+                    cm->frm_size.frame_width = cm->frm_size.frame_width << 1; // this will be the encoded width (not the source width as it is now)
+                    cm->frm_size.superres_denominator = 8; // denominator
+                    cm->mi_cols = cm->mi_cols << 1;
+                    cm->mi_stride = cm->mi_stride << 1;
+
                     // ------- end: Normative upscaling frame - super-resolution tool
 
                     // M'notes: loop restoration filter for frame
