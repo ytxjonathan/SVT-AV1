@@ -1508,9 +1508,11 @@ int32_t eb_av1_loop_restoration_corners_in_sb(Av1Common *cm, int32_t plane,
     // from which we get u = D * MI_SIZE * m / N
 
     // M'notes: Changes need to be made here - probably the same as libaom
-    const int32_t mi_to_num_x = mi_size_x;//CHKN  av1_superres_unscaled(cm) ? mi_size_x : mi_size_x * cm->superres_scale_denominator;
-    const int32_t mi_to_num_y = mi_size_y;
-    const int32_t denom_x = size;//CHKN  av1_superres_unscaled(cm) ? size : size * SCALE_NUMERATOR;
+    const int mi_to_num_x = !av1_superres_unscaled(&cm->frm_size)
+                            ? mi_size_x * cm->frm_size.superres_denominator
+                            : mi_size_x;
+    const int mi_to_num_y = mi_size_y;
+    const int denom_x = !av1_superres_unscaled(&cm->frm_size) ? size * SCALE_NUMERATOR : size;
     const int32_t denom_y = size;
 
     const int32_t rnd_x = denom_x - 1;
