@@ -149,15 +149,24 @@ EbErrorType eb_sequence_control_set_ctor(
     // 2 - adaptive
 
     sequence_control_set_ptr->seq_header.order_hint_info.enable_ref_frame_mvs = 1;
+
+    // TODO: static_config is NOT yet copied at this point, need to init these later to take cli into account
 #if NO_ENCDEC || SHUT_FILTERING
-    sequence_control_set_ptr->seq_header.enable_cdef = 0;
+    if (sequence_control_set_ptr->static_config.enable_cdef == DEFAULT)
+        sequence_control_set_ptr->seq_header.enable_cdef = 0;
+    else
+        sequence_control_set_ptr->seq_header.enable_cdef = sequence_control_set_ptr->static_config.enable_cdef;
 
     if (sequence_control_set_ptr->static_config.enable_restoration_filtering == DEFAULT)
         sequence_control_set_ptr->seq_header.enable_restoration = 0;
     else
         sequence_control_set_ptr->seq_header.enable_restoration = (uint8_t)sequence_control_set_ptr->static_config.enable_restoration_filtering;
 #else
-    sequence_control_set_ptr->seq_header.enable_cdef = 1;
+    if (sequence_control_set_ptr->static_config.enable_cdef == DEFAULT)
+        sequence_control_set_ptr->seq_header.enable_cdef = 1;
+    else
+        sequence_control_set_ptr->seq_header.enable_cdef = sequence_control_set_ptr->static_config.enable_cdef;
+
     if (sequence_control_set_ptr->static_config.enable_restoration_filtering == DEFAULT)
         sequence_control_set_ptr->seq_header.enable_restoration = 1;
     else

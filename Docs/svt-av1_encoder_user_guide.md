@@ -175,6 +175,11 @@ The encoder parameters present in the `Sample.cfg` file are listed in this table
 | **Bipred3x3** | -bipred-3x3 | [0-2, -1 for default] | DEFAULT | Set bipred3x3 injection, 0 = OFF, 1 = ON FULL, 2 = Reduced set, -1 = DEFAULT|
 | **PredMe** | -pred-me | [0-5, -1 for default] | DEFAULT | Set predictive me level: <BR>-1 = DEFAULT<BR>0 = OFF <BR>1 = 7x5 full-pel search + sub-pel refinement off <BR>2 = 7x5 full-pel search +  (H + V) sub-pel refinement only = 4 half-pel + 4 quarter-pel = 8 positions + pred_me_distortion to pa_me_distortion deviation on <BR>3 = 7x5 full-pel search +  (H + V + D only ~ the best) sub-pel refinement = up to 6 half-pel + up to 6  quarter-pel = up to 12 positions + pred_me_distortion to pa_me_distortion deviation on <BR>4 = 7x5 full-pel search +  (H + V + D) sub-pel refinement = 8 half-pel + 8 quarter-pel = 16 positions + pred_me_distortion to pa_me_distortion deviation on <BR>5 = 7x5 full-pel search +  (H + V + D) sub-pel refinement = 8 half-pel + 8 quarter-pel = 16 positions + pred_me_distortion to pa_me_distortion deviation off |
 | **CompoundLevel** | -compound | [0-2, -1 for default] | DEFAULT | Set compound mode: <BR>-1 = DEFAULT<BR>0 = OFF: No compond mode search : AVG only <BR>1 = ON: compond mode search: AVG/DIST/DIFF <BR>2 = ON: AVG/DIST/DIFF/WEDGE |
+| **Atb** | -atb | [0/1, -1 for default] | DEFAULT | Enable atb , 0 = OFF, 1 = ON, -1 = DEFAULT|
+| **Cdf** | -cdf | [0/1, -1 for default] | DEFAULT | Enable cdf, 0 = OFF, 1 = ON, -1 = DEFAULT|
+| **UpdateCdf** | -updt-cdf | [0/1, -1 for default] | DEFAULT | Enable update cdf, 0 = OFF, 1 = ON, -1 = DEFAULT|
+| **CDEF** | -cdef | [0/1, -1 for default] | DEFAULT | Enable CDEF, 0 = OFF, 1 = ON, -1 = DEFAULT|
+| **QuantFp** | -quantize-fp | [0/1, -1 for default] | DEFAULT | Enable perform quantize fp, 0 = OFF, 1 = ON, -1 = DEFAULT|
 | **ExtBlockFlag** | -ext-block | [0 - 1] | Depends on –enc-mode | Enable the non-square block 0=OFF, 1= ON |
 | **ScreenContentMode** | -scm | [0 - 2] | 2 | Enable Screen Content Optimization mode (0: OFF, 1: ON, 2: Content Based Detection) |
 | **SearchAreaWidth** | -search-w | [1 - 256] | Depends on input resolution | Search Area in Width |

@@ -332,6 +332,11 @@ typedef struct EbSvtAv1EncConfiguration
     * Default is -1 (AUTO) */
     int                   set_chroma_mode;
 
+    /* CDEF
+    *
+    * Default is -1. */
+    int                   enable_cdef;
+
     /* atb mode
     *
     * Default is -1. */

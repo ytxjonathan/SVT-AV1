@@ -80,6 +80,7 @@
 #define PRUNE_REF_REC_PART_TOKEN        "-prune-ref-rec-part"
 #define NSQ_TABLE_TOKEN                 "-nsq-table-use"
 #define FRAME_END_CDF_UPDATE_TOKEN      "-framend-cdf-upd-mode"
+#define CDEF_ENABLE_TOKEN               "-cdef"
 #define ATB_ENABLE_TOKEN                "-atb"
 #define CDF_ENABLE_TOKEN                "-cdf"
 #define QUANT_FP_TOKEN                  "-quantize-fp"
@@ -289,6 +290,7 @@ static void SetFrameEndCdfUpdateFlag            (const char *value, EbConfig *cf
 static void SetChromaMode                       (const char *value, EbConfig *cfg) {cfg->set_chroma_mode = strtol(value, NULL, 0);};
 static void SetEnableAtbFlag                    (const char *value, EbConfig *cfg) {cfg->enable_atb = strtol(value, NULL, 0);};
 static void SetEnableCdfFlag                    (const char *value, EbConfig *cfg) {cfg->enable_cdf = strtol(value, NULL, 0);};
+static void SetEnableCdefFlag                   (const char *value, EbConfig *cfg) {cfg->enable_cdef = strtol(value, NULL, 0);};
 static void SetQuantFpFlag                      (const char *value, EbConfig *cfg) {cfg->quant_fp = strtol(value, NULL, 0);};
 static void SetUpdateCdfFlag                    (const char *value, EbConfig *cfg) {cfg->update_cdf = strtol(value, NULL, 0);};
 static void SetEnableObmcFlag                   (const char *value, EbConfig *cfg) {cfg->enable_obmc = (EbBool)strtoul(value, NULL, 0);};
@@ -503,6 +505,9 @@ config_entry_t config_entry[] = {
 
     // CHROMA
     { SINGLE_INPUT, CHROMA_MODE_TOKEN, "ChromaMode", SetChromaMode },
+    // CDEF
+    { SINGLE_INPUT, CDEF_ENABLE_TOKEN, "CDEF", SetEnableCdefFlag },
+
     { SINGLE_INPUT, QUANT_FP_TOKEN                , "QuantFp", SetQuantFpFlag              },
     { SINGLE_INPUT, UPDATE_CDF_TOKEN              , "UpdateCdf", SetUpdateCdfFlag            },
 
@@ -657,6 +662,7 @@ void eb_config_ctor(EbConfig *config_ptr)
     config_ptr->enable_cdf                           = DEFAULT;
     config_ptr->quant_fp                             = DEFAULT;
     config_ptr->update_cdf                           = DEFAULT;
+    config_ptr->enable_cdef                          = DEFAULT;
     config_ptr->enable_obmc                          = EB_TRUE;
     config_ptr->enable_rdoq                          = DEFAULT;
     config_ptr->pred_me                              = DEFAULT;
