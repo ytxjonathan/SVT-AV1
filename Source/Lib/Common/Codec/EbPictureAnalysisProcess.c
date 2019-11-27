@@ -20,6 +20,8 @@
 #include "EbReferenceObject.h"
 #include "EbComputeMean_SSE2.h"
 #include "EbUtility.h"
+#include "EbCombinedAveragingSAD_Intrinsic_AVX2.h"
+#include "scale.h"
 
 #define VARIANCE_PRECISION        16
 #define  LCU_LOW_VAR_TH                5
@@ -34,6 +36,12 @@
 #define DENOISER_BITRATE_TH        14000000
 #define SAMPLE_THRESHOLD_PRECENT_BORDER_LINE      15
 #define SAMPLE_THRESHOLD_PRECENT_TWO_BORDER_LINES 10
+
+void save_YUV_to_file(char *filename, EbByte buffer_y, EbByte buffer_u, EbByte buffer_v,
+                      uint16_t width, uint16_t height,
+                      uint16_t stride_y, uint16_t stride_u, uint16_t stride_v,
+                      uint16_t origin_y, uint16_t origin_x,
+                      uint32_t ss_x, uint32_t ss_y);
 
 static void picture_analysis_context_dctor(EbPtr p)
 {
@@ -4249,6 +4257,34 @@ void DownsampleFilteringInputPicture(
     }
 }
 
+EbErrorType downscaled_source_buffer_ctor(
+        EbPictureBufferDesc    **picture_ptr,
+        EbPictureBufferDesc    *picture_ptr_for_reference) {
+
+    EbPictureBufferDescInitData initData;
+
+    initData.buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK;
+    initData.max_width = picture_ptr_for_reference->max_width >> 1; // width = width / 2
+    initData.max_height = picture_ptr_for_reference->max_height;
+    initData.bit_depth = picture_ptr_for_reference->bit_depth;
+    initData.color_format = picture_ptr_for_reference->color_format;
+//    initData.left_padding = PAD_VALUE_SCALED;
+//    initData.right_padding = PAD_VALUE_SCALED;
+//    initData.top_padding = PAD_VALUE_SCALED;
+//    initData.bot_padding = PAD_VALUE_SCALED;
+    initData.left_padding = PAD_VALUE;
+    initData.right_padding = PAD_VALUE;
+    initData.top_padding = PAD_VALUE;
+    initData.bot_padding = PAD_VALUE;
+    initData.split_mode = EB_FALSE;
+
+    EB_NEW(*picture_ptr,
+           eb_picture_buffer_desc_ctor,
+           (EbPtr)&initData);
+
+    return EB_ErrorNone;
+}
+
 /************************************************
  * Picture Analysis Kernel
  * The Picture Analysis Process pads & decimates the input pictures.
@@ -4341,6 +4377,45 @@ void* picture_analysis_kernel(void *input_ptr)
                     (EbPictureBufferDesc*)paReferenceObject->quarter_filtered_picture_ptr,
                     (EbPictureBufferDesc*)paReferenceObject->sixteenth_filtered_picture_ptr);
             }
+
+            // Allocate picture buffer descriptor
+            downscaled_source_buffer_ctor(&picture_control_set_ptr->enhanced_downscaled_picture_ptr,
+                                          input_picture_ptr);
+
+//            save_YUV_to_file("unscaled_pic.yuv",
+//                             input_picture_ptr->buffer_y,
+//                             input_picture_ptr->buffer_cb,
+//                             input_picture_ptr->buffer_cr,
+//                             input_picture_ptr->width,
+//                             input_picture_ptr->height,
+//                             input_picture_ptr->stride_y,
+//                             input_picture_ptr->stride_cb,
+//                             input_picture_ptr->stride_cr,
+//                             input_picture_ptr->origin_y,
+//                             input_picture_ptr->origin_x,
+//                             1,
+//                             1);
+
+            // Test here: if superres is enabled, downsample the souce picture
+            av1_resize_and_extend_frame(input_picture_ptr,
+                                        picture_control_set_ptr->enhanced_downscaled_picture_ptr,
+                                        picture_control_set_ptr->enhanced_downscaled_picture_ptr->bit_depth, // bit depth
+                                        3); // number of planes
+
+//            save_YUV_to_file("downscaled_pic.yuv",
+//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_y,
+//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_cb,
+//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_cr,
+//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->width,
+//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->height,
+//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->stride_y,
+//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->stride_cb,
+//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->stride_cr,
+//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->origin_y,
+//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->origin_x,
+//                             1,
+//                             1);
+
            // Gathering statistics of input picture, including Variance Calculation, Histogram Bins
             GatheringPictureStatistics(
                 sequence_control_set_ptr,

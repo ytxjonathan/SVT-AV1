@@ -583,6 +583,7 @@ extern "C" {
         EbObjectWrapper                    *reference_picture_wrapper_ptr;
         EbObjectWrapper                    *pa_reference_picture_wrapper_ptr;
         EbPictureBufferDesc                *enhanced_picture_ptr;
+        EbPictureBufferDesc                *enhanced_downscaled_picture_ptr;
         EbPictureBufferDesc                *chroma_downsampled_picture_ptr; //if 422/444 input, down sample to 420 for MD
         EbBool                              is_chroma_downsampled_picture_ptr_owner;
         PredictionStructure                *pred_struct_ptr;          // need to check
