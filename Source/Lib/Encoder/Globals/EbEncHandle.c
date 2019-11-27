@@ -2700,7 +2700,7 @@ static EbErrorType verify_settings(
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->superres_denom < 8 || config->superres_denom > 16) {
+    if (config->superres_denom < MIN_SUPERRES_DENOM || config->superres_denom > MAX_SUPERRES_DENOM) {
         SVT_LOG("Error instance %u: invalid superres-denom, should be in the range [%d - %d] \n", channelNumber + 1, MIN_SUPERRES_DENOM, MAX_SUPERRES_DENOM);
         return_error = EB_ErrorBadParameter;
     }
@@ -2846,7 +2846,7 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->enable_overlays = EB_FALSE;
 
     // Super-resolution default values
-    config_ptr->superres_mode = 0;
+    config_ptr->superres_mode = SUPERRES_NONE;
     config_ptr->superres_denom = 8;
     config_ptr->superres_qthres = 43; // random threshold, change
 

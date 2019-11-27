@@ -21,6 +21,8 @@
 #include "EbReferenceObject.h"
 #include "EbComputeMean_SSE2.h"
 #include "EbUtility.h"
+#include "EbCombinedAveragingSAD_Intrinsic_AVX2.h"
+#include "EbResize.h"
 
 #define VARIANCE_PRECISION 16
 #define SB_LOW_VAR_TH 5
@@ -6224,6 +6226,34 @@ void downsample_filtering_input_picture(PictureParentControlSet *pcs_ptr,
     }
 }
 
+EbErrorType downscaled_source_buffer_ctor(
+        EbPictureBufferDesc    **picture_ptr,
+        EbPictureBufferDesc    *picture_ptr_for_reference) {
+
+    EbPictureBufferDescInitData initData;
+
+    initData.buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK;
+    initData.max_width = picture_ptr_for_reference->max_width >> 1; // width = width / 2
+    initData.max_height = picture_ptr_for_reference->max_height;
+    initData.bit_depth = picture_ptr_for_reference->bit_depth;
+    initData.color_format = picture_ptr_for_reference->color_format;
+    initData.split_mode = EB_TRUE;
+//    initData.left_padding = PAD_VALUE_SCALED;
+//    initData.right_padding = PAD_VALUE_SCALED;
+//    initData.top_padding = PAD_VALUE_SCALED;
+//    initData.bot_padding = PAD_VALUE_SCALED;
+    initData.left_padding = PAD_VALUE;
+    initData.right_padding = PAD_VALUE;
+    initData.top_padding = PAD_VALUE;
+    initData.bot_padding = PAD_VALUE;
+
+    EB_NEW(*picture_ptr,
+           eb_picture_buffer_desc_ctor,
+           (EbPtr)&initData);
+
+    return EB_ErrorNone;
+}
+
 /************************************************
  * Picture Analysis Kernel
  * The Picture Analysis Process pads & decimates the input pictures.
@@ -6326,6 +6356,25 @@ void *picture_analysis_kernel(void *input_ptr) {
                     (EbPictureBufferDesc *)pa_ref_obj_->quarter_filtered_picture_ptr,
                     (EbPictureBufferDesc *)pa_ref_obj_->sixteenth_filtered_picture_ptr);
             }
+
+            // Super-resolution test: if superres is enabled, downsample the source picture
+            if(sequence_control_set_ptr->static_config.superres_mode != SUPERRES_NONE){
+                // Allocate picture buffer descriptor
+                downscaled_source_buffer_ctor(&picture_control_set_ptr->enhanced_downscaled_picture_ptr,
+                                              input_picture_ptr);
+
+                const int32_t num_planes = av1_num_planes(&sequence_control_set_ptr->seq_header.color_config);
+                const uint32_t ss_x = sequence_control_set_ptr->subsampling_x;
+                const uint32_t ss_y = sequence_control_set_ptr->subsampling_y;
+
+                av1_resize_and_extend_frame(input_picture_ptr,
+                                            picture_control_set_ptr->enhanced_downscaled_picture_ptr,
+                                            picture_control_set_ptr->enhanced_downscaled_picture_ptr->bit_depth,
+                                            num_planes,
+                                            ss_x,
+                                            ss_y);
+            }
+            
             // Gathering statistics of input picture, including Variance Calculation, Histogram Bins
             gathering_picture_statistics(
                 scs_ptr,

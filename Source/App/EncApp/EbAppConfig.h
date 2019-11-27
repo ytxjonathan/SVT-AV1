@@ -447,7 +447,7 @@ typedef struct EbConfig {
     /****************************************
      * Super-resolution related Parameters
      ****************************************/
-    uint8_t                 superres_mode;
+    SUPERRES_MODE           superres_mode;
     uint8_t                 superres_denom;
     uint8_t                 superres_qthres;
 

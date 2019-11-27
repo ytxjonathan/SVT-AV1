@@ -87,7 +87,6 @@ static const uint32_t index_16x16_from_subindexes[4][4] = {
 
 extern AomVarianceFnPtr mefn_ptr[BlockSizeS_ALL];
 
-#if DEBUG_TF
 // save YUV to file - auxiliary function for debug
 void save_YUV_to_file(char *filename, EbByte buffer_y, EbByte buffer_u, EbByte buffer_v,
                       uint16_t width, uint16_t height, uint16_t stride_y, uint16_t stride_u,
@@ -158,9 +157,8 @@ void save_YUV_to_file_highbd(char *filename, uint16_t *buffer_y, uint16_t *buffe
         fclose(fid);
     }
 }
-#endif
 
-static void pack_highbd_pic(EbPictureBufferDesc *pic_ptr, uint16_t *buffer_16bit[3], uint32_t ss_x,
+static void pack_highbd_pic(const EbPictureBufferDesc *pic_ptr, uint16_t *buffer_16bit[3], uint32_t ss_x,
                             uint32_t ss_y, EbBool include_padding) {
     uint32_t input_y_offset          = 0;
     uint32_t input_bit_inc_y_offset  = 0;
