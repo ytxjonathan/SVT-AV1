@@ -2001,7 +2001,10 @@ void SetParamBasedOnInput(SequenceControlSet *sequence_control_set_ptr)
 
     //0: ON
     //1: OFF
-    sequence_control_set_ptr->cdf_mode = (uint8_t)(sequence_control_set_ptr->static_config.enc_mode <= ENC_M6) ? 0 : 1;
+    if (sequence_control_set_ptr->static_config.enable_cdf == DEFAULT)
+        sequence_control_set_ptr->cdf_mode = (uint8_t)(sequence_control_set_ptr->static_config.enc_mode <= ENC_M6) ? 0 : 1;
+    else
+        sequence_control_set_ptr->cdf_mode = sequence_control_set_ptr->static_config.enable_cdf;
 
     //0: NSQ absent
     //1: NSQ present
@@ -2150,6 +2153,14 @@ void CopyApiFromApp(
 
     // Chroma mode
     sequence_control_set_ptr->static_config.set_chroma_mode = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->set_chroma_mode;
+    // atb mode
+    sequence_control_set_ptr->static_config.enable_atb                   = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_atb;
+    // cdf mode
+    sequence_control_set_ptr->static_config.enable_cdf                   = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_cdf;
+    // quantize fp
+    sequence_control_set_ptr->static_config.quant_fp                     = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->quant_fp;
+    // update cdf
+    sequence_control_set_ptr->static_config.update_cdf                   = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->update_cdf;
 
     // OBMC
     sequence_control_set_ptr->static_config.enable_obmc = ((EbSvtAv1EncConfiguration*)pComponentParameterStructure)->enable_obmc;
@@ -2783,6 +2794,26 @@ static EbErrorType VerifySettings(
       return_error = EB_ErrorBadParameter;
     }
 
+    if (config->enable_atb != 0 && config->enable_atb != 1 && config->enable_atb != -1) {
+      SVT_LOG("Error instance %u: Invalid atb flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->enable_atb);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->enable_cdf != 0 && config->enable_cdf != 1 && config->enable_cdf != -1) {
+      SVT_LOG("Error instance %u: Invalid cdf flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->enable_cdf);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->quant_fp != 0 && config->quant_fp != 1 && config->quant_fp != -1) {
+      SVT_LOG("Error instance %u: Invalid perform quant fp flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->quant_fp);
+      return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->update_cdf != 0 && config->update_cdf != 1 && config->update_cdf != -1) {
+      SVT_LOG("Error instance %u: Invalid update_cdf flag [0/1 or -1 for auto], your input: %d\n", channelNumber + 1, config->update_cdf);
+      return_error = EB_ErrorBadParameter;
+    }
+
     // mdc refinement
     if (config->olpd_refinement < (int32_t)(-1) || config->olpd_refinement > 1) {
         SVT_LOG("Error instance %u: Invalid OLPD Refinement Mode [0 .. 1], your input: %i\n", channelNumber + 1, config->olpd_refinement);
@@ -2860,6 +2891,10 @@ EbErrorType eb_svt_enc_init_parameter(
     config_ptr->nsq_table = DEFAULT;
     config_ptr->frame_end_cdf_update = DEFAULT;
     config_ptr->set_chroma_mode = DEFAULT;
+    config_ptr->enable_atb = DEFAULT;
+    config_ptr->enable_cdf = DEFAULT;
+    config_ptr->quant_fp = DEFAULT;
+    config_ptr->update_cdf = DEFAULT;
     config_ptr->enable_obmc = EB_TRUE;
     config_ptr->enable_rdoq = DEFAULT;
     config_ptr->pred_me = DEFAULT;

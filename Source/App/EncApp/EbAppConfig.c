@@ -80,6 +80,10 @@
 #define PRUNE_REF_REC_PART_TOKEN        "-prune-ref-rec-part"
 #define NSQ_TABLE_TOKEN                 "-nsq-table-use"
 #define FRAME_END_CDF_UPDATE_TOKEN      "-framend-cdf-upd-mode"
+#define ATB_ENABLE_TOKEN                "-atb"
+#define CDF_ENABLE_TOKEN                "-cdf"
+#define QUANT_FP_TOKEN                  "-quantize-fp"
+#define UPDATE_CDF_TOKEN                "-updt-cdf"
 #define LOCAL_WARPED_ENABLE_TOKEN       "-local-warp"
 #define GLOBAL_MOTION_ENABLE_TOKEN      "-global-motion"
 #define OBMC_TOKEN                      "-obmc"
@@ -283,6 +287,10 @@ static void SetPruneRefRecPartFlag              (const char *value, EbConfig *cf
 static void SetNsqTableFlag                     (const char *value, EbConfig *cfg) {cfg->nsq_table = strtol(value, NULL, 0);};
 static void SetFrameEndCdfUpdateFlag            (const char *value, EbConfig *cfg) {cfg->frame_end_cdf_update = strtol(value, NULL, 0);};
 static void SetChromaMode                       (const char *value, EbConfig *cfg) {cfg->set_chroma_mode = strtol(value, NULL, 0);};
+static void SetEnableAtbFlag                    (const char *value, EbConfig *cfg) {cfg->enable_atb = strtol(value, NULL, 0);};
+static void SetEnableCdfFlag                    (const char *value, EbConfig *cfg) {cfg->enable_cdf = strtol(value, NULL, 0);};
+static void SetQuantFpFlag                      (const char *value, EbConfig *cfg) {cfg->quant_fp = strtol(value, NULL, 0);};
+static void SetUpdateCdfFlag                    (const char *value, EbConfig *cfg) {cfg->update_cdf = strtol(value, NULL, 0);};
 static void SetEnableObmcFlag                   (const char *value, EbConfig *cfg) {cfg->enable_obmc = (EbBool)strtoul(value, NULL, 0);};
 static void SetEnableRdoqFlag                   (const char *value, EbConfig *cfg) {cfg->enable_rdoq = strtol(value, NULL, 0);};
 static void SetPredictiveMeFlag                 (const char *value, EbConfig *cfg) {cfg->pred_me = strtol(value, NULL, 0); };
@@ -495,6 +503,8 @@ config_entry_t config_entry[] = {
 
     // CHROMA
     { SINGLE_INPUT, CHROMA_MODE_TOKEN, "ChromaMode", SetChromaMode },
+    { SINGLE_INPUT, QUANT_FP_TOKEN                , "QuantFp", SetQuantFpFlag              },
+    { SINGLE_INPUT, UPDATE_CDF_TOKEN              , "UpdateCdf", SetUpdateCdfFlag            },
 
     // LOCAL WARPED MOTION
     { SINGLE_INPUT, LOCAL_WARPED_ENABLE_TOKEN, "LocalWarpedMotion", SetEnableLocalWarpedMotionFlag },
@@ -509,6 +519,10 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, INTER_INTRA_COMPOUND_TOKEN, "InterIntraCompound", SetInterIntraCompoundFlag },
     // FRACTIONAL SEARCH 64x64
     { SINGLE_INPUT, FRAC_SEARCH_64_TOKEN, "FractionalSearch64", SetFractionalSearch64Flag },
+    // ATB
+    { SINGLE_INPUT, ATB_ENABLE_TOKEN, "Atb", SetEnableAtbFlag },
+    // CDF
+    { SINGLE_INPUT, CDF_ENABLE_TOKEN, "Cdf", SetEnableCdfFlag },
 
     // OBMC
     { SINGLE_INPUT, OBMC_TOKEN, "Obmc", SetEnableObmcFlag },
@@ -639,6 +653,10 @@ void eb_config_ctor(EbConfig *config_ptr)
     config_ptr->nsq_table                            = DEFAULT;
     config_ptr->frame_end_cdf_update                 = DEFAULT;
     config_ptr->set_chroma_mode                      = DEFAULT;
+    config_ptr->enable_atb                           = DEFAULT;
+    config_ptr->enable_cdf                           = DEFAULT;
+    config_ptr->quant_fp                             = DEFAULT;
+    config_ptr->update_cdf                           = DEFAULT;
     config_ptr->enable_obmc                          = EB_TRUE;
     config_ptr->enable_rdoq                          = DEFAULT;
     config_ptr->pred_me                              = DEFAULT;
@@ -1005,6 +1023,36 @@ static EbErrorType VerifySettings(EbConfig *config, uint32_t channelNumber)
     // target_socket
     if (config->target_socket != -1 && config->target_socket != 0 && config->target_socket != 1) {
         fprintf(config->error_log_file, "Error instance %u: Invalid target_socket [-1 - 1], your input: %d\n", channelNumber + 1, config->target_socket);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    // Local Warped Motion
+    if (config->enable_warped_motion != 0 && config->enable_warped_motion != 1) {
+        fprintf(config->error_log_file, "Error instance %u: Invalid warped motion flag [0 - 1], your input: %d\n", channelNumber + 1, config->target_socket);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    // Global Motion
+    if (config->enable_global_motion != 0 && config->enable_global_motion != 1) {
+        fprintf(config->error_log_file, "Error instance %u: Invalid global motion flag [0 - 1], your input: %d\n", channelNumber + 1, config->target_socket);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    // OBMC
+    if (config->enable_obmc != 0 && config->enable_obmc != 1) {
+        fprintf(config->error_log_file, "Error instance %u: Invalid OBMC flag [0 - 1], your input: %d\n", channelNumber + 1, config->target_socket);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    // Filter Intra prediction
+    if (config->enable_filter_intra != 0 && config->enable_filter_intra != 1) {
+        fprintf(config->error_log_file, "Error instance %u: Invalid Filter Intra flag [0 - 1], your input: %d\n", channelNumber + 1, config->target_socket);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    // HBD mode decision
+    if (config->enable_hbd_mode_decision != 0 && config->enable_hbd_mode_decision != 1 && config->enable_hbd_mode_decision != 2) {
+        fprintf(config->error_log_file, "Error instance %u: Invalid HBD mode decision flag [0 - 2], your input: %d\n", channelNumber + 1, config->target_socket);
         return_error = EB_ErrorBadParameter;
     }
 

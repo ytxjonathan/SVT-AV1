@@ -207,6 +207,10 @@ EbErrorType CopyConfigurationParameters(
     callback_data->eb_enc_parameters.prune_ref_rec_part = config->prune_ref_rec_part;
     callback_data->eb_enc_parameters.nsq_table = config->nsq_table;
     callback_data->eb_enc_parameters.frame_end_cdf_update = config->frame_end_cdf_update;
+    callback_data->eb_enc_parameters.enable_atb = config->enable_atb;
+    callback_data->eb_enc_parameters.enable_cdf = config->enable_cdf;
+    callback_data->eb_enc_parameters.quant_fp = config->quant_fp;
+    callback_data->eb_enc_parameters.update_cdf = config->update_cdf;
     callback_data->eb_enc_parameters.enable_obmc = (EbBool)config->enable_obmc;
     callback_data->eb_enc_parameters.enable_rdoq = config->enable_rdoq;
     callback_data->eb_enc_parameters.pred_me = config->pred_me;
