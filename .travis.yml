@@ -90,8 +90,6 @@ matrix:
   allow_failures:
     - name: Binary Identical?
     - name: Valgrind
-    - name: Coveralls Linux+gcc
-    - name: Coveralls osx+clang
     - name: Unit Tests Linux+gcc
     - name: Unit Tests osx+clang
     # Exclude these because if the encoder can run with a release build, the commit is probably fine. Also required for fast_finish.
@@ -204,7 +202,7 @@ matrix:
     # Unittests on Linux and macOS
     - name: Unit Tests Linux+gcc
       stage: unittest
-      env: CMAKE_EFLAGS="-DBUILD_TESTING=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/ COVERALLS_PARALLEL=true build_type=debug CMAKE_EFLAGS="-DCOVERAGE=ON"
+      env: build_type=debug CMAKE_EFLAGS="-DBUILD_TESTING=ON -DCOVERAGE=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/ COVERALLS_PARALLEL=true 
       script:
         - *base_script
         - &unittests |
@@ -222,11 +220,11 @@ matrix:
         else
           GCOV_FILE=gcov GCOV_OPTIONS='\-lp'
         fi
-        coveralls --root $TRAVIS_BUILD_DIR -i Source -E ".*gtest.*" -E ".*CMakeFiles.*" -E ".*third_party.*" -E ".*test/FilmGrainTest.cc" --gcov $GCOV_FILE --gcov-options "$GCOV_OPTIONS"
+        coveralls --root $TRAVIS_BUILD_DIR -i Source -E ".*gtest.*" -E ".*CMakeFiles.*" -E ".*third_party.*"  -E ".*ffmpeg.*" --gcov $GCOV_FILE --gcov-options "$GCOV_OPTIONS"
     - name: Unit Tests osx+clang
       os: osx
       compiler: clang
-      env: CMAKE_EFLAGS="-DBUILD_TESTING=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/ COVERALLS_PARALLEL=true build_type=debug CMAKE_EFLAGS="-DCOVERAGE=ON"
+      env: build_type=debug CMAKE_EFLAGS="-DBUILD_TESTING=ON -DCOVERAGE=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/ COVERALLS_PARALLEL=true 
       script:
         - *base_script
         - *unittests
