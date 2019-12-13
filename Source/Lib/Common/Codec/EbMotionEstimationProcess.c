@@ -169,6 +169,11 @@ EbErrorType signal_derivation_me_kernel_oq(
         set_me_hme_params_from_config(
             sequence_control_set_ptr,
             context_ptr->me_context_ptr);
+#if SC_FRAC_SEARCH_METHOD_SUB_SAD
+    if (1)
+        context_ptr->me_context_ptr->fractional_search_method = SUB_SAD_SEARCH;
+    else
+#endif
     if (picture_control_set_ptr->sc_content_detected)
 #if PRESETS_TUNE
         context_ptr->me_context_ptr->fractional_search_method = (enc_mode == ENC_M0) ? FULL_SAD_SEARCH : SUB_SAD_SEARCH;
@@ -180,6 +185,12 @@ EbErrorType signal_derivation_me_kernel_oq(
             context_ptr->me_context_ptr->fractional_search_method = SSD_SEARCH;
         else
             context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
+
+#if SC_FRAC_SEARCH64_ON
+    if (1)
+        context_ptr->me_context_ptr->fractional_search64x64 = EB_TRUE;
+    else
+#endif
     if (picture_control_set_ptr->sc_content_detected)
         context_ptr->me_context_ptr->fractional_search64x64 = EB_FALSE;
     else
@@ -203,6 +214,11 @@ EbErrorType signal_derivation_me_kernel_oq(
             context_ptr->me_context_ptr->use_subpel_flag = 0;
     else
         context_ptr->me_context_ptr->use_subpel_flag = 1;
+
+#if SC_SUBPEL_FLAG_OFF
+    context_ptr->me_context_ptr->use_subpel_flag = 0;
+#endif
+
     if (MR_MODE) {
         context_ptr->me_context_ptr->half_pel_mode =
             EX_HP_MODE;
@@ -225,6 +241,12 @@ EbErrorType signal_derivation_me_kernel_oq(
         context_ptr->me_context_ptr->quarter_pel_mode =
             REFINMENT_QP_MODE;
     }
+#if SC_HALF_PEL_EX
+    context_ptr->me_context_ptr->half_pel_mode = EX_HP_MODE;
+#endif
+#if SC_QUARTER_PEL_EX
+    context_ptr->me_context_ptr->quarter_pel_mode = EX_QP_MODE;
+#endif
 #if M1_HALF_QUARTER_PEL_MODE
         context_ptr->me_context_ptr->half_pel_mode =
             REFINMENT_HP_MODE;
@@ -244,6 +266,10 @@ EbErrorType signal_derivation_me_kernel_oq(
     else
         context_ptr->me_context_ptr->fractional_search_model = 2;
 
+#if SC_FRAC_SEARCH_MODEL_1
+    context_ptr->me_context_ptr->fractional_search_model = 1;
+#endif
+
     // HME Search Method
     if (picture_control_set_ptr->sc_content_detected)
         if (enc_mode <= ENC_M6)
@@ -255,6 +281,10 @@ EbErrorType signal_derivation_me_kernel_oq(
         context_ptr->me_context_ptr->hme_search_method = SUB_SAD_SEARCH;
 #else
         context_ptr->me_context_ptr->hme_search_method = FULL_SAD_SEARCH;
+#endif
+
+#if SC_HME_SEARCH_SUB_SAD
+    context_ptr->me_context_ptr->hme_search_method = SUB_SAD_SEARCH;
 #endif
     // ME Search Method
     if (picture_control_set_ptr->sc_content_detected)
@@ -277,6 +307,9 @@ EbErrorType signal_derivation_me_kernel_oq(
 #endif
         FULL_SAD_SEARCH :
         SUB_SAD_SEARCH;
+#endif
+#if SC_ME_SEARCH_SUB_SAD
+        context_ptr->me_context_ptr->me_search_method = SUB_SAD_SEARCH;
 #endif
     if (sequence_control_set_ptr->static_config.enable_global_motion == EB_TRUE)
     {
@@ -495,6 +528,7 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
             context_ptr->me_context_ptr->fractional_search_method = SSD_SEARCH;
         else
             context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
+
     if (picture_control_set_ptr->sc_content_detected)
 #if PRESETS_TUNE
         if (enc_mode <= ENC_M5)

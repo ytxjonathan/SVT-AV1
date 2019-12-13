@@ -1162,6 +1162,10 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->ibc_mode = 0;
         else
             picture_control_set_ptr->ibc_mode = 1;
+
+#if IBC_MODE_1
+        picture_control_set_ptr->ibc_mode = 1;
+#endif
     }
     else {
 #if PAL_SUP
@@ -1172,6 +1176,13 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
         frm_hdr->allow_intrabc = 0;
     }
+
+#if ALLOW_INTRABC_0
+    frm_hdr->allow_intrabc = 0;
+#endif
+#if ALLOW_INTRABC_1
+    frm_hdr->allow_intrabc = 1;
+#endif
 
 #if PAL_SUP
 
@@ -1186,6 +1197,41 @@ EbErrorType signal_derivation_multi_processes_oq(
 
     */
     if (frm_hdr->allow_screen_content_tools)
+#if PALETTE_0
+        if (1)
+            picture_control_set_ptr->palette_mode = 0;
+        else
+#endif
+#if PALETTE_1
+        if (1)
+            picture_control_set_ptr->palette_mode = 1;
+        else
+#endif
+#if PALETTE_2
+        if (1)
+            picture_control_set_ptr->palette_mode = 2;
+        else
+#endif
+#if PALETTE_3
+        if (1)
+            picture_control_set_ptr->palette_mode = 3;
+        else
+#endif
+#if PALETTE_4
+        if (1)
+            picture_control_set_ptr->palette_mode = 4;
+        else
+#endif
+#if PALETTE_5
+        if (1)
+            picture_control_set_ptr->palette_mode = 5;
+        else
+#endif
+#if PALETTE_6
+        if (1)
+            picture_control_set_ptr->palette_mode = 6;
+        else
+#endif
         if (sequence_control_set_ptr->static_config.enable_palette == -1)//auto mode; if not set by cfg
             picture_control_set_ptr->palette_mode =
             (sequence_control_set_ptr->static_config.encoder_bit_depth == EB_8BIT ||
@@ -1198,6 +1244,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 
     assert(picture_control_set_ptr->palette_mode<7);
 #endif
+
     if (!picture_control_set_ptr->sequence_control_set_ptr->static_config.disable_dlf_flag && frm_hdr->allow_intrabc == 0) {
     if (sc_content_detected)
 #if M0_OPT
@@ -1225,6 +1272,17 @@ EbErrorType signal_derivation_multi_processes_oq(
     }
     else
         picture_control_set_ptr->loop_filter_mode = 0;
+
+#if M2_LOOP_FILTER_MODE
+    if (!picture_control_set_ptr->sequence_control_set_ptr->static_config.disable_dlf_flag && frm_hdr->allow_intrabc == 0) {
+        if (sc_content_detected)
+            picture_control_set_ptr->loop_filter_mode = 0;
+        else
+            picture_control_set_ptr->loop_filter_mode = 3;
+    }
+    else
+        picture_control_set_ptr->loop_filter_mode = 0;
+#endif
 
 #if M3_LOOP_FILTER_MODE
    if (!picture_control_set_ptr->sequence_control_set_ptr->static_config.disable_dlf_flag && frm_hdr->allow_intrabc == 0) {
@@ -1272,6 +1330,16 @@ EbErrorType signal_derivation_multi_processes_oq(
     else
         picture_control_set_ptr->cdef_filter_mode = 0;
 
+#if SC_CDEF_FILTER_MODE_0
+    picture_control_set_ptr->cdef_filter_mode = 0;
+#endif
+#if SC_CDEF_FILTER_MODE_5
+    picture_control_set_ptr->cdef_filter_mode = 5;
+#endif
+#if SC_CDEF_FILTER_MODE_3
+    picture_control_set_ptr->cdef_filter_mode = 3;
+#endif
+
 #if M2_CDEF_FILTER_MODE
     if (sequence_control_set_ptr->seq_header.enable_cdef && frm_hdr->allow_intrabc == 0) {
         if (sc_content_detected)
@@ -1281,7 +1349,6 @@ EbErrorType signal_derivation_multi_processes_oq(
     }
     else
         picture_control_set_ptr->cdef_filter_mode = 0;
-
 #endif
 
     // SG Level                                    Settings
@@ -1312,6 +1379,13 @@ EbErrorType signal_derivation_multi_processes_oq(
         cm->sg_filter_mode = 3;
     else
         cm->sg_filter_mode = 1;
+
+#if SC_SG_FILTER_MODE_0
+    cm->sg_filter_mode = 0;
+#endif
+#if SC_SG_FILTER_MODE_3
+    cm->sg_filter_mode = 3;
+#endif
 #if M3_SG_FILTER_MODE
     if (sc_content_detected)
         cm->sg_filter_mode = 4;
@@ -1342,6 +1416,13 @@ EbErrorType signal_derivation_multi_processes_oq(
         cm->wn_filter_mode = 2;
     else
         cm->wn_filter_mode = 0;
+
+#if SC_WN_FILTER_MODE_0
+    cm->wn_filter_mode = 0;
+#endif
+#if SC_WN_FILTER_MODE_2
+    cm->wn_filter_mode = 2;
+#endif
 
     // Tx_search Level                                Settings
     // 0                                              OFF
@@ -1520,7 +1601,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 
     if (MR_MODE)
         picture_control_set_ptr->intra_pred_mode = 0;
-#if M3_INTRA_PRED_MODE
+#if M3_INTRA_PRED_MODE || SC_M3_INTRA_PRED_MODE
     if (picture_control_set_ptr->slice_type == I_SLICE)
             picture_control_set_ptr->intra_pred_mode = 0;
     else {
@@ -1588,7 +1669,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
         else
             picture_control_set_ptr->atb_mode = 0;
-#if M2_ATB_MODE
+#if M2_ATB_MODE || SC_ATB_MODE_0
         picture_control_set_ptr->atb_mode = 0;
 #endif
         // Set skip atb                          Settings
@@ -1608,8 +1689,14 @@ EbErrorType signal_derivation_multi_processes_oq(
         else
             picture_control_set_ptr->coeff_based_skip_atb = 1;
 
-#if M1_COEFF_BASED_SKIP_ATB
+#if SC_COEFF_BASED_SKIP_ATB_1
         picture_control_set_ptr->coeff_based_skip_atb = 1;
+#endif
+#if M1_COEFF_BASED_SKIP_ATB
+        if (picture_control_set_ptr->sc_content_detected)
+            picture_control_set_ptr->coeff_based_skip_atb = 0;
+        else
+            picture_control_set_ptr->coeff_based_skip_atb = 1;
 #endif
 
         // Set Wedge mode      Settings
@@ -1642,6 +1729,13 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
         else
             picture_control_set_ptr->compound_mode = 0;
+
+#if SC_COMPOUND_MODE_0
+        picture_control_set_ptr->compound_mode = 0;
+#endif
+#if SC_COMPOUND_MODE_1
+        picture_control_set_ptr->compound_mode = 1;
+#endif
 #if M2_COMPOUND_MODE
         if (sequence_control_set_ptr->compound_mode)
             if (picture_control_set_ptr->sc_content_detected)
@@ -1677,6 +1771,10 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->prune_unipred_at_me = 0;
         else
             picture_control_set_ptr->prune_unipred_at_me = 1;
+
+#if SC_PRUNE_UNIPRED_AT_ME_1
+        picture_control_set_ptr->prune_unipred_at_me = 1;
+#endif
         //CHKN: Temporal MVP should be disabled for pictures beloning to 4L MiniGop preceeded by 5L miniGOP. in this case the RPS is wrong(known issue). check RPS construction for more info.
         if ((sequence_control_set_ptr->static_config.hierarchical_levels == 4 && picture_control_set_ptr->hierarchical_levels == 3) ||
             picture_control_set_ptr->slice_type == I_SLICE)
@@ -1689,6 +1787,9 @@ EbErrorType signal_derivation_multi_processes_oq(
         // GM_DOWN                                    Downsampled 1/4th serach mode.
         // GM_TRAN_ONLY                               Translation only using ME MV.
         picture_control_set_ptr->gm_level = GM_FULL;
+#if GM_LEVEL_DOWN
+        picture_control_set_ptr->gm_level = GM_DOWN;
+#endif
 #endif
     return return_error;
     return return_error;
