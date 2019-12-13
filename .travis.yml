@@ -202,7 +202,7 @@ matrix:
     # Unittests on Linux and macOS
     - name: Unit Tests Linux+gcc
       stage: unittest
-      env: build_type=debug CMAKE_EFLAGS="-DBUILD_TESTING=ON -DCOVERAGE=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/ COVERALLS_PARALLEL=true 
+      env: build_type=debug CMAKE_EFLAGS="-DBUILD_TESTING=ON -DCOVERAGE=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/ COVERALLS_PARALLEL=true
       script:
         - *base_script
         - &unittests |
@@ -224,7 +224,7 @@ matrix:
     - name: Unit Tests osx+clang
       os: osx
       compiler: clang
-      env: build_type=debug CMAKE_EFLAGS="-DBUILD_TESTING=ON -DCOVERAGE=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/ COVERALLS_PARALLEL=true 
+      env: build_type=debug CMAKE_EFLAGS="-DBUILD_TESTING=ON -DCOVERAGE=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/ COVERALLS_PARALLEL=true
       script:
         - *base_script
         - *unittests
