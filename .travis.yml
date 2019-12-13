@@ -194,13 +194,20 @@ matrix:
         - diff test-pr-m8.ivf test-master-m8.ivf
         - diff test-pr-m0.ivf test-master-m0.ivf
 
-    # Coveralls on Linux and macOS
-    - name: Coveralls Linux+gcc
-      stage: coveralls+valgrind
-      env: COVERALLS_PARALLEL=true build_type=debug CMAKE_EFLAGS="-DCOVERAGE=ON"
+    # Valgrind on Linux and macOS
+    - name: Valgrind
+      env: build_type=debug
       script:
         - *base_script
-        - &coveralls_script |
+        - travis_wait 60 valgrind -- SvtAv1EncApp -enc-mode 4 -i akiyo_cif.y4m -n 20 -b test1.ivf
+
+    # Unittests on Linux and macOS
+    - name: Unit Tests Linux+gcc
+      stage: unittest
+      env: CMAKE_EFLAGS="-DBUILD_TESTING=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/ COVERALLS_PARALLEL=true build_type=debug CMAKE_EFLAGS="-DCOVERAGE=ON"
+      script:
+        - *base_script
+        - &unittests |
           pip3 install --user cpp-coveralls
           export PATH=/Users/travis/Library/Python/3.7/bin:${PATH}
           cd $TRAVIS_BUILD_DIR/Build/linux/${build_type:-Release}
@@ -215,40 +222,12 @@ matrix:
         else
           GCOV_FILE=gcov GCOV_OPTIONS='\-lp'
         fi
-        coveralls --root $TRAVIS_BUILD_DIR -i Source -E ".*gtest.*" -E ".*CMakeFiles.*" -E ".*third_party.*" -E ".*test/FilmGrainTest.cc" -E ".*ffmpeg.*" --gcov $GCOV_FILE --gcov-options "$GCOV_OPTIONS"
-    - name: Coveralls osx+clang
-      os: osx
-      compiler: clang
-      env: COVERALLS_PARALLEL=true build_type=debug CMAKE_EFLAGS="-DCOVERAGE=ON"
-      script:
-        - *base_script
-        - *coveralls_script
-      after_script: *after_coveralls_script
-
-    # Valgrind on Linux and macOS
-    - name: Valgrind
-      env: build_type=debug
-      script:
-        - *base_script
-        - travis_wait 60 valgrind -- SvtAv1EncApp -enc-mode 4 -i akiyo_cif.y4m -n 20 -b test1.ivf
-
-    # Unittests on Linux and macOS
-    - name: Unit Tests Linux+gcc
-      stage: unittest
-      env: build_type=release CMAKE_EFLAGS="-DBUILD_TESTING=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/
-      script:
-        - *base_script
-        - &unittests |
-          cd $TRAVIS_BUILD_DIR/Build/linux/${build_type:-Release}
-          make TestVectors
-          cd $TRAVIS_BUILD_DIR
-          SvtAv1UnitTests
-          SvtAv1ApiTests
-          SvtAv1E2ETests
+        coveralls --root $TRAVIS_BUILD_DIR -i Source -E ".*gtest.*" -E ".*CMakeFiles.*" -E ".*third_party.*" -E ".*test/FilmGrainTest.cc" --gcov $GCOV_FILE --gcov-options "$GCOV_OPTIONS"
     - name: Unit Tests osx+clang
       os: osx
       compiler: clang
-      env: build_type=release CMAKE_EFLAGS="-DBUILD_TESTING=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/
+      env: CMAKE_EFLAGS="-DBUILD_TESTING=ON" SVT_AV1_TEST_VECTOR_PATH=$TRAVIS_BUILD_DIR/test/vectors/ COVERALLS_PARALLEL=true build_type=debug CMAKE_EFLAGS="-DCOVERAGE=ON"
       script:
         - *base_script
         - *unittests
+      after_script: *after_coveralls_script
