@@ -34,6 +34,13 @@ extern "C" {
 #endif
 #define TX_SIZE_EARLY_EXIT          1 // Exit TX size search when all coefficients are zero.
 
+#define   SINGLE_CORE_ENCODE   1
+#if SINGLE_CORE_ENCODE
+#define SERIAL_MODE                  1 // change ressource allocations  to optimize single core operating mode
+#define OUT_ALLOC                    1 // output bitsream allocation at run time for both single/multi core
+#define PAREF_OUT                    1 // disconnect pa ref  from input for both single/multi core
+#endif
+
 #define ENHANCED_M0_SETTINGS         1 // Updated M0 settings(optimized independent chroma search for all layers, conservative coeff - based NSQ cands reduction, shut coeff - based skip tx size search, warped for all layers, SUB - SAD as ME search method for non - SC only)
 #define MULTI_PASS_PD                1 // Multi-Pass Partitioning Depth (Multi-Pass PD) performs multiple PD stages for the same SB towards 1 final Partitioning Structure. As we go from PDn to PDn + 1, the prediction accuracy of the MD feature(s) increases while the number of block(s) decreases
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements
@@ -66,7 +73,7 @@ extern "C" {
 
 #define INTER_INTRA_CLASS_PRUNING    1
 
-#define FIX_ALTREF                   1 // Address ALTREF mismatch between rtime-m0-test and master: fixed actual_future_pics derivation, shut padding of the central frame, fixed end past frame index prior to window shrinking
+#define FIX_ALTREF                   0 // Address ALTREF mismatch between rtime-m0-test and master: fixed actual_future_pics derivation, shut padding of the central frame, fixed end past frame index prior to window shrinking
 #define FIX_NEAREST_NEW              1 // Address NEAREST_NEW mismatch between rtime-m0-test and master: fixed injection and fixed settings
 #define FIX_ESTIMATE_INTRA           1 // Address ESTIMATE_INTRA mismatch between rtime-m0-test and master: fixed settings
 #define FIX_SKIP_REDUNDANT_BLOCK     1 // Address SKIP_REDUNDANT_BLOCK mismatch between rtime-m0-test and master: fixed the action to bypass MD

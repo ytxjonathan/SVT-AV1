@@ -1982,6 +1982,26 @@ static void pad_and_decimate_filtered_pic(PictureParentControlSet *picture_contr
     // reference structures (padded pictures + downsampled versions)
     EbPaReferenceObject *src_object = (EbPaReferenceObject*)picture_control_set_ptr_central->pa_reference_picture_wrapper_ptr->object_ptr;
     EbPictureBufferDesc *padded_pic_ptr = src_object->input_padded_picture_ptr;
+
+#if PAREF_OUT
+    {
+        EbPictureBufferDesc *input_picture_ptr =picture_control_set_ptr_central->enhanced_picture_ptr;
+        uint8_t* pa = padded_pic_ptr->buffer_y + padded_pic_ptr->origin_x + padded_pic_ptr->origin_y * padded_pic_ptr->stride_y;
+        uint8_t* in = input_picture_ptr->buffer_y + input_picture_ptr->origin_x + input_picture_ptr->origin_y * input_picture_ptr->stride_y;
+        for (uint32_t row = 0; row < input_picture_ptr->height; row++)
+            EB_MEMCPY(pa + row * padded_pic_ptr->stride_y,
+                in + row * input_picture_ptr->stride_y,
+                sizeof(uint8_t)* input_picture_ptr->width);
+
+       generate_padding(
+            &(input_picture_ptr->buffer_y[C_Y]),
+            input_picture_ptr->stride_y,
+            input_picture_ptr->width,
+            input_picture_ptr->height,
+            input_picture_ptr->origin_x,
+            input_picture_ptr->origin_y);
+    }
+#endif
     generate_padding(
         &(padded_pic_ptr->buffer_y[C_Y]),
         padded_pic_ptr->stride_y,
