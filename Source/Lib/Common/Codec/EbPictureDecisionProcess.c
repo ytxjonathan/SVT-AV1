@@ -818,7 +818,21 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->pic_depth_mode = PIC_ALL_DEPTH_MODE;
         else if (picture_control_set_ptr->enc_mode == ENC_M0)
             // Use a single-stage PD if I_SLICE
+#if CHECK_SQ_NO_4_4
+            if (picture_control_set_ptr->slice_type == I_SLICE)
+                picture_control_set_ptr->pic_depth_mode = PIC_ALL_C_DEPTH_MODE;
+            else
+                if (sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128)
+                    picture_control_set_ptr->pic_depth_mode = PIC_SQ_DEPTH_MODE;
+                else
+                    picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
+#elif CHECK_PD_MODE_3
+            picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_3;
+#elif CHECK_PD_MODE_2
+            picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_2;
+#else
             picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_1;
+#endif
         else if (picture_control_set_ptr->enc_mode <= ENC_M2)
             // Use a single-stage PD if I_SLICE
             picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_2;

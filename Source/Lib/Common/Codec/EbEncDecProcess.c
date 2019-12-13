@@ -1972,8 +1972,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (MR_MODE)
         context_ptr->sq_weight = (uint32_t)~0;
     else
+#if CHECK_PD_MODE_3 // to fix; set cost to max for pred depth
+        context_ptr->sq_weight = (uint32_t)~0;
+#else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
-
+#endif
 #endif
 #if !ENHANCED_M0_SETTINGS // lossless change - enable_auto_max_partition is properly derived using pd_pass @ the bottom: previous merge conflict
 #if AUTO_MAX_PARTITION
@@ -2580,6 +2583,65 @@ static void perform_pred_depth_refinement(
     }
 }
 #endif
+
+
+#if CHECK_PD_MODE_3
+static const uint32_t ns_blk_offset[10] = { 0, 1, 3, 25, 5, 8, 11, 14 ,17, 21 };
+static const uint32_t ns_blk_num[10] = { 1, 2, 2, 4, 3, 3, 3, 3, 4, 4 };
+
+static void build_pred_structure(
+    SequenceControlSet  *sequence_control_set_ptr,
+    PictureControlSet   *picture_control_set_ptr,
+    ModeDecisionContext *context_ptr,
+    uint32_t             sb_index) {
+
+    MdcLcuData *resultsPtr = &picture_control_set_ptr->mdc_sb_array[sb_index];
+    uint32_t  blk_index = 0;
+
+    // Reset mdc_sb_array data to defaults; it will be updated based on the predicted blocks (stored in md_cu_arr_nsq)
+    while (blk_index < sequence_control_set_ptr->max_block_cnt) {
+        const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+        resultsPtr->leaf_data_array[blk_index].consider_block = 0;
+        resultsPtr->leaf_data_array[blk_index].split_flag = blk_geom->sq_size > 4 ? EB_TRUE : EB_FALSE;
+        resultsPtr->leaf_data_array[blk_index].refined_split_flag = blk_geom->sq_size > 4 ? EB_TRUE : EB_FALSE;
+        blk_index++;
+    }
+
+    resultsPtr->leaf_count = 0;
+    blk_index = 0;
+
+    uint32_t blk_it = 0;
+    while (blk_it < sequence_control_set_ptr->max_block_cnt) {
+        CodingUnit *cu_ptr = &context_ptr->md_cu_arr_nsq[blk_it];
+        PartitionType part = cu_ptr->part;
+
+        const BlockGeom * blk_geom = context_ptr->blk_geom = get_blk_geom_mds(blk_it);
+        UNUSED(blk_geom);
+
+        if (part != PARTITION_SPLIT && sequence_control_set_ptr->sb_geom[sb_index].block_is_allowed[blk_it]) {
+
+            int32_t offset_d1 = ns_blk_offset[(int32_t)part]; // cu_ptr->best_d1_blk; // TOCKECK
+            int32_t num_d1_block = ns_blk_num[(int32_t)part]; // context_ptr->blk_geom->totns; // TOCKECK
+
+           // for (int32_t d1_itr = blk_it; d1_itr < blk_it + num_d1_block; d1_itr++) {
+            for (int32_t d1_itr = (int32_t)blk_it + offset_d1; d1_itr < (int32_t)blk_it + offset_d1 + num_d1_block; d1_itr++) {
+
+                const BlockGeom * blk_geom = context_ptr->blk_geom = get_blk_geom_mds(d1_itr);
+                CodingUnit *cu_ptr = &context_ptr->md_cu_arr_nsq[d1_itr];
+                resultsPtr->leaf_data_array[d1_itr].consider_block = 1;
+                resultsPtr->leaf_data_array[d1_itr].refined_split_flag = EB_FALSE;
+
+            }
+            blk_it += ns_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][context_ptr->blk_geom->depth];
+        }
+        else
+            blk_it += d1_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][context_ptr->blk_geom->depth];
+    }
+
+}
+#endif
+
+
 /******************************************************
  * EncDec Kernel
  ******************************************************/
@@ -2889,7 +2951,17 @@ void* enc_dec_kernel(void *input_ptr)
                                 context_ptr->md_context);
 
                             // Perform Pred_1 depth refinement - Add blocks to be considered in the next stage(s) of PD based on depth cost.
-                            perform_pred_depth_refinement(
+#if CHECK_PD_MODE_3
+                            if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_3)
+
+                                build_pred_structure(
+                                    sequence_control_set_ptr,
+                                    picture_control_set_ptr,
+                                    context_ptr->md_context,
+                                    sb_index);
+                            else
+#endif
+                                perform_pred_depth_refinement(
                                 sequence_control_set_ptr,
                                 picture_control_set_ptr,
                                 context_ptr->md_context,
