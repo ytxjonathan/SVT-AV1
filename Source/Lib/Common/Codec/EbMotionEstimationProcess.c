@@ -105,6 +105,9 @@ void* set_me_hme_params_oq(
 #if M1_ME_HME_SEARCH_AREA
     hmeMeLevel = ENC_M1;
 #endif
+#if M3_ME_HME_SEARCH_AREA
+    hmeMeLevel = ENC_M3;
+#endif
     // HME/ME default settings
     me_context_ptr->number_hme_search_region_in_width = 2;
     me_context_ptr->number_hme_search_region_in_height = 2;
@@ -420,6 +423,9 @@ void* tf_set_me_hme_params_oq(
     uint8_t  hmeMeLevel = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
 #else
     uint8_t  hmeMeLevel = picture_control_set_ptr->enc_mode; // OMK to be revised after new presets
+#endif
+#if M3_ME_HME_SEARCH_AREA
+    hmeMeLevel = ENC_M3;
 #endif
 
     // HME/ME default settings

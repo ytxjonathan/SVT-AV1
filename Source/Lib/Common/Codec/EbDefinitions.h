@@ -90,6 +90,9 @@ extern "C" {
 #define M3_REF_COUNT_USED                          1
 #define M3_INTERPOLATION_SEARCH_LEVEL              1
 #define M3_MD_STAGE_2_COUNT_TH_S                   1
+#define M3_NSQ_SEARCH_LEVEL                        1
+#define M3_ENABLE_HME_FLAG                         1
+#define M3_ME_HME_SEARCH_AREA                      1
 
 // NOT yet done
 #define M3_BIPRED3X3_INJECTION                     1
