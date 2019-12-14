@@ -217,6 +217,12 @@ void EbSetThreadManagementParameters(EbSvtAv1EncConfiguration *config_ptr)
     uint32_t num_logical_processors = GetNumProcessors();
     // For system with a single processor group(no more than 64 logic processors all together)
     // Affinity of the thread can be set to one or more logical processors
+#if NO_THREAD_PIN
+    if (config_ptr->logical_processors == 1) {
+        group_affinity.Mask = GetAffinityMask(num_logical_processors);
+    }
+    else {
+#endif
     if (num_groups == 1) {
         uint32_t lps = config_ptr->logical_processors == 0 ? num_logical_processors :
             config_ptr->logical_processors < num_logical_processors ? config_ptr->logical_processors : num_logical_processors;
@@ -245,8 +251,17 @@ void EbSetThreadManagementParameters(EbSvtAv1EncConfiguration *config_ptr)
             }
         }
     }
+#if NO_THREAD_PIN
+    }
+#endif
 #elif defined(__linux__)
     uint32_t num_logical_processors = GetNumProcessors();
+#if NO_THREAD_PIN
+    if (config_ptr->logical_processors == 1) {
+        pthread_getaffinity_np(pthread_self(), sizeof(cpu_set_t), &group_affinity);
+    }
+    else {
+#endif
     CPU_ZERO(&group_affinity);
 
     if (num_groups == 1) {
@@ -286,6 +301,9 @@ void EbSetThreadManagementParameters(EbSvtAv1EncConfiguration *config_ptr)
             }
         }
     }
+#if NO_THREAD_PIN
+    }
+#endif
 #else
     UNUSED(config_ptr);
 #endif
@@ -410,6 +428,14 @@ EbErrorType load_default_buffer_configuration_settings(
                     core_count, sequence_control_set_ptr->input_resolution);
     if (return_ppcs == -1)
         return EB_ErrorInsufficientResources;
+
+    if (core_count == SINGLE_CORE_COUNT){
+        encDecSegH  = 1;
+        encDecSegW  = 1;
+        meSegH      = 1;
+        meSegW      = 1;
+    }
+
     uint32_t input_pic = (uint32_t)return_ppcs;
     sequence_control_set_ptr->input_buffer_fifo_init_count = input_pic + SCD_LAD + sequence_control_set_ptr->static_config.look_ahead_distance;
     sequence_control_set_ptr->output_stream_buffer_fifo_init_count =
@@ -453,8 +479,8 @@ EbErrorType load_default_buffer_configuration_settings(
     uint32_t unit_size                                  = 256;
     uint32_t rest_seg_w                                 = MAX((sequence_control_set_ptr->max_input_luma_width /2 + (unit_size >> 1)) / unit_size, 1);
     uint32_t rest_seg_h                                 = MAX((sequence_control_set_ptr->max_input_luma_height/2 + (unit_size >> 1)) / unit_size, 1);
-    sequence_control_set_ptr->rest_segment_column_count = MIN(rest_seg_w,6);
-    sequence_control_set_ptr->rest_segment_row_count    = MIN(rest_seg_h,4);
+    sequence_control_set_ptr->rest_segment_column_count = core_count == SINGLE_CORE_COUNT ? 1 : MIN(rest_seg_w,6);
+    sequence_control_set_ptr->rest_segment_row_count    = core_count == SINGLE_CORE_COUNT ? 1 : MIN(rest_seg_h,4);
 
     sequence_control_set_ptr->tf_segment_column_count = meSegW;//1;//
     sequence_control_set_ptr->tf_segment_row_count =  meSegH;//1;//

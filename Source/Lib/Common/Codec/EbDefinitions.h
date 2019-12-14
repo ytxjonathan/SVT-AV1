@@ -32,6 +32,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define QPS_QPM_OFF                  1
+#define NO_THREAD_PIN                1 // when -lp 1 threads are not pinned to cpu 0
+
 #define TX_SIZE_EARLY_EXIT          1 // Exit TX size search when all coefficients are zero.
 
 #define   SINGLE_CORE_ENCODE   1
