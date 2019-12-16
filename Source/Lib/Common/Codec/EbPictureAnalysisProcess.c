@@ -4382,19 +4382,19 @@ void* picture_analysis_kernel(void *input_ptr)
             downscaled_source_buffer_ctor(&picture_control_set_ptr->enhanced_downscaled_picture_ptr,
                                           input_picture_ptr);
 
-//            save_YUV_to_file("unscaled_pic.yuv",
-//                             input_picture_ptr->buffer_y,
-//                             input_picture_ptr->buffer_cb,
-//                             input_picture_ptr->buffer_cr,
-//                             input_picture_ptr->width,
-//                             input_picture_ptr->height,
-//                             input_picture_ptr->stride_y,
-//                             input_picture_ptr->stride_cb,
-//                             input_picture_ptr->stride_cr,
-//                             input_picture_ptr->origin_y,
-//                             input_picture_ptr->origin_x,
-//                             1,
-//                             1);
+            save_YUV_to_file("unscaled_pic.yuv",
+                             input_picture_ptr->buffer_y,
+                             input_picture_ptr->buffer_cb,
+                             input_picture_ptr->buffer_cr,
+                             input_picture_ptr->width + input_picture_ptr->origin_x*2,
+                             input_picture_ptr->height + input_picture_ptr->origin_y*2,
+                             input_picture_ptr->stride_y,
+                             input_picture_ptr->stride_cb,
+                             input_picture_ptr->stride_cr,
+                             0,
+                             0,
+                             1,
+                             1);
 
             // Test here: if superres is enabled, downsample the souce picture
             av1_resize_and_extend_frame(input_picture_ptr,
@@ -4402,19 +4402,19 @@ void* picture_analysis_kernel(void *input_ptr)
                                         picture_control_set_ptr->enhanced_downscaled_picture_ptr->bit_depth, // bit depth
                                         3); // number of planes
 
-//            save_YUV_to_file("downscaled_pic.yuv",
-//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_y,
-//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_cb,
-//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_cr,
-//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->width,
-//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->height,
-//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->stride_y,
-//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->stride_cb,
-//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->stride_cr,
-//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->origin_y,
-//                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->origin_x,
-//                             1,
-//                             1);
+            save_YUV_to_file("downscaled_pic.yuv",
+                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_y,
+                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_cb,
+                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_cr,
+                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->width + picture_control_set_ptr->enhanced_downscaled_picture_ptr->origin_x*2,
+                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->height + picture_control_set_ptr->enhanced_downscaled_picture_ptr->origin_y*2,
+                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->stride_y,
+                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->stride_cb,
+                             picture_control_set_ptr->enhanced_downscaled_picture_ptr->stride_cr,
+                             0,
+                             0,
+                             1,
+                             1);
 
            // Gathering statistics of input picture, including Variance Calculation, Histogram Bins
             GatheringPictureStatistics(
