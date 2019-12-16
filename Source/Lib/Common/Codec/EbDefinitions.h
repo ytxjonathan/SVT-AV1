@@ -37,6 +37,9 @@ extern "C" {
 #define MULTI_PASS_PD                1 // Multi-Pass Partitioning Depth (Multi-Pass PD) performs multiple PD stages for the same SB towards 1 final Partitioning Structure. As we go from PDn to PDn + 1, the prediction accuracy of the MD feature(s) increases while the number of block(s) decreases
 
 #define MULTI_PASS_PD_COST           1 // Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
+#if MULTI_PASS_PD_COST
+#define POST_PD2_INTER_DEPTH         1
+#endif
 
 #define CHECK_PD_MODE_2              0
 #define CHECK_PD_MODE_3              0

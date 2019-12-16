@@ -23,8 +23,9 @@
 #include "EbSvtAv1ErrorCodes.h"
 #include "EbUtility.h"
 #include "grainSynthesis.h"
-
-
+#if POST_PD2_INTER_DEPTH
+#include "EbFullLoop.h"
+#endif
 #if MULTI_PASS_PD
 #define FC_SKIP_TX_SR_TH025 125 // Fast cost skip tx search threshold.
 #define FC_SKIP_TX_SR_TH010 110 // Fast cost skip tx search threshold.
@@ -2642,6 +2643,78 @@ static void build_pred_structure(
 #endif
 
 
+#if POST_PD2_INTER_DEPTH
+EB_EXTERN EbErrorType perform_d1_d2_block_decision(
+    SequenceControlSet       *sequence_control_set_ptr,
+    PictureControlSet        *picture_control_set_ptr,
+    const MdcLcuData *const   mdcResultTbPtr,
+    SuperBlock               *sb_ptr,
+    uint16_t                  sb_origin_x,
+    uint16_t                  sb_origin_y,
+    uint32_t                  lcuAddr,
+    ModeDecisionContext      *context_ptr)
+{
+    EbErrorType                          return_error = EB_ErrorNone;
+
+    uint32_t                             cuIdx;
+    const EbMdcLeafData *const           leaf_data_array = mdcResultTbPtr->leaf_data_array;
+    context_ptr->sb_ptr = sb_ptr;
+
+    //CU Loop
+    cuIdx = 0;  //index over mdc array
+    uint32_t blk_idx_mds = 0;
+    uint32_t  d1_blocks_accumlated = 0;
+
+    do {
+
+        blk_idx_mds = leaf_data_array[cuIdx].mds_idx;
+
+        const BlockGeom * blk_geom = context_ptr->blk_geom = get_blk_geom_mds(blk_idx_mds);
+        CodingUnit *cu_ptr = context_ptr->cu_ptr = &context_ptr->md_cu_arr_nsq[blk_idx_mds];
+        const EbMdcLeafData * const leafDataPtr = &mdcResultTbPtr->leaf_data_array[cuIdx];
+
+        cu_ptr->av1xd->sb_type = blk_geom->bsize;
+        cu_ptr->mds_idx = blk_idx_mds;
+        context_ptr->md_cu_arr_nsq[blk_idx_mds].mdc_split_flag = (uint16_t)leafDataPtr->split_flag;
+        cu_ptr->split_flag = (uint16_t)leafDataPtr->split_flag; //mdc indicates smallest or non valid CUs with split flag=
+        cu_ptr->qp = context_ptr->qp;
+        cu_ptr->best_d1_blk = blk_idx_mds;
+
+        if (blk_geom->nsi + 1 == blk_geom->totns)
+            d1_non_square_block_decision(context_ptr);
+        else {
+            uint64_t tot_cost = 0;
+            uint32_t first_blk_idx = context_ptr->cu_ptr->mds_idx - (blk_geom->nsi);//index of first block in this partition
+            for (int blk_it = 0; blk_it < blk_geom->nsi + 1; blk_it++)
+                tot_cost += context_ptr->md_local_cu_unit[first_blk_idx + blk_it].cost;
+        }
+
+        d1_blocks_accumlated = blk_geom->shape == PART_N ? 1 : d1_blocks_accumlated + 1;
+
+        if (d1_blocks_accumlated == leafDataPtr->tot_d1_blocks)
+        {
+            uint32_t  lastCuIndex_mds = d2_inter_depth_block_decision(
+                context_ptr,
+                blk_geom->sqi_mds,//input is parent square
+                sb_ptr,
+                lcuAddr,
+                sb_origin_x,
+                sb_origin_y,
+                context_ptr->full_lambda,
+                context_ptr->md_rate_estimation_ptr,
+                picture_control_set_ptr);
+
+        }
+
+        cuIdx++;
+
+    } while (cuIdx < mdcResultTbPtr->leaf_count);// End of CU loop
+
+
+    return return_error;
+}
+#endif
+
 /******************************************************
  * EncDec Kernel
  ******************************************************/
@@ -2949,6 +3022,22 @@ void* enc_dec_kernel(void *input_ptr)
                                 sb_index,
                                 context_ptr->ss_mecontext,
                                 context_ptr->md_context);
+
+#if POST_PD2_INTER_DEPTH
+                            // Reset block cost to default value (i.e. assuming no d1_non_square_block_decision() and d2_inter_depth_block_decision() where block cost might get updated)
+                            for(uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index ++)
+                                context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
+
+                            perform_d1_d2_block_decision(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                mdcPtr,
+                                sb_ptr,
+                                sb_origin_x,
+                                sb_origin_y,
+                                sb_index,
+                                context_ptr->md_context);
+#endif
 
                             // Perform Pred_1 depth refinement - Add blocks to be considered in the next stage(s) of PD based on depth cost.
 #if CHECK_PD_MODE_3
