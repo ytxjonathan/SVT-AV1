@@ -41,6 +41,12 @@ extern "C" {
 #define ENABLE_M2    0 // To get M2  using enc-mode 0
 #define ENABLE_M3    0 // To get M3  using enc-mode 0
 
+// MR to M0 SC
+#define MR_INTERPOLATION_SEARCH_LEVEL             0
+#define MR_MD_STAGE_1_CLASS_PRUNE_TH              0
+#define MR_MD_STAGE_2_CLASS_PRUNE_TH              0
+#define MR_INTRA_PRED_MODE                        0
+
 // macros for SC testing
 #define IBC_MODE_1                                0
 #define ALLOW_INTRABC_0                           0

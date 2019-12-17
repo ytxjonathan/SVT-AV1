@@ -1194,7 +1194,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     }
     else
 #endif
-    if (MR_MODE)
+#if MR_INTERPOLATION_SEARCH_LEVEL
+        if (1)
+#else
+        if (MR_MODE)
+#endif
         context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP;
     else if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
         context_ptr->interpolation_search_level = IT_SEARCH_OFF;
@@ -2241,7 +2245,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if M0_OPT
+#if MR_MD_STAGE_1_CLASS_PRUNE_TH
+    if (1)
+#else
     if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#endif
 #else
     if (MR_MODE || picture_control_set_ptr->enc_mode == ENC_M0 || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
@@ -2332,7 +2340,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if M0_OPT
+#if MR_MD_STAGE_2_CLASS_PRUNE_TH
+    if (1)
+#else
     if (MR_MODE)
+#endif
 #else
     if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #endif
