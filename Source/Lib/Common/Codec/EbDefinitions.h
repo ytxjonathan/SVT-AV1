@@ -2672,7 +2672,7 @@ void(*ErrorHandler)(
 
 #define MAX_NUMBER_OF_TREEBLOCKS_PER_PICTURE       ((MAX_PICTURE_WIDTH_SIZE + BLOCK_SIZE_64 - 1) / BLOCK_SIZE_64) * \
                                                 ((MAX_PICTURE_HEIGHT_SIZE + BLOCK_SIZE_64 - 1) / BLOCK_SIZE_64)
-
+// super-resolution definitions
 #define MIN_SUPERRES_DENOM                          8
 #define MAX_SUPERRES_DENOM                          16
 

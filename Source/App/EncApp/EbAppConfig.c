@@ -699,10 +699,11 @@ void eb_config_ctor(EbConfig *config_ptr)
     config_ptr->altref_nframes                       = 7;
     // --- end: ALTREF_FILTERING_SUPPORT
 
-    // super-resolution support
-    config_ptr->superres_mode                        = 0; // disabled
+    // start - super-resolution support
+    config_ptr->superres_mode                        = SUPERRES_NONE; // disabled
     config_ptr->superres_denom                       = 8; // no scaling
     config_ptr->superres_qthres                      = 43; // random threshold for now
+    // end - super-resolution support
 
     config_ptr->sq_weight                            = 100;
     config_ptr->enable_auto_max_partition             = 1;
