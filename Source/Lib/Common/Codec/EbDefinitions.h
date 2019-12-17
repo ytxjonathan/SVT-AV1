@@ -45,7 +45,7 @@ extern "C" {
 #define CHECK_PD_MODE_3              0
 #define CHECK_SQ_NO_4_4              0
 
-#if CHECK_PD_MODE_3
+#if CHECK_PD_MODE_3 || POST_PD2_INTER_DEPTH
 #define ADD_SUPPORT_TO_SKIP_PART_N   1
 #endif
 
