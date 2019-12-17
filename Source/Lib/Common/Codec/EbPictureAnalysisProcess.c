@@ -21,7 +21,7 @@
 #include "EbComputeMean_SSE2.h"
 #include "EbUtility.h"
 #include "EbCombinedAveragingSAD_Intrinsic_AVX2.h"
-#include "scale.h"
+#include "EbResize.h"
 
 #define VARIANCE_PRECISION        16
 #define  LCU_LOW_VAR_TH                5
