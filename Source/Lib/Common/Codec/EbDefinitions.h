@@ -32,6 +32,12 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define ALTREF_UNPACK                    1 
+
+
+
+
 #define HBD2_COMP                    1 // comp inter-inter HBD2
 #define HBD2_PME                     1 // pme HBD1
 #define HBD2_OBMC                    1 // OBMC semi losseless for HBD1 & 2
