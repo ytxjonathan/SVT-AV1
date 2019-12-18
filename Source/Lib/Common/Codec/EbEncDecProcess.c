@@ -3103,15 +3103,14 @@ void* enc_dec_kernel(void *input_ptr)
                                 sb_index);
 
                             // Add the best PD1 partitioning structure to mdc array 
-                            uint32_t part_struct_max = 1;
+                            uint32_t part_struct_max = 50;
                             for (uint32_t part_struct_index = 0; part_struct_index < part_struct_max; part_struct_index++) {
 
                                 // Reset block cost to default value (i.e. assuming no d1_non_square_block_decision() and d2_inter_depth_block_decision() where block cost might get updated)
                                 for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
                                     context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
-
-                                    const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
 #if JUST_TESTING
+                                    const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
                                     //if (blk_index == 25 || blk_index == 294 || blk_index == 563 || blk_index == 832)
                                     if (blk_index == 0)
                                     //if(blk_geom->bwidth == 8 && blk_geom->bheight == 32)
@@ -3142,21 +3141,55 @@ void* enc_dec_kernel(void *input_ptr)
 
                             }
 
-                            // Generate split flag 
-
-
-                            MdcLcuData *input = &picture_control_set_ptr->enc_dec_mdc_sb_array[sb_index];
-                            MdcLcuData *output = &picture_control_set_ptr->mdc_sb_array[sb_index];
-
-
+                            // Generate split flag(s)
                             for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
-                                const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
-                                output->leaf_data_array[blk_index].consider_block     = input->leaf_data_array[blk_index].consider_block;
-                                output->leaf_data_array[blk_index].split_flag         = input->leaf_data_array[blk_index].split_flag;
-                                output->leaf_data_array[blk_index].refined_split_flag = input->leaf_data_array[blk_index].refined_split_flag;
+                                if (resultsPtr->leaf_data_array[blk_index].consider_block) {
+
+                                    const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+
+                                    // Get current depth
+                                    uint8_t current_depth = get_blk_geom_mds(blk_index)->depth;
+
+                                    // Loop through child block(s) 
+                                    EbBool is_valid_child_present = EB_FALSE;
+                                    uint32_t next_blk_index = blk_index + 1;
+                                    const BlockGeom * next_blk_geom = get_blk_geom_mds(next_blk_index);
+
+                                    while ((next_blk_geom->origin_x < blk_geom->origin_x + blk_geom->sq_size) && (next_blk_geom->origin_y < blk_geom->origin_y + blk_geom->sq_size)) {
+                                        if (resultsPtr->leaf_data_array[next_blk_index].consider_block && next_blk_geom->depth > current_depth) {
+                                            is_valid_child_present = EB_TRUE;
+                                        }
+                                        next_blk_index++;
+                                        next_blk_geom = get_blk_geom_mds(next_blk_index);
+                                    }
+
+                                    if (is_valid_child_present == EB_FALSE) {
+                                        while (get_blk_geom_mds(blk_index)->depth == current_depth) {
+                                            resultsPtr->leaf_data_array[blk_index].refined_split_flag = EB_FALSE;
+                                            blk_index++;
+                                        }
+                                    }
+                                    else {
+                                        while (get_blk_geom_mds(blk_index)->depth == current_depth) {
+                                            resultsPtr->leaf_data_array[blk_index].refined_split_flag = EB_TRUE;
+                                            blk_index++;
+                                        }
+                                    }
+                                }
                             }
 
+                            {
+                                MdcLcuData *input = &picture_control_set_ptr->enc_dec_mdc_sb_array[sb_index];
+                                MdcLcuData *output = &picture_control_set_ptr->mdc_sb_array[sb_index];
 
+
+                                for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                                    const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+                                    output->leaf_data_array[blk_index].consider_block = input->leaf_data_array[blk_index].consider_block;
+                                    output->leaf_data_array[blk_index].split_flag = input->leaf_data_array[blk_index].split_flag;
+                                    output->leaf_data_array[blk_index].refined_split_flag = input->leaf_data_array[blk_index].refined_split_flag;
+                                }
+                            }
 
 
 

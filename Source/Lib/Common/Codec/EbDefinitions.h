@@ -39,7 +39,7 @@ extern "C" {
 #define MULTI_PASS_PD_COST           1 // Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
 #if MULTI_PASS_PD_COST
 #define POST_PD2_INTER_DEPTH         1
-#define JUST_TESTING                 1
+#define JUST_TESTING                 0
 #endif
 
 #define CHECK_PD_MODE_2              0

@@ -9595,10 +9595,18 @@ EB_EXTERN EbErrorType mode_decision_sb(
                     bestcandidate_buffers);
 #if JUST_TESTING
                 if (context_ptr->pd_pass == PD_PASS_1) {
-                    if (context_ptr->blk_geom->bheight == 16 && context_ptr->blk_geom->bwidth == 32)
+                    if (context_ptr->blk_geom->bheight == 16 && context_ptr->blk_geom->bwidth == 4)
                         context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = 0;
                     else
                         context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = MAX_MODE_COST;
+                }
+                else if (context_ptr->pd_pass == PD_PASS_2) {
+                    if (picture_control_set_ptr->slice_type != I_SLICE) {
+                        if (context_ptr->blk_geom->bheight == 64 && context_ptr->blk_geom->bwidth == 64)
+                            context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = rand() * 64;
+                        else
+                            context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = rand();
+                    }
                 }
 #endif
             }
