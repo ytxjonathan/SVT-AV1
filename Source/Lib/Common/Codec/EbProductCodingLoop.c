@@ -8959,6 +8959,9 @@ void md_encode_block(
     else
     {
         context_ptr->md_local_cu_unit[cu_ptr->mds_idx].cost = MAX_MODE_COST;
+#if MULTI_PASS_PD_COST
+        context_ptr->md_local_cu_unit[cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
+#endif
         cu_ptr->prediction_unit_array->ref_frame_type = 0;
     }
 }
@@ -9646,24 +9649,51 @@ EB_EXTERN EbErrorType mode_decision_sb(
             }
 #if AUTO_MAX_PARTITION
             else if (auto_max_partition_block_skip) {
+#if MULTI_PASS_PD_COST
+                if (context_ptr->blk_geom->shape != PART_N) {
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = (MAX_MODE_COST >> 4);
+                }
+                else {
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 10);
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = (MAX_MODE_COST >> 10);
+                }
+#else
                 if (context_ptr->blk_geom->shape != PART_N)
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
                 else
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 10);
+#endif
             }
 #endif
             else if (skip_next_sq) {
+#if MULTI_PASS_PD_COST
                 context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 10);
+                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = (MAX_MODE_COST >> 10);
+#else
+                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 10);
+#endif
             }
             else {
                 // If the block is out of the boundaries, md is not performed.
                 // - For square blocks, since the blocks can be further splitted, they are considered in d2_inter_depth_block_decision with cost of zero.
                 // - For non square blocks, since they can not be splitted further the cost is set to a large value (MAX_MODE_COST >> 4) to make sure they are not selected.
                 //   The value is set to MAX_MODE_COST >> 4 to make sure there is not overflow when adding costs.
+#if MULTI_PASS_PD_COST
+                if (context_ptr->blk_geom->shape != PART_N) {
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = (MAX_MODE_COST >> 4);
+                }
+                else {
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = 0;
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = 0;
+                }
+#else
                 if (context_ptr->blk_geom->shape != PART_N)
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
                 else
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = 0;
+#endif
             }
 #if FIX_SKIP_REDUNDANT_BLOCK
         }

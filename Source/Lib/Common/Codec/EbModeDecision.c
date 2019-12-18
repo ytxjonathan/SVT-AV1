@@ -6300,7 +6300,9 @@ uint32_t product_full_mode_decision(
 
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].cost = *(buffer_ptr_array[lowestCostIndex]->full_cost_ptr);
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].cost = (context_ptr->md_local_cu_unit[cu_ptr->mds_idx].cost - buffer_ptr_array[lowestCostIndex]->candidate_ptr->chroma_distortion) + buffer_ptr_array[lowestCostIndex]->candidate_ptr->chroma_distortion_inter_depth;
-
+#if MULTI_PASS_PD_COST
+    context_ptr->md_local_cu_unit[cu_ptr->mds_idx].default_cost = *(buffer_ptr_array[lowestCostIndex]->full_cost_ptr);
+#endif
     if (candidate_ptr->type == INTRA_MODE)
         context_ptr->md_local_cu_unit[cu_ptr->mds_idx].cost_luma = buffer_ptr_array[lowestCostIndex]->full_cost_luma;
 
