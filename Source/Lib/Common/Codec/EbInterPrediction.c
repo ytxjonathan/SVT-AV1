@@ -7176,9 +7176,11 @@ void interpolation_filter_search(
     int32_t i;
     int32_t tmp_rate;
     int64_t tmp_dist;
-
+#if OMARK_HBD0_IFS
+    uint32_t full_lambda_divided = hbd_mode_decision ? md_context_ptr->full_lambda >> (2 * (bit_depth - 8)) : md_context_ptr->full_lambda ;
+#else
     uint32_t full_lambda_8b = md_context_ptr->full_lambda >> (2 * (bit_depth - 8));
-
+#endif
     InterpFilter assign_filter = SWITCHABLE;
 
     if (cm->interp_filter != SWITCHABLE)
@@ -7243,9 +7245,11 @@ void interpolation_filter_search(
         &tmp_rate,
         &tmp_dist,
         hbd_mode_decision ? EB_10BIT : EB_8BIT);
-
+#if OMARK_HBD0_IFS
+    rd = RDCOST(full_lambda_divided, switchable_rate + tmp_rate, tmp_dist);
+#else
     rd = RDCOST(full_lambda_8b, switchable_rate + tmp_rate, tmp_dist);
-
+#endif
     if (assign_filter == SWITCHABLE) {
         // do interp_filter search
         if (av1_is_interp_needed(candidate_buffer_ptr, picture_control_set_ptr, md_context_ptr->blk_geom->bsize) /*&& av1_is_interp_search_needed(xd)*/) {
@@ -7325,8 +7329,11 @@ void interpolation_filter_search(
                         &tmp_rate,
                         &tmp_dist,
                         hbd_mode_decision ? EB_10BIT : EB_8BIT);
+#if OMARK_HBD0_IFS
+                    tmp_rd = RDCOST(full_lambda_divided, tmp_rs + tmp_rate, tmp_dist);
+#else
                     tmp_rd = RDCOST(full_lambda_8b, tmp_rs + tmp_rate, tmp_dist);
-
+#endif
                     if (tmp_rd < rd) {
                         best_dual_mode = i;
                         rd = tmp_rd;
@@ -7398,8 +7405,11 @@ void interpolation_filter_search(
                         &tmp_rate,
                         &tmp_dist,
                         hbd_mode_decision ? EB_10BIT : EB_8BIT);
+#if OMARK_HBD0_IFS
+                    tmp_rd = RDCOST(full_lambda_divided, tmp_rs + tmp_rate, tmp_dist);
+#else
                     tmp_rd = RDCOST(full_lambda_8b, tmp_rs + tmp_rate, tmp_dist);
-
+#endif
                     if (tmp_rd < rd) {
                         rd = tmp_rd;
                         switchable_rate = tmp_rs;
@@ -7474,8 +7484,11 @@ void interpolation_filter_search(
                         &tmp_rate,
                         &tmp_dist,
                         hbd_mode_decision ? EB_10BIT : EB_8BIT);
+#if OMARK_HBD0_IFS
+                    tmp_rd = RDCOST(full_lambda_divided, tmp_rs + tmp_rate, tmp_dist);
+#else
                     tmp_rd = RDCOST(full_lambda_8b, tmp_rs + tmp_rate, tmp_dist);
-
+#endif
                     if (tmp_rd < rd) {
                         rd = tmp_rd;
                         switchable_rate = tmp_rs;

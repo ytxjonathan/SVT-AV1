@@ -1461,7 +1461,11 @@ void finish_cdef_search(
         &full_chroma_lambda,
         (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
         qp_index,
+#if OMARK_HBD1_CDEF && OMARK_LAMBDA
+        EB_FALSE);
+#else
         picture_control_set_ptr->hbd_mode_decision);
+#endif
     lambda = full_lambda;
 #else
     quantizer =

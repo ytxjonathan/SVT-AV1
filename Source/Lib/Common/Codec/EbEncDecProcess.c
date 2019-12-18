@@ -275,7 +275,11 @@ static void ResetEncDec(
         &context_ptr->full_chroma_lambda,
         (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
         context_ptr->qp_index,
+#if OMARK_HBD0_ED && OMARK_LAMBDA
+        EB_TRUE);
+#else
         context_ptr->md_context->hbd_mode_decision);
+#endif
     // Reset MD rate Estimation table to initial values by copying from md_rate_estimation_array
     if (context_ptr->is_md_rate_estimation_ptr_owner) {
         EB_FREE(context_ptr->md_rate_estimation_ptr);
@@ -314,8 +318,11 @@ static void EncDecConfigureLcu(
         &context_ptr->full_chroma_lambda,
         (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
         context_ptr->qp_index,
+#if OMARK_HBD0_ED && OMARK_LAMBDA
+        EB_TRUE);
+#else
         context_ptr->md_context->hbd_mode_decision);
-
+#endif
     return;
 }
 
