@@ -1756,7 +1756,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->redundant_blk = EB_FALSE;
     else if (context_ptr->pd_pass == PD_PASS_1)
+#if JUST_TESTING
+        context_ptr->redundant_blk = EB_FALSE;
+#else
         context_ptr->redundant_blk = EB_TRUE;
+#endif
     else
 #endif
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
@@ -2555,7 +2559,10 @@ static void perform_pred_depth_refinement(
                                 e_depth = 1;
                             }
                     }
-
+#if JUST_TESTING
+                    s_depth = -5;
+                    e_depth =  5;
+#endif
                     // Add current pred depth block(s)
                     for (block_1d_idx = 0; block_1d_idx < tot_d1_blocks; block_1d_idx++) {
                         resultsPtr->leaf_data_array[blk_index + block_1d_idx].consider_block = 1;
@@ -2648,7 +2655,7 @@ static void add_part_struct_to_mdc_array(
     ModeDecisionContext *context_ptr,
     uint32_t             sb_index) {
 
-    MdcLcuData *resultsPtr = &picture_control_set_ptr->mdc_sb_array[sb_index];
+    MdcLcuData *resultsPtr = &picture_control_set_ptr->enc_dec_mdc_sb_array[sb_index];
     resultsPtr->leaf_count = 0;
 
 
@@ -2728,22 +2735,11 @@ EB_EXTERN EbErrorType perform_d1_d2_block_decision(
         cu_ptr->qp = context_ptr->qp;
         cu_ptr->best_d1_blk = blk_idx_mds;
 
-        if (blk_geom->nsi + 1 == blk_geom->totns)
-#if MULTI_PASS_PD
+        if (blk_geom->nsi + 1 == blk_geom->totns) {
             d1_non_square_block_decision(context_ptr, d1_block_itr);
-#else
-            d1_non_square_block_decision(context_ptr);
-#endif
-#if ADD_SUPPORT_TO_SKIP_PART_N
-        else if (d1_block_itr) {
-#else
-        else {
-#endif
-            uint64_t tot_cost = 0;
-            uint32_t first_blk_idx = context_ptr->cu_ptr->mds_idx - (blk_geom->nsi);//index of first block in this partition
-            for (int blk_it = 0; blk_it < blk_geom->nsi + 1; blk_it++)
-                tot_cost += context_ptr->md_local_cu_unit[first_blk_idx + blk_it].cost;
+            d1_block_itr++;
         }
+
 #if ADD_SUPPORT_TO_SKIP_PART_N
         d1_blocks_accumlated = d1_first_block == 1 ? 1 : d1_blocks_accumlated + 1;
 #else
@@ -3090,7 +3086,7 @@ void* enc_dec_kernel(void *input_ptr)
                                 context_ptr->md_context);
 
 #if POST_PD2_INTER_DEPTH             
-                            MdcLcuData *resultsPtr = &picture_control_set_ptr->mdc_sb_array[sb_index];
+                            MdcLcuData *resultsPtr = &picture_control_set_ptr->enc_dec_mdc_sb_array[sb_index];
                             // Reset mdc_sb_array (beyond this point Pred_0 depth refinement block indices are not any more available)
                             for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
                                 const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
@@ -3113,6 +3109,16 @@ void* enc_dec_kernel(void *input_ptr)
                                 // Reset block cost to default value (i.e. assuming no d1_non_square_block_decision() and d2_inter_depth_block_decision() where block cost might get updated)
                                 for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
                                     context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
+
+                                    const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+#if JUST_TESTING
+                                    //if (blk_index == 25 || blk_index == 294 || blk_index == 563 || blk_index == 832)
+                                    if (blk_index == 0)
+                                    //if(blk_geom->bwidth == 8 && blk_geom->bheight == 32)
+                                        context_ptr->md_context->md_local_cu_unit[blk_index].cost = 0;
+                                    else
+                                        context_ptr->md_context->md_local_cu_unit[blk_index].cost = MAX_MODE_COST;
+#endif
                                 }
 
                                 // Perform d1 and d2 block decision
@@ -3135,6 +3141,25 @@ void* enc_dec_kernel(void *input_ptr)
                                     sb_index);
 
                             }
+
+                            // Generate split flag 
+
+
+                            MdcLcuData *input = &picture_control_set_ptr->enc_dec_mdc_sb_array[sb_index];
+                            MdcLcuData *output = &picture_control_set_ptr->mdc_sb_array[sb_index];
+
+
+                            for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                                const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+                                output->leaf_data_array[blk_index].consider_block     = input->leaf_data_array[blk_index].consider_block;
+                                output->leaf_data_array[blk_index].split_flag         = input->leaf_data_array[blk_index].split_flag;
+                                output->leaf_data_array[blk_index].refined_split_flag = input->leaf_data_array[blk_index].refined_split_flag;
+                            }
+
+
+
+
+
 #else
 
                             // Perform Pred_1 depth refinement - Add blocks to be considered in the next stage(s) of PD based on depth cost.
