@@ -2915,7 +2915,7 @@ static void add_part_struct_to_mdc_array(
                 resultsPtr->leaf_data_array[d1_itr].consider_block = 1;
                 resultsPtr->leaf_data_array[d1_itr].refined_split_flag = EB_FALSE;
 
-                // Set cost to MAX to do not get selected @ next d1/d2 block decision (if any) 
+                // Set cost to MAX to do not get selected @ next d1/d2 block decision (if any)
                 context_ptr->md_local_cu_unit[d1_itr].default_cost = MAX_MODE_COST;
 
             }
@@ -3304,7 +3304,7 @@ void* enc_dec_kernel(void *input_ptr)
                                 sb_origin_y,
                                 sb_index,
                                 context_ptr->md_context);
-#if POST_PD2_INTER_DEPTH             
+#if POST_PD2_INTER_DEPTH
                             MdcLcuData *resultsPtr = &picture_control_set_ptr->enc_dec_mdc_sb_array[sb_index];
                             // Reset mdc_sb_array (beyond this point Pred_0 depth refinement block indices are not any more available)
                             for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
@@ -3314,14 +3314,14 @@ void* enc_dec_kernel(void *input_ptr)
                                 resultsPtr->leaf_data_array[blk_index].refined_split_flag = blk_geom->sq_size > 4 ? EB_TRUE : EB_FALSE;
                             }
 
-                            // Add the best PD1 partitioning structure to mdc array 
+                            // Add the best PD1 partitioning structure to mdc array
                             add_part_struct_to_mdc_array(
                                 sequence_control_set_ptr,
                                 picture_control_set_ptr,
                                 context_ptr->md_context,
                                 sb_index);
 
-                            // Add the best PD1 partitioning structure to mdc array 
+                            // Add the best PD1 partitioning structure to mdc array
                             uint32_t part_struct_max = NUMBER_DISTINCT_PART_STRUCT;
                             for (uint32_t part_struct_index = 0; part_struct_index < part_struct_max; part_struct_index++) {
 
@@ -3342,7 +3342,7 @@ void* enc_dec_kernel(void *input_ptr)
                                     context_ptr->md_context);
 
 
-                                // Add partitioning structure to mdc array 
+                                // Add partitioning structure to mdc array
                                 add_part_struct_to_mdc_array(
                                     sequence_control_set_ptr,
                                     picture_control_set_ptr,
@@ -3360,7 +3360,7 @@ void* enc_dec_kernel(void *input_ptr)
                                     // Get current depth
                                     uint8_t current_depth = get_blk_geom_mds(blk_index)->depth;
 
-                                    // Loop through child block(s) 
+                                    // Loop through child block(s)
                                     EbBool is_valid_child_present = EB_FALSE;
                                     uint32_t next_blk_index = blk_index + 1;
                                     const BlockGeom * next_blk_geom = get_blk_geom_mds(next_blk_index);

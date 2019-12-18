@@ -228,7 +228,7 @@ void picture_control_set_dctor(EbPtr p)
        EB_FREE_ARRAY(obj->tile_tok[0][0]);
 #endif
     EB_FREE_ARRAY(obj->mdc_sb_array);
-#if POST_PD2_INTER_DEPTH   
+#if POST_PD2_INTER_DEPTH
     EB_FREE_ARRAY(obj->enc_dec_mdc_sb_array);
 #endif
     EB_FREE_ARRAY(obj->qp_array);
@@ -467,7 +467,7 @@ EbErrorType picture_control_set_ctor(
 #endif
     // Mode Decision Control config
     EB_MALLOC_ARRAY(object_ptr->mdc_sb_array, object_ptr->sb_total_count);
-#if POST_PD2_INTER_DEPTH   
+#if POST_PD2_INTER_DEPTH
     EB_MALLOC_ARRAY(object_ptr->enc_dec_mdc_sb_array, object_ptr->sb_total_count);
 #endif
     object_ptr->qp_array_stride = (uint16_t)((initDataPtr->picture_width + MIN_BLOCK_SIZE - 1) / MIN_BLOCK_SIZE);
