@@ -504,7 +504,9 @@ void reset_mode_decision(
     uint32_t                   segment_index)
 {
     FrameHeader *frm_hdr = &picture_control_set_ptr->parent_pcs_ptr->frm_hdr;
-
+#if PICT_SWITCH
+    context_ptr->hbd_mode_decision = picture_control_set_ptr->hbd_mode_decision;
+#endif
     // QP
 #if ADD_DELTA_QP_SUPPORT
     uint16_t picture_qp = picture_control_set_ptr->parent_pcs_ptr->frm_hdr.quantization_params.base_q_idx;

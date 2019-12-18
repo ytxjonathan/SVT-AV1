@@ -45,6 +45,10 @@ extern "C" {
 #define OMARK_HBD0_RDOQ             1 // 6. fix RDOQ lambda for hbd0
 #define RDQO_ON_HBD0                1 // 6. turn ON RDOQ for hbd0
 
+#define PICT_SWITCH                 1  // Fix picture switching
+#define PIC_SWITCH_NREF                   0 // hbd0 in non-ref
+#define PIC_SWITCH_NBASE                  0 // hbd0 in non-base
+#define PIC_SWITCH_NISLICE                0 // hbd0 in non-i
 
 
 
