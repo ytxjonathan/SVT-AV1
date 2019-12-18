@@ -32,6 +32,22 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+                                      // 0. tunr OFF AVX512
+#define FIXED_QP_M                  1 // 1. core only
+#define OMARK_LAMBDA                1 // 2. fix lambda calculation
+
+#define OMARK_HBD1_CDEF             1 // 3. fix CDEF lambda for hbd1/2
+
+#define OMARK_HBD0_ED               1 // 4. fix ED lambda for hbd0
+#define OMARK_HBD0_IFS              1 // 5. fix IFS lambda for hbd0
+#define OMARK_HBD0_MD               1 // 5. fix MD lambda for hbd0
+#define OMARK_HBD0_RDOQ             1 // 6. fix RDOQ lambda for hbd0
+#define RDQO_ON_HBD0                1 // 6. turn ON RDOQ for hbd0
+
+
+
+
 #define TX_SIZE_EARLY_EXIT          1 // Exit TX size search when all coefficients are zero.
 
 #define ENHANCED_M0_SETTINGS         1 // Updated M0 settings(optimized independent chroma search for all layers, conservative coeff - based NSQ cands reduction, shut coeff - based skip tx size search, warped for all layers, SUB - SAD as ME search method for non - SC only)
@@ -97,7 +113,7 @@ extern "C" {
 #define GM_OPT                       1 // Perform global motion estimation on a down-sampled version of the input picture
 
 #ifndef NON_AVX512_SUPPORT
-//#define NON_AVX512_SUPPORT
+#define NON_AVX512_SUPPORT
 #endif
 
 #define MR_MODE                           0

@@ -572,6 +572,9 @@ static void Av1EncodeLoop(
             context_ptr->md_context->luma_dc_sign_context,
             cu_ptr->pred_mode,
             cu_ptr->av1xd->use_intrabc,
+#if OMARK_HBD0_RDOQ
+            context_ptr->full_lambda,
+#endif
             EB_TRUE);
 
         if (context_ptr->md_skip_blk) {
@@ -764,6 +767,9 @@ static void Av1EncodeLoop(
             context_ptr->md_context->cb_dc_sign_context,
             cu_ptr->pred_mode,
             cu_ptr->av1xd->use_intrabc,
+#if OMARK_HBD0_RDOQ
+            context_ptr->full_lambda,
+#endif
             EB_TRUE);
 
         if (context_ptr->md_skip_blk) {
@@ -810,6 +816,9 @@ static void Av1EncodeLoop(
             context_ptr->md_context->cr_dc_sign_context,
             cu_ptr->pred_mode,
             cu_ptr->av1xd->use_intrabc,
+#if OMARK_HBD0_RDOQ
+            context_ptr->full_lambda,
+#endif
             EB_TRUE);
         if (context_ptr->md_skip_blk) {
             count_non_zero_coeffs[2] = 0;
@@ -982,6 +991,9 @@ static void Av1EncodeLoop16bit(
                 context_ptr->md_context->luma_dc_sign_context,
                 cu_ptr->pred_mode,
                 cu_ptr->av1xd->use_intrabc,
+#if OMARK_HBD0_RDOQ
+                context_ptr->full_lambda,
+#endif
                 EB_TRUE);
             if (context_ptr->md_skip_blk) {
                 count_non_zero_coeffs[0] = 0;
@@ -1137,6 +1149,9 @@ static void Av1EncodeLoop16bit(
                 context_ptr->md_context->cb_dc_sign_context,
                 cu_ptr->pred_mode,
                 cu_ptr->av1xd->use_intrabc,
+#if OMARK_HBD0_RDOQ
+                context_ptr->full_lambda,
+#endif
                 EB_TRUE);
 
             if (context_ptr->md_skip_blk) {
@@ -1184,6 +1199,9 @@ static void Av1EncodeLoop16bit(
                 context_ptr->md_context->cr_dc_sign_context,
                 cu_ptr->pred_mode,
                 cu_ptr->av1xd->use_intrabc,
+#if OMARK_HBD0_RDOQ
+                context_ptr->full_lambda,
+#endif
                 EB_TRUE);
             if (context_ptr->md_skip_blk) {
                 count_non_zero_coeffs[2] = 0;

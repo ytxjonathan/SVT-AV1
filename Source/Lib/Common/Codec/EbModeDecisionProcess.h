@@ -427,8 +427,11 @@ extern "C" {
         uint32_t                    *full_chroma_lambda,
         uint8_t                      bit_depth,
         uint16_t                     qp_index,
+#if OMARK_LAMBDA
+        EbBool                       multiply_lambda);
+#else
         EbBool                       hbd_mode_decision);
-
+#endif
     typedef void(*EbLambdaAssignFunc)(
         uint32_t                    *fast_lambda,
         uint32_t                    *full_lambda,

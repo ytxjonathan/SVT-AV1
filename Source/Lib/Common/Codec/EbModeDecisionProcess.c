@@ -450,7 +450,11 @@ void Av1lambdaAssign(
     uint32_t                    *full_chroma_lambda,
     uint8_t                      bit_depth,
     uint16_t                     qp_index,
+#if OMARK_LAMBDA
+    EbBool                       multiply_lambda)
+#else
     EbBool                       hbd_mode_decision)
+#endif
 {
     if (bit_depth == 8) {
         *full_lambda = av1_lambda_mode_decision8_bit_sse[qp_index];
@@ -459,7 +463,11 @@ void Av1lambdaAssign(
     else if (bit_depth == 10) {
         *full_lambda = av1lambda_mode_decision10_bit_sse[qp_index];
         *fast_lambda = av1lambda_mode_decision10_bit_sad[qp_index];
+#if OMARK_LAMBDA
+        if (multiply_lambda) {
+#else
         if (hbd_mode_decision) {
+#endif
             *full_lambda *= 16;
             *fast_lambda *= 4;
         }
@@ -513,9 +521,17 @@ void reset_mode_decision(
         &context_ptr->full_lambda,
         &context_ptr->fast_chroma_lambda,
         &context_ptr->full_chroma_lambda,
+#if OMARK_HBD0_MD
+        context_ptr->hbd_mode_decision? EB_10BIT : EB_8BIT,
+#else
         (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
+#endif
         context_ptr->qp_index,
+#if OMARK_LAMBDA && OMARK_HBD0_MD
+        EB_TRUE);
+#else
         context_ptr->hbd_mode_decision);
+#endif
     // Reset MD rate Estimation table to initial values by copying from md_rate_estimation_array
     if (context_ptr->is_md_rate_estimation_ptr_owner) {
         context_ptr->is_md_rate_estimation_ptr_owner = EB_FALSE;
@@ -632,9 +648,17 @@ void mode_decision_configure_lcu(
         &context_ptr->full_lambda,
         &context_ptr->fast_chroma_lambda,
         &context_ptr->full_chroma_lambda,
+#if OMARK_HBD0_MD
+        context_ptr->hbd_mode_decision? EB_10BIT : EB_8BIT,
+#else
         (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
+#endif
         context_ptr->qp_index,
+#if OMARK_LAMBDA && OMARK_HBD0_MD
+        EB_TRUE);
+#else
         context_ptr->hbd_mode_decision);
+#endif
 
     return;
 }

@@ -4546,6 +4546,9 @@ void tx_type_search(
             context_ptr->luma_dc_sign_context,
             candidate_buffer->candidate_ptr->pred_mode,
             EB_FALSE,
+#if OMARK_HBD0_RDOQ
+            context_ptr->full_lambda,
+#endif
             EB_FALSE);
 
         candidate_buffer->candidate_ptr->quantized_dc[0][context_ptr->txb_itr] = (((int32_t*)candidate_buffer->residual_quant_coeff_ptr->buffer_y)[context_ptr->txb_1d_offset]);

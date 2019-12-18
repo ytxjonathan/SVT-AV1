@@ -1325,6 +1325,9 @@ void eb_av1_optimize_b(
     TxType                  tx_type,
     EbBool                  is_inter,
     uint32_t                bit_increment,
+#if OMARK_HBD0_RDOQ
+    uint32_t                lambda,
+#endif
     int                     plane)
 
 {
@@ -1365,7 +1368,11 @@ void eb_av1_optimize_b(
                 ? (3 - sb_energy_level)
                 : 0));
     const int64_t rdmult =
+#if OMARK_HBD0_RDOQ
+        (((int64_t)lambda *
+#else
         (((int64_t)md_context->full_lambda *
+#endif
         plane_rd_mult[is_inter][plane_type]) +
             2) >>
         rshift;
@@ -1511,6 +1518,9 @@ int32_t av1_quantize_inv_quantize(
     int16_t                      dc_sign_context,     // Hsan (Trellis): derived @ MD (what about re-generating @ EP ?)
     PredictionMode               pred_mode,
     EbBool                       is_intra_bc,
+#if OMARK_HBD0_RDOQ
+    uint32_t                     lambda,
+#endif
     EbBool                       is_encode_pass)
 {
     (void)candidate_buffer;
@@ -1613,9 +1623,11 @@ int32_t av1_quantize_inv_quantize(
     SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
     if (sequence_control_set_ptr->static_config.enable_rdoq == DEFAULT) {
         perform_rdoq = perform_rdoq && (EbBool) sequence_control_set_ptr->static_config.enable_rdoq;
+#if !RDQO_ON_HBD0
         if (sequence_control_set_ptr->static_config.encoder_bit_depth > 8
             && picture_control_set_ptr->hbd_mode_decision==0 )
             perform_rdoq = EB_FALSE;
+#endif
     } else
         perform_rdoq = (EbBool)sequence_control_set_ptr->static_config.enable_rdoq;
 
@@ -1695,6 +1707,9 @@ int32_t av1_quantize_inv_quantize(
                 tx_type,
                 is_inter,
                 bit_increment,
+#if OMARK_HBD0_RDOQ
+                lambda,
+#endif
                 (component_type == COMPONENT_LUMA) ? 0 : 1);
         }
     }
@@ -1814,6 +1829,9 @@ void product_full_loop(
             context_ptr->luma_dc_sign_context,
             candidate_buffer->candidate_ptr->pred_mode,
             candidate_buffer->candidate_ptr->use_intrabc,
+#if OMARK_HBD0_RDOQ
+            context_ptr->full_lambda,
+#endif
             EB_FALSE);
 
         if (context_ptr->spatial_sse_full_loop) {
@@ -2141,6 +2159,9 @@ void product_full_loop_tx_search(
                 context_ptr->luma_dc_sign_context,
                 candidate_buffer->candidate_ptr->pred_mode,
                 candidate_buffer->candidate_ptr->use_intrabc,
+#if OMARK_HBD0_RDOQ
+                context_ptr->full_lambda,
+#endif
                 EB_FALSE);
 
             //tx_type not equal to DCT_DCT and no coeff is not an acceptable option in AV1.
@@ -2405,6 +2426,9 @@ void encode_pass_tx_search(
             0,
             0,
             cu_ptr->av1xd->use_intrabc,
+#if OMARK_HBD0_RDOQ
+            context_ptr->full_lambda,
+#endif
             EB_FALSE);
 
 
@@ -2601,6 +2625,9 @@ void encode_pass_tx_search_hbd(
             0,
             0,
             cu_ptr->av1xd->use_intrabc,
+#if OMARK_HBD0_RDOQ
+            context_ptr->full_lambda,
+#endif
             EB_FALSE);
 
 
@@ -2863,6 +2890,9 @@ void full_loop_r(
                 0,
 #endif
                 candidate_buffer->candidate_ptr->use_intrabc,
+#if OMARK_HBD0_RDOQ
+                context_ptr->full_lambda,
+#endif
                 EB_FALSE);
 
             if (context_ptr->spatial_sse_full_loop) {
@@ -2951,6 +2981,9 @@ void full_loop_r(
                 0,
 #endif
                 candidate_buffer->candidate_ptr->use_intrabc,
+#if OMARK_HBD0_RDOQ
+                context_ptr->full_lambda,
+#endif
                 EB_FALSE);
 
             if (context_ptr->spatial_sse_full_loop) {
