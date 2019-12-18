@@ -609,6 +609,9 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
             context_ptr->me_context_ptr->hme_search_method = SUB_SAD_SEARCH;
     else
         context_ptr->me_context_ptr->hme_search_method = FULL_SAD_SEARCH;
+#if SC_TF_HME_SEARCH_SUB_SAD
+    context_ptr->me_context_ptr->hme_search_method = SUB_SAD_SEARCH;
+#endif
     // ME Search Method
     if (picture_control_set_ptr->sc_content_detected)
         if (enc_mode <= ENC_M3)
@@ -623,6 +626,10 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
 #endif
         FULL_SAD_SEARCH :
         SUB_SAD_SEARCH;
+
+#if SC_TF_ME_SEARCH_SUB_SAD
+        context_ptr->me_context_ptr->me_search_method = SUB_SAD_SEARCH;
+#endif
     return return_error;
 };
 #else

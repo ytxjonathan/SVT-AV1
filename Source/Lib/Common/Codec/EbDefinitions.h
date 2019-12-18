@@ -45,9 +45,29 @@ extern "C" {
 #define MR_INTERPOLATION_SEARCH_LEVEL             0
 #define MR_MD_STAGE_1_CLASS_PRUNE_TH              0
 #define MR_MD_STAGE_2_CLASS_PRUNE_TH              0
+
 #define MR_INTRA_PRED_MODE                        0
 
 // macros for SC testing
+#define SC_HME_SEARCH_SUB_SAD                     0
+#define SC_ME_SEARCH_SUB_SAD                      0
+#define ENABLE_FILTER_INTRA_OFF                   0
+#define PIC_OBMC_MODE_2                           0
+#define SC_EDGE_BASED_SKIP_ANGLE_INTRA_0          0
+#define PREDICTIVE_ME_LEVEL_3                     0
+
+#define SC_BIPRED3X3_0                            0
+#define SC_COMPOUND_MODE_0                        0
+
+#define SC_COMBINE_CLASS12_1                      0
+
+#define SC_FRAC_SEARCH_METHOD_SUB_SAD             0
+#define SC_FRAC_SEARCH_MODEL_1                    0
+#define SC_PRUNE_UNIPRED_AT_ME_1                  0
+
+#define SC_TF_ME_SEARCH_SUB_SAD                   0
+#define SC_TF_HME_SEARCH_SUB_SAD                  0
+
 #define IBC_MODE_1                                0
 #define ALLOW_INTRABC_0                           0
 #define ALLOW_INTRABC_1                           0
@@ -69,9 +89,7 @@ extern "C" {
 #define SC_ATB_MODE_0                             0
 #define SC_M3_INTRA_PRED_MODE                     0
 #define SC_COEFF_BASED_SKIP_ATB_1                 0
-#define SC_COMPOUND_MODE_0                        0
 #define SC_COMPOUND_MODE_1                        0
-#define SC_PRUNE_UNIPRED_AT_ME_1                  0
 #define GM_LEVEL_DOWN                             0
 #define M7_CHROMA_LEVEL_SC                        0
 #define SC_FULL_LOOP_ESCAPE_2                     0
@@ -79,19 +97,15 @@ extern "C" {
 #define NEW_NEAREST_NEAR_COMB_INJECT_1            0
 #define NX4_4XN_PARENT_MV_INJECTION_0             0
 #define SC_WARPED_MOTION_INJECTION_1              0
-#define SC_BIPRED3X3_0                            0
 #define SC_BIPRED3X3_2                            0
 #define SC_UNIPRED3X3_0                           0
 #define SC_UNIPRED3X3_1                           0
 #define PREDICTIVE_ME_LEVEL_0                     0
 #define PREDICTIVE_ME_LEVEL_1                     0
-#define PREDICTIVE_ME_LEVEL_3                     0
 #define PREDICTIVE_ME_LEVEL_4                     0
 #define PREDICTIVE_ME_LEVEL_5                     0
-#define SC_COMBINE_CLASS12_1                      0
 #define SC_TRELLIS_0                              0
 #define SC_REDUNDANT_BLK_OFF                      0
-#define SC_EDGE_BASED_SKIP_ANGLE_INTRA_0          0
 #define SC_PRUNE_REF_FRAME_REC_PART_1             0
 #define SC_INTER_INTER_WEDGE_VARIANCE_TH_0        0
 #define SC_MD_EXIT_TH_0                           0
@@ -102,21 +116,15 @@ extern "C" {
 #define SC_ENABLE_WM_ON                           0
 #define PIC_OBMC_MODE_0                           0
 #define PIC_OBMC_MODE_1                           0
-#define PIC_OBMC_MODE_2                           0
 #define PIC_OBMC_MODE_3                           0
 #define PIC_OBMC_MODE_4                           0
 #define SC_MFMV_ENABLED_1                         0
 #define SC_OVER_BOUNDARY_BLOCK_MODE_0             0
-#define ENABLE_FILTER_INTRA_OFF                   0
 #define SC_ENABLE_INTERINTRA_COMPOUND_ON          0
-#define SC_FRAC_SEARCH_METHOD_SUB_SAD             0
 #define SC_FRAC_SEARCH64_ON                       0
 #define SC_SUBPEL_FLAG_OFF                        0
 #define SC_HALF_PEL_EX                            0
 #define SC_QUARTER_PEL_EX                         0
-#define SC_FRAC_SEARCH_MODEL_1                    0
-#define SC_HME_SEARCH_SUB_SAD                     0
-#define SC_ME_SEARCH_SUB_SAD                      0
 
 // M0 TO M1
 #if ENABLE_M1 || ENABLE_M2 || ENABLE_M3
