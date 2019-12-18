@@ -32,6 +32,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define LOW_DELAY_TUNE 1
+#define LOW_DELAY_TUNE_DEBUG       1
 #define TX_SIZE_EARLY_EXIT          1 // Exit TX size search when all coefficients are zero.
 
 #define   SINGLE_CORE_ENCODE   1

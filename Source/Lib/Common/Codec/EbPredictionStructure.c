@@ -75,8 +75,13 @@ PredictionStructureConfigEntry flat_pred_struct[] = {
     {
         0,               // GOP Index 0 - Temporal Layer
         0,               // GOP Index 0 - Decode Order
+#if LOW_DELAY_TUNE
+        {1, 3, 5, 8},    // GOP Index 0 - Ref List 0
+        {2, 4, 6, 0}     // GOP Index 0 - Ref List 1
+#else
         {1, 2, 0, 0},    // GOP Index 0 - Ref List 0
         {1, 2, 0, 0}     // GOP Index 0 - Ref List 1
+#endif
     }
 };
 
@@ -1043,6 +1048,9 @@ static EbErrorType PredictionStructureCtor(
             // For low delay B case, will use the first 3 refs in L0 as refs in L0 and L1.
             predictionStructurePtr->pred_struct_entry_ptr_array[entryIndex]->ref_list0.reference_list_count = (predType == EB_PRED_LOW_DELAY_B) ?
                 MIN(3, refIndex): refIndex;
+#if 0//LOW_DELAY_TUNE
+            predictionStructurePtr->pred_struct_entry_ptr_array[entryIndex]->ref_list0.reference_list_count = refIndex;
+#endif
 
             // Allocate the Leading Picture Reference List 0
             if (predictionStructurePtr->pred_struct_entry_ptr_array[entryIndex]->ref_list0.reference_list_count) {
@@ -1141,7 +1149,9 @@ static EbErrorType PredictionStructureCtor(
             // Set Reference List 0 Count
             predictionStructurePtr->pred_struct_entry_ptr_array[entryIndex]->ref_list0.reference_list_count = (predType == EB_PRED_LOW_DELAY_B) ?
                 MIN(3, refIndex): refIndex;
-
+#if 0//LOW_DELAY_TUNE
+            predictionStructurePtr->pred_struct_entry_ptr_array[entryIndex]->ref_list0.reference_list_count = refIndex;
+#endif
             // Allocate Reference List 0
             EB_MALLOC_ARRAY(predictionStructurePtr->pred_struct_entry_ptr_array[entryIndex]->ref_list0.reference_list, predictionStructurePtr->pred_struct_entry_ptr_array[entryIndex]->ref_list0.reference_list_count);
             // Copy Reference List 0

@@ -3229,8 +3229,11 @@ enum {
 #define LOW_QPS_COMP_THRESHOLD         40
 #define HIGH_FILTERED_THRESHOLD     (4<<8) // 8 bit precision
 #define LOW_FILTERED_THRESHOLD      (2<<8) // 8 bit precision
+#if LOW_DELAY_TUNE
+#define QPS_SW_THRESH          100
+#else
 #define QPS_SW_THRESH                   8  // 100 to shut QPS/QPM (i.e. CORE only)
-
+#endif
 #if TWO_PASS
 #if TWO_PASS_IMPROVEMENT
 #define MAX_REF_AREA_I                 50 // Max ref area for I slice
@@ -4304,12 +4307,24 @@ void* rate_control_kernel(void *input_ptr)
                         const  double delta_rate_new[2][6] =
                         { { 0.40, 0.7, 0.85, 1.0, 1.0, 1.0 },
                         { 0.35, 0.6, 0.8,  0.9, 1.0, 1.0 } };
-
+#if LOW_DELAY_TUNE
+                        int32_t delta_qindex;
+                        if (picture_control_set_ptr->parent_pcs_ptr->hierarchical_levels == 0)
+                            delta_qindex = eb_av1_compute_qdelta(
+                                q_val,
+                                q_val * 1,
+                                (AomBitDepth)sequence_control_set_ptr->static_config.encoder_bit_depth);
+                        else
+                            delta_qindex = eb_av1_compute_qdelta(
+                                q_val,
+                                q_val * delta_rate_new[picture_control_set_ptr->parent_pcs_ptr->hierarchical_levels == 4][picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index],
+                                (AomBitDepth)sequence_control_set_ptr->static_config.encoder_bit_depth);
+#else
                         const int32_t delta_qindex = eb_av1_compute_qdelta(
                             q_val,
                             q_val * delta_rate_new[picture_control_set_ptr->parent_pcs_ptr->hierarchical_levels == 4][picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index],
                             (AomBitDepth)sequence_control_set_ptr->static_config.encoder_bit_depth);
-
+#endif
                         new_qindex = (int32_t)(qindex + delta_qindex);
                     }
                     frm_hdr->quantization_params.base_q_idx =

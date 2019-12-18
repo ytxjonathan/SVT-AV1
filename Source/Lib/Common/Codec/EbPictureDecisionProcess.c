@@ -833,7 +833,11 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->pic_depth_mode = PIC_ALL_DEPTH_MODE;
         else if (picture_control_set_ptr->enc_mode == ENC_M0)
             // Use a single-stage PD if I_SLICE
+#if LOW_DELAY_TUNE_DEBUG
+            picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_ALL_DEPTH_MODE;
+#else
             picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_1;
+#endif
         else if (picture_control_set_ptr->enc_mode <= ENC_M2)
             // Use a single-stage PD if I_SLICE
             picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_2;
@@ -1773,7 +1777,27 @@ static void  Av1GenerateRpsInfo(
             set_key_frame_rps(picture_control_set_ptr, context_ptr);
             return;
         }
+#if LOW_DELAY_TUNE
+        const uint8_t  base0_idx = (context_ptr->lay0_toggle + 8 - 1) % 8;// context_ptr->lay0_toggle == 0 ? 1 : context_ptr->lay0_toggle == 1 ? 2 : 0;
+        const uint8_t  base1_idx = (context_ptr->lay0_toggle + 8 - 2) % 8;// context_ptr->lay0_toggle == 0 ? 2 : context_ptr->lay0_toggle == 1 ? 0 : 1;
+        const uint8_t  base2_idx = (context_ptr->lay0_toggle + 8 - 3) % 8;
+        const uint8_t  base3_idx = (context_ptr->lay0_toggle + 8 - 4) % 8;
+        const uint8_t  base4_idx = (context_ptr->lay0_toggle + 8 - 5) % 8;
+        const uint8_t  base5_idx = (context_ptr->lay0_toggle + 8 - 6) % 8;
+        const uint8_t  base6_idx = (context_ptr->lay0_toggle + 8 - 7) % 8;// context_ptr->lay0_toggle == 0 ? 2 : context_ptr->lay0_toggle == 1 ? 0 : 1;
+        const uint8_t  base7_idx = (context_ptr->lay0_toggle + 8 - 8) % 8;// context_ptr->lay0_toggle == 0 ? 2 : context_ptr->lay0_toggle == 1 ? 0 : 1;
 
+       // {1, 3, 5, 7},    // GOP Index 0 - Ref List 0
+       // { 2, 4, 6, 0 }     // GOP Index 0 - Ref List 1
+        av1_rps->ref_dpb_index[LAST] = base0_idx;
+        av1_rps->ref_dpb_index[LAST2] = base2_idx;
+        av1_rps->ref_dpb_index[LAST3] = base4_idx;
+        av1_rps->ref_dpb_index[GOLD] = base7_idx;
+
+        av1_rps->ref_dpb_index[BWD] = base1_idx;// base1_idx;
+        av1_rps->ref_dpb_index[ALT2] = base3_idx;
+        av1_rps->ref_dpb_index[ALT] = base5_idx;
+#else
         const uint8_t  base0_idx = context_ptr->lay0_toggle == 0 ? 1 : context_ptr->lay0_toggle == 1 ? 2 : 0;
         const uint8_t  base1_idx = context_ptr->lay0_toggle == 0 ? 2 : context_ptr->lay0_toggle == 1 ? 0 : 1;
 
@@ -1787,16 +1811,24 @@ static void  Av1GenerateRpsInfo(
         av1_rps->ref_dpb_index[BWD] = av1_rps->ref_dpb_index[LAST];
         av1_rps->ref_dpb_index[ALT2] = av1_rps->ref_dpb_index[LAST2];
         av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[LAST];
+#endif
         gop_i = 0;
         av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, flat_pred_struct[gop_i].ref_list0[0]);
         av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, flat_pred_struct[gop_i].ref_list0[1]);
+#if LOW_DELAY_TUNE
+        av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, flat_pred_struct[gop_i].ref_list0[2]);
+        av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, flat_pred_struct[gop_i].ref_list0[3]);
+#else 
         av1_rps->ref_poc_array[LAST3] = av1_rps->ref_poc_array[LAST];
         av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
-
+#endif
         av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, flat_pred_struct[gop_i].ref_list1[0]);
         av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, flat_pred_struct[gop_i].ref_list1[1]);
+#if LOW_DELAY_TUNE
+        av1_rps->ref_poc_array[ALT] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, flat_pred_struct[gop_i].ref_list1[2]);
+#else
         av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
-
+#endif
         prune_refs(pred_position_ptr, av1_rps);
         av1_rps->refresh_frame_mask = 1 << context_ptr->lay0_toggle;
 
@@ -1804,7 +1836,11 @@ static void  Av1GenerateRpsInfo(
         set_frame_display_params(picture_control_set_ptr, context_ptr, mini_gop_index);
         frm_hdr->show_frame = EB_TRUE;
         picture_control_set_ptr->has_show_existing = EB_FALSE;
+#if LOW_DELAY_TUNE
+        context_ptr->lay0_toggle = (1 + context_ptr->lay0_toggle) % 8;
+#else
         context_ptr->lay0_toggle = circ_inc(3, 1, context_ptr->lay0_toggle);
+#endif
     } else if (picture_control_set_ptr->hierarchical_levels == 1) {
         uint8_t gop_i;
         if (frm_hdr->frame_type == KEY_FRAME) {
