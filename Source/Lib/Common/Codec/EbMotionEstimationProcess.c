@@ -996,7 +996,22 @@ void* motion_estimation_kernel(void *input_ptr)
 #if CUTREE_LA
             if (sequence_control_set_ptr->static_config.look_ahead_distance != 0 && sequence_control_set_ptr->static_config.enable_cutree_in_la) {
                 //kelvinhack
-                av1_open_loop_intra_search(picture_control_set_ptr, context_ptr, input_picture_ptr);
+                //av1_open_loop_intra_search(picture_control_set_ptr, context_ptr, input_picture_ptr);
+                for (y_lcu_index = yLcuStartIndex; y_lcu_index < yLcuEndIndex; ++y_lcu_index) {
+                    for (x_lcu_index = xLcuStartIndex; x_lcu_index < xLcuEndIndex; ++x_lcu_index) {
+                        sb_origin_x = x_lcu_index * sequence_control_set_ptr->sb_sz;
+                        sb_origin_y = y_lcu_index * sequence_control_set_ptr->sb_sz;
+
+                        sb_index = (uint16_t)(x_lcu_index + y_lcu_index * picture_width_in_sb);
+//if(picture_control_set_ptr->picture_number == 0)
+//    printf("kelvin ---> motion_estimation_kernel sb_index=%d, la distance=%d\n", sb_index, sequence_control_set_ptr->static_config.look_ahead_distance);
+                        open_loop_intra_search_mb(
+                            picture_control_set_ptr,
+                            sb_index,
+                            context_ptr,
+                            input_picture_ptr);
+                    }
+                }
             }
 #endif
 

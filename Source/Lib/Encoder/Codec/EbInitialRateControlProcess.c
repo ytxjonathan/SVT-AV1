@@ -1756,7 +1756,7 @@ void update_mc_flow_synthesizer(
     for(frame_idx = picture_control_set_ptr->frames_in_sw - 1; frame_idx > 0; frame_idx--) {
         //printf("kelvin ---> init_rc update_mc_flow_synthesizer frame_idx=%d, reordered decode_order=%d\n", frame_idx, picture_control_set_array[frame_idx]->decode_order);
         //kelvinhack
-        cutree_mc_flow_synthesizer(encode_context_ptr, sequence_control_set_ptr, picture_control_set_array[60], frame_idx); // in decode order
+        //cutree_mc_flow_synthesizer(encode_context_ptr, sequence_control_set_ptr, picture_control_set_array[60], frame_idx); // in decode order
     }
 
     return;
@@ -1838,7 +1838,7 @@ void* initial_rate_control_kernel(void *input_ptr)
             if (sequence_control_set_ptr->static_config.look_ahead_distance != 0 && sequence_control_set_ptr->static_config.enable_cutree_in_la) {
                 //if (picture_control_set_ptr->slice_type != I_SLICE)
                 //kelvinhack
-                cutree_mc_flow_dispenser(encode_context_ptr, sequence_control_set_ptr, picture_control_set_ptr);
+                //cutree_mc_flow_dispenser(encode_context_ptr, sequence_control_set_ptr, picture_control_set_ptr);
             }
             //printf("kelvin ---> init_rc picture_number=%d to releasePaReference, look_ahead_distance=%d\n", picture_control_set_ptr->picture_number, sequence_control_set_ptr->static_config.look_ahead_distance);
 #else

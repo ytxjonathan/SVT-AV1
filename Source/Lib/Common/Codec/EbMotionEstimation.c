@@ -15774,5 +15774,92 @@ EbErrorType av1_open_loop_intra_search(
     }
 
 }
+
+EbErrorType open_loop_intra_search_mb(
+    PictureParentControlSet *picture_control_set_ptr, uint32_t sb_index,
+    MotionEstimationContext_t *context_ptr, EbPictureBufferDesc *input_ptr)
+{
+    EbErrorType return_error = EB_ErrorNone;
+    SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet *)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
+
+    uint32_t cu_origin_x;
+    uint32_t cu_origin_y;
+    uint32_t pa_blk_index = 0;
+#if !PAETH_HBD
+    uint8_t is_16_bit =
+        (sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
+#endif
+    SbParams *sb_params = &sequence_control_set_ptr->sb_params_array[sb_index];
+    OisMbResults *ois_mb_results_ptr;
+    uint8_t *above_row;
+    uint8_t *left_col;
+    uint32_t mb_stride = (sequence_control_set_ptr->seq_header.max_frame_width + 15) / 16;
+
+    DECLARE_ALIGNED(16, uint8_t, left_data[MAX_TX_SIZE * 2 + 32]);
+    DECLARE_ALIGNED(16, uint8_t, above_data[MAX_TX_SIZE * 2 + 32]);
+
+    DECLARE_ALIGNED(32, uint8_t, predictor8[256 * 2]);
+    DECLARE_ALIGNED(32, int16_t, src_diff[256]);
+    DECLARE_ALIGNED(32, int32_t, coeff[256]);
+    DECLARE_ALIGNED(32, int32_t, qcoeff[256]);
+    uint8_t *predictor = /*is_16_bit is_cur_buf_hbd(xd) ? CONVERT_TO_BYTEPTR(predictor8) :*/ predictor8;
+
+    while (pa_blk_index < CU_MAX_COUNT) {
+        const CodedUnitStats *blk_stats_ptr;
+        blk_stats_ptr = get_coded_unit_stats(pa_blk_index);
+        uint8_t bsize = blk_stats_ptr->size;
+        if(bsize != 16) {
+            pa_blk_index++;
+            continue;
+        }
+        TxSize tx_size = bsize == 8 ? TX_8X8 : bsize == 16 ? TX_16X16 : bsize == 32 ? TX_32X32 : TX_64X64;
+        if (sb_params->raster_scan_cu_validity[md_scan_to_raster_scan[pa_blk_index]]) {
+            cu_origin_x = sb_params->origin_x + blk_stats_ptr->origin_x;
+            cu_origin_y = sb_params->origin_y + blk_stats_ptr->origin_y;
+            above_row = above_data + 16;
+            left_col = left_data + 16;
+            ois_mb_results_ptr = picture_control_set_ptr->ois_mb_results[(cu_origin_y >> 4) * mb_stride + cu_origin_x >> 4];
+            uint8_t *src = input_ptr->buffer_y + cu_origin_x + cu_origin_y * input_ptr->stride_y;
+
+            // Fill Neighbor Arrays
+            update_neighbor_samples_array_open_loop(above_row - 1, left_col - 1, input_ptr, input_ptr->stride_y, cu_origin_x, cu_origin_y, bsize, bsize);
+            uint8_t ois_intra_mode;
+            uint8_t ois_intra_count = 0;
+            uint8_t best_intra_ois_index = 0;
+            uint32_t best_intra_ois_distortion = 64 * 64 * 255;
+            uint8_t intra_mode_start = DC_PRED;
+#if PAETH_HBD
+            uint8_t intra_mode_end = PAETH_PRED;
+#else
+            uint8_t intra_mode_end = /*is_16_bit ? SMOOTH_H_PRED :*/ PAETH_PRED;
+#endif
+            int64_t intra_cost;
+            PredictionMode best_mode = DC_PRED;
+            int64_t best_intra_cost = INT64_MAX;
+            for (ois_intra_mode = intra_mode_start; ois_intra_mode <= intra_mode_end; ++ois_intra_mode) {
+                int32_t p_angle = av1_is_directional_mode((PredictionMode)ois_intra_mode) ? mode_to_angle_map[(PredictionMode)ois_intra_mode] : 0;
+                // PRED
+                intra_prediction_open_loop(p_angle, ois_intra_mode, cu_origin_x, cu_origin_y, tx_size, above_row, left_col, context_ptr);
+
+                // Distortion
+                aom_subtract_block(16, 16, src_diff, 16, src, input_ptr->stride_y/*src_stride*/, predictor, 16/*dst_stride*/);
+                wht_fwd_txfm(src_diff, 16, coeff, 2/*TX_16X16*/, 8, 0/*is_cur_buf_hbd(xd)*/);
+                intra_cost = aom_satd(coeff, 16 * 16);
+
+                if (intra_cost < best_intra_cost) {
+                    best_intra_cost = intra_cost;
+                    best_mode = ois_intra_mode;
+                }
+            }
+            // store intra_cost to pcs
+            ois_mb_results_ptr->intra_mode = best_mode;
+            ois_mb_results_ptr->intra_cost = best_intra_cost;
+        }
+        pa_blk_index++;
+    }
+    return return_error;
+}
+
+
 #endif
 
