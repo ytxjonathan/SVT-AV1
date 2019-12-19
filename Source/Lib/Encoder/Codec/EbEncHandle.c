@@ -2117,7 +2117,6 @@ void SetParamBasedOnInput(SequenceControlSet *sequence_control_set_ptr)
             sequence_control_set_ptr->over_boundary_block_mode = 0;
     else
         sequence_control_set_ptr->over_boundary_block_mode = sequence_control_set_ptr->static_config.over_bndry_blk;
-
     if (sequence_control_set_ptr->static_config.enable_mfmv == DEFAULT)
 #if PRESETS_TUNE
         if (sequence_control_set_ptr->static_config.screen_content_mode == 1)
@@ -2508,7 +2507,7 @@ static EbErrorType VerifySettings(
         SVT_LOG("Error instance %u: QP must be [0 - %d]\n", channelNumber + 1, MAX_QP_VALUE);
         return_error = EB_ErrorBadParameter;
     }
-#if !LOW_DELAY_TUNE
+#if 0 //!LOW_DELAY_TUNE
     if (config->hierarchical_levels != 3 && config->hierarchical_levels != 4) {
         SVT_LOG("Error instance %u: Hierarchical Levels supported [3-4]\n", channelNumber + 1);
         return_error = EB_ErrorBadParameter;

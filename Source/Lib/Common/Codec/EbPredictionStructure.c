@@ -102,17 +102,28 @@ PredictionStructureConfigEntry two_level_hierarchical_pred_struct[] = {
     {
         0,                // GOP Index 0 - Temporal Layer
         0,                // GOP Index 0 - Decode Order
+#if LOW_DELAY_TUNE
+        {2, 6, 10, 0},     // GOP Index 0 - Ref List 0
+        {4, 8, 0, 0}      // GOP Index 0 - Ref List 1
+#else
         {2, 4, 0, 0},     // GOP Index 0 - Ref List 0
         {2, 4, 0, 0}      // GOP Index 0 - Ref List 1
+#endif
     },
     {
         1,                // GOP Index 1 - Temporal Layer
         1,                // GOP Index 1 - Decode Order
+#if LOW_DELAY_TUNE
+        { 1, 2 ,3, 5},    // GOP Index 1 - Ref List 0
+        {-1, 0, 0, 0}     // GOP Index 1 - Ref List 1
+        //{ 1, 3, 5, 0},    // GOP Index 1 - Ref List 0
+        //{-1, 2, 4, 0}     // GOP Index 1 - Ref List 1
+#else
         { 1, 3, 0, 0},    // GOP Index 1 - Ref List 0
         {-1, 0, 0, 0}     // GOP Index 1 - Ref List 1
+#endif
     }
 };
-
 /************************************************
  * Three-Level Hierarchical
  *

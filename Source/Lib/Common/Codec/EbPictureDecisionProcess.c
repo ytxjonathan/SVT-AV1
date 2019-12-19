@@ -834,7 +834,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         else if (picture_control_set_ptr->enc_mode == ENC_M0)
             // Use a single-stage PD if I_SLICE
 #if LOW_DELAY_TUNE_DEBUG
-            picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_ALL_DEPTH_MODE;
+            picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_0;
 #else
             picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_1;
 #endif
@@ -1550,7 +1550,6 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
         else
             picture_control_set_ptr->frame_end_cdf_update_mode = sequence_control_set_ptr->static_config.frame_end_cdf_update;
-
         if (sequence_control_set_ptr->static_config.prune_unipred_me == DEFAULT)
 #if M0_OPT
             if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode >= ENC_M4)
@@ -1818,7 +1817,7 @@ static void  Av1GenerateRpsInfo(
 #if LOW_DELAY_TUNE
         av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, flat_pred_struct[gop_i].ref_list0[2]);
         av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, flat_pred_struct[gop_i].ref_list0[3]);
-#else 
+#else
         av1_rps->ref_poc_array[LAST3] = av1_rps->ref_poc_array[LAST];
         av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
 #endif
@@ -1847,15 +1846,46 @@ static void  Av1GenerateRpsInfo(
             set_key_frame_rps(picture_control_set_ptr, context_ptr);
             return;
         }
-
+#if LOW_DELAY_TUNE
+        const uint8_t  base_off0_idx = (context_ptr->lay0_toggle + 5 - 5) % 5;
+        const uint8_t  base_off2_idx = (context_ptr->lay0_toggle + 5 - 1) % 5;// context_ptr->lay0_toggle == 0 ? 1 : context_ptr->lay0_toggle == 1 ? 2 : 0;
+        const uint8_t  base_off4_idx = (context_ptr->lay0_toggle + 5 - 2) % 5;// context_ptr->lay0_toggle == 0 ? 2 : context_ptr->lay0_toggle == 1 ? 0 : 1;
+        const uint8_t  base_off6_idx = (context_ptr->lay0_toggle + 5 - 3) % 5;
+        const uint8_t  base_off8_idx = (context_ptr->lay0_toggle + 5 - 4) % 5;
+        const uint8_t  lay1_off0_idx = (context_ptr->lay1_toggle + 3 - 3) % 3 + 5;
+        const uint8_t  lay1_off2_idx = (context_ptr->lay1_toggle + 3 - 1) % 3 + 5;
+        const uint8_t  lay1_off4_idx = (context_ptr->lay1_toggle + 3 - 2) % 3 + 5;
+#else
         const uint8_t  base0_idx = context_ptr->lay0_toggle == 0 ? 1 : context_ptr->lay0_toggle == 1 ? 2 : 0;
         const uint8_t  base1_idx = context_ptr->lay0_toggle == 0 ? 2 : context_ptr->lay0_toggle == 1 ? 0 : 1;
         const uint8_t  base2_idx = context_ptr->lay0_toggle == 0 ? 0 : context_ptr->lay0_toggle == 1 ? 1 : 2;
-
+#endif
         switch (picture_control_set_ptr->temporal_layer_index) {
         case 0:
+#if LOW_DELAY_TUNE
+       // {2, 4, 8, 0},     // GOP Index 0 - Ref List 0
+       // { 2, 6, 10, 0 }      // GOP Index 0 - Ref List 1
+        //{2, 6, 10, 0},     // GOP Index 0 - Ref List 0
+        //{4 , 8, 0, 0 }      // GOP Index 0 - Ref List 1
+            av1_rps->ref_dpb_index[LAST] = base_off2_idx;
+            av1_rps->ref_dpb_index[LAST2] = base_off6_idx;
+            av1_rps->ref_dpb_index[LAST3] = base_off0_idx;
+            av1_rps->ref_dpb_index[GOLD] = av1_rps->ref_dpb_index[LAST];
 
-            //{2, 4, 0, 0},     // GOP Index 0 - Ref List 0
+            av1_rps->ref_dpb_index[BWD] = base_off4_idx;
+            av1_rps->ref_dpb_index[ALT2] = base_off8_idx;
+            av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[LAST];
+            gop_i = 0;
+            av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+            av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+            av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+            av1_rps->ref_poc_array[GOLD] = av1_rps->ref_poc_array[LAST];
+
+            av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+            av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
+            av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+#else
+              //{2, 4, 0, 0},     // GOP Index 0 - Ref List 0
             //{2, 4, 0, 0},     // GOP Index 0 - Ref List 1
             av1_rps->ref_dpb_index[LAST] = base1_idx;
             av1_rps->ref_dpb_index[LAST2] = base0_idx;
@@ -1874,11 +1904,24 @@ static void  Av1GenerateRpsInfo(
             av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
             av1_rps->ref_poc_array[ALT2] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list1[1]);
             av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+#endif
 
             av1_rps->refresh_frame_mask = 1 << context_ptr->lay0_toggle;
             break;
 
         case 1:
+#if LOW_DELAY_TUNE
+        //{ 1, 2, 3, 5},    // GOP Index 1 - Ref List 0
+        //{ -1, 0, 0, 0 }     // GOP Index 1 - Ref List 1
+            av1_rps->ref_dpb_index[LAST] = base_off2_idx;
+            av1_rps->ref_dpb_index[LAST2] = lay1_off2_idx;
+            av1_rps->ref_dpb_index[LAST3] = base_off4_idx;
+            av1_rps->ref_dpb_index[GOLD] = base_off6_idx;
+
+            av1_rps->ref_dpb_index[BWD] = base_off0_idx;
+            av1_rps->ref_dpb_index[ALT2] = av1_rps->ref_dpb_index[BWD];
+            av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+#else
             //{ 1, 3, 0, 0}   // GOP Index 2 - Ref List 0
             //{-1, 0, 0, 0}   // GOP Index 2 - Ref List 1
             av1_rps->ref_dpb_index[LAST] = base1_idx;
@@ -1889,8 +1932,20 @@ static void  Av1GenerateRpsInfo(
             av1_rps->ref_dpb_index[BWD] = base2_idx;
             av1_rps->ref_dpb_index[ALT2] = av1_rps->ref_dpb_index[BWD];
             av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
+#endif
 
             gop_i = 1;
+#if LOW_DELAY_TUNE
+            av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
+            av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
+            av1_rps->ref_poc_array[LAST3] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list0[2]);
+            av1_rps->ref_poc_array[GOLD] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list0[3]);;
+
+            av1_rps->ref_poc_array[BWD] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list1[0]);
+            av1_rps->ref_poc_array[ALT2] = av1_rps->ref_poc_array[BWD];
+            av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
+            av1_rps->refresh_frame_mask = 1 << (context_ptr->lay1_toggle+5);
+#else
             av1_rps->ref_poc_array[LAST] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list0[0]);
             av1_rps->ref_poc_array[LAST2] = get_ref_poc(context_ptr, picture_control_set_ptr->picture_number, two_level_hierarchical_pred_struct[gop_i].ref_list0[1]);
             av1_rps->ref_poc_array[LAST3] = av1_rps->ref_poc_array[LAST];
@@ -1901,7 +1956,7 @@ static void  Av1GenerateRpsInfo(
             av1_rps->ref_poc_array[ALT] = av1_rps->ref_poc_array[BWD];
 
             av1_rps->refresh_frame_mask = 0;
-
+#endif
             break;
 
         default:
@@ -1920,7 +1975,11 @@ static void  Av1GenerateRpsInfo(
                 picture_control_set_ptr->has_show_existing = EB_TRUE;
 
                 if (picture_index == 0)
+#if LOW_DELAY_TUNE
+                    frm_hdr->show_existing_frame = base_off0_idx;
+#else
                     frm_hdr->show_existing_frame = base2_idx;
+#endif
                 else
                     printf("Error in GOP indexing for hierarchical level %d\n", picture_control_set_ptr->hierarchical_levels);
             }
@@ -1933,10 +1992,15 @@ static void  Av1GenerateRpsInfo(
                 ((sequence_control_set_ptr->static_config.pred_structure == EB_PRED_LOW_DELAY_P ||
                   sequence_control_set_ptr->static_config.pred_structure == EB_PRED_LOW_DELAY_B) &&
                  (picture_control_set_ptr->temporal_layer_index == 0))) {
+#if LOW_DELAY_TUNE
+            context_ptr->lay0_toggle = (1 + context_ptr->lay0_toggle) % 5;
+            context_ptr->lay1_toggle = (1 + context_ptr->lay1_toggle) % 3;
+#else
             //Layer0 toggle 0->1->2
             context_ptr->lay0_toggle = circ_inc(3, 1, context_ptr->lay0_toggle);
             //Layer1 toggle 3->4
             context_ptr->lay1_toggle = 1 - context_ptr->lay1_toggle;
+#endif
         }
     } else if (picture_control_set_ptr->hierarchical_levels == 2) {
         uint8_t gop_i;
@@ -3756,6 +3820,7 @@ void* picture_decision_kernel(void *input_ptr)
                             // Else, Increment the position normally
                             else
                                 ++encode_context_ptr->pred_struct_position;
+
                             // The poc number of the latest IDR picture is stored so that last_idr_picture (present in PCS) for the incoming pictures can be updated.
                             // The last_idr_picture is used in reseting the poc (in entropy coding) whenever IDR is encountered.
                             // Note IMP: This logic only works when display and decode order are the same. Currently for Random Access, IDR is inserted (similar to CRA) by using trailing P pictures (low delay fashion) and breaking prediction structure.
@@ -3765,9 +3830,15 @@ void* picture_decision_kernel(void *input_ptr)
                             else
                                 picture_control_set_ptr->last_idr_picture = encode_context_ptr->last_idr_picture;
                             // Cycle the PredStructPosition if its overflowed
+#if 0//LOW_DELAY_TUNE
+                            encode_context_ptr->pred_struct_position = (encode_context_ptr->pred_struct_position >= picture_control_set_ptr->pred_struct_ptr->pred_struct_entry_count) ?
+                                encode_context_ptr->pred_struct_position - picture_control_set_ptr->pred_struct_ptr->pred_struct_period :
+                                encode_context_ptr->pred_struct_position;
+#else
                             encode_context_ptr->pred_struct_position = (encode_context_ptr->pred_struct_position == picture_control_set_ptr->pred_struct_ptr->pred_struct_entry_count) ?
                                 encode_context_ptr->pred_struct_position - picture_control_set_ptr->pred_struct_ptr->pred_struct_period :
                                 encode_context_ptr->pred_struct_position;
+#endif
 
                             predPositionPtr = picture_control_set_ptr->pred_struct_ptr->pred_struct_entry_ptr_array[encode_context_ptr->pred_struct_position];
                             if (sequence_control_set_ptr->static_config.enable_overlays == EB_TRUE) {
@@ -4141,7 +4212,7 @@ void* picture_decision_kernel(void *input_ptr)
                                             break;
                                     }
                                     picture_control_set_ptr->future_altref_nframes = pic_itr - index_center;
-                                    //printf("\nPOC %d\t PAST %d\t FUTURE %d\n", picture_control_set_ptr->picture_number, picture_control_set_ptr->past_altref_nframes, picture_control_set_ptr->future_altref_nframes);
+                                    printf("\nPOC %d\t PAST %d\t FUTURE %d\n", picture_control_set_ptr->picture_number, picture_control_set_ptr->past_altref_nframes, picture_control_set_ptr->future_altref_nframes);
                                 }
                                 else
                                 {
@@ -4268,7 +4339,7 @@ void* picture_decision_kernel(void *input_ptr)
                                         break;
                                 }
                                 picture_control_set_ptr->future_altref_nframes = pic_itr - index_center;
-                                //printf("\nPOC %d\t PAST %d\t FUTURE %d\n", picture_control_set_ptr->picture_number, picture_control_set_ptr->past_altref_nframes, picture_control_set_ptr->future_altref_nframes);
+                                printf("\nPOC %d\t PAST %d\t FUTURE %d\n", picture_control_set_ptr->picture_number, picture_control_set_ptr->past_altref_nframes, picture_control_set_ptr->future_altref_nframes);
 
                                 // adjust the temporal filtering pcs buffer to remove unused past pictures
                                 if(actual_past_pics != num_past_pics) {
