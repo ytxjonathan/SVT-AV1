@@ -2295,17 +2295,34 @@ static void model_rd_with_curvfit(
     BlockSize plane_bsize,
     int64_t sse, int num_samples, int *rate,
     int64_t *dist,
+#if QUANT_HBD0_FIX    
+    ModeDecisionContext *context_ptr
+#else
     uint32_t rdmult
+#endif
 )
 {
     (void)plane_bsize;
+#if QUANT_HBD0_FIX
+    uint32_t rdmult = context_ptr->full_lambda;
+#endif
+
     const int dequant_shift = 3;
 #if 0
     int32_t current_q_index = MAX(0, MIN(QINDEX_RANGE - 1, picture_control_set_ptr->parent_pcs_ptr->frm_hdr.quantization_params.base_q_idx));
 #else
     int32_t current_q_index = picture_control_set_ptr->parent_pcs_ptr->frm_hdr.quantization_params.base_q_idx;
 #endif
+#if QUANT_CLEANUP
+    
+#if QUANT_HBD0_FIX
+    Dequants *const dequants = context_ptr->hbd_mode_decision ? &picture_control_set_ptr->parent_pcs_ptr->deq_bd: &picture_control_set_ptr->parent_pcs_ptr->deq_8bit ;
+#else
+    Dequants *const dequants = &picture_control_set_ptr->parent_pcs_ptr->deq_bd;
+#endif
+#else
     Dequants *const dequants = &picture_control_set_ptr->parent_pcs_ptr->deq;
+#endif
     int16_t quantizer = dequants->y_dequant_Q3[current_q_index][1];
 
     const int qstep = AOMMAX(quantizer >> dequant_shift, 1);
@@ -2473,8 +2490,12 @@ static void pick_wedge(
         mask = av1_get_contiguous_soft_mask(wedge_index, wedge_sign, bsize);
         sse = av1_wedge_sse_from_residuals(residual1, diff10, mask, N);
         sse = ROUND_POWER_OF_TWO(sse, bd_round);
-
+#if QUANT_HBD0_FIX
+        model_rd_with_curvfit(picture_control_set_ptr, bsize, sse, N, &rate, &dist, context_ptr);
+#else
         model_rd_with_curvfit(picture_control_set_ptr, bsize, sse, N, &rate, &dist, context_ptr->full_lambda);
+
+#endif
 
         rd = RDCOST(context_ptr->full_lambda, rate, dist);
 
@@ -2590,8 +2611,11 @@ static int64_t pick_wedge_fixed_sign(
     mask = av1_get_contiguous_soft_mask(wedge_index, wedge_sign, bsize);
     sse = av1_wedge_sse_from_residuals(residual1, diff10, mask, N);
     sse = ROUND_POWER_OF_TWO(sse, bd_round);
-
+#if QUANT_HBD0_FIX
+    model_rd_with_curvfit(picture_control_set_ptr,bsize, /*0,*/ sse, N,    &rate, &dist, context_ptr);
+#else
     model_rd_with_curvfit(picture_control_set_ptr,bsize, /*0,*/ sse, N,    &rate, &dist, context_ptr->full_lambda);
+#endif
    // model_rd_sse_fn[MODELRD_TYPE_MASKED_COMPOUND](cpi, x, bsize, 0, sse, N, &rate, &dist);
 
    // rate += x->wedge_idx_cost[bsize][wedge_index];
@@ -2688,9 +2712,11 @@ static void  pick_interinter_seg(
         uint64_t sse = av1_wedge_sse_from_residuals(residual1, diff10, tmp_mask[cur_mask_type], N);
 
         sse = ROUND_POWER_OF_TWO(sse, bd_round );
-
+#if QUANT_HBD0_FIX
+        model_rd_with_curvfit(picture_control_set_ptr, bsize,  sse, N, &rate, &dist, context_ptr);
+#else
         model_rd_with_curvfit(picture_control_set_ptr, bsize,  sse, N, &rate, &dist, context_ptr->full_lambda);
-
+#endif
         const int64_t rd0 = RDCOST(context_ptr->full_lambda , rate, dist);
 
         if (rd0 < best_rd) {
@@ -2993,8 +3019,11 @@ static void model_rd_for_sb_with_curvfit(
         sse = aom_sse(src_buf, src_stride, pred_buf, pred_stride, bw, bh);
 
         sse = ROUND_POWER_OF_TWO(sse, bd_round);
+#if QUANT_HBD0_FIX
+        model_rd_with_curvfit(picture_control_set_ptr , plane_bsize, sse, bw * bh, &rate, &dist, context_ptr);
+#else
         model_rd_with_curvfit(picture_control_set_ptr , plane_bsize, sse, bw * bh, &rate, &dist, context_ptr->full_lambda);
-
+#endif
         total_sse += sse;
         rate_sum += rate;
         dist_sum += dist;
@@ -7081,7 +7110,15 @@ extern void model_rd_for_sb(
 
         int32_t current_q_index = picture_control_set_ptr->
             parent_pcs_ptr->frm_hdr.quantization_params.base_q_idx;
+#if QUANT_CLEANUP
+#if QUANT_HBD0_FIX
+        Dequants *const dequants = md_context_ptr->hbd_mode_decision ? &picture_control_set_ptr->parent_pcs_ptr->deq_bd: &picture_control_set_ptr->parent_pcs_ptr->deq_8bit ;
+#else
+        Dequants *const dequants = &picture_control_set_ptr->parent_pcs_ptr->deq_bd;
+#endif
+#else
         Dequants *const dequants = &picture_control_set_ptr->parent_pcs_ptr->deq;
+#endif
 
         int16_t quantizer = dequants->y_dequant_Q3[current_q_index][1];
         model_rd_from_sse(

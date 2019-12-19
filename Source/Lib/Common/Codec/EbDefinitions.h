@@ -50,6 +50,8 @@ extern "C" {
 #define PIC_SWITCH_NBASE                  0 // hbd0 in non-base
 #define PIC_SWITCH_NISLICE                0 // hbd0 in non-i
 
+#define QUANT_CLEANUP                1
+#define QUANT_HBD0_FIX               1
 
 
 #define TX_SIZE_EARLY_EXIT          1 // Exit TX size search when all coefficients are zero.

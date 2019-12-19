@@ -3105,6 +3105,35 @@ void* mode_decision_configuration_kernel(void *input_ptr)
         eb_av1_qm_init(
             picture_control_set_ptr->parent_pcs_ptr);
 
+#if QUANT_CLEANUP
+        Quants *const quants_bd = &picture_control_set_ptr->parent_pcs_ptr->quants_bd;
+        Dequants *const deq_bd = &picture_control_set_ptr->parent_pcs_ptr->deq_bd;
+        eb_av1_set_quantizer(
+            picture_control_set_ptr->parent_pcs_ptr,
+            frm_hdr->quantization_params.base_q_idx);
+        eb_av1_build_quantizer(
+            (AomBitDepth)sequence_control_set_ptr->static_config.encoder_bit_depth,
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_Y],
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_U],
+            frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_U],
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_V],
+            frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_V],
+            quants_bd,
+            deq_bd);
+
+        Quants *const quants_8bit = &picture_control_set_ptr->parent_pcs_ptr->quants_8bit;
+        Dequants *const deq_8bit = &picture_control_set_ptr->parent_pcs_ptr->deq_8bit;
+        eb_av1_build_quantizer(
+            AOM_BITS_8,
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_Y],
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_U],
+            frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_U],
+            frm_hdr->quantization_params.delta_q_dc[AOM_PLANE_V],
+            frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_V],
+            quants_8bit,
+            deq_8bit);
+#else
+
         Quants *const quants = &picture_control_set_ptr->parent_pcs_ptr->quants;
         Dequants *const dequants = &picture_control_set_ptr->parent_pcs_ptr->deq;
 
@@ -3132,7 +3161,7 @@ void* mode_decision_configuration_kernel(void *input_ptr)
             frm_hdr->quantization_params.delta_q_ac[AOM_PLANE_V],
             quantsMd,
             dequantsMd);
-
+#endif
         // Hsan: collapse spare code
         MdRateEstimationContext   *md_rate_estimation_array;
         uint32_t                     entropyCodingQp;
