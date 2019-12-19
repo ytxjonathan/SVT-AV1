@@ -2199,7 +2199,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->sq_weight = (uint32_t)~0;
     else if (context_ptr->pd_pass == PD_PASS_1)
 #if ENHANCED_M0_SETTINGS // lossless change - PD_PASS_2 and PD_PASS_1 should be completely decoupled: previous merge conflict
+#if POST_PD2_INTER_DEPTH
+        context_ptr->sq_weight = (uint32_t)~0;
+#else
         context_ptr->sq_weight = 100;
+#endif
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
 #endif
@@ -2208,7 +2212,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (MR_MODE)
         context_ptr->sq_weight = (uint32_t)~0;
     else
-#if POST_PD2_INTER_DEPTH // to fix; set cost to max for pred depth
+#if POST_PD2_INTER_DEPTH // set cost to max for pred depth
         context_ptr->sq_weight = (uint32_t)~0;
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
@@ -2800,7 +2804,10 @@ static void perform_pred_depth_refinement(
                                 e_depth = 1;
                             }
                     }
-
+#if THE_1101_BLOCKS_MOD
+                    s_depth = -5;
+                    e_depth =  5;
+#endif
                     // Add current pred depth block(s)
                     for (block_1d_idx = 0; block_1d_idx < tot_d1_blocks; block_1d_idx++) {
                         resultsPtr->leaf_data_array[blk_index + block_1d_idx].consider_block = 1;
@@ -2976,7 +2983,11 @@ EB_EXTERN EbErrorType perform_d1_d2_block_decision(
         cu_ptr->best_d1_blk = blk_idx_mds;
 
         if (blk_geom->nsi + 1 == blk_geom->totns) {
+#if FLAG_CHECK_MERGE_1_D // shut merge technique @ d1_non_square_block_decision
+            d1_non_square_block_decision(context_ptr, d1_block_itr,0);
+#else
             d1_non_square_block_decision(context_ptr, d1_block_itr);
+#endif
             d1_block_itr++;
         }
 

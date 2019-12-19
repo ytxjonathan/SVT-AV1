@@ -3238,6 +3238,9 @@ void  d1_non_square_block_decision(
 #if ADD_SUPPORT_TO_SKIP_PART_N
     , uint32_t                         d1_block_itr
 #endif
+#if FLAG_CHECK_MERGE_1_D // shut merge technique @ d1_non_square_block_decision
+    , EbBool check_merge_1D_inter_block
+#endif
 )
 {
     //compute total cost for the whole block partition
@@ -3249,6 +3252,9 @@ void  d1_non_square_block_decision(
     for (blk_it = 0; blk_it < context_ptr->blk_geom->totns; blk_it++)
     {
         tot_cost += context_ptr->md_local_cu_unit[first_blk_idx + blk_it].cost;
+#if FLAG_CHECK_MERGE_1_D // shut merge technique @ d1_non_square_block_decision
+        if(check_merge_1D_inter_block)
+#endif
         if (context_ptr->blk_geom->sqi_mds != first_blk_idx + blk_it)
             if (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag)
                 merge_block_cnt += merge_1D_inter_block(context_ptr, context_ptr->blk_geom->sqi_mds, first_blk_idx + blk_it);

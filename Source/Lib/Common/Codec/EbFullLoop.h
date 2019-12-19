@@ -129,6 +129,9 @@ extern "C" {
 #if ADD_SUPPORT_TO_SKIP_PART_N
         , uint32_t                         d1_block_itr
 #endif
+#if FLAG_CHECK_MERGE_1_D // shut merge technique @ d1_non_square_block_decision
+        , EbBool check_merge_1D_inter_block
+#endif
     );
 
     static const uint8_t clip_max3[256] = {
