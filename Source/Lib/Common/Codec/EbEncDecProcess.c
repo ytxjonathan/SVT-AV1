@@ -2912,6 +2912,11 @@ static void add_part_struct_to_mdc_array(
                 CodingUnit *cu_ptr = &context_ptr->md_cu_arr_nsq[d1_itr];
 
                 // Tag block to be tested @ next PD Pass
+#if DEBUG_THIS
+                if (resultsPtr->leaf_data_array[d1_itr].consider_block == 1)
+                    printf("already injected");
+#endif
+
                 resultsPtr->leaf_data_array[d1_itr].consider_block = 1;
                 resultsPtr->leaf_data_array[d1_itr].refined_split_flag = EB_FALSE;
 
@@ -3321,16 +3326,18 @@ void* enc_dec_kernel(void *input_ptr)
                                 context_ptr->md_context,
                                 sb_index);
 
-                            // Add the best PD1 partitioning structure to mdc array
-                            uint32_t part_struct_max = NUMBER_DISTINCT_PART_STRUCT;
-                            for (uint32_t part_struct_index = 0; part_struct_index < part_struct_max; part_struct_index++) {
+                            // Search the top NUMBER_DISTINCT_PART_STRUCT PD1 partitioning structure(s) (besides the best PD1 partitioning structure already derived @ the previous stage)
+                            uint32_t max_distinct_part_struct = NUMBER_DISTINCT_PART_STRUCT; // Hsan: add the ability to set through an API signal
+                            for (uint32_t part_struct_index = 0; part_struct_index < max_distinct_part_struct; part_struct_index++) {
 
-                                // Reset block cost to default value (i.e. assuming no d1_non_square_block_decision() and d2_inter_depth_block_decision() where block cost might get updated)
+                                // Reset block cost to default value(s) (i.e. do not consider the cost update(s) that happened d1_non_square_block_decision() and d2_inter_depth_block_decision() of the previous iteration)
                                 for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
                                     context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
                                 }
 
-                                // Perform d1 and d2 block decision
+                                // Perform d1 and d2 block decision (d1_non_square_block_decision() and d2_inter_depth_block_decision())
+                                // Input : mdc_cu_ptr = PD1 default candidate(s)
+                                // Output: md_cu_arr_nsq = best part_struct_index partitioning structure 
                                 perform_d1_d2_block_decision(
                                     sequence_control_set_ptr,
                                     picture_control_set_ptr,
@@ -3341,14 +3348,12 @@ void* enc_dec_kernel(void *input_ptr)
                                     sb_index,
                                     context_ptr->md_context);
 
-
-                                // Add partitioning structure to mdc array
+                                // Merge the best part_struct_index partitioning structure into enc_dec_mdc_sb_array
                                 add_part_struct_to_mdc_array(
                                     sequence_control_set_ptr,
                                     picture_control_set_ptr,
                                     context_ptr->md_context,
                                     sb_index);
-
                             }
 
                             // Generate split flag(s)
@@ -3365,6 +3370,7 @@ void* enc_dec_kernel(void *input_ptr)
                                     uint32_t next_blk_index = blk_index + 1;
                                     const BlockGeom * next_blk_geom = get_blk_geom_mds(next_blk_index);
 
+                                    // Check the area under the selected/candidate block only, and return TRUE if possible split (selected/candidate block that belongs to an superior depth)
                                     while ((next_blk_geom->origin_x < blk_geom->origin_x + blk_geom->sq_size) && (next_blk_geom->origin_y < blk_geom->origin_y + blk_geom->sq_size)) {
                                         if (resultsPtr->leaf_data_array[next_blk_index].consider_block && next_blk_geom->depth > current_depth) {
                                             is_valid_child_present = EB_TRUE;
@@ -3373,6 +3379,7 @@ void* enc_dec_kernel(void *input_ptr)
                                         next_blk_geom = get_blk_geom_mds(next_blk_index);
                                     }
 
+                                    //
                                     if (is_valid_child_present == EB_FALSE) {
                                         while (get_blk_geom_mds(blk_index)->depth == current_depth) {
                                             resultsPtr->leaf_data_array[blk_index].refined_split_flag = EB_FALSE;
