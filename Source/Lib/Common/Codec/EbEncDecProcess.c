@@ -1613,10 +1613,17 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (sequence_control_set_ptr->static_config.bipred_3x3_inject == DEFAULT)
 #if PRESETS_TUNE
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#if M0_SC_ADOPTIONS
+            if (MR_MODE)
+                context_ptr->bipred3x3_injection = 1;
+            else
+                context_ptr->bipred3x3_injection = 0;
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M4)
                 context_ptr->bipred3x3_injection = 1;
             else
                 context_ptr->bipred3x3_injection = 0;
+#endif
         else
             if (picture_control_set_ptr->enc_mode <= ENC_M2)
                 context_ptr->bipred3x3_injection = 1;
@@ -1657,11 +1664,20 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
         if (sequence_control_set_ptr->static_config.pred_me == DEFAULT) {
+#if M0_SC_PREDICTIVE_ME_LEVEL
+            if (1)
+                context_ptr->predictive_me_level = 3;
+            else
+#endif
 #if PRESETS_TUNE
             if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
                 if (picture_control_set_ptr->enc_mode <= ENC_M1)
 #if M0_OPT
+#if M0_SC_ADOPTIONS
+                    context_ptr->predictive_me_level = (picture_control_set_ptr->enc_mode <= ENC_M0) ? 3 : 4;
+#else
                     context_ptr->predictive_me_level = (picture_control_set_ptr->enc_mode <= ENC_M0) ? 2 : 4;
+#endif
 #else
                     context_ptr->predictive_me_level = 4;
 #endif
@@ -1703,7 +1719,6 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->predictive_me_level = sequence_control_set_ptr->static_config.pred_me;
     } else
         context_ptr->predictive_me_level = 0;
-
 
     // Derive md_staging_mode
     //
@@ -1984,12 +1999,24 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
 #endif
         if (sequence_control_set_ptr->static_config.edge_skp_angle_intra == DEFAULT) {
+#if M0_SC_EDGE_BASED_SKIP_ANGLE_INTRA
+        if (1)
+            context_ptr->edge_based_skip_angle_intra = 0;
+        else
+#endif
 #if FIX_ESTIMATE_INTRA
         if (MR_MODE)
 #else
         if (MR_MODE || picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
             context_ptr->edge_based_skip_angle_intra = 0;
+#if M0_SC_ADOPTIONS
+        if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+            if (picture_control_set_ptr->enc_mode <= ENC_M0)
+                context_ptr->edge_based_skip_angle_intra = 0;
+            else
+                context_ptr->edge_based_skip_angle_intra = 1;
+#endif
 #if M0_OPT
 #if PRESETS_TUNE
 #if PRESETS_OPT
@@ -2040,7 +2067,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // Derive INTER/INTER WEDGE variance TH
 #if PRESETS_OPT
     // Phoenix: Active only when inter/inter compound is on
+#if M0_SC_ADOPTIONS
+    if (picture_control_set_ptr->enc_mode <= ENC_M7 && !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#else
     if (picture_control_set_ptr->enc_mode <= ENC_M7)
+#endif
 #else
 #if M0_OPT
     if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0))

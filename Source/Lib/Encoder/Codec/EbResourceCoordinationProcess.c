@@ -93,6 +93,9 @@ EbErrorType signal_derivation_pre_analysis_oq(
 #else
     uint8_t  hme_me_level = picture_control_set_ptr->enc_mode;
 #endif
+#if M0_SC_ENABLE_HME_FLAG
+    hme_me_level = ENC_M0;
+#endif
     // Derive HME Flag
     if (sequence_control_set_ptr->static_config.use_default_me_hme) {
         picture_control_set_ptr->enable_hme_flag = enable_hme_flag[0][input_resolution][hme_me_level] || enable_hme_flag[1][input_resolution][hme_me_level];
@@ -741,6 +744,11 @@ void* resource_coordination_kernel(void *input_ptr)
             // 0                 OFF
             // 1                 ON
             if (sequence_control_set_ptr->static_config.enable_filter_intra)
+#if M0_SC_ADOPTIONS
+                if (sequence_control_set_ptr->static_config.screen_content_mode)
+                        sequence_control_set_ptr->seq_header.enable_filter_intra = 0;
+                else
+#endif
 #if PRESETS_TUNE
                 sequence_control_set_ptr->seq_header.enable_filter_intra = (sequence_control_set_ptr->static_config.enc_mode <= ENC_M4) ? 1 : 0;
 #else

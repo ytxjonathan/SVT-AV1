@@ -2664,7 +2664,11 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #if M0_OPT
         if (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0)
             picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode =
-            picture_control_set_ptr->slice_type != I_SLICE ? 2 : 0;
+#if M0_SC_ADOPTIONS
+                picture_control_set_ptr->slice_type != I_SLICE ? 2 : picture_control_set_ptr->parent_pcs_ptr->sc_content_detected ? 2 : 0;
+#else
+                picture_control_set_ptr->slice_type != I_SLICE ? 2 : 0;
+#endif
         else
 #endif
             if (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M2)
@@ -2685,12 +2689,28 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #endif
 
 #if MR_MODE
-        picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode =
-            picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->slice_type != I_SLICE ? 1 : 0;
+#if M0_SC_ADOPTIONS
+        if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)
+#endif
+            picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode =
+                picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->slice_type != I_SLICE ? 1 : 0;
 #endif
     }
     else
         picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode = 0;
+
+#if M0_SC_PIC_OBMC_MODE
+    if (sequence_control_set_ptr->static_config.enable_obmc) {
+        picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode =
+#if M0_SC_ADOPTIONS
+            picture_control_set_ptr->slice_type != I_SLICE ? 2 : picture_control_set_ptr->parent_pcs_ptr->sc_content_detected ? 2 : 0;
+#else
+            picture_control_set_ptr->slice_type != I_SLICE ? 2 : 0;
+#endif
+    }
+    else
+        picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode = 0;
+#endif
 
     frm_hdr->is_motion_mode_switchable =
         frm_hdr->is_motion_mode_switchable || picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode;

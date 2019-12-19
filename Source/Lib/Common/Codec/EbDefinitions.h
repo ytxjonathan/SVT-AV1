@@ -32,6 +32,20 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// M0 SC adoptions
+#define M0_SC_ADOPTIONS                           1
+
+// M0 to M1 - for SC
+#define M0_SC_EDGE_BASED_SKIP_ANGLE_INTRA         0
+#define M0_SC_PREDICTIVE_ME_LEVEL                 0
+#define M0_SC_PIC_OBMC_MODE                       0
+#define M0_SC_ENABLE_HME_FLAG                     0
+#define M0_SC_PALETTE                             0
+
+#define M1_ME_HME_SEARCH_AREA                     0
+#define FRACTIONAL_SEARCH_METHOD_SSD_SEARCH       0
+
 #define TX_SIZE_EARLY_EXIT          1 // Exit TX size search when all coefficients are zero.
 
 #define   SINGLE_CORE_ENCODE   1

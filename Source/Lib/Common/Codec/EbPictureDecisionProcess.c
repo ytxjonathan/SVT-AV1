@@ -775,6 +775,9 @@ EbErrorType signal_derivation_multi_processes_oq(
 
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     uint8_t enc_mode_hme = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
+#if M0_SC_ENABLE_HME_FLAG
+    enc_mode_hme = ENC_M0;
+#endif
     picture_control_set_ptr->enable_hme_flag = enable_hme_flag[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][enc_mode_hme];
 
     picture_control_set_ptr->enable_hme_level0_flag = enable_hme_level0_flag[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][enc_mode_hme];
@@ -1159,6 +1162,18 @@ EbErrorType signal_derivation_multi_processes_oq(
     else
         picture_control_set_ptr->palette_mode = 0;
 
+#if M0_SC_PALETTE
+    if (frm_hdr->allow_screen_content_tools)
+        if (sequence_control_set_ptr->static_config.enable_palette == -1)//auto mode; if not set by cfg
+            picture_control_set_ptr->palette_mode =
+            (sequence_control_set_ptr->static_config.encoder_bit_depth == EB_8BIT ||
+            (sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT && sequence_control_set_ptr->static_config.enable_hbd_mode_decision == 0)) ? 6 : 0;
+        else
+            picture_control_set_ptr->palette_mode = sequence_control_set_ptr->static_config.enable_palette;
+    else
+        picture_control_set_ptr->palette_mode = 0;
+#endif
+
     assert(picture_control_set_ptr->palette_mode<7);
 #endif
     if (!picture_control_set_ptr->sequence_control_set_ptr->static_config.disable_dlf_flag && frm_hdr->allow_intrabc == 0) {
@@ -1455,7 +1470,11 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
 
 #if SPEED_OPT
+#if M0_SC_ADOPTIONS
+            picture_control_set_ptr->atb_mode = ((MR_MODE && !picture_control_set_ptr->sc_content_detected) || picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 0;
+#else
             picture_control_set_ptr->atb_mode = (MR_MODE || picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 0;
+#endif
 #else
             picture_control_set_ptr->atb_mode = 1;
 #endif
@@ -1512,7 +1531,14 @@ EbErrorType signal_derivation_multi_processes_oq(
             if (sequence_control_set_ptr->compound_mode)
 #if PRESETS_TUNE
                 if (picture_control_set_ptr->sc_content_detected)
+#if M0_SC_ADOPTIONS
+                    if (MR_MODE)
+                        picture_control_set_ptr->compound_mode = 2;
+                    else
+                        picture_control_set_ptr->compound_mode = 0;
+#else
                     picture_control_set_ptr->compound_mode = (picture_control_set_ptr->enc_mode <= ENC_M0) ? 2 : 0;
+#endif
                 else
                     picture_control_set_ptr->compound_mode = picture_control_set_ptr->enc_mode <= ENC_M1 ? 2 : 1;
 #else
@@ -1521,6 +1547,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
             else
                 picture_control_set_ptr->compound_mode = 0;
+
 #if !MULTI_PASS_PD
             // set compound_types_to_try
             if (picture_control_set_ptr->compound_mode)
@@ -1549,7 +1576,11 @@ EbErrorType signal_derivation_multi_processes_oq(
 
         if (sequence_control_set_ptr->static_config.prune_unipred_me == DEFAULT)
 #if M0_OPT
+#if M0_SC_ADOPTIONS
+            if (picture_control_set_ptr->enc_mode >= ENC_M4)
+#else
             if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode >= ENC_M4)
+#endif
 #else
             if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode == ENC_M0 || picture_control_set_ptr->enc_mode >= ENC_M4)
 #endif
