@@ -16,6 +16,7 @@
 #include "EbMotionEstimationContext.h"
 #include "EbUtility.h"
 #include "EbReferenceObject.h"
+#include "EbTransforms.h"
 
 /**************************************
 * Macros
@@ -50,6 +51,31 @@ void GetMeDist(
 {
     *distortion = (uint32_t)picture_control_set_ptr->me_results[sb_index]->me_candidate[0][0].distortion;
 }
+
+#if CUTREE_LA
+MeCandidate* GetMbMv(
+    PictureParentControlSet    *picture_control_set_ptr,
+    uint32_t                    sb_index,
+    uint32_t                    rf_idx,
+    uint32_t                    me_mb_offset,
+    int32_t                    *xCurrentMv,
+    int32_t                    *yCurrentMv)
+{
+    uint32_t             meCandidateIndex;
+
+    const MeLcuResults *me_results = picture_control_set_ptr->me_results[sb_index];
+    uint8_t total_me_cnt = me_results->total_me_candidate_index[me_mb_offset];
+    MeCandidate *me_block_results = me_results->me_candidate[me_mb_offset];
+    for (meCandidateIndex = 0; meCandidateIndex < total_me_cnt; meCandidateIndex++) {
+        if (me_block_results->direction == UNI_PRED_LIST_0) {
+            *xCurrentMv = me_results->me_mv_array[me_mb_offset][rf_idx].x_mv;
+            *yCurrentMv = me_results->me_mv_array[me_mb_offset][rf_idx].y_mv;
+            break;
+        }
+    }
+    return me_block_results;
+}
+#endif
 
 EbBool CheckMvForPanHighAmp(
     uint32_t   hierarchical_levels,
@@ -1192,6 +1218,551 @@ void DeriveBlockinessPresentFlag(
     }
 }
 
+#if CUTREE_LA
+static AOM_INLINE void get_quantize_error(MacroblockPlane *p, int plane,
+                                          tran_low_t *coeff, tran_low_t *qcoeff,
+                                          tran_low_t *dqcoeff, TxSize tx_size,
+                                          uint16_t *eob, int64_t *recon_error,
+                                          int64_t *sse) {
+  const ScanOrder *const scan_order = &av1_scan_orders[tx_size][DCT_1D]; //&av1_default_scan_orders[tx_size]
+  int pix_num = 1 << num_pels_log2_lookup[txsize_to_bsize[tx_size]];
+  const int shift = tx_size == TX_32X32 ? 0 : 2;
+
+  eb_av1_quantize_fp(coeff, pix_num, p->zbin_QTX, p->round_fp_QTX, p->quant_fp_QTX,
+                  p->quant_shift_QTX, qcoeff, dqcoeff, p->dequant_QTX, eob,
+                  scan_order->scan, scan_order->iscan);
+
+  *recon_error = av1_block_error(coeff, dqcoeff, pix_num, sse) >> shift;
+  *recon_error = AOMMAX(*recon_error, 1);
+
+  *sse = (*sse) >> shift;
+  *sse = AOMMAX(*sse, 1);
+}
+
+static int rate_estimator(tran_low_t *qcoeff, int eob, TxSize tx_size) {
+  const ScanOrder *const scan_order = &av1_scan_orders[tx_size][DCT_1D]; //&av1_default_scan_orders[tx_size]
+
+  assert((1 << num_pels_log2_lookup[txsize_to_bsize[tx_size]]) >= eob);
+
+  int rate_cost = 1;
+
+  for (int idx = 0; idx < eob; ++idx) {
+    int abs_level = abs(qcoeff[scan_order->scan[idx]]);
+    rate_cost += (int)(log(abs_level + 1.0) / log(2.0)) + 1;
+  }
+
+  return (rate_cost << AV1_PROB_COST_SHIFT);
+}
+
+static void result_model_store(PictureParentControlSet *picture_control_set_ptr, OisMbResults *ois_mb_results_ptr,
+        uint32_t mb_origin_x, uint32_t mb_origin_y, uint32_t picture_width_in_mb) {
+  const int mi_height = mi_size_high[TX_16X16];
+  const int mi_width = mi_size_wide[TX_16X16];
+  const int step = 1 << 2;//cpi->tpl_stats_block_mis_log2; //is_720p_or_larger ? 2 : 1;
+
+  int64_t intra_cost = ois_mb_results_ptr->intra_cost / (mi_height * mi_width);
+  int64_t inter_cost = ois_mb_results_ptr->inter_cost / (mi_height * mi_width);
+  int64_t srcrf_dist = ois_mb_results_ptr->srcrf_dist / (mi_height * mi_width);
+  int64_t recrf_dist = ois_mb_results_ptr->recrf_dist / (mi_height * mi_width);
+  int64_t srcrf_rate = ois_mb_results_ptr->srcrf_rate / (mi_height * mi_width);
+  int64_t recrf_rate = ois_mb_results_ptr->recrf_rate / (mi_height * mi_width);
+
+  intra_cost = AOMMAX(1, intra_cost);
+  inter_cost = AOMMAX(1, inter_cost);
+  srcrf_dist = AOMMAX(1, srcrf_dist);
+  recrf_dist = AOMMAX(1, recrf_dist);
+  srcrf_rate = AOMMAX(1, srcrf_rate);
+  recrf_rate = AOMMAX(1, recrf_rate);
+
+  for (int idy = 0; idy < mi_height; idy += step) {
+    //TplDepStats *tpl_ptr =
+    //    &tpl_stats_ptr[av1_tpl_ptr_pos(cpi, mi_row + idy, mi_col, stride)];
+    OisMbResults *dst_ptr = picture_control_set_ptr->ois_mb_results[(mb_origin_y >> 4) * picture_width_in_mb + mb_origin_x >> 4];
+    for (int idx = 0; idx < mi_width; idx += step) {
+      dst_ptr->intra_cost = intra_cost;
+      dst_ptr->inter_cost = inter_cost;
+      dst_ptr->srcrf_dist = srcrf_dist;
+      dst_ptr->recrf_dist = recrf_dist;
+      dst_ptr->srcrf_rate = srcrf_rate;
+      dst_ptr->recrf_rate = recrf_rate;
+      dst_ptr->mv = ois_mb_results_ptr->mv;
+      dst_ptr->ref_frame_poc = ois_mb_results_ptr->ref_frame_poc;
+      ++dst_ptr;
+    }
+  }
+}
+
+#define TPL_DEP_COST_SCALE_LOG2 4
+/************************************************
+* Genrate CUTree MC Flow Dispenser  Based on Lookahead
+** LAD Window: sliding window size
+************************************************/
+void cutree_mc_flow_dispenser(
+    EncodeContext                   *encode_context_ptr,
+    SequenceControlSet              *sequence_control_set_ptr,
+    PictureParentControlSet         *picture_control_set_ptr)
+{
+    InitialRateControlReorderEntry   *temporaryQueueEntryPtr;
+    PictureParentControlSet          *temporaryPictureControlSetPtr;
+
+    uint32_t    inputQueueIndex;
+    uint32_t    frame_to_check_index;
+    uint32_t    picture_width_in_sb = (picture_control_set_ptr->enhanced_picture_ptr->width + BLOCK_SIZE_64 - 1) / BLOCK_SIZE_64;
+    uint32_t    picture_width_in_mb = (picture_control_set_ptr->enhanced_picture_ptr->width + 16 - 1) / 16;
+    uint32_t    picture_height_in_sb = (picture_control_set_ptr->enhanced_picture_ptr->height + BLOCK_SIZE_64 - 1) / BLOCK_SIZE_64;
+    uint32_t    sb_origin_x;
+    uint32_t    sb_origin_y;
+    int32_t     x_curr_mv = 0;
+    int32_t     y_curr_mv = 0;
+    uint32_t    me_mb_offset = 0;
+    TxSize      tx_size = TX_16X16;
+    MeCandidate *me_block_result;
+    EbPictureBufferDesc  *refPicPtr;
+    EbReferenceObject    *referenceObject;
+    struct      ScaleFactors sf;
+    BlockGeom   blk_geom;
+    Av1Common *cm = picture_control_set_ptr->av1_cm;
+    uint32_t    kernel = (EIGHTTAP_REGULAR << 16) | EIGHTTAP_REGULAR;
+    EbPictureBufferDesc *input_picture_ptr = picture_control_set_ptr->enhanced_picture_ptr;
+    int64_t recon_error = 1, sse = 1;
+
+    (void)sequence_control_set_ptr;
+
+    DECLARE_ALIGNED(32, uint8_t, predictor8[256 * 2]);
+    DECLARE_ALIGNED(32, int16_t, src_diff[256]);
+    DECLARE_ALIGNED(32, tran_low_t, coeff[256]);
+    DECLARE_ALIGNED(32, tran_low_t, qcoeff[256]);
+    DECLARE_ALIGNED(32, tran_low_t, dqcoeff[256]);
+    uint8_t *predictor = predictor8;
+
+    blk_geom.bwidth  = 16;
+    blk_geom.bheight = 16;
+
+    av1_setup_scale_factors_for_frame(
+                &sf, picture_width_in_sb * BLOCK_SIZE_64,
+                picture_height_in_sb * BLOCK_SIZE_64,
+                picture_width_in_sb * BLOCK_SIZE_64,
+                picture_height_in_sb * BLOCK_SIZE_64);
+
+    MacroblockPlane mb_plane;
+    int32_t qIndex = quantizer_to_qindex[(uint8_t)sequence_control_set_ptr->qp];
+    mb_plane.quant_QTX       = picture_control_set_ptr->quantsMd.y_quant[qIndex];
+    mb_plane.quant_fp_QTX    = picture_control_set_ptr->quantsMd.y_quant_fp[qIndex];
+    mb_plane.round_fp_QTX    = picture_control_set_ptr->quantsMd.y_round_fp[qIndex];
+    mb_plane.quant_shift_QTX = picture_control_set_ptr->quantsMd.y_quant_shift[qIndex];
+    mb_plane.zbin_QTX        = picture_control_set_ptr->quantsMd.y_zbin[qIndex];
+    mb_plane.round_QTX       = picture_control_set_ptr->quantsMd.y_round[qIndex];
+    mb_plane.dequant_QTX     = picture_control_set_ptr->deqMd.y_dequant_QTX[qIndex];
+
+    // Walk the first N entries in the sliding window
+    inputQueueIndex = encode_context_ptr->initial_rate_control_reorder_queue_head_index;
+    //inputQueueIndex = (inputQueueIndex == INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH - 1) ? 0 : inputQueueIndex + 1;
+    for (uint32_t sb_count = 0; sb_count < picture_control_set_ptr->sb_total_count; ++sb_count) {
+        sb_origin_x = (sb_count % picture_width_in_sb) * BLOCK_SIZE_64;
+        sb_origin_y = (sb_count / picture_width_in_sb) * BLOCK_SIZE_64;
+        if (((sb_origin_x + BLOCK_SIZE_64) <= input_picture_ptr->width) &&
+            ((sb_origin_y + BLOCK_SIZE_64) <= input_picture_ptr->height)) {
+            for(blk_geom.origin_y = 0; (sb_origin_y + blk_geom.origin_y) < input_picture_ptr->height; blk_geom.origin_y += 16) {
+                for(blk_geom.origin_x = 0; (sb_origin_x + blk_geom.origin_x) < input_picture_ptr->width; blk_geom.origin_x += 16) {
+                    uint32_t mb_origin_x = sb_origin_x + blk_geom.origin_x;
+                    uint32_t mb_origin_y = sb_origin_y + blk_geom.origin_y;
+                    int64_t inter_cost;
+                    int32_t best_rf_idx = -1;
+                    int64_t best_inter_cost = INT64_MAX;
+                    MV final_best_mv = {0, 0};
+                    uint32_t max_inter_ref = ((sequence_control_set_ptr->mrp_mode == 0) ? ME_MV_MRP_MODE_0 : ME_MV_MRP_MODE_1);
+                    OisMbResults *ois_mb_results_ptr = picture_control_set_ptr->ois_mb_results[(mb_origin_y >> 4) * picture_width_in_mb + mb_origin_x >> 4];
+                    int64_t best_intra_cost = ois_mb_results_ptr->intra_cost;
+                    uint8_t best_mode = DC_PRED;
+                    const int ref_mb_offset = mb_origin_y * input_picture_ptr->stride_y + mb_origin_x;
+                    uint8_t *src_mb = input_picture_ptr->buffer_y + mb_origin_y * input_picture_ptr->stride_y + mb_origin_x;
+                    for(uint32_t rf_idx = 0; rf_idx < max_inter_ref; rf_idx++) {
+                        me_mb_offset = get_me_info_index(picture_control_set_ptr->max_number_of_pus_per_sb, &blk_geom, 0, 0);
+                        me_block_result = GetMbMv(picture_control_set_ptr, rf_idx, sb_count, me_mb_offset, &x_curr_mv, &y_curr_mv);
+
+                        struct buf_2d ref_buf = { NULL, input_picture_ptr->buffer_y,
+                            input_picture_ptr->width, input_picture_ptr->width,
+                            input_picture_ptr->stride_y };
+                        InterPredParams inter_pred_params;
+                        av1_init_inter_params(&inter_pred_params, 16, 16, mb_origin_y,
+                                mb_origin_x, 0, 0, 8/*xd->bd*/, 0/*is_cur_buf_hbd(xd)*/, 0,
+                                &sf, &ref_buf, kernel);
+
+                        inter_pred_params.conv_params = get_conv_params(0, 0, 0, 8/*xd->bd*/);
+
+                        uint32_t list_index = (sequence_control_set_ptr->mrp_mode == 0) ? (rf_idx < picture_control_set_ptr->ref_list0_count ? 0 : 1)
+                                                                                        : (rf_idx < 2 ? 0 : 1);
+                        uint32_t ref_pic_index = (sequence_control_set_ptr->mrp_mode == 0) ? (rf_idx >= 6 ? (rf_idx - 6) : rf_idx)
+                                                                                           : (rf_idx >= 2 ? (rf_idx - 2) : rf_idx);
+                        referenceObject = (EbReferenceObject*)picture_control_set_ptr->ref_pa_pic_ptr_array[list_index][ref_pic_index]->object_ptr;
+                        refPicPtr = /*is16bit ? (EbPictureBufferDesc*)referenceObject->reference_picture16bit : */(EbPictureBufferDesc*)referenceObject->reference_picture;
+                        uint8_t *ref_mb = refPicPtr->buffer_y + ref_mb_offset;
+                        // referenceObject = (EbReferenceObject*)picture_control_set_ptr->ref_pic_ptr_array[listIndex][0]->object_ptr;
+                        // referenceObject->reference_picture ->buffer_y ;
+                        MV best_mv = {x_curr_mv, y_curr_mv};
+                        av1_build_inter_predictor(ref_mb, input_picture_ptr->stride_y, predictor, 16,
+                                &best_mv, mb_origin_x, mb_origin_y, &inter_pred_params);
+                        aom_subtract_block(16, 16, src_diff, 16, src_mb, input_picture_ptr->stride_y, predictor, 16);
+
+                        wht_fwd_txfm(src_diff, 16, coeff, tx_size, 8/*xd->bd*/, 0/*is_cur_buf_hbd(xd)*/);
+
+                        inter_cost = aom_satd(coeff, 256);
+                        if (inter_cost < best_inter_cost) {
+                            uint16_t eob;
+                            best_rf_idx = rf_idx;
+                            best_inter_cost = inter_cost;
+                            final_best_mv = best_mv;
+                            get_quantize_error(&mb_plane, 0, coeff, qcoeff, dqcoeff, tx_size, &eob, &recon_error, &sse);
+                            int rate_cost = rate_estimator(qcoeff, eob, tx_size);
+                            ois_mb_results_ptr->srcrf_rate = rate_cost << TPL_DEP_COST_SCALE_LOG2;
+
+                            if (best_inter_cost < best_intra_cost) best_mode = NEWMV;
+                        }
+                    } // rf_idx
+                    best_intra_cost = AOMMAX(best_intra_cost, 1);
+                    if (0)//(frame_idx == 0)
+                        best_inter_cost = 0;
+                    else
+                        best_inter_cost = AOMMIN(best_intra_cost, best_inter_cost);
+                    ois_mb_results_ptr->inter_cost = best_inter_cost << TPL_DEP_COST_SCALE_LOG2;
+                    ois_mb_results_ptr->intra_cost = best_intra_cost << TPL_DEP_COST_SCALE_LOG2;
+
+                    ois_mb_results_ptr->srcrf_dist = recon_error << (TPL_DEP_COST_SCALE_LOG2);
+
+                    if (best_mode == NEWMV) {
+                        // inter recon
+                        struct buf_2d ref_buf = { NULL, input_picture_ptr->buffer_y,
+                            input_picture_ptr->width, input_picture_ptr->width,
+                            input_picture_ptr->stride_y };
+                        InterPredParams inter_pred_params;
+                        av1_init_inter_params(&inter_pred_params, 16, 16, mb_origin_y,
+                            mb_origin_x, 0, 0, 8/*xd->bd*/, 0/*is_cur_buf_hbd(xd)*/, 0,
+                            &sf, &ref_buf, kernel);
+                        inter_pred_params.conv_params = get_conv_params(0, 0, 0, 8/*xd->bd*/);
+
+                        uint32_t list_index = (sequence_control_set_ptr->mrp_mode == 0) ? (best_rf_idx < picture_control_set_ptr->ref_list0_count ? 0 : 1)
+                                                                                        : (best_rf_idx < 2 ? 0 : 1);
+                        uint32_t ref_pic_index = (sequence_control_set_ptr->mrp_mode == 0) ? (best_rf_idx >= 6 ? (best_rf_idx - 6) : best_rf_idx)
+                                                                                           : (best_rf_idx >= 2 ? (best_rf_idx - 2) : best_rf_idx);
+                        const int ref_mb_offset = mb_origin_y * input_picture_ptr->stride_y + mb_origin_x;
+                        referenceObject = (EbReferenceObject*)picture_control_set_ptr->ref_pa_pic_ptr_array[list_index][ref_pic_index]->object_ptr;
+                        refPicPtr = /*is16bit ? (EbPictureBufferDesc*)referenceObject->reference_picture16bit : */(EbPictureBufferDesc*)referenceObject->reference_picture;
+                        uint8_t *ref_mb = refPicPtr->buffer_y + ref_mb_offset;
+                        uint8_t *src_mb = input_picture_ptr->buffer_y + mb_origin_y * input_picture_ptr->stride_y + mb_origin_x;
+                        // referenceObject = (EbReferenceObject*)picture_control_set_ptr->ref_pic_ptr_array[listIndex][0]->object_ptr;
+                        // referenceObject->reference_picture ->buffer_y ;
+                        MV best_mv = {x_curr_mv, y_curr_mv};
+                        av1_build_inter_predictor(ref_mb, input_picture_ptr->stride_y, predictor, 16,
+                                &best_mv, mb_origin_x, mb_origin_y, &inter_pred_params);
+                    } else {
+                        // intra recon
+                        uint8_t *src = input_picture_ptr->buffer_y + mb_origin_x + mb_origin_y * input_picture_ptr->stride_y;
+                        int src_stride = input_picture_ptr->stride_y;
+                        uint8_t *dst = predictor;
+                        int dst_stride = 16;
+                        uint8_t topNeighArray[64 * 2 + 1];
+                        uint8_t leftNeighArray[64 * 2 + 1];
+                        uint8_t buffer_y[16 * 16];
+                        BlockGeom blk_geom;
+                        EbPictureBufferDesc  recon_buffer;
+                        recon_buffer.buffer_y = buffer_y;
+                        blk_geom.shape = PART_N;
+                        if (mb_origin_y != 0)
+                            memcpy(topNeighArray + 1, input_picture_ptr->buffer_y + mb_origin_x + (mb_origin_y - 1) * input_picture_ptr->stride_y, 32);
+                        if (mb_origin_x != 0) {
+                            for(int i = 0; i < 32; i++)
+                                *(leftNeighArray + 1 + i) = *(input_picture_ptr->buffer_y + mb_origin_x - 1 + (mb_origin_y + i) * input_picture_ptr->stride_y);
+                        }
+                        /*if(is16bit)
+                            eb_av1_predict_intra_block_16bit();
+                        else*/
+                            eb_av1_predict_intra_block(
+                                &cm->tiles_info,
+                                !ED_STAGE,
+                                &blk_geom,
+                                cm,
+                                16,
+                                16,
+                                tx_size,
+                                ois_mb_results_ptr->intra_mode,
+                                0, //angle_delta
+#if PAL_SUP
+                                0,
+                                0,
+#else
+                                0, //use_palette
+#endif
+                                FILTER_INTRA_MODES,
+                                topNeighArray + 1,
+                                leftNeighArray + 1,
+                                &recon_buffer,
+                                0,
+                                0,
+                                0,
+                                BLOCK_16X16,
+                                mb_origin_x,
+                                mb_origin_y,
+                                mb_origin_x,
+                                mb_origin_y,
+                                0,
+                                0);
+                    }
+
+                    aom_subtract_block(16, 16, src_diff, 16, src_mb, input_picture_ptr->stride_y, predictor, 16);
+                    wht_fwd_txfm(src_diff, 16, coeff, tx_size, 8/*xd->bd*/, 0/*s_cur_buf_hbd(xd)*/);
+
+                    uint16_t eob;
+                    get_quantize_error(&mb_plane, 0, coeff, qcoeff, dqcoeff, tx_size, &eob, &recon_error, &sse);
+
+                    int rate_cost = rate_estimator(qcoeff, eob, tx_size);
+                    /*if(is16bit)
+                      av1_inv_transform_recon16bit();
+                    else*/
+                    av1_inv_transform_recon8bit((int32_t*)dqcoeff, predictor, 16, predictor, 16, TX_16X16, DCT_DCT, PLANE_TYPE_Y, eob, 0 /*lossless*/);
+
+                    ois_mb_results_ptr->recrf_dist = recon_error << (TPL_DEP_COST_SCALE_LOG2);
+                    ois_mb_results_ptr->recrf_rate = rate_cost << TPL_DEP_COST_SCALE_LOG2;
+                    if (best_mode != NEWMV) {
+                        ois_mb_results_ptr->srcrf_dist = recon_error << (TPL_DEP_COST_SCALE_LOG2);
+                        ois_mb_results_ptr->srcrf_rate = rate_cost << TPL_DEP_COST_SCALE_LOG2;
+                    }
+                    ois_mb_results_ptr->recrf_dist = AOMMAX(ois_mb_results_ptr->srcrf_dist, ois_mb_results_ptr->recrf_dist);
+                    ois_mb_results_ptr->recrf_rate = AOMMAX(ois_mb_results_ptr->srcrf_rate, ois_mb_results_ptr->recrf_rate);
+
+                    if (/*frame_idx && */best_rf_idx != -1) {
+                        ois_mb_results_ptr->mv = final_best_mv;
+                        ois_mb_results_ptr->ref_frame_poc = picture_control_set_ptr->ref_order_hint[best_rf_idx];
+                    }
+
+                    // Motion flow dependency dispenser.
+                    result_model_store(picture_control_set_ptr, ois_mb_results_ptr, mb_origin_x, mb_origin_y, picture_width_in_mb);
+                }
+            }
+        }
+    }
+
+    return;
+}
+
+static int get_overlap_area(int grid_pos_row, int grid_pos_col, int ref_pos_row,
+                            int ref_pos_col, int block, int/*BLOCK_SIZE*/ bsize) {
+  int width = 0, height = 0;
+  int bw = 4 << mi_size_wide_log2[bsize];
+  int bh = 4 << mi_size_high_log2[bsize];
+
+  switch (block) {
+    case 0:
+      width = grid_pos_col + bw - ref_pos_col;
+      height = grid_pos_row + bh - ref_pos_row;
+      break;
+    case 1:
+      width = ref_pos_col + bw - grid_pos_col;
+      height = grid_pos_row + bh - ref_pos_row;
+      break;
+    case 2:
+      width = grid_pos_col + bw - ref_pos_col;
+      height = ref_pos_row + bh - grid_pos_row;
+      break;
+    case 3:
+      width = ref_pos_col + bw - grid_pos_col;
+      height = ref_pos_row + bh - grid_pos_row;
+      break;
+    default: assert(0);
+  }
+
+  return width * height;
+}
+
+static int round_floor(int ref_pos, int bsize_pix) {
+  int round;
+  if (ref_pos < 0)
+    round = -(1 + (-ref_pos - 1) / bsize_pix);
+  else
+    round = ref_pos / bsize_pix;
+
+  return round;
+}
+
+static int64_t delta_rate_cost(int64_t delta_rate, int64_t recrf_dist,
+                               int64_t srcrf_dist, int pix_num) {
+  double beta = (double)srcrf_dist / recrf_dist;
+  int64_t rate_cost = delta_rate;
+
+  if (srcrf_dist <= 128) return rate_cost;
+
+  double dr =
+      (double)(delta_rate >> (TPL_DEP_COST_SCALE_LOG2 + AV1_PROB_COST_SHIFT)) /
+      pix_num;
+
+  double log_den = log(beta) / log(2.0) + 2.0 * dr;
+
+  if (log_den > log(10.0) / log(2.0)) {
+    rate_cost = (int64_t)((log(1.0 / beta) * pix_num) / log(2.0) / 2.0);
+    rate_cost <<= (TPL_DEP_COST_SCALE_LOG2 + AV1_PROB_COST_SHIFT);
+    return rate_cost;
+  }
+
+  double num = pow(2.0, log_den);
+  double den = num * beta + (1 - beta) * beta;
+
+  rate_cost = (int64_t)((pix_num * log(num / den)) / log(2.0) / 2.0);
+
+  rate_cost <<= (TPL_DEP_COST_SCALE_LOG2 + AV1_PROB_COST_SHIFT);
+
+  return rate_cost;
+}
+
+static AOM_INLINE void tpl_model_update_b(PictureParentControlSet *ref_picture_control_set_ptr, OisMbResults *ois_mb_results_ptr,
+                                          int mi_row, int mi_col,
+                                          const int/*BLOCK_SIZE*/ bsize) {
+  Av1Common *ref_cm = ref_picture_control_set_ptr->av1_cm;
+  OisMbResults *ref_ois_mb_results_ptr;
+
+  const int ref_pos_row = mi_row * MI_SIZE + (ois_mb_results_ptr->mv.row >> 3);
+  const int ref_pos_col = mi_col * MI_SIZE + (ois_mb_results_ptr->mv.col >> 3);
+
+  const int bw = 4 << mi_size_wide_log2[bsize];
+  const int bh = 4 << mi_size_high_log2[bsize];
+  const int mi_height = mi_size_high[bsize];
+  const int mi_width = mi_size_wide[bsize];
+  const int pix_num = bw * bh;
+
+  // top-left on grid block location in pixel
+  int grid_pos_row_base = round_floor(ref_pos_row, bh) * bh;
+  int grid_pos_col_base = round_floor(ref_pos_col, bw) * bw;
+  int block;
+
+  int64_t cur_dep_dist = ois_mb_results_ptr->recrf_dist - ois_mb_results_ptr->srcrf_dist;
+  int64_t mc_dep_dist = (int64_t)(
+      ois_mb_results_ptr->mc_dep_dist *
+      ((double)(ois_mb_results_ptr->recrf_dist - ois_mb_results_ptr->srcrf_dist) /
+       ois_mb_results_ptr->recrf_dist));
+  int64_t delta_rate = ois_mb_results_ptr->recrf_rate - ois_mb_results_ptr->srcrf_rate;
+  int64_t mc_dep_rate =
+      delta_rate_cost(ois_mb_results_ptr->mc_dep_rate, ois_mb_results_ptr->recrf_dist,
+                      ois_mb_results_ptr->srcrf_dist, pix_num);
+
+  for (block = 0; block < 4; ++block) {
+    int grid_pos_row = grid_pos_row_base + bh * (block >> 1);
+    int grid_pos_col = grid_pos_col_base + bw * (block & 0x01);
+
+    if (grid_pos_row >= 0 && grid_pos_row < ref_cm->mi_rows * MI_SIZE &&
+        grid_pos_col >= 0 && grid_pos_col < ref_cm->mi_cols * MI_SIZE) {
+      int overlap_area = get_overlap_area(
+          grid_pos_row, grid_pos_col, ref_pos_row, ref_pos_col, block, bsize);
+      int ref_mi_row = round_floor(grid_pos_row, bh) * mi_height;
+      int ref_mi_col = round_floor(grid_pos_col, bw) * mi_width;
+      const int step = 1 << 2;//cpi->tpl_stats_block_mis_log2;
+
+      for (int idy = 0; idy < mi_height; idy += step) {
+        for (int idx = 0; idx < mi_width; idx += step) {
+          ref_ois_mb_results_ptr = ref_picture_control_set_ptr->ois_mb_results[(((ref_mi_row + idy) >> 2) * (ref_cm->mi_rows >> 2)  + (ref_mi_col + idx) >> 2)]; //cpi->tpl_stats_block_mis_log2;
+          ref_ois_mb_results_ptr->mc_dep_dist +=
+              ((cur_dep_dist + mc_dep_dist) * overlap_area) / pix_num;
+          ref_ois_mb_results_ptr->mc_dep_rate +=
+              ((delta_rate + mc_dep_rate) * overlap_area) / pix_num;
+
+          assert(overlap_area >= 0);
+        }
+      }
+    }
+  }
+}
+
+static AOM_INLINE void tpl_model_update(PictureParentControlSet *picture_control_set_array[60], int32_t frame_idx, int mi_row, int mi_col, const int/*BLOCK_SIZE*/ bsize) {
+  const int mi_height = mi_size_high[bsize];
+  const int mi_width = mi_size_wide[bsize];
+  const int step = 1 << 2; //cpi->tpl_stats_block_mis_log2;
+  const int/*BLOCK_SIZE*/ block_size = BLOCK_16X16; //convert_length_to_bsize(MI_SIZE << cpi->tpl_stats_block_mis_log2);
+  PictureParentControlSet *picture_control_set_ptr = picture_control_set_array[frame_idx];
+  int i = 0;
+
+  for (int idy = 0; idy < mi_height; idy += step) {
+    for (int idx = 0; idx < mi_width; idx += step) {
+      OisMbResults *ois_mb_results_ptr = picture_control_set_ptr->ois_mb_results[((mi_row + idy) * mi_width) >> 4 + (mi_col + idx) >> 2];
+      while(picture_control_set_array[i]->picture_number != ois_mb_results_ptr->ref_frame_poc) i++;
+      assert(picture_control_set_array[i]->picture_number < frame_idx); //kelvin to check
+          tpl_model_update_b(picture_control_set_array[i], ois_mb_results_ptr, mi_row + idy, mi_col + idx, block_size);
+    }
+  }
+}
+
+void cutree_mc_flow_synthesizer(
+    EncodeContext                   *encode_context_ptr,
+    SequenceControlSet              *sequence_control_set_ptr,
+    PictureParentControlSet         *picture_control_set_array[60],
+    int32_t                          frame_idx)
+{
+    Av1Common *cm = picture_control_set_array[frame_idx]->av1_cm;
+    const int/*BLOCK_SIZE*/ bsize = BLOCK_16X16;
+    const int mi_height = mi_size_high[bsize];
+    const int mi_width = mi_size_wide[bsize];
+
+    for (int mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
+        for (int mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
+            tpl_model_update(picture_control_set_array[60], frame_idx, mi_row, mi_col, bsize);
+        }
+    }
+    return;
+}
+
+/************************************************
+* Genrate CUTree MC Flow Synthesizer Based on Lookahead
+** LAD Window: sliding window size
+************************************************/
+void update_mc_flow_synthesizer(
+    EncodeContext                   *encode_context_ptr,
+    SequenceControlSet              *sequence_control_set_ptr,
+    PictureParentControlSet         *picture_control_set_ptr)
+{
+    InitialRateControlReorderEntry   *temporaryQueueEntryPtr;
+    PictureParentControlSet          *temp_picture_control_set_ptr;
+    PictureParentControlSet          *picture_control_set_array[60] = {NULL, };
+
+    //uint32_t                         frame_idx_checked = 0;
+    uint32_t                         inputQueueIndex;
+    int32_t                          frame_idx, i;
+
+    (void)sequence_control_set_ptr;
+
+    // Walk the first N entries in the sliding window
+    inputQueueIndex = encode_context_ptr->initial_rate_control_reorder_queue_head_index;
+    for (frame_idx = 0; frame_idx < picture_control_set_ptr->frames_in_sw; frame_idx++) {
+        temporaryQueueEntryPtr = encode_context_ptr->initial_rate_control_reorder_queue[inputQueueIndex];
+        temp_picture_control_set_ptr = ((PictureParentControlSet*)(temporaryQueueEntryPtr->parent_pcs_wrapper_ptr)->object_ptr);
+
+        //printf("kelvin ---> init_rc update_mc_flow_synthesizer curr picture_number=%d %d, inputQueueIndex=%d, temp picture_number=%d, temp decode_order=%d, frames_in_sw=%d\n", picture_control_set_ptr->picture_number, frame_idx, inputQueueIndex, temp_picture_control_set_ptr->picture_number, temp_picture_control_set_ptr->decode_order, picture_control_set_ptr->frames_in_sw);
+
+        // sort to be decode order
+        if(frame_idx == 0) {
+            picture_control_set_array[0] = temp_picture_control_set_ptr;
+        } else {
+            for (i = 0; i < frame_idx; i++) {
+                if (temp_picture_control_set_ptr->decode_order < picture_control_set_array[i]->decode_order) {
+                    for (int32_t j = frame_idx; j > i; j--)
+                        picture_control_set_array[j] = picture_control_set_array[j-1];
+                    picture_control_set_array[i] = temp_picture_control_set_ptr;
+                    break;
+                }
+            }
+            if (i == frame_idx)
+                picture_control_set_array[i] = temp_picture_control_set_ptr;
+        }
+
+        // Increment the inputQueueIndex Iterator
+        inputQueueIndex = (inputQueueIndex == INITIAL_RATE_CONTROL_REORDER_QUEUE_MAX_DEPTH - 1) ? 0 : inputQueueIndex + 1;
+    }
+
+    for(frame_idx = picture_control_set_ptr->frames_in_sw - 1; frame_idx > 0; frame_idx--) {
+        //printf("kelvin ---> init_rc update_mc_flow_synthesizer frame_idx=%d, reordered decode_order=%d\n", frame_idx, picture_control_set_array[frame_idx]->decode_order);
+        //kelvinhack
+        cutree_mc_flow_synthesizer(encode_context_ptr, sequence_control_set_ptr, picture_control_set_array[60], frame_idx); // in decode order
+    }
+
+    return;
+}
+
+#endif
 /************************************************
 * Initial Rate Control Kernel
 * The Initial Rate Control Process determines the initial bit budget for each
@@ -1255,10 +1826,27 @@ void* initial_rate_control_kernel(void *input_ptr)
             //reset intraCodedEstimationLcu
             MeBasedGlobalMotionDetection(
                 picture_control_set_ptr);
+#if CUTREE_LA
+            if(picture_control_set_ptr->picture_number == 0)
+                printf("kelvin ---> input sqc look_ahead_distance=%d, enable_cutree_in_la=%d\n", sequence_control_set_ptr->static_config.look_ahead_distance, sequence_control_set_ptr->static_config.enable_cutree_in_la);
+            if (sequence_control_set_ptr->static_config.look_ahead_distance == 0 || sequence_control_set_ptr->static_config.enable_cutree_in_la == 0) {
+                // Release Pa Ref pictures when not needed
+                ReleasePaReferenceObjects(
+                    sequence_control_set_ptr,
+                    picture_control_set_ptr);
+            }
+            if (sequence_control_set_ptr->static_config.look_ahead_distance != 0 && sequence_control_set_ptr->static_config.enable_cutree_in_la) {
+                //if (picture_control_set_ptr->slice_type != I_SLICE)
+                //kelvinhack
+                cutree_mc_flow_dispenser(encode_context_ptr, sequence_control_set_ptr, picture_control_set_ptr);
+            }
+            //printf("kelvin ---> init_rc picture_number=%d to releasePaReference, look_ahead_distance=%d\n", picture_control_set_ptr->picture_number, sequence_control_set_ptr->static_config.look_ahead_distance);
+#else
             // Release Pa Ref pictures when not needed
             ReleasePaReferenceObjects(
                 sequence_control_set_ptr,
                 picture_control_set_ptr);
+#endif
 
             //****************************************************
             // Input Motion Analysis Results into Reordering Queue
@@ -1432,6 +2020,14 @@ void* initial_rate_control_kernel(void *input_ptr)
                         if (sequence_control_set_ptr->use_output_stat_file)
                             memset(picture_control_set_ptr->stat_struct_first_pass_ptr, 0, sizeof(stat_struct_t));
 #endif
+#if CUTREE_LA
+                        if (sequence_control_set_ptr->static_config.look_ahead_distance != 0 &&
+                            sequence_control_set_ptr->static_config.enable_cutree_in_la &&
+                            picture_control_set_ptr->temporal_layer_index == 0) {
+                            update_mc_flow_synthesizer(encode_context_ptr, sequence_control_set_ptr, picture_control_set_ptr);
+                        }
+#endif
+
                         //OPTION 1:  get the output stream buffer in ressource coordination
                         eb_get_empty_object(
                             sequence_control_set_ptr->encode_context_ptr->stream_output_fifo_ptr,
@@ -1450,6 +2046,17 @@ void* initial_rate_control_kernel(void *input_ptr)
                             outputResultsPtr->picture_control_set_wrapper_ptr = picture_control_set_ptr->p_pcs_wrapper_ptr;
                         else
                         outputResultsPtr->picture_control_set_wrapper_ptr = queueEntryPtr->parent_pcs_wrapper_ptr;
+#if CUTREE_LA
+//printf("kelvin ---> loop_index=%d, output picture_number=%d\n", loop_index, loop_index ? picture_control_set_ptr->picture_number : queueEntryPtr->picture_number );
+                        if (sequence_control_set_ptr->static_config.look_ahead_distance != 0 && sequence_control_set_ptr->static_config.enable_cutree_in_la
+                            && ((has_overlay == 0 && loop_index == 0) || (has_overlay == 1 && loop_index == 1))) {
+                            // Release Pa Ref pictures when not needed
+                            ReleasePaReferenceObjects(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr);
+                                //loop_index ? picture_control_set_ptr : queueEntryPtr);
+                        }
+#endif
                         // Post the Full Results Object
                         eb_post_full_object(outputResultsWrapperPtr);
                     }

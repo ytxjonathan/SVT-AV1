@@ -19,6 +19,7 @@ extern "C" {
 #define TILES    1
 #define TWO_PASS_USE_2NDP_ME_IN_1STP                1
 #define TWO_PASS                                    1
+#define CUTREE_LA                                   0
 #define ALT_REF_OVERLAY_APP                         1
     //***HME***
 #define EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT         2
@@ -319,6 +320,12 @@ typedef struct EbSvtAv1EncConfiguration
      *
      * Default depends on rate control mode.*/
     uint32_t                 look_ahead_distance;
+
+    /* Enable CU TREE in look ahead, only works when look_ahead_distance>0
+     * 0 = disable CU TREE in look ahead
+     * 1 = enable CU TREE in look ahead
+     * Default is 0  */
+    uint8_t                  enable_cutree_in_la;
 
     /* Target bitrate in bits/second, only apllicable when rate control mode is
      * set to 2 or 3.

@@ -203,6 +203,16 @@ EbErrorType av1_inter_prediction_hbd(
         InterpFilterParams *params_x, InterpFilterParams *params_y,
         int32_t w, int32_t h);
 
+#if CUTREE_LA
+    void av1_init_inter_params(InterPredParams *inter_pred_params, int block_width,
+                           int block_height, int pix_row, int pix_col,
+                           int subsampling_x, int subsampling_y, int bit_depth,
+                           int use_hbd_buf, int is_intrabc,
+                           const struct ScaleFactors *sf,
+                           const struct buf_2d *ref_buf,
+                           uint32_t interp_filters);
+#endif
+
 #if COMP_INTERINTRA
     /* Mapping of interintra to intra mode for use in the intra component */
     static const PredictionMode interintra_to_intra_mode[INTERINTRA_MODES] = {

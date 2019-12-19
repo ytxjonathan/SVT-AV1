@@ -353,13 +353,13 @@ extern "C" {
 */
     } MacroBlockPlane;
 
-    struct buf_2d {
+    typedef struct buf_2d {
         uint8_t *buf;
         uint8_t *buf0;
         int width;
         int height;
         int stride;
-    };
+    } buf_2d;
     typedef struct macroblockd_plane {
         int subsampling_x;
         int subsampling_y;
@@ -367,6 +367,33 @@ extern "C" {
         struct buf_2d pre[2];
         uint8_t width, height;
     } MACROBLOCKD_PLANE;
+
+#if CUTREE_LA
+    typedef enum InterPredMode {
+      UNIFORM_PRED,
+      WARP_PRED,
+      MASK_PRED,
+    } InterPredMode;
+
+    typedef struct InterPredParams {
+      InterPredMode mode;
+      EbWarpedMotionParams warp_params;
+      ConvolveParams conv_params;
+      //const InterpFilterParams *interp_filter_params[2];
+      InterpFilterParams interp_filter_params[2];
+      int block_width;
+      int block_height;
+      int pix_row;
+      int pix_col;
+      struct buf_2d ref_frame_buf;
+      int subsampling_x;
+      int subsampling_y;
+      const struct ScaleFactors *scale_factors;
+      int bit_depth;
+      int use_hbd_buf;
+      int is_intrabc;
+    } InterPredParams;
+#endif
 
     typedef struct MacroBlockD
     {
@@ -534,6 +561,22 @@ extern "C" {
         OisCandidate*    ois_candidate_array[CU_MAX_COUNT];
         int8_t              best_distortion_index[CU_MAX_COUNT];
     } OisSbResults;
+#if CUTREE_LA
+    typedef struct OisMbResults
+    {
+        int64_t intra_cost;
+        int32_t intra_mode;
+        int64_t inter_cost;
+        int64_t srcrf_dist;
+        int64_t recrf_dist;
+        int64_t srcrf_rate;
+        int64_t recrf_rate;
+        int64_t mc_dep_rate;
+        int64_t mc_dep_dist;
+        MV mv;
+        int ref_frame_poc;
+    } OisMbResults;
+#endif
     typedef struct QpmLcuResults_s {
         uint8_t  cu_qp;
         uint8_t  cu_intra_qp;

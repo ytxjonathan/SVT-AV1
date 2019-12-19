@@ -117,6 +117,7 @@ extern "C" {
 #define NON_KF_INTRA_TF_FIX               0 // Fix temporal filtering for non-key Intra frames
 
 #define TWO_PASS_IMPROVEMENT              1 // Tune 2 pass for better Luma by adjusting the reference area and the actions
+#define CUTREE_LA                         0 // Add CUTREE into look ahead
 //FOR DEBUGGING - Do not remove
 #define NO_ENCDEC                         0 // bypass encDec to test cmpliance of MD. complained achieved when skip_flag is OFF. Port sample code from VCI-SW_AV1_Candidate1 branch
 
@@ -909,6 +910,10 @@ static const int32_t tx_size_high[TX_SIZES_ALL] = {
 
  // TranLow  is the datatype used for final transform coefficients.
 typedef int32_t TranLow;
+typedef int32_t tran_low_t;
+typedef int64_t tran_high_t;
+
+
 typedef uint8_t QmVal;
 
 typedef enum TxClass

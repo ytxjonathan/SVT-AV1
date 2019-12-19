@@ -28,6 +28,7 @@ extern "C" {
 #include "EbEncDecProcess.h"
 
 #define UNIT_QUANT_SHIFT        2
+#define UNIT_QUANT_FACTOR (1 << UNIT_QUANT_SHIFT)
 #define INV_COS_BIT             12
 #define MAX_TXFM_STAGE_NUM      12
 #define MAX_TXWH_IDX            5
@@ -133,6 +134,14 @@ extern "C" {
     static const int8_t fwd_shift_32x8[3] = { 2, -2, 0 };
     static const int8_t fwd_shift_16x64[3] = { 0, -2, 0 };
     static const int8_t fwd_shift_64x16[3] = { 2, -4, 0 };
+
+    static const int8_t *av1_fwd_txfm_shift_ls[TX_SIZES_ALL] = {
+        fwd_shift_4x4,   fwd_shift_8x8,   fwd_shift_16x16, fwd_shift_32x32,
+        fwd_shift_64x64, fwd_shift_4x8,   fwd_shift_8x4,   fwd_shift_8x16,
+        fwd_shift_16x8,  fwd_shift_16x32, fwd_shift_32x16, fwd_shift_32x64,
+        fwd_shift_64x32, fwd_shift_4x16,  fwd_shift_16x4,  fwd_shift_8x32,
+        fwd_shift_32x8,  fwd_shift_16x64, fwd_shift_64x16,
+    };
 
     static const int8_t fwd_cos_bit_col[MAX_TXWH_IDX /*txw_idx*/][MAX_TXWH_IDX /*txh_idx*/] =
     {
@@ -3915,6 +3924,10 @@ extern "C" {
     extern const int32_t eb_av1_sinpi_arr_data[7][5];
     extern const int8_t *eb_inv_txfm_shift_ls[TX_SIZES_ALL];
 
+    extern const int8_t *av1_fwd_txfm_shift_ls[TX_SIZES_ALL];
+    extern const int8_t fwd_cos_bit_col[5][5];
+    extern const int8_t fwd_cos_bit_row[5][5];
+
     static const int32_t cos_bit_min = 10;
 
     static const int32_t NewSqrt2Bits = 12;
@@ -4125,6 +4138,12 @@ extern "C" {
         uint32_t       *nonzerocoeff);
 
     void construct_pm_trans_coeff_shaping(SequenceControlSet  *sequence_control_set_ptr);
+
+    typedef void (*TxfmFunc)(const int32_t *input, int32_t *output, int8_t cos_bit,
+            const int8_t *stage_range);
+
+    typedef void (*FwdTxfm2dFunc)(const int16_t *input, int32_t *output, int stride,
+            TxType tx_type, int bd);
 
 #ifdef __cplusplus
 }

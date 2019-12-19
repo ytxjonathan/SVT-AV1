@@ -15666,3 +15666,113 @@ EbErrorType open_loop_intra_search_sb(
     }
     return return_error;
 }
+
+#if CUTREE_LA
+EbErrorType av1_open_loop_intra_search(
+    PictureParentControlSet *picture_control_set_ptr, MotionEstimationContext_t *context_ptr, EbPictureBufferDesc *input_ptr)
+{
+    EbErrorType return_error = EB_ErrorNone;
+    SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet *)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
+
+    uint32_t pa_blk_index = 0;
+//#if !PAETH_HBD
+    uint8_t is_16_bit =
+        (sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
+//#endif
+    //SbParams *sb_params = &sequence_control_set_ptr->sb_params_array[sb_index];
+    uint8_t *above_row;
+    uint8_t *left_col;
+
+    DECLARE_ALIGNED(32, uint8_t, predictor8[256 * 2]);
+    DECLARE_ALIGNED(32, int16_t, src_diff[256]);
+    DECLARE_ALIGNED(32, int32_t, coeff[256]);
+    DECLARE_ALIGNED(32, int32_t, qcoeff[256]);
+
+    uint8_t *predictor = is_16_bit/*is_cur_buf_hbd(xd)*/ ? CONVERT_TO_BYTEPTR(predictor8) : predictor8;
+
+    int mi_row, mi_col;
+    Av1Common *cm = picture_control_set_ptr->av1_cm;
+    const BlockSize bsize = BLOCK_16X16;
+    const TxSize tx_size = TX_16X16;//max_txsize_lookup[bsize];
+    const int mi_height = mi_size_high[bsize];
+    const int mi_width = mi_size_wide[bsize];
+
+    for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
+        for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
+            OisMbResults *ois_mb_results_ptr = picture_control_set_ptr->ois_mb_results[ (mi_col >> 2) * (cm->mi_rows >> 2) + mi_col >> 2];
+            uint32_t mb_origin_x = mi_col << 2;
+            uint32_t mb_origin_y = mi_row << 2;
+            PredictionMode best_mode = DC_PRED;
+            int64_t best_intra_cost = INT64_MAX;
+            for (PredictionMode mode = DC_PRED; mode <= PAETH_PRED; ++mode) {
+                uint8_t *src = input_ptr->buffer_y + mb_origin_x + mb_origin_y * input_ptr->stride_y;
+                int src_stride = input_ptr->stride_y;
+                uint8_t *dst = predictor;
+                int dst_stride = 16;
+                uint8_t topNeighArray[64 * 2 + 1];
+                uint8_t leftNeighArray[64 * 2 + 1];
+                uint8_t buffer_y[16 * 16];
+                BlockGeom blk_geom;
+                EbPictureBufferDesc  recon_buffer;
+                int64_t intra_cost;
+                recon_buffer.buffer_y = buffer_y;
+                blk_geom.shape = PART_N;
+                if (mb_origin_y != 0)
+                   memcpy(topNeighArray + 1, input_ptr->buffer_y + mb_origin_x + (mb_origin_y - 1) * input_ptr->stride_y, 32);
+                if (mb_origin_x != 0) {
+                   for(int i = 0; i < 32; i++)
+                      *(leftNeighArray + 1 + i) = *(input_ptr->buffer_y + mb_origin_x - 1 + (mb_origin_y + i) * input_ptr->stride_y);
+                }
+
+                /*if(is16bit)
+                    eb_av1_predict_intra_block_16bit();
+                else*/
+                    eb_av1_predict_intra_block(
+                        &cm->tiles_info,
+                        !ED_STAGE,
+                        &blk_geom,
+                        cm,
+                        16,
+                        16,
+                        tx_size,
+                        mode,
+                        0, //angle_delta
+#if PAL_SUP
+                        0,
+                        0,
+#else
+                        0, //use_palette
+#endif
+                        FILTER_INTRA_MODES,
+                        topNeighArray + 1,
+                        leftNeighArray + 1,
+                        &recon_buffer,
+                        0,
+                        0,
+                        0,
+                        bsize,
+                        mb_origin_x,
+                        mb_origin_y,
+                        mb_origin_x,
+                        mb_origin_y,
+                        0,
+                        0);
+
+                aom_subtract_block(16, 16, src_diff, 16, src, src_stride, dst, dst_stride);
+                wht_fwd_txfm(src_diff, 16, coeff, 2/*TX_16X16*/, 8, 0/*is_cur_buf_hbd(xd)*/);
+                intra_cost = aom_satd(coeff, 16 * 16);
+
+                if (intra_cost < best_intra_cost) {
+                    best_intra_cost = intra_cost;
+                    best_mode = mode;
+                }
+            }
+            // store intra_cost to pcs
+            ois_mb_results_ptr->intra_mode = best_mode;
+            ois_mb_results_ptr->intra_cost = best_intra_cost;
+        }
+    }
+
+}
+#endif
+

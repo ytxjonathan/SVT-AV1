@@ -993,6 +993,13 @@ void* motion_estimation_kernel(void *input_ptr)
                 }
             }
 
+#if CUTREE_LA
+            if (sequence_control_set_ptr->static_config.look_ahead_distance != 0 && sequence_control_set_ptr->static_config.enable_cutree_in_la) {
+                //kelvinhack
+                av1_open_loop_intra_search(picture_control_set_ptr, context_ptr, input_picture_ptr);
+            }
+#endif
+
             // ZZ SADs Computation
             // 1 lookahead frame is needed to get valid (0,0) SAD
             if (sequence_control_set_ptr->static_config.look_ahead_distance != 0) {

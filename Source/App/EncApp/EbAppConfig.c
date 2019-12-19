@@ -107,6 +107,9 @@
 #define MIN_QP_TOKEN                    "-min-qp"
 #define ADAPTIVE_QP_ENABLE_TOKEN        "-adaptive-quantization"
 #define LOOK_AHEAD_DIST_TOKEN           "-lad"
+#if CUTREE_LA
+#define ENABLE_CUTREE_LA_TOKEN          "-enable-cutree-la"
+#endif
 #define SUPER_BLOCK_SIZE_TOKEN          "-sb-size"
 #define TILE_ROW_TOKEN                   "-tile-rows"
 #define TILE_COL_TOKEN                   "-tile-columns"
@@ -260,6 +263,9 @@ static void SetTileCol                          (const char *value, EbConfig *cf
 
 static void SetSceneChangeDetection             (const char *value, EbConfig *cfg) {cfg->scene_change_detection = strtoul(value, NULL, 0);};
 static void SetLookAheadDistance                (const char *value, EbConfig *cfg) {cfg->look_ahead_distance = strtoul(value, NULL, 0);};
+#if CUTREE_LA
+static void SetEnableCutreeInLA                 (const char *value, EbConfig *cfg) {cfg->enable_cutree_in_la = strtoul(value, NULL, 0);};
+#endif
 static void SetRateControlMode                  (const char *value, EbConfig *cfg) {cfg->rate_control_mode = strtoul(value, NULL, 0);};
 static void SetTargetBitRate                    (const char *value, EbConfig *cfg) {cfg->target_bit_rate = 1000*strtoul(value, NULL, 0);};
 static void SetMaxQpAllowed                     (const char *value, EbConfig *cfg) {cfg->max_qp_allowed = strtoul(value, NULL, 0);};
@@ -439,6 +445,9 @@ config_entry_t config_entry[] = {
     { SINGLE_INPUT, STAT_REPORT_TOKEN, "StatReport", SetStatReport },
     { SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", SetRateControlMode },
     { SINGLE_INPUT, LOOK_AHEAD_DIST_TOKEN, "LookAheadDistance",                             SetLookAheadDistance},
+#if CUTREE_LA
+    { SINGLE_INPUT, ENABLE_CUTREE_LA_TOKEN, "EnableCutreeInLA",                             SetEnableCutreeInLA},
+#endif
     { SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "TargetBitRate", SetTargetBitRate },
     { SINGLE_INPUT, MAX_QP_TOKEN, "MaxQpAllowed", SetMaxQpAllowed },
     { SINGLE_INPUT, MIN_QP_TOKEN, "MinQpAllowed", SetMinQpAllowed },
@@ -539,6 +548,9 @@ void eb_config_ctor(EbConfig *config_ptr)
     config_ptr->qp                                   = 50;
     config_ptr->use_qp_file                          = EB_FALSE;
     config_ptr->look_ahead_distance                  = (uint32_t)~0;
+#if CUTREE_LA
+    config_ptr->enable_cutree_in_la                  = 0;
+#endif
     config_ptr->target_bit_rate                        = 7000000;
     config_ptr->max_qp_allowed                       = 63;
     config_ptr->min_qp_allowed                       = 10;

@@ -1257,6 +1257,7 @@ DECLARE_ALIGNED(256, static const int16_t, av1_intrabc_bilinear_filter[2]) = {
 static const InterpFilterParams av1_intrabc_filter_params = {
   av1_intrabc_bilinear_filter, 2, 0, BILINEAR
 };
+
 static void convolve_2d_for_intrabc(const uint8_t *src, int src_stride,
     uint8_t *dst, int dst_stride, int w, int h,
     int subpel_x_q4, int subpel_y_q4,
@@ -1403,6 +1404,112 @@ void svt_highbd_inter_predictor(const uint16_t *src, int32_t src_stride,
             &filter_params_y, sp.subpel_x, sp.subpel_y, conv_params, bd);
     }
 }
+
+#if CUTREE_LA
+void av1_init_inter_params(InterPredParams *inter_pred_params, int block_width,
+                           int block_height, int pix_row, int pix_col,
+                           int subsampling_x, int subsampling_y, int bit_depth,
+                           int use_hbd_buf, int is_intrabc,
+                           const struct ScaleFactors *sf,
+                           const struct buf_2d *ref_buf,
+                           uint32_t interp_filters) {
+  inter_pred_params->block_width = block_width;
+  inter_pred_params->block_height = block_height;
+  inter_pred_params->pix_row = pix_row;
+  inter_pred_params->pix_col = pix_col;
+  inter_pred_params->subsampling_x = subsampling_x;
+  inter_pred_params->subsampling_y = subsampling_y;
+  inter_pred_params->bit_depth = bit_depth;
+  inter_pred_params->use_hbd_buf = use_hbd_buf;
+  inter_pred_params->is_intrabc = is_intrabc;
+  inter_pred_params->scale_factors = sf;
+  inter_pred_params->ref_frame_buf = *ref_buf;
+  inter_pred_params->mode = UNIFORM_PRED;
+
+  if (is_intrabc) {
+    inter_pred_params->interp_filter_params[0] = av1_intrabc_filter_params;
+    inter_pred_params->interp_filter_params[1] = av1_intrabc_filter_params;
+  } else {
+    InterpFilter filter_x = av1_extract_interp_filter(interp_filters, 1);
+    InterpFilter filter_y = av1_extract_interp_filter(interp_filters, 0);
+    inter_pred_params->interp_filter_params[0] =
+        av1_get_interp_filter_params_with_block_size(
+            filter_x, block_width);
+    inter_pred_params->interp_filter_params[1] =
+        av1_get_interp_filter_params_with_block_size(
+            filter_y, block_height);
+  }
+}
+
+void av1_make_inter_predictor(const uint8_t *src, int src_stride, uint8_t *dst,
+                              int dst_stride,
+                              InterPredParams *inter_pred_params,
+                              const SubpelParams *subpel_params) {
+  assert(IMPLIES(inter_pred_params->conv_params.is_compound,
+                 inter_pred_params->conv_params.dst != NULL));
+
+  if (inter_pred_params->mode == WARP_PRED) {
+    eb_av1_warp_plane(
+        &inter_pred_params->warp_params, inter_pred_params->use_hbd_buf,
+        inter_pred_params->bit_depth, inter_pred_params->ref_frame_buf.buf0,
+        inter_pred_params->ref_frame_buf.width,
+        inter_pred_params->ref_frame_buf.height,
+        inter_pred_params->ref_frame_buf.stride, dst,
+        inter_pred_params->pix_col, inter_pred_params->pix_row,
+        inter_pred_params->block_width, inter_pred_params->block_height,
+        dst_stride, inter_pred_params->subsampling_x,
+        inter_pred_params->subsampling_y, &inter_pred_params->conv_params);
+  } else if (inter_pred_params->mode == UNIFORM_PRED) {
+    svt_inter_predictor(
+        src, src_stride, dst, dst_stride, subpel_params,
+        inter_pred_params->scale_factors, inter_pred_params->block_width,
+        inter_pred_params->block_height, &inter_pred_params->conv_params,
+        inter_pred_params->interp_filter_params, 0);
+  }
+}
+
+void av1_build_inter_predictor(const uint8_t *src, int src_stride, uint8_t *dst,
+                               int dst_stride, const MV *src_mv, int pix_col,
+                               int pix_row,
+                               InterPredParams *inter_pred_params) {
+  SubpelParams subpel_params;
+  //const struct scale_factors *sf = inter_pred_params->scale_factors;
+  const struct ScaleFactors *sf = inter_pred_params->scale_factors;
+
+  (void)pix_row;
+  (void)pix_col;
+
+  struct buf_2d *pre_buf = &inter_pred_params->ref_frame_buf;
+  int ssx = inter_pred_params->subsampling_x;
+  int ssy = inter_pred_params->subsampling_y;
+  int orig_pos_y = inter_pred_params->pix_row << SUBPEL_BITS;
+  orig_pos_y += src_mv->row * (1 << (1 - ssy));
+  int orig_pos_x = inter_pred_params->pix_col << SUBPEL_BITS;
+  orig_pos_x += src_mv->col * (1 << (1 - ssx));
+  int pos_y = sf->scale_value_y(orig_pos_y, sf);
+  int pos_x = sf->scale_value_x(orig_pos_x, sf);
+  pos_x += SCALE_EXTRA_OFF;
+  pos_y += SCALE_EXTRA_OFF;
+
+  const int top = -AOM_LEFT_TOP_MARGIN_SCALED(ssy);
+  const int left = -AOM_LEFT_TOP_MARGIN_SCALED(ssx);
+  const int bottom = (pre_buf->height + AOM_INTERP_EXTEND) << SCALE_SUBPEL_BITS;
+  const int right = (pre_buf->width + AOM_INTERP_EXTEND) << SCALE_SUBPEL_BITS;
+  pos_y = clamp(pos_y, top, bottom);
+  pos_x = clamp(pos_x, left, right);
+
+  src = pre_buf->buf0 + (pos_y >> SCALE_SUBPEL_BITS) * pre_buf->stride +
+        (pos_x >> SCALE_SUBPEL_BITS);
+  subpel_params.subpel_x = pos_x & SCALE_SUBPEL_MASK;
+  subpel_params.subpel_y = pos_y & SCALE_SUBPEL_MASK;
+  subpel_params.xs = sf->x_step_q4;
+  subpel_params.ys = sf->y_step_q4;
+
+  av1_make_inter_predictor(src, src_stride, dst, dst_stride, inter_pred_params,
+                           &subpel_params);
+}
+#endif
+
 #define USE_PRECOMPUTED_WEDGE_SIGN 1
 #define USE_PRECOMPUTED_WEDGE_MASK 1
 

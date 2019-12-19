@@ -14136,6 +14136,9 @@ extern "C" {
 
         // Open loop Intra candidate Search Results
         OisSbResults                    **ois_sb_results;
+#if CUTREE_LA
+        OisMbResults                    **ois_mb_results;
+#endif
         OisCandidate                    **ois_candicate;
         // Dynamic GOP
         EbPred                                pred_structure;

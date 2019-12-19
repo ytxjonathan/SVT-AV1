@@ -80,6 +80,12 @@ void interpolate_search_region_AVC_chroma(
         MotionEstimationContext_t   *context_ptr,
         EbPictureBufferDesc       *input_ptr);
 
+#if CUTREE_LA
+    extern EbErrorType av1_open_loop_intra_search(
+        PictureParentControlSet   *picture_control_set_ptr,
+        MotionEstimationContext_t *context_ptr,
+        EbPictureBufferDesc       *input_ptr);
+#endif
     int8_t sort_3_elements(uint32_t a, uint32_t b, uint32_t c);
 #define a_b_c  0
 #define a_c_b  1
