@@ -811,7 +811,11 @@ uint64_t av1_intra_fast_cost(
 #endif
     if (use_ssd) {
         int32_t current_q_index = frm_hdr->quantization_params.base_q_idx;
+#if QUANT_CLEANUP
+        Dequants *const dequants = &picture_control_set_ptr->parent_pcs_ptr->deq_bd;
+#else
         Dequants *const dequants = &picture_control_set_ptr->parent_pcs_ptr->deq;
+#endif
 
         int16_t quantizer = dequants->y_dequant_Q3[current_q_index][1];
         rate = 0;
@@ -2006,8 +2010,11 @@ uint64_t av1_inter_fast_cost(
 #endif
     if (use_ssd) {
         int32_t current_q_index = frm_hdr->quantization_params.base_q_idx;
+#if QUANT_CLEANUP
+        Dequants *const dequants = &picture_control_set_ptr->parent_pcs_ptr->deq_bd;
+#else
         Dequants *const dequants = &picture_control_set_ptr->parent_pcs_ptr->deq;
-
+#endif
         int16_t quantizer = dequants->y_dequant_Q3[current_q_index][1];
         rate = 0;
         model_rd_from_sse(
