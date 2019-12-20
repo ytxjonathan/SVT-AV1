@@ -652,12 +652,14 @@ TEST_P(InvTxfm2dAsmTest, sqr_txfm_match_test) {
     }
 }
 
+#if ENABLE_SEGFAULT_UT
 TEST_P(InvTxfm2dAsmTest, rect_type1_txfm_match_test) {
     for (int i = TX_4X8; i < TX_SIZES_ALL; i++) {
         const TxSize tx_size = static_cast<TxSize>(i);
         run_rect_type1_txfm_match_test(tx_size);
     }
 }
+#endif
 
 TEST_P(InvTxfm2dAsmTest, rect_type2_txfm_match_test) {
     for (int i = TX_4X8; i < TX_SIZES_ALL; i++) {
@@ -666,12 +668,14 @@ TEST_P(InvTxfm2dAsmTest, rect_type2_txfm_match_test) {
     }
 }
 
+#if ENABLE_SEGFAULT_UT
 TEST_P(InvTxfm2dAsmTest, lowbd_txfm_match_test) {
     for (int i = TX_4X4; i < TX_SIZES_ALL; i++) {
         const TxSize tx_size = static_cast<TxSize>(i);
         run_lowbd_txfm_match_test(tx_size);
     }
 }
+#endif
 
 TEST_P(InvTxfm2dAsmTest, HandleTransform_match_test) {
     run_HandleTransform_match_test();

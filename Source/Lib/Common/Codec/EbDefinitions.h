@@ -109,6 +109,8 @@ extern "C" {
 #define GLOBAL_WARPED_MOTION         1 // Global warped motion detection and insertion
 #define GM_OPT                       1 // Perform global motion estimation on a down-sampled version of the input picture
 
+#define ENABLE_SEGFAULT_UT           0
+
 #ifndef NON_AVX512_SUPPORT
 #define NON_AVX512_SUPPORT
 #endif

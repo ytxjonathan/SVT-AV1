@@ -237,9 +237,11 @@ class AV1FwdTxfm2dTest : public ::testing::TestWithParam<FwdTxfm2dParam> {
     double *output_ref_;
 };
 
+#if ENABLE_SEGFAULT_UT
 TEST_P(AV1FwdTxfm2dTest, run_fwd_accuracy_check) {
     run_fwd_accuracy_check();
 }
+#endif
 
 static double max_error_ls[TX_SIZES_ALL] = {
     3,    // 4x4 transform

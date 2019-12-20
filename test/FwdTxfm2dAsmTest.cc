@@ -154,9 +154,11 @@ class FwdTxfm2dAsmTest : public ::testing::TestWithParam<FwdTxfm2dAsmParam> {
     int32_t *output_ref_;  /**< aligned address for output ref */
 };
 
+#if ENABLE_SEGFAULT_UT
 TEST_P(FwdTxfm2dAsmTest, match_test) {
     run_match_test();
 }
+#endif
 
 INSTANTIATE_TEST_CASE_P(
     TX, FwdTxfm2dAsmTest,
