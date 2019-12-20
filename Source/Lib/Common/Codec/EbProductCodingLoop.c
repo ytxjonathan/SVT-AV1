@@ -8996,7 +8996,15 @@ void update_skip_next_nsq_for_a_b_shapes(
         break;
     case 4:
         *v_cost += context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost;
+#if 0//POST_PD2_INTER_DEPTH
+        *skip_next_nsq = (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds    ].avail_blk_flag &&
+                          context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 1].avail_blk_flag && 
+                          context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 2].avail_blk_flag )?
+            (*h_cost > ((*sq_cost * context_ptr->sq_weight) / 100)) ? 1 : *skip_next_nsq :
+            0 ;
+#else
         *skip_next_nsq = (*h_cost > ((*sq_cost * context_ptr->sq_weight) / 100)) ? 1 : *skip_next_nsq;
+#endif
         break;
 
     // HA
@@ -9007,7 +9015,15 @@ void update_skip_next_nsq_for_a_b_shapes(
     // HB
     case 8:
     case 9:
+#if 0//POST_PD2_INTER_DEPTH
+        *skip_next_nsq = (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds    ].avail_blk_flag &&
+                          context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 1].avail_blk_flag &&
+                          context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 2].avail_blk_flag) ?
+            (*h_cost > ((*sq_cost * context_ptr->sq_weight) / 100)) ? 1 : *skip_next_nsq :
+            0;
+#else
         *skip_next_nsq = (*h_cost > ((*sq_cost * context_ptr->sq_weight) / 100)) ? 1 : *skip_next_nsq;
+#endif
         break;
     case 10:
 
@@ -9019,7 +9035,16 @@ void update_skip_next_nsq_for_a_b_shapes(
     // VB
     case 14:
     case 15:
+#if 0//POST_PD2_INTER_DEPTH
+        *skip_next_nsq = 
+            (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds    ].avail_blk_flag &&
+                          context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 3].avail_blk_flag &&
+                          context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 4].avail_blk_flag) ?
+            (*v_cost > ((*sq_cost * context_ptr->sq_weight) / 100)) ? 1 : *skip_next_nsq :
+            0;
+#else
         *skip_next_nsq = (*v_cost > ((*sq_cost * context_ptr->sq_weight) / 100)) ? 1 : *skip_next_nsq;
+#endif
         break;
     }
 }

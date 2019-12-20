@@ -2212,7 +2212,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (MR_MODE)
         context_ptr->sq_weight = (uint32_t)~0;
     else
-#if POST_PD2_INTER_DEPTH // set cost to max for pred depth
+#if 1//POST_PD2_INTER_DEPTH // set cost to max for pred depth
         context_ptr->sq_weight = (uint32_t)~0;
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
