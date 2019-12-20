@@ -1599,7 +1599,7 @@ int32_t av1_quantize_inv_quantize(
         }
     }
 #else
-    
+
     if (bit_increment == 0) {
         if (component_type == COMPONENT_LUMA) {
             candidate_plane.quant_QTX = picture_control_set_ptr->parent_pcs_ptr->quantsMd.y_quant[qIndex];
@@ -1816,6 +1816,9 @@ void product_full_loop(
     uint64_t   y_tu_coeff_bits;
     EB_ALIGN(16) uint64_t tuFullDistortion[3][DIST_CALC_TOTAL];
     context_ptr->three_quad_energy = 0;
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
 #if ENHANCE_ATB
     uint8_t  tx_depth = context_ptr->tx_depth;
     uint32_t txb_itr = context_ptr->txb_itr;
@@ -1893,7 +1896,11 @@ void product_full_loop(
             candidate_buffer->candidate_ptr->pred_mode,
             candidate_buffer->candidate_ptr->use_intrabc,
 #if OMARK_HBD0_RDOQ
+#if NEW_MD_LAMBDA
+            full_lambda,
+#else
             context_ptr->full_lambda,
+#endif
 #endif
             EB_FALSE);
 
@@ -2022,8 +2029,11 @@ void product_full_loop(
             tuFullDistortion[0],      //gets updated inside based on cbf decision
             &y_tu_coeff_bits,            //gets updated inside based on cbf decision
             &y_full_cost,
+#if NEW_MD_LAMBDA
+            full_lambda);
+#else
             context_ptr->full_lambda);
-
+#endif
         (*y_coeff_bits) += y_tu_coeff_bits;
 
         y_full_distortion[DIST_CALC_RESIDUAL] += tuFullDistortion[0][DIST_CALC_RESIDUAL];
@@ -2084,6 +2094,9 @@ void product_full_loop_tx_search(
     ModeDecisionContext          *context_ptr,
     PictureControlSet            *picture_control_set_ptr)
 {
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     uint32_t                       tu_origin_index;
     SequenceControlSet          *sequence_control_set_ptr = (SequenceControlSet*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
     uint64_t                       y_tu_coeff_bits;
@@ -2223,7 +2236,11 @@ void product_full_loop_tx_search(
                 candidate_buffer->candidate_ptr->pred_mode,
                 candidate_buffer->candidate_ptr->use_intrabc,
 #if OMARK_HBD0_RDOQ
+#if NEW_MD_LAMBDA
+                full_lambda,
+#else
                 context_ptr->full_lambda,
+#endif
 #endif
                 EB_FALSE);
 
@@ -2353,7 +2370,11 @@ void product_full_loop_tx_search(
                 tuFullDistortion[0],
                 &y_tu_coeff_bits,
                 &y_full_cost,
+#if NEW_MD_LAMBDA
+                full_lambda);
+#else
                 context_ptr->full_lambda);
+#endif
         }
 
         if (y_full_cost < best_full_cost) {
@@ -2854,7 +2875,9 @@ void full_loop_r(
     uint32_t                 txb_origin_y;
 
     SequenceControlSet    *sequence_control_set_ptr = (SequenceControlSet*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
-
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     context_ptr->three_quad_energy = 0;
 
     uint8_t tx_depth = candidate_buffer->candidate_ptr->tx_depth;
@@ -2954,7 +2977,11 @@ void full_loop_r(
 #endif
                 candidate_buffer->candidate_ptr->use_intrabc,
 #if OMARK_HBD0_RDOQ
+#if NEW_MD_LAMBDA
+                full_lambda,
+#else
                 context_ptr->full_lambda,
+#endif
 #endif
                 EB_FALSE);
 
@@ -3045,7 +3072,11 @@ void full_loop_r(
 #endif
                 candidate_buffer->candidate_ptr->use_intrabc,
 #if OMARK_HBD0_RDOQ
+#if NEW_MD_LAMBDA
+                full_lambda,
+#else
                 context_ptr->full_lambda,
+#endif
 #endif
                 EB_FALSE);
 
@@ -3110,6 +3141,9 @@ void cu_full_distortion_fast_tu_mode_r(
 {
     (void)sb_ptr;
 
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     uint64_t                          y_tu_coeff_bits;
     uint64_t                          cb_tu_coeff_bits;
     uint64_t                          cr_tu_coeff_bits;
@@ -3271,8 +3305,11 @@ void cu_full_distortion_fast_tu_mode_r(
                 &cb_tu_coeff_bits,
                 &cr_tu_coeff_bits,
                 context_ptr->blk_geom->txsize[tx_depth][txb_itr],
+#if NEW_MD_LAMBDA
+                full_lambda);
+#else
                 context_ptr->full_lambda);
-
+#endif
             *cb_coeff_bits += cb_tu_coeff_bits;
             *cr_coeff_bits += cr_tu_coeff_bits;
             cbFullDistortion[DIST_CALC_RESIDUAL] += tuFullDistortion[1][DIST_CALC_RESIDUAL];
@@ -3339,6 +3376,9 @@ void  d1_non_square_block_decision(
 #endif
 )
 {
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     //compute total cost for the whole block partition
     uint64_t tot_cost = 0;
     uint32_t first_blk_idx = context_ptr->cu_ptr->mds_idx - (context_ptr->blk_geom->totns - 1);//index of first block in this partition
@@ -3362,7 +3402,11 @@ void  d1_non_square_block_decision(
             0,
             from_shape_to_part[context_ptr->blk_geom->shape],
             &split_cost,
+#if NEW_MD_LAMBDA
+            full_lambda,
+#else
             context_ptr->full_lambda,
+#endif
             context_ptr->md_rate_estimation_ptr,
             context_ptr->sb_ptr->picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->max_sb_depth);
 
@@ -3395,6 +3439,9 @@ void   compute_depth_costs(
     uint64_t                 *above_depth_cost,
     uint64_t                 *curr_depth_cost)
 {
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     uint64_t       above_non_split_rate = 0;
     uint64_t       above_split_rate = 0;
 
@@ -3437,7 +3484,11 @@ void   compute_depth_costs(
             0,
             PARTITION_SPLIT,
             &above_split_rate,
+#if NEW_MD_LAMBDA
+            full_lambda,
+#else
             context_ptr->full_lambda,
+#endif
             context_ptr->md_rate_estimation_ptr,
             sequence_control_set_ptr->max_sb_depth);
     }
@@ -3453,7 +3504,11 @@ void   compute_depth_costs(
                     0,
                     PARTITION_NONE,
                     &curr_non_split_rate_blk0,
+#if NEW_MD_LAMBDA
+                    full_lambda,
+#else
                     context_ptr->full_lambda,
+#endif
                     context_ptr->md_rate_estimation_ptr,
                     sequence_control_set_ptr->max_sb_depth);
 
@@ -3466,7 +3521,11 @@ void   compute_depth_costs(
                     0,
                     PARTITION_NONE,
                     &curr_non_split_rate_blk1,
+#if NEW_MD_LAMBDA
+                    full_lambda,
+#else
                     context_ptr->full_lambda,
+#endif
                     context_ptr->md_rate_estimation_ptr,
                     sequence_control_set_ptr->max_sb_depth);
 
@@ -3479,7 +3538,11 @@ void   compute_depth_costs(
                     0,
                     PARTITION_NONE,
                     &curr_non_split_rate_blk2,
+#if NEW_MD_LAMBDA
+                    full_lambda,
+#else
                     context_ptr->full_lambda,
+#endif
                     context_ptr->md_rate_estimation_ptr,
                     sequence_control_set_ptr->max_sb_depth);
 
@@ -3492,7 +3555,11 @@ void   compute_depth_costs(
                     0,
                     PARTITION_NONE,
                     &curr_non_split_rate_blk3,
+#if NEW_MD_LAMBDA
+                    full_lambda,
+#else
                     context_ptr->full_lambda,
+#endif
                     context_ptr->md_rate_estimation_ptr,
                     sequence_control_set_ptr->max_sb_depth);
     }
@@ -3578,6 +3645,9 @@ void   compute_depth_costs_md_skip(
     uint64_t            *above_depth_cost,
     uint64_t            *curr_depth_cost)
 {
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     uint64_t       above_non_split_rate = 0;
     uint64_t       above_split_rate = 0;
     *curr_depth_cost = 0;
@@ -3595,7 +3665,11 @@ void   compute_depth_costs_md_skip(
                         0,
                         PARTITION_NONE,
                         &curr_non_split_rate_blk,
+#if NEW_MD_LAMBDA
+                        full_lambda,
+#else
                         context_ptr->full_lambda,
+#endif
                         context_ptr->md_rate_estimation_ptr,
                         sequence_control_set_ptr->max_sb_depth);
         }
@@ -3632,7 +3706,11 @@ void   compute_depth_costs_md_skip(
             0,
             PARTITION_SPLIT,
             &above_split_rate,
+#if NEW_MD_LAMBDA
+            full_lambda,
+#else
             context_ptr->full_lambda,
+#endif
             context_ptr->md_rate_estimation_ptr,
             sequence_control_set_ptr->max_sb_depth);
     }

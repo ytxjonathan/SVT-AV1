@@ -2295,18 +2295,13 @@ static void model_rd_with_curvfit(
     BlockSize plane_bsize,
     int64_t sse, int num_samples, int *rate,
     int64_t *dist,
-#if QUANT_HBD0_FIX    
-    ModeDecisionContext *context_ptr
-#else
-    uint32_t rdmult
+#if QUANT_HBD0_FIX
+    ModeDecisionContext *context_ptr,
 #endif
+    uint32_t rdmult
 )
 {
     (void)plane_bsize;
-#if QUANT_HBD0_FIX
-    uint32_t rdmult = context_ptr->full_lambda;
-#endif
-
     const int dequant_shift = 3;
 #if 0
     int32_t current_q_index = MAX(0, MIN(QINDEX_RANGE - 1, picture_control_set_ptr->parent_pcs_ptr->frm_hdr.quantization_params.base_q_idx));
@@ -2314,7 +2309,7 @@ static void model_rd_with_curvfit(
     int32_t current_q_index = picture_control_set_ptr->parent_pcs_ptr->frm_hdr.quantization_params.base_q_idx;
 #endif
 #if QUANT_CLEANUP
-    
+
 #if QUANT_HBD0_FIX
     Dequants *const dequants = context_ptr->hbd_mode_decision ? &picture_control_set_ptr->parent_pcs_ptr->deq_bd: &picture_control_set_ptr->parent_pcs_ptr->deq_8bit ;
 #else
@@ -2444,6 +2439,9 @@ static void pick_wedge(
 #else
     uint8_t hbd_mode_decision = context_ptr->hbd_mode_decision;
 #endif
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
 #if COMP_HBD
     EbPictureBufferDesc  *src_pic = hbd_mode_decision ? picture_control_set_ptr->input_frame16bit : picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr;
 #else
@@ -2491,14 +2489,20 @@ static void pick_wedge(
         sse = av1_wedge_sse_from_residuals(residual1, diff10, mask, N);
         sse = ROUND_POWER_OF_TWO(sse, bd_round);
 #if QUANT_HBD0_FIX
+#if NEW_MD_LAMBDA
+        model_rd_with_curvfit(picture_control_set_ptr, bsize, sse, N, &rate, &dist, context_ptr, full_lambda);
+#else
         model_rd_with_curvfit(picture_control_set_ptr, bsize, sse, N, &rate, &dist, context_ptr);
+#endif
 #else
         model_rd_with_curvfit(picture_control_set_ptr, bsize, sse, N, &rate, &dist, context_ptr->full_lambda);
 
 #endif
-
+#if NEW_MD_LAMBDA
+        rd = RDCOST(full_lambda, rate, dist);
+#else
         rd = RDCOST(context_ptr->full_lambda, rate, dist);
-
+#endif
         if (rd < best_rd) {
             *best_wedge_index = wedge_index;
             *best_wedge_sign = wedge_sign;
@@ -2593,7 +2597,9 @@ static int64_t pick_wedge_fixed_sign(
     const int8_t wedge_sign,
     int8_t *const best_wedge_index) {
   //const MACROBLOCKD *const xd = &x->e_mbd;
-
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
   const int bw = block_size_wide[bsize];
   const int bh = block_size_high[bsize];
   const int N = bw * bh;
@@ -2612,7 +2618,11 @@ static int64_t pick_wedge_fixed_sign(
     sse = av1_wedge_sse_from_residuals(residual1, diff10, mask, N);
     sse = ROUND_POWER_OF_TWO(sse, bd_round);
 #if QUANT_HBD0_FIX
+#if NEW_MD_LAMBDA
+    model_rd_with_curvfit(picture_control_set_ptr,bsize, /*0,*/ sse, N,    &rate, &dist, context_ptr, full_lambda);
+#else
     model_rd_with_curvfit(picture_control_set_ptr,bsize, /*0,*/ sse, N,    &rate, &dist, context_ptr);
+#endif
 #else
     model_rd_with_curvfit(picture_control_set_ptr,bsize, /*0,*/ sse, N,    &rate, &dist, context_ptr->full_lambda);
 #endif
@@ -2622,8 +2632,11 @@ static int64_t pick_wedge_fixed_sign(
 #if  II_COMP_FLAG
     rate  += candidate_ptr->md_rate_estimation_ptr->wedge_idx_fac_bits[bsize][wedge_index];
 #endif
+#if NEW_MD_LAMBDA
+    rd = RDCOST(/*x->rdmult*/full_lambda, rate, dist);
+#else
     rd = RDCOST(/*x->rdmult*/context_ptr->full_lambda, rate, dist);
-
+#endif
     if (rd < best_rd) {
       *best_wedge_index = wedge_index;
       best_rd = rd;
@@ -2683,6 +2696,9 @@ static void  pick_interinter_seg(
 #else
     uint8_t hbd_mode_decision = context_ptr->hbd_mode_decision;
 #endif
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     const int bw = block_size_wide[bsize];
     const int bh = block_size_high[bsize];
     const int N = 1 << num_pels_log2_lookup[bsize];
@@ -2713,11 +2729,19 @@ static void  pick_interinter_seg(
 
         sse = ROUND_POWER_OF_TWO(sse, bd_round );
 #if QUANT_HBD0_FIX
+#if NEW_MD_LAMBDA
+        model_rd_with_curvfit(picture_control_set_ptr, bsize,  sse, N, &rate, &dist, context_ptr, full_lambda);
+#else
         model_rd_with_curvfit(picture_control_set_ptr, bsize,  sse, N, &rate, &dist, context_ptr);
+#endif
 #else
         model_rd_with_curvfit(picture_control_set_ptr, bsize,  sse, N, &rate, &dist, context_ptr->full_lambda);
 #endif
+#if NEW_MD_LAMBDA
+        const int64_t rd0 = RDCOST(full_lambda , rate, dist);
+#else
         const int64_t rd0 = RDCOST(context_ptr->full_lambda , rate, dist);
+#endif
 
         if (rd0 < best_rd) {
             best_mask_type = cur_mask_type;
@@ -3000,7 +3024,9 @@ static void model_rd_for_sb_with_curvfit(
     // Hence quantizer step is also 8 times. To get effective quantizer
     // we need to divide by 8 before sending to modeling function.
     const int bd_round = 0;
-
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     int64_t rate_sum = 0;
     int64_t dist_sum = 0;
     int64_t total_sse = 0;
@@ -3020,7 +3046,11 @@ static void model_rd_for_sb_with_curvfit(
 
         sse = ROUND_POWER_OF_TWO(sse, bd_round);
 #if QUANT_HBD0_FIX
+#if NEW_MD_LAMBDA
+        model_rd_with_curvfit(picture_control_set_ptr , plane_bsize, sse, bw * bh, &rate, &dist, context_ptr, full_lambda);
+#else
         model_rd_with_curvfit(picture_control_set_ptr , plane_bsize, sse, bw * bh, &rate, &dist, context_ptr);
+#endif
 #else
         model_rd_with_curvfit(picture_control_set_ptr , plane_bsize, sse, bw * bh, &rate, &dist, context_ptr->full_lambda);
 #endif
@@ -3063,7 +3093,9 @@ void search_compound_avg_dist(
         picture_control_set_ptr->parent_pcs_ptr->ref_order_hint[rf[0] - 1],
         picture_control_set_ptr->parent_pcs_ptr->ref_order_hint[rf[1] - 1],
         context_ptr->cu_ptr->av1xd);
-
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     //COMPOUND AVERAGE
     COMPOUND_TYPE  comp_i;
 
@@ -3165,7 +3197,11 @@ void search_compound_avg_dist(
         est_rate += candidate_ptr->md_rate_estimation_ptr->comp_idx_fac_bits[comp_index_ctx][candidate_ptr->compound_idx];
 
         est_rd[comp_i] =
+#if NEW_MD_LAMBDA
+            RDCOST(full_lambda , est_rate, est_dist);
+#else
             RDCOST(context_ptr->full_lambda , est_rate, est_dist);
+#endif
     }
 
     //assign the best compound type
@@ -7214,7 +7250,11 @@ void interpolation_filter_search(
     int32_t tmp_rate;
     int64_t tmp_dist;
 #if OMARK_HBD0_IFS
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda_divided = hbd_mode_decision ? md_context_ptr->full_lambda_md[EB_10_BIT_MD] >> (2 * (bit_depth - 8)) : md_context_ptr->full_lambda_md[EB_8_BIT_MD];
+#else
     uint32_t full_lambda_divided = hbd_mode_decision ? md_context_ptr->full_lambda >> (2 * (bit_depth - 8)) : md_context_ptr->full_lambda ;
+#endif
 #else
     uint32_t full_lambda_8b = md_context_ptr->full_lambda >> (2 * (bit_depth - 8));
 #endif

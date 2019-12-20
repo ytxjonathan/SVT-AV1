@@ -1453,12 +1453,18 @@ void finish_cdef_search(
     const int32_t num_planes = 3; // av1_num_planes(cm);
 #if UPDATE_CDEF
     uint16_t qp_index = (uint8_t)picture_control_set_ptr->parent_pcs_ptr->frm_hdr.quantization_params.base_q_idx;
+#if NEW_MD_LAMBDA
+    uint32_t fast_lambda, full_lambda;
+#else
     uint32_t fast_lambda, full_lambda, fast_chroma_lambda, full_chroma_lambda;
+#endif
     (*av1_lambda_assignment_function_table[picture_control_set_ptr->parent_pcs_ptr->pred_structure])(
         &fast_lambda,
         &full_lambda,
+#if !NEW_MD_LAMBDA
         &fast_chroma_lambda,
         &full_chroma_lambda,
+#endif
         (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
         qp_index,
 #if OMARK_HBD1_CDEF && OMARK_LAMBDA

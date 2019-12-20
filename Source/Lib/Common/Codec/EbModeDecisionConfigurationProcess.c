@@ -3178,8 +3178,10 @@ void* mode_decision_configuration_kernel(void *input_ptr)
         (*av1_lambda_assignment_function_table[picture_control_set_ptr->parent_pcs_ptr->pred_structure])(
             &lambdaSad,
             &lambdaSse,
+#if !NEW_MD_LAMBDA
             &lambdaSad,
             &lambdaSse,
+#endif
             (uint8_t)picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr->bit_depth,
             context_ptr->qp_index,
 #if OMARK_LAMBDA

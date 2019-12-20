@@ -35,7 +35,11 @@ extern "C" {
 
                                       // 0. tunr OFF AVX512
 #define FIXED_QP_M                  1 // 1. core only
-#define OMARK_LAMBDA                1 // 2. fix lambda calculation
+
+#if 1
+
+
+#define OMARK_LAMBDA                1 // 2. fix lambda calculation for HBD0
 
 #define OMARK_HBD1_CDEF             1 // 3. fix CDEF lambda for hbd1/2
 
@@ -54,6 +58,8 @@ extern "C" {
 #define QUANT_HBD0_FIX               1
 
 
+#define NEW_MD_LAMBDA               1
+#endif
 #define TX_SIZE_EARLY_EXIT          1 // Exit TX size search when all coefficients are zero.
 
 #define   SINGLE_CORE_ENCODE   1

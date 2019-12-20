@@ -156,12 +156,16 @@ extern "C" {
         uint8_t                         qp;
 #endif
         uint8_t                         chroma_qp;
+#if NEW_MD_LAMBDA
+        uint32_t                        fast_lambda_md[2];
+        uint32_t                        full_lambda_md[2];
+#else
         uint32_t                        fast_lambda;
         uint32_t                        full_lambda;
         uint32_t                        fast_chroma_lambda;
         uint32_t                        full_chroma_lambda;
         uint32_t                        full_chroma_lambda_sao;
-
+#endif
         //  Context Variables---------------------------------
         SuperBlock                   *sb_ptr;
         TransformUnit                *txb_ptr;
@@ -423,8 +427,10 @@ extern "C" {
     typedef void(*EbAv1LambdaAssignFunc)(
         uint32_t                    *fast_lambda,
         uint32_t                    *full_lambda,
+#if !NEW_MD_LAMBDA
         uint32_t                    *fast_chroma_lambda,
         uint32_t                    *full_chroma_lambda,
+#endif
         uint8_t                      bit_depth,
         uint16_t                     qp_index,
 #if OMARK_LAMBDA
