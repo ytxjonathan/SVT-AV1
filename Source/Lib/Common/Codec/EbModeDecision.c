@@ -330,7 +330,9 @@ void inter_intra_search(
     uint8_t *src_buf = src_pic->buffer_y + (context_ptr->cu_origin_x + src_pic->origin_x) + (context_ptr->cu_origin_y + src_pic->origin_y) * src_pic->stride_y;
 
     uint8_t bit_depth = context_ptr->hbd_mode_decision ? EB_10BIT : EB_8BIT;
-
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     uint32_t  bwidth = context_ptr->blk_geom->bwidth;
     uint32_t  bheight = context_ptr->blk_geom->bheight;
     EbPictureBufferDesc  pred_desc;
@@ -518,8 +520,11 @@ void inter_intra_search(
                     0, 0, 0, 0, &rate_sum, &dist_sum, NULL, NULL, NULL, NULL, NULL);
                 }
                 // rd = RDCOST(x->rdmult, tmp_rate_mv + rate_sum + rmode, dist_sum);
+#if NEW_MD_LAMBDA
+                rd = RDCOST(full_lambda, tmp_rate_mv + rate_sum + rmode, dist_sum);
+#else
                 rd = RDCOST(context_ptr->full_lambda, tmp_rate_mv + rate_sum + rmode, dist_sum);
-
+#endif
                 if (rd < best_interintra_rd) {
                     best_interintra_rd = rd;
                     candidate_ptr->interintra_mode = best_interintra_mode = interintra_mode;
@@ -3279,7 +3284,10 @@ static void single_motion_search(
     (void)ref_idx;
     const Av1Common *const cm = pcs->parent_pcs_ptr->av1_cm;
     FrameHeader *frm_hdr = &pcs->parent_pcs_ptr->frm_hdr;
-
+#if NEW_MD_LAMBDA
+// single_motion_search supports 8bit path only
+    uint32_t full_lambda = context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     x->xd = context_ptr->cu_ptr->av1xd;
     const int mi_row = -x->xd->mb_to_top_edge / (8 * MI_SIZE);
     const int mi_col = -x->xd->mb_to_left_edge / (8 * MI_SIZE);
@@ -3297,7 +3305,11 @@ static void single_motion_search(
     x->mv_limits.col_max = (cm->mi_cols - mi_col) * MI_SIZE + AOM_INTERP_EXTEND;
     //set search paramters
     x->sadperbit16 = sad_per_bit16lut_8[frm_hdr->quantization_params.base_q_idx];
+#if NEW_MD_LAMBDA
+    x->errorperbit = full_lambda >> RD_EPB_SHIFT;
+#else
     x->errorperbit = context_ptr->full_lambda >> RD_EPB_SHIFT;
+#endif
     x->errorperbit += (x->errorperbit == 0);
 
 
@@ -5233,7 +5245,9 @@ void  intra_bc_search(
     //CHKN crc calculator could be moved to mdContext and these init at init time.
     av1_crc_calculator_init(&x->crc_calculator1, 24, 0x5D6DCB);
     av1_crc_calculator_init(&x->crc_calculator2, 24, 0x864CFB);
-
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
     x->xd = cu_ptr->av1xd;
     x->nmv_vec_cost = context_ptr->md_rate_estimation_ptr->nmv_vec_cost;
     x->mv_cost_stack = context_ptr->md_rate_estimation_ptr->nmvcoststack;
@@ -5263,7 +5277,11 @@ void  intra_bc_search(
     x->mv_limits.col_max = (cm->mi_cols - mi_col) * MI_SIZE + AOM_INTERP_EXTEND;
     //set search paramters
     x->sadperbit16 = sad_per_bit16lut_8[frm_hdr->quantization_params.base_q_idx];
+#if NEW_MD_LAMBDA
+    x->errorperbit = full_lambda >> RD_EPB_SHIFT;
+#else
     x->errorperbit = context_ptr->full_lambda >> RD_EPB_SHIFT;
+#endif
     x->errorperbit += (x->errorperbit == 0);
     //temp buffer for hash me
     for (int xi = 0; xi < 2; xi++)
