@@ -778,6 +778,9 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if M0_SC_ENABLE_HME_FLAG
     enc_mode_hme = ENC_M0;
 #endif
+#if M2_SC_ENABLE_HME_FLAG
+    enc_mode_hme = ENC_M2;
+#endif
     picture_control_set_ptr->enable_hme_flag = enable_hme_flag[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][enc_mode_hme];
 
     picture_control_set_ptr->enable_hme_level0_flag = enable_hme_level0_flag[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][enc_mode_hme];
@@ -963,6 +966,14 @@ EbErrorType signal_derivation_multi_processes_oq(
         }
 #endif
         else if (sc_content_detected)
+#if M2_SC_NSQ_SEARCH_LEVEL
+            if (1)
+                if (picture_control_set_ptr->is_used_as_reference_flag)
+                    picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL5;
+                else
+                    picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL2;
+            else
+#endif
 #if PRESETS_TUNE
 #if M0_OPT
             if (picture_control_set_ptr->enc_mode <= ENC_M1)
@@ -1207,6 +1218,11 @@ EbErrorType signal_derivation_multi_processes_oq(
     }
     else
         picture_control_set_ptr->loop_filter_mode = 0;
+
+#if M2_SC_LOOP_FILTER_MODE
+    picture_control_set_ptr->loop_filter_mode = 0;
+#endif
+
     // CDEF Level                                   Settings
     // 0                                            OFF
     // 1                                            1 step refinement

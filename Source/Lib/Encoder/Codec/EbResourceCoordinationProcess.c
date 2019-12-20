@@ -96,6 +96,9 @@ EbErrorType signal_derivation_pre_analysis_oq(
 #if M0_SC_ENABLE_HME_FLAG
     hme_me_level = ENC_M0;
 #endif
+#if M2_SC_ENABLE_HME_FLAG
+    hme_me_level = ENC_M2;
+#endif
     // Derive HME Flag
     if (sequence_control_set_ptr->static_config.use_default_me_hme) {
         picture_control_set_ptr->enable_hme_flag = enable_hme_flag[0][input_resolution][hme_me_level] || enable_hme_flag[1][input_resolution][hme_me_level];

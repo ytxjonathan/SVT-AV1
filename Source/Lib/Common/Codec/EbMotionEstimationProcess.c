@@ -107,6 +107,9 @@ void* set_me_hme_params_oq(
 #if M1_ME_HME_SEARCH_AREA
     hmeMeLevel = ENC_M1;
 #endif
+#if M2_SC_ME_HME_SEARCH_AREA
+    hmeMeLevel = ENC_M2;
+#endif
     // HME/ME default settings
     me_context_ptr->number_hme_search_region_in_width = 2;
     me_context_ptr->number_hme_search_region_in_height = 2;
@@ -327,6 +330,9 @@ EbErrorType signal_derivation_me_kernel_oq(
     else
         context_ptr->me_context_ptr->compute_global_motion = EB_FALSE;
 
+#if M2_SC_GLOBAL_MV_INJECTION
+    context_ptr->me_context_ptr->compute_global_motion = EB_FALSE;
+#endif
     return return_error;
 };
 #else
@@ -471,6 +477,10 @@ void* tf_set_me_hme_params_oq(
 
     uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
 
+#if M2_SC_ME_HME_SEARCH_AREA
+    hmeMeLevel = ENC_M2;
+#endif
+
     // HME Level0
     me_context_ptr->hme_level0_total_search_area_width = tf_hme_level0_total_search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
     me_context_ptr->hme_level0_total_search_area_height = tf_hme_level0_total_search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
@@ -546,6 +556,9 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
 #if FRACTIONAL_SEARCH_METHOD_SSD_SEARCH
     context_ptr->me_context_ptr->fractional_search_method = SSD_SEARCH;
 #endif
+#if M2_SC_FRACTIONAL_SEARCH_METHOD
+    context_ptr->me_context_ptr->fractional_search_method = SUB_SAD_SEARCH;
+#endif
 
     if (sequence_control_set_ptr->static_config.fract_search_64 == DEFAULT)
         if (picture_control_set_ptr->sc_content_detected)
@@ -578,6 +591,9 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
             context_ptr->me_context_ptr->use_subpel_flag = 1;
     else
         context_ptr->me_context_ptr->use_subpel_flag = sequence_control_set_ptr->static_config.enable_subpel;
+#if M2_SC_TF_SUBPEL_FLAG
+    context_ptr->me_context_ptr->use_subpel_flag = 0;
+#endif
 
     if (MR_MODE) {
         context_ptr->me_context_ptr->half_pel_mode =

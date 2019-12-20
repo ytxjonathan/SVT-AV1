@@ -43,8 +43,23 @@ extern "C" {
 #define M0_SC_ENABLE_HME_FLAG                     0
 #define M0_SC_PALETTE                             0
 
+// Old M1 settings
 #define M1_ME_HME_SEARCH_AREA                     0
 #define FRACTIONAL_SEARCH_METHOD_SSD_SEARCH       0
+
+// M2 to M1 - for SC
+#define ENABLE_M2_ON_M1                           0 // Give M2 bitstreams when run in M1
+#if ENABLE_M2_ON_M1
+#define M2_SC_GLOBAL_MV_INJECTION                 1
+#define M2_SC_PREDICTIVE_ME_LEVEL                 1
+#define M2_SC_FRACTIONAL_SEARCH_METHOD            1
+#define M2_SC_TF_SUBPEL_FLAG                      1
+#define M2_SC_NSQ_SEARCH_LEVEL                    1
+#define M2_SC_LOOP_FILTER_MODE                    1
+#define M2_SC_REF_COUNT_USED                      1
+#define M2_SC_ENABLE_HME_FLAG                     1
+#define M2_SC_ME_HME_SEARCH_AREA                  1
+#endif
 
 #define TX_SIZE_EARLY_EXIT          1 // Exit TX size search when all coefficients are zero.
 

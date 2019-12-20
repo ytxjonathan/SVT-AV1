@@ -1473,6 +1473,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->global_mv_injection = 0;
 #endif
+#if M2_SC_GLOBAL_MV_INJECTION
+    context_ptr->global_mv_injection = 0;
+#endif
+
 #if MULTI_PASS_PD
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->new_nearest_injection = 0;
@@ -1667,6 +1671,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if M0_SC_PREDICTIVE_ME_LEVEL
             if (1)
                 context_ptr->predictive_me_level = 3;
+            else
+#endif
+#if M2_SC_PREDICTIVE_ME_LEVEL
+            if (1)
+                context_ptr->predictive_me_level = 2;
             else
 #endif
 #if PRESETS_TUNE
