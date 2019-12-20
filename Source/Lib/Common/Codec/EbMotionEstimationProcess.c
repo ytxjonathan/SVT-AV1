@@ -1010,6 +1010,7 @@ void* motion_estimation_kernel(void *input_ptr)
                             sb_index,
                             context_ptr,
                             input_picture_ptr);
+                            //picture_control_set_ptr->save_enhanced_picture_ptr); //original YUV
                     }
                 }
             }

@@ -15775,6 +15775,57 @@ EbErrorType av1_open_loop_intra_search(
 
 }
 
+static void filter_intra_edge(PictureParentControlSet *picture_control_set_ptr, OisMbResults *ois_mb_results_ptr, uint8_t mode, 
+                              int32_t p_angle, uint32_t cu_origin_x, uint32_t cu_origin_y, uint8_t *above_row, uint8_t *left_col) {
+    SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet *)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
+    uint32_t mb_stride = (sequence_control_set_ptr->seq_header.max_frame_width + 15) / 16;
+    uint32_t mb_height = (sequence_control_set_ptr->seq_header.max_frame_height + 15) / 16;
+    const int txwpx = tx_size_wide[TX_16X16];
+    const int txhpx = tx_size_high[TX_16X16];
+    const int need_right = p_angle < 90;
+    const int need_bottom = p_angle > 180;
+    int need_left = extend_modes[mode] & NEED_LEFT;
+    int need_above = extend_modes[mode] & NEED_ABOVE;
+    int need_above_left = extend_modes[mode] & NEED_ABOVELEFT;
+    int ab_sm = (cu_origin_y > 0 && (ois_mb_results_ptr - mb_stride)) ? is_smooth((ois_mb_results_ptr - mb_stride)->intra_mode, 0) : 0;
+    int le_sm = (cu_origin_x > 0 && (ois_mb_results_ptr - 1)) ? is_smooth((ois_mb_results_ptr - 1)->intra_mode, 0) : 0;
+    const int filt_type = (ab_sm || le_sm) ? 1 : 0;
+    int n_top_px  = cu_origin_y > 0 ? AOMMIN(txwpx, (mb_stride * 16 - cu_origin_x + txwpx)) : 0;
+    int n_left_px = cu_origin_x > 0 ? AOMMIN(txhpx, (mb_height * 16 - cu_origin_y + txhpx)) : 0;
+
+    if (p_angle != 90 && p_angle != 180) {
+        const int ab_le = need_above_left ? 1 : 0;
+        if (need_above && need_left && (txwpx + txhpx >= 24)) {
+            filter_intra_edge_corner(above_row, left_col);
+        }
+        if (need_above && n_top_px > 0) {
+            const int strength =
+                intra_edge_filter_strength(txwpx, txhpx, p_angle - 90, filt_type);
+            const int n_px = n_top_px + ab_le + (need_right ? txhpx : 0);
+            eb_av1_filter_intra_edge(above_row - ab_le, n_px, strength);
+        }
+        if (need_left && n_left_px > 0) {
+            const int strength = intra_edge_filter_strength(
+                    txhpx, txwpx, p_angle - 180, filt_type);
+            const int n_px = n_left_px + ab_le + (need_bottom ? txwpx : 0);
+            eb_av1_filter_intra_edge(left_col - ab_le, n_px, strength);
+        }
+    }
+    int upsample_above =
+        use_intra_edge_upsample(txwpx, txhpx, p_angle - 90, filt_type);
+    if (need_above && upsample_above) {
+        const int n_px = txwpx + (need_right ? txhpx : 0);
+        eb_av1_upsample_intra_edge(above_row, n_px);
+    }
+    int upsample_left =
+        use_intra_edge_upsample(txhpx, txwpx, p_angle - 180, filt_type);
+    if (need_left && upsample_left) {
+        const int n_px = txhpx + (need_bottom ? txwpx : 0);
+        eb_av1_upsample_intra_edge(left_col, n_px);
+    }
+    return;
+}
+
 EbErrorType open_loop_intra_search_mb(
     PictureParentControlSet *picture_control_set_ptr, uint32_t sb_index,
     MotionEstimationContext_t *context_ptr, EbPictureBufferDesc *input_ptr)
@@ -15838,6 +15889,10 @@ EbErrorType open_loop_intra_search_mb(
             int64_t best_intra_cost = INT64_MAX;
             for (ois_intra_mode = intra_mode_start; ois_intra_mode <= intra_mode_end; ++ois_intra_mode) {
                 int32_t p_angle = av1_is_directional_mode((PredictionMode)ois_intra_mode) ? mode_to_angle_map[(PredictionMode)ois_intra_mode] : 0;
+                // Edge filter
+                if(av1_is_directional_mode((PredictionMode)ois_intra_mode) && sequence_control_set_ptr->seq_header.enable_intra_edge_filter) {
+                    filter_intra_edge(picture_control_set_ptr, ois_mb_results_ptr, ois_intra_mode, p_angle, cu_origin_x, cu_origin_y, above_row, left_col);
+                }
                 // PRED
                 intra_prediction_open_loop(p_angle, ois_intra_mode, cu_origin_x, cu_origin_y, tx_size, above_row, left_col, context_ptr);
 
