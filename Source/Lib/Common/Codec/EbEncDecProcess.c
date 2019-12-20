@@ -2212,11 +2212,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (MR_MODE)
         context_ptr->sq_weight = (uint32_t)~0;
     else
-#if 1//POST_PD2_INTER_DEPTH // set cost to max for pred depth
-        context_ptr->sq_weight = (uint32_t)~0;
-#else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
-#endif
 #endif
 #if !ENHANCED_M0_SETTINGS // lossless change - enable_auto_max_partition is properly derived using pd_pass @ the bottom: previous merge conflict
 #if AUTO_MAX_PARTITION
