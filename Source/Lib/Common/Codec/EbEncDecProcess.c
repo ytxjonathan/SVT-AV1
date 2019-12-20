@@ -3413,14 +3413,14 @@ void* enc_dec_kernel(void *input_ptr)
 
                             // Generate consider_block
                             uint32_t total_blk_index = 0;
-                            for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                            for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt, total_blk_index < total_blk_count; blk_index++) {
 
                                 if (blk_index == context_ptr->md_context->part_struct_union_block_index_array[total_blk_index]) {
 
                                     resultsPtr->leaf_data_array[blk_index].consider_block = 1;
                                     resultsPtr->leaf_data_array[blk_index].refined_split_flag = EB_FALSE;
                                     // This to skip duplicated block indices
-                                    while (blk_index == context_ptr->md_context->part_struct_union_block_index_array[total_blk_index]) {
+                                    while (total_blk_index < total_blk_count && blk_index == context_ptr->md_context->part_struct_union_block_index_array[total_blk_index]) {
                                         total_blk_index++;
                                     }
 
