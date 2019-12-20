@@ -1624,10 +1624,17 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (sequence_control_set_ptr->static_config.bipred_3x3_inject == DEFAULT)
 #if PRESETS_TUNE
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#if SC_PRESETS_OPT
+            if (MR_MODE)
+                context_ptr->bipred3x3_injection = 1;
+            else
+                context_ptr->bipred3x3_injection = 0;
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M4)
                 context_ptr->bipred3x3_injection = 1;
             else
                 context_ptr->bipred3x3_injection = 0;
+#endif
         else
             if (picture_control_set_ptr->enc_mode <= ENC_M2)
                 context_ptr->bipred3x3_injection = 1;
@@ -1672,7 +1679,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
                 if (picture_control_set_ptr->enc_mode <= ENC_M1)
 #if M0_OPT
+#if SC_PRESETS_OPT
+                    context_ptr->predictive_me_level = (picture_control_set_ptr->enc_mode <= ENC_M0) ? 3 : 4;
+#else
                     context_ptr->predictive_me_level = (picture_control_set_ptr->enc_mode <= ENC_M0) ? 2 : 4;
+#endif
 #else
                     context_ptr->predictive_me_level = 4;
 #endif
@@ -2001,6 +2012,13 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         if (MR_MODE || picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
             context_ptr->edge_based_skip_angle_intra = 0;
+#if SC_PRESETS_OPT
+        if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+            if (picture_control_set_ptr->enc_mode <= ENC_M0)
+                context_ptr->edge_based_skip_angle_intra = 0;
+            else
+                context_ptr->edge_based_skip_angle_intra = 1;
+#endif
 #if M0_OPT
 #if PRESETS_TUNE
 #if PRESETS_OPT
@@ -2051,7 +2069,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // Derive INTER/INTER WEDGE variance TH
 #if PRESETS_OPT
     // Phoenix: Active only when inter/inter compound is on
+#if SC_PRESETS_OPT
+    if (picture_control_set_ptr->enc_mode <= ENC_M7 && !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#else
     if (picture_control_set_ptr->enc_mode <= ENC_M7)
+#endif
 #else
 #if M0_OPT
     if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0))
