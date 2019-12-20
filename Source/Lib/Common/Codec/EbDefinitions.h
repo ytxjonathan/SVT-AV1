@@ -57,6 +57,7 @@ extern "C" {
 #define THE_1101_BLOCKS_REF          0
 #define THE_1101_BLOCKS_MOD          0   
 #define FLAG_CHECK_MERGE_1_D         1
+#define PART_STRUCTURE_PRUNING       1
 #endif
 
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements

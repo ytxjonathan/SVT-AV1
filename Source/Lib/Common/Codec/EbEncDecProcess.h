@@ -121,6 +121,7 @@ extern "C" {
         uint8_t                                reduced_tx_set_used;
         EbBool                                 evaluate_cfl_ep; // 0: CFL is evaluated @ mode decision, 1: CFL is evaluated @ encode pass
         uint8_t                                md_skip_blk;
+
     } EncDecContext;
 
     /**************************************
