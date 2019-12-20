@@ -94,8 +94,6 @@ matrix:
     - name: Valgrind
     - name: Coveralls Linux+gcc
     - name: Coveralls osx+clang
-    - name: Unit Tests Linux+gcc
-    - name: Unit Tests osx+clang
     # Exclude these because if the encoder can run with a release build, the commit is probably fine. Also required for fast_finish.
   include:
     # GCC & Clang builds
