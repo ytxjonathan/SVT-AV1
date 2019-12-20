@@ -4310,7 +4310,7 @@ void* rate_control_kernel(void *input_ptr)
                         {
                             { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 }, // 1L
                             { 0.35, 1.0, 1.0, 1.0, 1.0, 1.0 }, // 2L
-                            { 0.40, 0.7, 1.0, 1.0, 1.0, 1.0 }, // 3L
+                            { 0.35, 0.8, 1.0, 1.0, 1.0, 1.0 }, // 3L
                             { 0.40, 0.7, 0.85, 1.0, 1.0, 1.0 }, // 4L
                             { 0.35, 0.6, 0.8,  0.9, 1.0, 1.0 }  //5L
                         };
@@ -4318,17 +4318,16 @@ void* rate_control_kernel(void *input_ptr)
                             q_val,
                             q_val * delta_rate_new[picture_control_set_ptr->parent_pcs_ptr->hierarchical_levels][picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index],
                             (AomBitDepth)sequence_control_set_ptr->static_config.encoder_bit_depth);
-                        /*int32_t delta_qindex;
-                        if (picture_control_set_ptr->parent_pcs_ptr->hierarchical_levels == 0)
-                            delta_qindex = eb_av1_compute_qdelta(
-                                q_val,
-                                q_val * 1,
-                                (AomBitDepth)sequence_control_set_ptr->static_config.encoder_bit_depth);
+
+                        if (picture_control_set_ptr->parent_pcs_ptr->hierarchical_levels < 3 && picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index > 0 &&
+                            picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index < picture_control_set_ptr->parent_pcs_ptr->hierarchical_levels) {
+                            int32_t ref_q = (picture_control_set_ptr->ref_pic_qp_array[0][0] << 2) + 2;
+                            if (picture_control_set_ptr->slice_type == B_SLICE)
+                                ref_q = MAX(ref_q, ((picture_control_set_ptr->ref_pic_qp_array[1][0] << 2) + 2));
+                            new_qindex = (ref_q + qindex + 1) / 2;
+                        }
                         else
-                            delta_qindex = eb_av1_compute_qdelta(
-                                q_val,
-                                q_val * delta_rate_new[picture_control_set_ptr->parent_pcs_ptr->hierarchical_levels == 4][picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index],
-                                (AomBitDepth)sequence_control_set_ptr->static_config.encoder_bit_depth);*/
+                            new_qindex = (int32_t)(qindex + delta_qindex);
 #else
                         const  double delta_rate_new[2][6] =
                         { { 0.40, 0.7, 0.85, 1.0, 1.0, 1.0 },
@@ -4337,8 +4336,8 @@ void* rate_control_kernel(void *input_ptr)
                             q_val,
                             q_val * delta_rate_new[picture_control_set_ptr->parent_pcs_ptr->hierarchical_levels == 4][picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index],
                             (AomBitDepth)sequence_control_set_ptr->static_config.encoder_bit_depth);
-#endif
                         new_qindex = (int32_t)(qindex + delta_qindex);
+#endif
                     }
                     frm_hdr->quantization_params.base_q_idx =
                         (uint8_t)CLIP3(
