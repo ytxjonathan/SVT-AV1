@@ -9434,13 +9434,13 @@ EB_EXTERN EbErrorType mode_decision_sb(
 
     //CU Loop
     cuIdx = 0;  //index over mdc array
-
+#if !REFACTOR_SQ_WEIGHT
 #if LESS_RECTANGULAR_CHECK_LEVEL
     uint64_t sq_cost = 0;
     uint64_t h_cost;
     uint64_t v_cost;
 #endif
-
+#endif
     uint32_t blk_idx_mds = 0;
     uint32_t  d1_blocks_accumlated = 0;
     int skip_next_nsq = 0;
@@ -9636,10 +9636,41 @@ EB_EXTERN EbErrorType mode_decision_sb(
             if (cu_ptr->mds_idx >= next_non_skip_blk_idx_mds && skip_next_sq == 1)
                 skip_next_sq = 0;
 
+#if REFACTOR_SQ_WEIGHT
+            EbBool a_b_shapes_skip_flag = EB_FALSE;
+            
+            if (context_ptr->sq_weight != (uint32_t)~0 && blk_geom->bsize > BLOCK_8X8) {
+
+                if (context_ptr->blk_geom->shape == PART_HA || context_ptr->blk_geom->shape == PART_HB) {
+                    if (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 1].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 2].avail_blk_flag) {
+                        uint64_t sq_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].default_cost;
+                        uint64_t h_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 1].default_cost + context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 2].default_cost;
+
+                        a_b_shapes_skip_flag = (h_cost > ((sq_cost * context_ptr->sq_weight) / 100));
+                    }
+                }
+
+                if (context_ptr->blk_geom->shape == PART_VA || context_ptr->blk_geom->shape == PART_VB) {
+                    if (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 3].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 4].avail_blk_flag) {
+
+                        uint64_t sq_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].default_cost;
+                        uint64_t v_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 3].default_cost + context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 4].default_cost;
+
+                        a_b_shapes_skip_flag = (v_cost > ((sq_cost * context_ptr->sq_weight) / 100));
+
+                    }
+                }
+
+            }
+#endif
+
 #if AUTO_MAX_PARTITION
             EbBool auto_max_partition_block_skip = (context_ptr->blk_geom->bwidth > block_size_wide[max_bsize] || context_ptr->blk_geom->bheight > block_size_high[max_bsize]) && (mdcResultTbPtr->leaf_data_array[cuIdx].split_flag == EB_TRUE);
-
+#if REFACTOR_SQ_WEIGHT
+            if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->sb_geom[lcuAddr].block_is_allowed[cu_ptr->mds_idx] && !skip_next_nsq && !skip_next_sq && !auto_max_partition_block_skip && !a_b_shapes_skip_flag) {
+#else
             if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->sb_geom[lcuAddr].block_is_allowed[cu_ptr->mds_idx] && !skip_next_nsq && !skip_next_sq && !auto_max_partition_block_skip) {
+#endif
 #else
             if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->sb_geom[lcuAddr].block_is_allowed[cu_ptr->mds_idx] && !skip_next_nsq && !skip_next_sq) {
 #endif
@@ -9654,7 +9685,11 @@ EB_EXTERN EbErrorType mode_decision_sb(
 
             }
 #if AUTO_MAX_PARTITION
+#if REFACTOR_SQ_WEIGHT
+            else if (auto_max_partition_block_skip || a_b_shapes_skip_flag || skip_next_nsq) {
+#else
             else if (auto_max_partition_block_skip) {
+#endif
 #if MULTI_PASS_PD_COST
                 if (context_ptr->blk_geom->shape != PART_N) {
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
@@ -9752,12 +9787,12 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #endif
                 skip_next_nsq = 1;
         }
-
+#if !REFACTOR_SQ_WEIGHT
 #if LESS_RECTANGULAR_CHECK_LEVEL
         if (context_ptr->sq_weight != (uint32_t)~0 && blk_geom->bsize > BLOCK_8X8)
             update_skip_next_nsq_for_a_b_shapes(context_ptr, &sq_cost, &h_cost, &v_cost, &skip_next_nsq);
 #endif
-
+#endif
         if (blk_geom->shape != PART_N) {
             if (blk_geom->nsi + 1 < blk_geom->totns)
                 md_update_all_neighbour_arrays(
