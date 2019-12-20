@@ -36,6 +36,37 @@
 #include "aom_dsp_rtcd.h"
 #define  INCRMENT_CAND_TOTAL_COUNT(cnt) MULTI_LINE_MACRO_BEGIN cnt++; if(cnt>=MODE_DECISION_CANDIDATE_MAX_COUNT) printf(" ERROR: reaching limit for MODE_DECISION_CANDIDATE_MAX_COUNT %i\n",cnt); MULTI_LINE_MACRO_END
 
+
+#if MUS_ME
+//Given one reference frame identified by the couple (list_index,ref_index)
+//tell if ME data is valid
+uint8_t is_me_data_present(
+    struct ModeDecisionContext  *context_ptr,
+    const MeLcuResults          *me_results, 
+    uint8_t                      list_idx,
+    uint8_t                      ref_idx)
+{
+    uint8_t total_me_cnt = me_results->total_me_candidate_index[context_ptr->me_block_offset];
+    const MeCandidate *me_block_results = me_results->me_candidate[context_ptr->me_block_offset];
+  
+    for (uint32_t me_cand_i = 0; me_cand_i < total_me_cnt; ++me_cand_i)
+    {
+        const MeCandidate *me_cand = &me_block_results[me_cand_i];
+        assert(me_cand->direction >= 0 && me_cand->direction <= 2);
+        if (me_cand->direction == 0 || me_cand->direction == 2) {
+            if (list_idx == me_cand->ref0_list && ref_idx == me_cand->ref_idx_l0)
+                return 1;
+        }
+        if (me_cand->direction == 1 || me_cand->direction == 2) {
+            if (list_idx == me_cand->ref1_list && ref_idx == me_cand->ref_idx_l1)
+                return 1;
+        }
+    }
+    return 0;
+}
+#endif
+
+
 int8_t av1_ref_frame_type(const MvReferenceFrame *const rf);
 
 #if FILTER_INTRA_FLAG
@@ -2567,6 +2598,10 @@ void inject_new_nearest_new_comb_candidates(
                                   is_inside_tile_boundary(&(xd->tile), to_inject_mv_x_l1, to_inject_mv_y_l1, mi_col, mi_row, context_ptr->blk_geom->bsize);
                 }
                 inj_mv = inj_mv && inside_tile;
+#if MUS_ME
+                inj_mv = inj_mv && is_me_data_present(context_ptr, me_results, get_list_idx(rf[1]), ref_idx_1);
+#endif
+
                 if (inj_mv) {
 
                     context_ptr->variance_ready = 0;
@@ -2673,6 +2708,9 @@ void inject_new_nearest_new_comb_candidates(
                                   is_inside_tile_boundary(&(xd->tile), to_inject_mv_x_l1, to_inject_mv_y_l1, mi_col, mi_row, context_ptr->blk_geom->bsize);
                 }
                 inj_mv = inj_mv && inside_tile;
+#if MUS_ME
+                inj_mv = inj_mv && is_me_data_present(context_ptr, me_results, 0, ref_idx_0);
+#endif
                 if (inj_mv)
                 {
 
@@ -2789,7 +2827,9 @@ void inject_new_nearest_new_comb_candidates(
                         int16_t to_inject_mv_y_l1 = nearmv[1].as_mv.row;
 
                         inj_mv = context_ptr->injected_mv_count_bipred == 0 || mrp_is_already_injected_mv_bipred(context_ptr, to_inject_mv_x_l0, to_inject_mv_y_l0, to_inject_mv_x_l1, to_inject_mv_y_l1, ref_pair) == EB_FALSE;
-
+#if MUS_ME
+                        inj_mv = inj_mv && is_me_data_present(context_ptr, me_results, 0, ref_idx_0);
+#endif
                         if (inj_mv){
                             context_ptr->variance_ready = 0 ;
                             for (cur_type = MD_COMP_AVG; cur_type <= tot_comp_types; cur_type++){
@@ -2875,7 +2915,9 @@ void inject_new_nearest_new_comb_candidates(
                    int16_t to_inject_mv_y_l1 = me_results->me_mv_array[context_ptr->me_block_offset][((sequence_control_set_ptr->mrp_mode == 0) ? (get_list_idx(rf[1]) << 2) : (get_list_idx(rf[1]) << 1)) + ref_idx_1].y_mv << 1;//context_ptr->md_local_cu_unit[context_ptr->blk_geom->blkidx_mds].ed_ref_mv_stack[ref_pair][0].comp_mv.as_mv.row;
 
                    inj_mv = context_ptr->injected_mv_count_bipred == 0 || mrp_is_already_injected_mv_bipred(context_ptr, to_inject_mv_x_l0, to_inject_mv_y_l0, to_inject_mv_x_l1, to_inject_mv_y_l1, ref_pair) == EB_FALSE;
-
+#if MUS_ME
+                   inj_mv = inj_mv && is_me_data_present(context_ptr, me_results, get_list_idx(rf[1]), ref_idx_1);
+#endif
                    if (inj_mv) {
 
                        context_ptr->variance_ready = 0 ;
