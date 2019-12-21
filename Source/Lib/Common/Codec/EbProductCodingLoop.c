@@ -6157,14 +6157,14 @@ void full_loop_core(
 
 #if FULL_LOOP_8
         if (use_8bit_pred) {
-            DECLARE_ALIGNED(16, uint8_t, zero_2b[MAX_SB_SQUARE]);
-            memset(zero_2b, 0, MAX_SB_SQUARE);
+            DECLARE_ALIGNED(16, uint8_t, zero_2b[MAX_SB_SIZE]);
+            memset(zero_2b, 0, MAX_SB_SIZE);
 
             pack2d_src(
                 candidate_buffer->prediction_scratch_ptr->buffer_y + cuOriginIndex,
                 candidate_buffer->prediction_scratch_ptr->stride_y,
                 zero_2b,
-                MAX_SB_SIZE,
+                0,
                 (uint16_t *)candidate_buffer->prediction_ptr->buffer_y + cuOriginIndex,
                 candidate_buffer->prediction_ptr->stride_y,
                 context_ptr->blk_geom->bwidth,
@@ -6175,7 +6175,7 @@ void full_loop_core(
                     candidate_buffer->prediction_scratch_ptr->buffer_cb + cuChromaOriginIndex,
                     candidate_buffer->prediction_scratch_ptr->stride_cb,
                     zero_2b,
-                    MAX_SB_SIZE,
+                    0,
                     (uint16_t *)candidate_buffer->prediction_ptr->buffer_cb + cuChromaOriginIndex,
                     candidate_buffer->prediction_ptr->stride_cb,
                     context_ptr->blk_geom->bwidth >> 1,
@@ -6185,7 +6185,7 @@ void full_loop_core(
                     candidate_buffer->prediction_scratch_ptr->buffer_cr + cuChromaOriginIndex,
                     candidate_buffer->prediction_scratch_ptr->stride_cr,
                     zero_2b,
-                    MAX_SB_SIZE,
+                    0,
                     (uint16_t *)candidate_buffer->prediction_ptr->buffer_cr + cuChromaOriginIndex,
                     candidate_buffer->prediction_ptr->stride_cr,
                     context_ptr->blk_geom->bwidth >> 1,
