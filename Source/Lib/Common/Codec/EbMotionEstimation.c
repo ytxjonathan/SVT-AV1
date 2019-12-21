@@ -14185,7 +14185,7 @@ void prune_references(
     }
         
 #if 1
-    uint8_t  BIGGER_THAN_TH = 50;
+    uint8_t  BIGGER_THAN_TH = 75;
     uint32_t best = sorted[0][0].hme_sad;//is this always the best?
 
     for (uint32_t li = 0; li < MAX_NUM_OF_REF_PIC_LIST; li++) {
@@ -14394,8 +14394,9 @@ EbErrorType motion_estimate_lcu(
         context_ptr,
         input_ptr  );
 
-    //pruning of the references is not done for alt-ref / Base-Layer (HME not done for list1 refs) / non-complete-SBs
-    if(context_ptr->me_alt_ref == EB_FALSE && picture_control_set_ptr->temporal_layer_index>0 && sb_height==BLOCK_SIZE_64)
+    //pruning of the references is not done for alt-ref / Base-Layer (HME not done for list1 refs) / non-complete-SBs when HMeLevel2 is done
+    if(context_ptr->enable_hme_flag && context_ptr->enable_hme_level2_flag && 
+        context_ptr->me_alt_ref == EB_FALSE && picture_control_set_ptr->temporal_layer_index>0 && sb_height==BLOCK_SIZE_64)
         prune_references(
             picture_control_set_ptr,
             sb_index,
