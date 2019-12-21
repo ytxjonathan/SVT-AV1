@@ -1768,6 +1768,26 @@ EbErrorType prediction_structure_group_ctor(
     uint8_t ref_count_used = enc_mode <= ENC_M1 ? MAX_REF_IDX : enc_mode <= ENC_M2 ? 2 : 1;
 
     if (ref_count_used > 0 && ref_count_used < MAX_REF_IDX) {
+#if LOW_DELAY_TUNE
+        for (int gop_i = 0; gop_i < 1; ++gop_i) {
+            for (int i = ref_count_used; i < MAX_REF_IDX; ++i) {
+                flat_pred_struct[gop_i].ref_list0[i] = 0;
+                flat_pred_struct[gop_i].ref_list1[i] = 0;
+            }
+        }
+        for (int gop_i = 0; gop_i < 2; ++gop_i) {
+            for (int i = ref_count_used; i < MAX_REF_IDX; ++i) {
+                two_level_hierarchical_pred_struct[gop_i].ref_list0[i] = 0;
+                two_level_hierarchical_pred_struct[gop_i].ref_list1[i] = 0;
+            }
+        }
+        for (int gop_i = 0; gop_i < 4; ++gop_i) {
+            for (int i = ref_count_used; i < MAX_REF_IDX; ++i) {
+                three_level_hierarchical_pred_struct[gop_i].ref_list0[i] = 0;
+                three_level_hierarchical_pred_struct[gop_i].ref_list1[i] = 0;
+            }
+        }
+#endif
         for (int gop_i = 1; gop_i < 8; ++gop_i) {
             for (int i = ref_count_used; i < MAX_REF_IDX; ++i) {
                 four_level_hierarchical_pred_struct[gop_i].ref_list0[i] = 0;
