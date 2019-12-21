@@ -9587,7 +9587,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #endif
             // Initialize tx_depth
             cu_ptr->tx_depth = 0;
-#if POST_PD2_INTER_DEPTH // control early exit(s) (both lossless & lossy)
+#if SHUT_D1_D2_EARLY_EXIT // control early exit(s) (both lossless & lossy)
             if(context_ptr->pd_pass == PD_PASS_2)
 #endif
 #if ADD_SUPPORT_TO_SKIP_PART_N
@@ -9686,7 +9686,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
             }
 #if AUTO_MAX_PARTITION
 #if REFACTOR_SQ_WEIGHT
-            else if (auto_max_partition_block_skip || a_b_shapes_skip_flag || skip_next_nsq) {
+            else if (auto_max_partition_block_skip || a_b_shapes_skip_flag) {
 #else
             else if (auto_max_partition_block_skip) {
 #endif
@@ -9743,8 +9743,8 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #if ADD_SUPPORT_TO_SKIP_PART_N
         if (blk_geom->nsi + 1 == blk_geom->totns) {
 #if MULTI_PASS_PD
-#if FLAG_CHECK_MERGE_1_D // shut merge technique @ d1_non_square_block_decision
-            nsq_cost[context_ptr->blk_geom->shape] = d1_non_square_block_decision(context_ptr, d1_block_itr, 1);
+#if SHUT_D1_D2_EARLY_EXIT // shut merge technique @ d1_non_square_block_decision
+            nsq_cost[context_ptr->blk_geom->shape] = d1_non_square_block_decision(context_ptr, d1_block_itr, context_ptr->pd_pass == PD_PASS_2);
 #else
             nsq_cost[context_ptr->blk_geom->shape] = d1_non_square_block_decision(context_ptr, d1_block_itr);
 #endif
@@ -9765,7 +9765,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
             d1_non_square_block_decision(context_ptr);
 #endif
 #if ADD_SUPPORT_TO_SKIP_PART_N
-#if POST_PD2_INTER_DEPTH // control early exit(s) (both lossless & lossy)
+#if SHUT_D1_D2_EARLY_EXIT // control early exit(s) (both lossless & lossy)
         else if (d1_block_itr && context_ptr->pd_pass == PD_PASS_2) {
 #else
         else if (d1_block_itr) {

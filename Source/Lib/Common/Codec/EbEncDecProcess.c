@@ -2059,7 +2059,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->md_exit_th = 0;
     else if (context_ptr->pd_pass == PD_PASS_1)
+#if SHUT_D1_D2_EARLY_EXIT
+        context_ptr->md_exit_th = 0;
+#else
         context_ptr->md_exit_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) ? 10 : 18;
+#endif
     else
 #endif
 #if M0_OPT
@@ -2199,7 +2203,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->sq_weight = (uint32_t)~0;
     else if (context_ptr->pd_pass == PD_PASS_1)
 #if ENHANCED_M0_SETTINGS // lossless change - PD_PASS_2 and PD_PASS_1 should be completely decoupled: previous merge conflict
-#if POST_PD2_INTER_DEPTH
+#if SHUT_D1_D2_EARLY_EXIT
         context_ptr->sq_weight = (uint32_t)~0;
 #else
         context_ptr->sq_weight = 100;
@@ -2927,8 +2931,8 @@ EB_EXTERN EbErrorType perform_d1_d2_block_decision(
         cu_ptr->best_d1_blk = blk_idx_mds;
 
         if (blk_geom->nsi + 1 == blk_geom->totns) {
-#if FLAG_CHECK_MERGE_1_D // shut merge technique @ d1_non_square_block_decision
-            d1_non_square_block_decision(context_ptr, d1_block_itr,0);
+#if SHUT_D1_D2_EARLY_EXIT // shut merge technique @ d1_non_square_block_decision
+            d1_non_square_block_decision(context_ptr, d1_block_itr, context_ptr->pd_pass == PD_PASS_2);
 #else
             d1_non_square_block_decision(context_ptr, d1_block_itr);
 #endif
@@ -3305,12 +3309,17 @@ void* enc_dec_kernel(void *input_ptr)
                                     part_struct_index);
                             }
 
+                                                    
                             // Merge the best max_distinct_part_struct partitioning structure into 1 block indices array
+                            uint64_t part_struct_pruning_th  = (uint64_t)~0;
                             uint32_t total_blk_count = 0;
                             for (uint32_t part_struct_index = 0; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
-                                for (uint32_t block_count = 0; block_count < context_ptr->md_context->part_struct_block_count_array[part_struct_index]; block_count++) {
-                                    context_ptr->md_context->part_struct_union_block_index_array[total_blk_count++] = context_ptr->md_context->part_struct_block_index_array[part_struct_index][block_count];
-                                }
+
+                                if (((context_ptr->md_context->part_struct_cost_array[part_struct_index] - context_ptr->md_context->part_struct_cost_array[0]) * 100) < part_struct_pruning_th)
+
+                                    for (uint32_t block_count = 0; block_count < context_ptr->md_context->part_struct_block_count_array[part_struct_index]; block_count++) {
+                                        context_ptr->md_context->part_struct_union_block_index_array[total_blk_count++] = context_ptr->md_context->part_struct_block_index_array[part_struct_index][block_count];
+                                    }
                             }
                  
                             uint32_t i, j, a;
@@ -3326,6 +3335,7 @@ void* enc_dec_kernel(void *input_ptr)
                                     }
                                 }
                             }
+
                             // Reset mdc_sb_array data to defaults; it will be updated based on the predicted blocks (stored in md_cu_arr_nsq)
                             uint32_t blk_index = 0;
                             while (blk_index < sequence_control_set_ptr->max_block_cnt) {
@@ -3392,8 +3402,6 @@ void* enc_dec_kernel(void *input_ptr)
                                     }
                                 }
                             }
-
-
 #else
                             // Perform Pred_1 depth refinement - Add blocks to be considered in the next stage(s) of PD based on depth cost.
                             perform_pred_depth_refinement(
