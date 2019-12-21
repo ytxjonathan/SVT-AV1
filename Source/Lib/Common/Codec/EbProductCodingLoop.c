@@ -1450,6 +1450,16 @@ void fast_loop_core(
     ModeDecisionCandidate       *candidate_ptr = candidate_buffer->candidate_ptr;
     EbPictureBufferDesc         *prediction_ptr = candidate_buffer->prediction_ptr;
     context_ptr->pu_itr = 0;
+#if FAST_LOOP_8
+    if (candidate_ptr->type == INTER_MODE && candidate_ptr->is_interintra_used == 0)
+         context_ptr->hbd_mode_decision = EB_8_BIT_MD;
+
+    input_picture_ptr =  (context_ptr->hbd_mode_decision)  ?  picture_control_set_ptr->input_frame16bit : picture_control_set_ptr->parent_pcs_ptr->enhanced_picture_ptr ;
+    //Update input origin
+    input_origin_index = (context_ptr->cu_origin_y + input_picture_ptr->origin_y) * input_picture_ptr->stride_y + (context_ptr->cu_origin_x + input_picture_ptr->origin_x);
+    input_cb_origin_index = ((context_ptr->round_origin_y >> 1) + (input_picture_ptr->origin_y >> 1)) * input_picture_ptr->stride_cb + ((context_ptr->round_origin_x >> 1) + (input_picture_ptr->origin_x >> 1));
+    input_cr_origin_index = input_cb_origin_index;
+#endif
 #if NEW_MD_LAMBDA
     uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
     uint32_t fast_lambda =  context_ptr->hbd_mode_decision ? context_ptr->fast_lambda_md[EB_10_BIT_MD] : context_ptr->fast_lambda_md[EB_8_BIT_MD]; //OMK
@@ -1458,6 +1468,9 @@ void fast_loop_core(
     // Set default interp_filters
     candidate_buffer->candidate_ptr->interp_filters = (context_ptr->md_staging_use_bilinear) ? av1_make_interp_filters(BILINEAR, BILINEAR) : 0;
     ProductPredictionFunTable[candidate_buffer->candidate_ptr->use_intrabc ? INTER_MODE : candidate_ptr->type](
+#if FULL_LOOP_8
+        0,
+#endif
         context_ptr->hbd_mode_decision,
         context_ptr,
         picture_control_set_ptr,
@@ -1592,7 +1605,9 @@ void fast_loop_core(
         1,
         context_ptr->intra_luma_left_mode,
         context_ptr->intra_luma_top_mode);
-
+#if FAST_LOOP_8
+        context_ptr->hbd_mode_decision = EB_DUAL_BIT_MD;
+#endif
 }
 #if REMOVE_MD_STAGE_1
 void set_md_stage_counts(
@@ -2868,6 +2883,9 @@ void predictive_me_sub_pel_search(
             context_ptr->md_staging_skip_interpolation_search = EB_TRUE;
             context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
             ProductPredictionFunTable[INTER_MODE](
+#if FULL_LOOP_8
+                0,
+#endif
                 hbd_mode_decision,
                 context_ptr,
                 picture_control_set_ptr,
@@ -4038,6 +4056,9 @@ void check_best_indepedant_cfl(
         uint32_t count_non_zero_coeffs[3][MAX_NUM_OF_TU_PER_CU];
         context_ptr->md_staging_skip_inter_chroma_pred = EB_FALSE;
         ProductPredictionFunTable[candidate_buffer->candidate_ptr->type](
+#if FULL_LOOP_8
+            0,
+#endif
             context_ptr->hbd_mode_decision,
             context_ptr,
             picture_control_set_ptr,
@@ -6103,7 +6124,16 @@ void full_loop_core(
         candidate_ptr->chroma_distortion_inter_depth = 0;
         // Set Skip Flag
         candidate_ptr->skip_flag = EB_FALSE;
+#if FULL_LOOP_8
+        uint8_t use_8bit_pred = 0;
+        if (context_ptr->hbd_mode_decision == EB_DUAL_BIT_MD) {
+            if (context_ptr->md_staging_skip_full_pred == EB_FALSE && candidate_ptr->type == INTER_MODE && candidate_ptr->is_interintra_used == 0) {
+                use_8bit_pred = 1;
+                context_ptr->hbd_mode_decision = EB_8_BIT_MD;
 
+            }
+        }
+#endif
         if (candidate_ptr->type != INTRA_MODE) {
 #if REMOVE_MD_STAGE_1
             if (context_ptr->md_staging_skip_full_pred == EB_FALSE) {
@@ -6114,12 +6144,57 @@ void full_loop_core(
                     context_ptr->md_staging_skip_inter_chroma_pred = EB_FALSE;
 #endif
                     ProductPredictionFunTable[candidate_ptr->type](
+#if FULL_LOOP_8
+                        use_8bit_pred,
+#endif
                         context_ptr->hbd_mode_decision,
                         context_ptr,
                         picture_control_set_ptr,
                         candidate_buffer);
                 }
         }
+
+
+#if FULL_LOOP_8
+        if (use_8bit_pred) {
+            DECLARE_ALIGNED(16, uint8_t, zero_2b[MAX_SB_SQUARE]);
+            memset(zero_2b, 0, MAX_SB_SQUARE);
+
+            pack2d_src(
+                candidate_buffer->prediction_scratch_ptr->buffer_y + cuOriginIndex,
+                candidate_buffer->prediction_scratch_ptr->stride_y,
+                zero_2b,
+                MAX_SB_SIZE,
+                (uint16_t *)candidate_buffer->prediction_ptr->buffer_y + cuOriginIndex,
+                candidate_buffer->prediction_ptr->stride_y,
+                context_ptr->blk_geom->bwidth,
+                context_ptr->blk_geom->bheight);
+
+            if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level <= CHROMA_MODE_1) {
+                pack2d_src(
+                    candidate_buffer->prediction_scratch_ptr->buffer_cb + cuChromaOriginIndex,
+                    candidate_buffer->prediction_scratch_ptr->stride_cb,
+                    zero_2b,
+                    MAX_SB_SIZE,
+                    (uint16_t *)candidate_buffer->prediction_ptr->buffer_cb + cuChromaOriginIndex,
+                    candidate_buffer->prediction_ptr->stride_cb,
+                    context_ptr->blk_geom->bwidth >> 1,
+                    context_ptr->blk_geom->bheight >> 1);
+
+                pack2d_src(
+                    candidate_buffer->prediction_scratch_ptr->buffer_cr + cuChromaOriginIndex,
+                    candidate_buffer->prediction_scratch_ptr->stride_cr,
+                    zero_2b,
+                    MAX_SB_SIZE,
+                    (uint16_t *)candidate_buffer->prediction_ptr->buffer_cr + cuChromaOriginIndex,
+                    candidate_buffer->prediction_ptr->stride_cr,
+                    context_ptr->blk_geom->bwidth >> 1,
+                    context_ptr->blk_geom->bheight >> 1);
+            }
+            context_ptr->hbd_mode_decision = EB_DUAL_BIT_MD;
+        }
+
+#endif
 
         // Initialize luma CBF
         candidate_ptr->y_has_coeff = 0;
@@ -7787,6 +7862,9 @@ void search_best_independent_uv_mode(
 
         context_ptr->md_staging_skip_inter_chroma_pred = EB_FALSE;
         ProductPredictionFunTable[candidate_buffer->candidate_ptr->type](
+#if FULL_LOOP_8
+            0,
+#endif
             context_ptr->hbd_mode_decision,
             context_ptr,
             picture_control_set_ptr,

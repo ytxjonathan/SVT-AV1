@@ -7593,6 +7593,9 @@ void interpolation_filter_search(
 }
 
 EbErrorType inter_pu_prediction_av1(
+#if FULL_LOOP_8
+    uint8_t                              use_scratch_buff,
+#endif
     uint8_t                              hbd_mode_decision,
     ModeDecisionContext                  *md_context_ptr,
     PictureControlSet                    *picture_control_set_ptr,
@@ -7651,7 +7654,11 @@ EbErrorType inter_pu_prediction_av1(
             md_context_ptr->blk_geom->bheight,
             ref_pic_list0,
             0,//ref_pic_list1,
+#if FULL_LOOP_8
+            use_scratch_buff ? candidate_buffer_ptr->prediction_scratch_ptr: candidate_buffer_ptr->prediction_ptr,
+#else
             candidate_buffer_ptr->prediction_ptr,
+#endif
             md_context_ptr->blk_geom->origin_x,
             md_context_ptr->blk_geom->origin_y,
             md_context_ptr->chroma_level <= CHROMA_MODE_1 && md_context_ptr->md_staging_skip_inter_chroma_pred == EB_FALSE,
@@ -7719,7 +7726,11 @@ EbErrorType inter_pu_prediction_av1(
             md_context_ptr->blk_geom,
             ref_pic_list0,
             ref_pic_list1,
+#if FULL_LOOP_8
+            use_scratch_buff ? candidate_buffer_ptr->prediction_scratch_ptr: candidate_buffer_ptr->prediction_ptr,
+#else
             candidate_buffer_ptr->prediction_ptr,
+#endif
             md_context_ptr->blk_geom->origin_x,
             md_context_ptr->blk_geom->origin_y,
             &candidate_ptr->wm_params_l0,
@@ -7823,7 +7834,11 @@ EbErrorType inter_pu_prediction_av1(
         md_context_ptr->blk_geom->bheight,
         ref_pic_list0,
         ref_pic_list1,
+#if FULL_LOOP_8
+        use_scratch_buff ? candidate_buffer_ptr->prediction_scratch_ptr: candidate_buffer_ptr->prediction_ptr,
+#else
         candidate_buffer_ptr->prediction_ptr,
+#endif
         md_context_ptr->blk_geom->origin_x,
         md_context_ptr->blk_geom->origin_y,
         md_context_ptr->chroma_level <= CHROMA_MODE_1 && md_context_ptr->md_staging_skip_inter_chroma_pred == EB_FALSE,

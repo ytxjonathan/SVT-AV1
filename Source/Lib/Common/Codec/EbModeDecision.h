@@ -151,6 +151,9 @@ extern "C" {
     * Function Ptrs Definitions
     **************************************/
     typedef EbErrorType(*EbPredictionFunc)(
+#if FULL_LOOP_8
+        uint8_t                              use_scratch_buff,
+#endif
         uint8_t                              hbd_mode_decision,
         struct ModeDecisionContext           *context_ptr,
         PictureControlSet                    *picture_control_set_ptr,
@@ -241,6 +244,9 @@ extern "C" {
         // Video Buffers
         EbPictureBufferDesc                  *prediction_ptr;
         EbPictureBufferDesc                  *prediction_ptr_temp;
+#if FULL_LOOP_8
+        EbPictureBufferDesc                  *prediction_scratch_ptr;
+#endif
         EbPictureBufferDesc                  *cfl_temp_prediction_ptr;
         EbPictureBufferDesc                  *residual_quant_coeff_ptr;// One buffer for residual and quantized coefficient
         EbPictureBufferDesc                  *recon_coeff_ptr;

@@ -249,6 +249,9 @@ EbErrorType av1_inter_prediction_hbd(
         const ScaleFactors *sf);
 
     EbErrorType inter_pu_prediction_av1(
+#if FULL_LOOP_8
+        uint8_t                              use_scratch_buff,
+#endif
         uint8_t                              hbd_mode_decision,
         struct ModeDecisionContext           *md_context_ptr,
         PictureControlSet                    *picture_control_set_ptr,

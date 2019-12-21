@@ -708,6 +708,9 @@ static void mode_decision_candidate_buffer_dctor(EbPtr p)
     ModeDecisionCandidateBuffer *obj = (ModeDecisionCandidateBuffer*)p;
     EB_DELETE(obj->prediction_ptr);
     EB_DELETE(obj->prediction_ptr_temp);
+#if FULL_LOOP_8
+    EB_DELETE(obj->prediction_scratch_ptr);
+#endif
     EB_DELETE(obj->cfl_temp_prediction_ptr);
     EB_DELETE(obj->residual_ptr);
     EB_DELETE(obj->residual_quant_coeff_ptr);
@@ -792,7 +795,12 @@ EbErrorType mode_decision_candidate_buffer_ctor(
         buffer_ptr->prediction_ptr_temp,
         eb_picture_buffer_desc_ctor,
         (EbPtr)&pictureBufferDescInitData);
-
+#if FULL_LOOP_8
+    EB_NEW(
+        buffer_ptr->prediction_scratch_ptr,
+        eb_picture_buffer_desc_ctor,
+        (EbPtr)&pictureBufferDescInitData);
+#endif
     EB_NEW(
         buffer_ptr->cfl_temp_prediction_ptr,
         eb_picture_buffer_desc_ctor,

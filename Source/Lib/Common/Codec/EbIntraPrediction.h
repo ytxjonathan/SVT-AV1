@@ -176,6 +176,9 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
 /////////..............................................//////////////////////////
 
     extern EbErrorType eb_av1_intra_prediction_cl(
+#if FULL_LOOP_8
+        uint8_t                              use_scratch_buff,
+#endif
         uint8_t                              hbd_mode_decision,
         struct ModeDecisionContext           *context_ptr,
         PictureControlSet                    *picture_control_set_ptr,
