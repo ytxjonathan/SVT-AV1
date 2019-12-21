@@ -2803,6 +2803,11 @@ static void perform_pred_depth_refinement(
                                 s_depth = 0;
                                 e_depth = 1;
                             }
+
+#if BACK_TO_PRED_DEPTH
+                        s_depth = 0;
+                        e_depth = 0;
+#endif
                     }
 
                     // Add current pred depth block(s)
@@ -3265,7 +3270,7 @@ void* enc_dec_kernel(void *input_ptr)
                                 sb_origin_y,
                                 sb_index,
                                 context_ptr->md_context);
-#if POST_PD2_INTER_DEPTH
+#if POST_PD2_INTER_DEPTH && !BACK_TO_PRED_DEPTH
                             // Save the best PD1 partitioning structure block indices, block count, and cost
                             derive_part_struct_stats(
                                 sequence_control_set_ptr,

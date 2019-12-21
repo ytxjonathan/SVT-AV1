@@ -57,6 +57,9 @@ extern "C" {
 #define ADD_SUPPORT_TO_SKIP_PART_N   1
 #define SHUT_D1_D2_EARLY_EXIT        1
 #define POST_PD2_INTER_DEPTH         1
+
+#define BACK_TO_PRED_DEPTH           0
+
 #endif
 
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements
