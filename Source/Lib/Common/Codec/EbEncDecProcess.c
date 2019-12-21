@@ -2804,10 +2804,7 @@ static void perform_pred_depth_refinement(
                                 e_depth = 1;
                             }
                     }
-#if THE_1101_BLOCKS_MOD
-                    s_depth = -5;
-                    e_depth =  5;
-#endif
+
                     // Add current pred depth block(s)
                     for (block_1d_idx = 0; block_1d_idx < tot_d1_blocks; block_1d_idx++) {
                         resultsPtr->leaf_data_array[blk_index + block_1d_idx].consider_block = 1;
@@ -3278,7 +3275,7 @@ void* enc_dec_kernel(void *input_ptr)
                                 0);
 
                             // Search the top NUMBER_DISTINCT_PART_STRUCT PD1 partitioning structure(s) (besides the best PD1 partitioning structure already derived @ the previous stage)
-                            uint32_t max_distinct_part_struct = NUMBER_DISTINCT_PART_STRUCT; // Hsan: add the ability to set through an API signal
+                            uint32_t max_distinct_part_struct = 0; // Hsan: add the ability to set through an API signal
 
                             for (uint32_t part_struct_index = 1; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
 
@@ -3311,11 +3308,11 @@ void* enc_dec_kernel(void *input_ptr)
 
                                                     
                             // Merge the best max_distinct_part_struct partitioning structure into 1 block indices array
-                            uint64_t part_struct_pruning_th  = (uint64_t)~0;
+                            uint64_t part_struct_pruning_th = (uint64_t)~0;
                             uint32_t total_blk_count = 0;
                             for (uint32_t part_struct_index = 0; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
 
-                                if (((context_ptr->md_context->part_struct_cost_array[part_struct_index] - context_ptr->md_context->part_struct_cost_array[0]) * 100) < part_struct_pruning_th)
+                                if ((((context_ptr->md_context->part_struct_cost_array[part_struct_index] - context_ptr->md_context->part_struct_cost_array[0]) * 100) / context_ptr->md_context->part_struct_cost_array[0]) < part_struct_pruning_th)
 
                                     for (uint32_t block_count = 0; block_count < context_ptr->md_context->part_struct_block_count_array[part_struct_index]; block_count++) {
                                         context_ptr->md_context->part_struct_union_block_index_array[total_blk_count++] = context_ptr->md_context->part_struct_block_index_array[part_struct_index][block_count];
@@ -3345,6 +3342,7 @@ void* enc_dec_kernel(void *input_ptr)
                                 mdcPtr->leaf_data_array[blk_index].refined_split_flag = blk_geom->sq_size > 4 ? EB_TRUE : EB_FALSE;
                                 blk_index++;
                             }
+
                             // Generate consider_block
                             uint32_t total_blk_index = 0;
                             for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt, total_blk_index < total_blk_count; blk_index++) {
