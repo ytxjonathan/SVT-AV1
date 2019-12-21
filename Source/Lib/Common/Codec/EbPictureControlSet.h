@@ -385,9 +385,6 @@ extern "C" {
 
         // Mode Decision Config
         MdcLcuData                         *mdc_sb_array;
-#if POST_PD2_INTER_DEPTH
-        MdcLcuData                         *enc_dec_mdc_sb_array;
-#endif
         // Error Resilience
         EbBool                                constrained_intra_flag;
 

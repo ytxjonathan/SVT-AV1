@@ -49,12 +49,12 @@ extern "C" {
 
 
 
-#define MULTI_PASS_PD_COST           0 // Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
-#define REFACTOR_SQ_WEIGHT           0
+#define MULTI_PASS_PD_COST           1 // Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
+#define REFACTOR_SQ_WEIGHT           1
 
-#define IMPROVED_MULTI_PASS_PD       0
+#define IMPROVED_MULTI_PASS_PD       1
 #if IMPROVED_MULTI_PASS_PD
-
+#define SHUT_D1_D2_EARLY_EXIT        1
 #define ADD_SUPPORT_TO_SKIP_PART_N   1
 #define POST_PD2_INTER_DEPTH         1
 #define NUMBER_DISTINCT_PART_STRUCT  10
@@ -62,7 +62,6 @@ extern "C" {
 #define THE_1101_BLOCKS_REF          0
 #define THE_1101_BLOCKS_MOD          0   
 #define FLAG_CHECK_MERGE_1_D         1
-#define PART_STRUCTURE_PRUNING       1
 #endif
 
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements
