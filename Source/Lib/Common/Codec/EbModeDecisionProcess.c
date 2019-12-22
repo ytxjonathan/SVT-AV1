@@ -113,7 +113,10 @@ EbErrorType mode_decision_context_ctor(
 
     context_ptr->dctor = mode_decision_context_dctor;
     context_ptr->hbd_mode_decision = enable_hbd_mode_decision;
+#if FULL_LOOP_8
 
+    memset(context_ptr->zero_2b, 0, MAX_SB_SQUARE);
+#endif
     // Input/Output System Resource Manager FIFOs
     context_ptr->mode_decision_configuration_input_fifo_ptr = mode_decision_configuration_input_fifo_ptr;
     context_ptr->mode_decision_output_fifo_ptr = mode_decision_output_fifo_ptr;

@@ -421,6 +421,9 @@ extern "C" {
 
     // Signal to control initial and final pass PD setting(s)
     PD_PASS pd_pass;
+#if FULL_LOOP_8
+    DECLARE_ALIGNED(16, uint8_t, zero_2b[MAX_SB_SQUARE]);
+#endif
 #endif
     } ModeDecisionContext;
 

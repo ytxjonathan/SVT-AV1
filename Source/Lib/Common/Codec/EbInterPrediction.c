@@ -4741,7 +4741,11 @@ void precompute_obmc_data(
     PictureControlSet            *picture_control_set_ptr,
     ModeDecisionContext          *context_ptr)
 {
+    
+#if FULL_LOOP_8
 
+    context_ptr->hbd_mode_decision = EB_8_BIT_MD;
+#endif
 #if HBD2_OBMC
     uint8_t * tmp_obmc_bufs_8b[2];
 #endif
@@ -4870,6 +4874,12 @@ void precompute_obmc_data(
         dst_stride1[0] , dst_buf2[0]  ,
         dst_stride2[0] );
 #endif
+
+    #if FULL_LOOP_8
+
+    context_ptr->hbd_mode_decision = EB_DUAL_BIT_MD;
+#endif
+
 }
 #endif
 EbErrorType av1_inter_prediction(
