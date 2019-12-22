@@ -9755,11 +9755,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #if ADD_SUPPORT_TO_SKIP_PART_N
         if (blk_geom->nsi + 1 == blk_geom->totns) {
 #if MULTI_PASS_PD
-#if SHUT_D1_D2_EARLY_EXIT // shut merge technique @ d1_non_square_block_decision
-            nsq_cost[context_ptr->blk_geom->shape] = d1_non_square_block_decision(context_ptr, d1_block_itr, context_ptr->pd_pass == PD_PASS_2);
-#else
             nsq_cost[context_ptr->blk_geom->shape] = d1_non_square_block_decision(context_ptr, d1_block_itr);
-#endif
 #else
             d1_non_square_block_decision(context_ptr, d1_block_itr);
 #endif

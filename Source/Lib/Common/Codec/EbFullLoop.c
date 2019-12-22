@@ -3238,9 +3238,6 @@ void  d1_non_square_block_decision(
 #if ADD_SUPPORT_TO_SKIP_PART_N
     , uint32_t                         d1_block_itr
 #endif
-#if SHUT_D1_D2_EARLY_EXIT // shut merge technique @ d1_non_square_block_decision
-    , EbBool check_merge_1D_inter_block
-#endif
 )
 {
     //compute total cost for the whole block partition
@@ -3252,14 +3249,18 @@ void  d1_non_square_block_decision(
     for (blk_it = 0; blk_it < context_ptr->blk_geom->totns; blk_it++)
     {
         tot_cost += context_ptr->md_local_cu_unit[first_blk_idx + blk_it].cost;
-#if SHUT_D1_D2_EARLY_EXIT // shut merge technique @ d1_non_square_block_decision
-        if(check_merge_1D_inter_block)
+#if SHUT_SPLIT_COST // shut merge technique @ d1_non_square_block_decision
+        if(context_ptr->pd_pass == PD_PASS_2)
 #endif
         if (context_ptr->blk_geom->sqi_mds != first_blk_idx + blk_it)
             if (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag)
                 merge_block_cnt += merge_1D_inter_block(context_ptr, context_ptr->blk_geom->sqi_mds, first_blk_idx + blk_it);
     }
+#if SHUT_SPLIT_COST
+    if (context_ptr->blk_geom->bsize > BLOCK_4X4 && context_ptr->pd_pass == PD_PASS_2) {
+#else
     if (context_ptr->blk_geom->bsize > BLOCK_4X4) {
+#endif
         uint64_t split_cost = 0;
         uint32_t parent_depth_idx_mds = context_ptr->blk_geom->sqi_mds;
         av1_split_flag_rate(
@@ -3405,12 +3406,31 @@ void   compute_depth_costs(
     }
     //curr_non_split_rate_344 = splitflag_mdc_344 || 4x4 ? 0 : compute;
 
+#if SHUT_SPLIT_COST
+    if (context_ptr->pd_pass == PD_PASS_2) {
+        *curr_depth_cost =
+            context_ptr->md_local_cu_unit[curr_depth_mds].cost + curr_non_split_rate_blk3 +
+            context_ptr->md_local_cu_unit[curr_depth_mds - 1 * step].cost + curr_non_split_rate_blk2 +
+            context_ptr->md_local_cu_unit[curr_depth_mds - 2 * step].cost + curr_non_split_rate_blk1 +
+            context_ptr->md_local_cu_unit[curr_depth_mds - 3 * step].cost + curr_non_split_rate_blk0 +
+            above_split_rate;
+    }
+    else {
+        *curr_depth_cost =
+            context_ptr->md_local_cu_unit[curr_depth_mds].cost +
+            context_ptr->md_local_cu_unit[curr_depth_mds - 1 * step].cost + 
+            context_ptr->md_local_cu_unit[curr_depth_mds - 2 * step].cost + 
+            context_ptr->md_local_cu_unit[curr_depth_mds - 3 * step].cost;
+    
+    }
+#else
     *curr_depth_cost =
         context_ptr->md_local_cu_unit[curr_depth_mds].cost + curr_non_split_rate_blk3 +
         context_ptr->md_local_cu_unit[curr_depth_mds - 1 * step].cost + curr_non_split_rate_blk2 +
         context_ptr->md_local_cu_unit[curr_depth_mds - 2 * step].cost + curr_non_split_rate_blk1 +
         context_ptr->md_local_cu_unit[curr_depth_mds - 3 * step].cost + curr_non_split_rate_blk0 +
         above_split_rate;
+#endif
 }
 
 uint32_t d2_inter_depth_block_decision(

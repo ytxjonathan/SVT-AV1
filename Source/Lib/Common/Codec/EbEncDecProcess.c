@@ -2811,6 +2811,10 @@ static void perform_pred_depth_refinement(
                                 s_depth = 0;
                                 e_depth = 1;
                             }
+#if SHUT_REF
+                        s_depth = 0;
+                        e_depth = 0;
+#endif
                     }
 
                     // Add current pred depth block(s)
@@ -2882,7 +2886,11 @@ static void derive_part_struct_stats(
                     
 
                 // Set cost to MAX to do not get selected @ next d1/d2 block decision (if any)
+                //
+#if !DIVERSIFY_PART_STRUCT
                 mdcPtr->leaf_data_array[d1_itr].consider_block = 0;
+                
+#endif
                 //context_ptr->md_local_cu_unit[d1_itr].default_cost = MAX_MODE_COST;
                 //if (blk_geom->shape != PART_N) {
                 //    context_ptr->md_local_cu_unit[d1_itr].default_cost = (MAX_MODE_COST >> 4);
@@ -2984,6 +2992,7 @@ EB_EXTERN EbErrorType perform_d1_d2_block_decision(
 
         blk_idx_mds = leaf_data_array[blk_index].mds_idx;
 
+        context_ptr->md_local_cu_unit[blk_idx_mds].tested_cu_flag = EB_TRUE; //// !!!!!!!!!!!
         const BlockGeom * blk_geom = context_ptr->blk_geom = get_blk_geom_mds(blk_idx_mds);
         CodingUnit *cu_ptr = context_ptr->cu_ptr = &context_ptr->md_cu_arr_nsq[blk_idx_mds];
         const EbMdcLeafData * const leafDataPtr = &mdcResultTbPtr->leaf_data_array[blk_index];
@@ -3000,11 +3009,7 @@ EB_EXTERN EbErrorType perform_d1_d2_block_decision(
         cu_ptr->best_d1_blk = blk_idx_mds;
 
         if (blk_geom->nsi + 1 == blk_geom->totns) {
-#if SHUT_D1_D2_EARLY_EXIT // shut merge technique @ d1_non_square_block_decision
-            d1_non_square_block_decision(context_ptr, d1_block_itr, context_ptr->pd_pass == PD_PASS_2);
-#else
             d1_non_square_block_decision(context_ptr, d1_block_itr);
-#endif
             d1_block_itr++;
         }
 
@@ -3345,8 +3350,127 @@ void* enc_dec_kernel(void *input_ptr)
                                 context_ptr->md_context,
                                 sb_index);
                             
+                         
+#if DIVERSIFY_PART_STRUCT
+                            // Re-build mdc_cu_ptr
+                            build_cand_block_array(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                sb_index);
+
+                            uint32_t max_distinct_part_struct = 0;
+                            // Save the current partitioning structure block indices, block count, and cost
+                            derive_part_struct_stats(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                context_ptr->md_context,
+                                mdcPtr,
+                                sb_index,
+                                max_distinct_part_struct++);
+
+                            uint32_t ref_count = 0;
+                            uint32_t block_count;
+                            while (max_distinct_part_struct < 50) {
+
+                               
+                                block_count = 0;
+                                while (block_count < context_ptr->md_context->part_struct_block_count_array[ref_count]) {
+
+                                    uint32_t blk_index = context_ptr->md_context->part_struct_block_index_array[ref_count][block_count];
+                                    const BlockGeom *blk_geom = get_blk_geom_mds(blk_index);
+
+                                    if (blk_geom->shape == PART_N) {
+                                        context_ptr->md_context->md_local_cu_unit[blk_index].cost = MAX_MODE_COST;
+                                        block_count++;
+                                    }
+                                    else {
+                                        for (int32_t d1_itr = blk_index; d1_itr < blk_index + blk_geom->totns; d1_itr++) {
+                                            context_ptr->md_context->md_local_cu_unit[d1_itr].cost = MAX_MODE_COST;
+                                            block_count++;
+                                        }
+                                    }
+
+                                    // Perform d1 and d2 block decision (d1_non_square_block_decision() and d2_inter_depth_block_decision())
+                                    // Input : mdc_cu_ptr = PD1 default candidate(s)
+                                    // Output: md_cu_arr_nsq = best part_struct_index partitioning structure 
+                                    perform_d1_d2_block_decision(
+                                        sequence_control_set_ptr,
+                                        picture_control_set_ptr,
+                                        mdcPtr,
+                                        sb_ptr,
+                                        sb_origin_x,
+                                        sb_origin_y,
+                                        sb_index,
+                                        context_ptr->md_context);
+
+                                    // Save the current partitioning structure block indices, block count, and cost
+                                    derive_part_struct_stats(
+                                        sequence_control_set_ptr,
+                                        picture_control_set_ptr,
+                                        context_ptr->md_context,
+                                        mdcPtr,
+                                        sb_index,
+                                        max_distinct_part_struct++);
+
+                                    // Reset block cost to default value(s) (i.e. do not consider the cost update(s) that happened d1_non_square_block_decision() and d2_inter_depth_block_decision() of the previous iteration)
+                                    for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                                        context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
+                                    }
+                                }
+                                
+                                // Now get rid of ref the part struct
+                                block_count = 0;
+                                while (block_count < context_ptr->md_context->part_struct_block_count_array[ref_count]) {
+
+                                    uint32_t blk_index = context_ptr->md_context->part_struct_block_index_array[ref_count][block_count];
+                                    const BlockGeom *blk_geom = get_blk_geom_mds(blk_index);
+
+                                    if (blk_geom->shape == PART_N) {
+                                        context_ptr->md_context->md_local_cu_unit[blk_index].cost = MAX_MODE_COST;
+                                        block_count++;
+                                    }
+                                    else {
+                                        for (int32_t d1_itr = blk_index; d1_itr < blk_index + blk_geom->totns; d1_itr++) {
+                                            context_ptr->md_context->md_local_cu_unit[d1_itr].cost = MAX_MODE_COST;
+                                            block_count++;
+                                        }
+                                    }
+                                }
+                                
+                                // Now modify the ref count
+                                ref_count = max_distinct_part_struct;
+                                // Perform d1 and d2 block decision (d1_non_square_block_decision() and d2_inter_depth_block_decision())
+                                // Input : mdc_cu_ptr = PD1 default candidate(s)
+                                // Output: md_cu_arr_nsq = best part_struct_index partitioning structure 
+                                perform_d1_d2_block_decision(
+                                    sequence_control_set_ptr,
+                                    picture_control_set_ptr,
+                                    mdcPtr,
+                                    sb_ptr,
+                                    sb_origin_x,
+                                    sb_origin_y,
+                                    sb_index,
+                                    context_ptr->md_context);
+
+                                // Save the current partitioning structure block indices, block count, and cost
+                                derive_part_struct_stats(
+                                    sequence_control_set_ptr,
+                                    picture_control_set_ptr,
+                                    context_ptr->md_context,
+                                    mdcPtr,
+                                    sb_index,
+                                    max_distinct_part_struct++);
+
+                                // Reset block cost to default value(s) (i.e. do not consider the cost update(s) that happened d1_non_square_block_decision() and d2_inter_depth_block_decision() of the previous iteration)
+                                for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                                    context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
+                                }
+
+                            }
+
+#else
                             // Search the top NUMBER_DISTINCT_PART_STRUCT PD1 partitioning structure(s) (besides the best PD1 partitioning structure already derived @ the previous stage)
-                            uint32_t max_distinct_part_struct = 15; // Hsan: add the ability to set through an API signal
+                            uint32_t max_distinct_part_struct = 100; // Hsan: add the ability to set through an API signal
 
                             for (uint32_t part_struct_index = 0; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
 
@@ -3391,7 +3515,7 @@ void* enc_dec_kernel(void *input_ptr)
                                     sb_index,
                                     context_ptr->md_context);
                             }
-
+#endif
 
                             // Merge the best max_distinct_part_struct partitioning structure into 1 block indices array
                             uint64_t part_struct_pruning_th = (uint64_t)~0;

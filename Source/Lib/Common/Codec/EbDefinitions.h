@@ -56,10 +56,15 @@ extern "C" {
 #if IMPROVED_MULTI_PASS_PD
 #define ADD_SUPPORT_TO_SKIP_PART_N   1
 #define SHUT_D1_D2_EARLY_EXIT        1
+
+#define SHUT_SPLIT_COST              1
 #define POST_PD2_INTER_DEPTH         1
 
+#define DIVERSIFY_PART_STRUCT        0   
 
 #define HARD_CODE_32x32_DEPTH_ONLY   0
+
+#define SHUT_REF                     0
 #endif
 
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements
