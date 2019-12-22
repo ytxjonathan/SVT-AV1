@@ -427,9 +427,6 @@ extern "C" {
     uint32_t part_struct_block_count_array[MAX_PART_STRUCT_CANDIDATES];
     uint64_t part_struct_cost_array[MAX_PART_STRUCT_CANDIDATES];
     uint32_t part_struct_union_block_index_array[MAX_PART_STRUCT_CANDIDATES * MAX_BLOCK_PER_PART_STRUCT];
-
-    uint32_t target_block_index_array[BLOCK_MAX_COUNT_SB_128];
-    uint32_t target_block_count;
 #endif
 #endif
     } ModeDecisionContext;
