@@ -3484,15 +3484,14 @@ void* enc_dec_kernel(void *input_ptr)
                                 sb_index);
 
                             uint32_t target_block_index = 0;
-                            for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt, target_block_index < context_ptr->md_context->target_block_count; blk_index++) {
-                                const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
-                                mdcPtr->leaf_data_array[blk_index].consider_block = 1;
-                                if (blk_index != context_ptr->md_context->target_block_index_array[target_block_index]) {
-                                    mdcPtr->leaf_data_array[blk_index].consider_block = 0;
-                                }
-                                else
+                            for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                                if (target_block_index < context_ptr->md_context->target_block_count && blk_index == context_ptr->md_context->target_block_index_array[target_block_index]) {
+                                    mdcPtr->leaf_data_array[blk_index].consider_block = 1; 
                                     target_block_index++;
-
+                                }
+                                else {
+                                    mdcPtr->leaf_data_array[blk_index].consider_block = 0;
+                                }                                 
                             }
 #endif
                             // Save the best PD1 partitioning structure block indices, block count, and cost
