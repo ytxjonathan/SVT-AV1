@@ -3494,69 +3494,25 @@ void* enc_dec_kernel(void *input_ptr)
                                 }                                 
                             }
 #endif
-                            // Save the best PD1 partitioning structure block indices, block count, and cost
-                            derive_part_struct_stats(
-                                sequence_control_set_ptr,
-                                picture_control_set_ptr,
-                                context_ptr->md_context,
-                                mdcPtr,
-                                sb_index,
-                                0);
-
-                            // Generate split flag(s)
-                            generate_mdc_split_flag(
-                                sequence_control_set_ptr,
-                                picture_control_set_ptr,
-                                context_ptr->md_context,
-                                mdcPtr,
-                                sb_index);
-
-                            // Re-build mdc_cu_ptr for the 3rd PD Pass [PD_PASS_2]
-                            build_cand_block_array(
-                                sequence_control_set_ptr,
-                                picture_control_set_ptr,
-                                sb_index);
-
+                            
+                            
                             // Search the top NUMBER_DISTINCT_PART_STRUCT PD1 partitioning structure(s) (besides the best PD1 partitioning structure already derived @ the previous stage)
                             uint32_t max_distinct_part_struct = 15; // Hsan: add the ability to set through an API signal
 
-                            for (uint32_t part_struct_index = 1; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
+                            for (uint32_t part_struct_index = 0; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
 
                                 // Reset block cost to default value(s) (i.e. do not consider the cost update(s) that happened d1_non_square_block_decision() and d2_inter_depth_block_decision() of the previous iteration)
                                 for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
                                     context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
                                 }
 
-                                // Perform d1 and d2 block decision (d1_non_square_block_decision() and d2_inter_depth_block_decision())
-                                // Input : mdc_cu_ptr = PD1 default candidate(s)
-                                // Output: md_cu_arr_nsq = best part_struct_index partitioning structure 
-                                //mode_decision_sb(
-                                //    sequence_control_set_ptr,
-                                //    picture_control_set_ptr,
-                                //    mdcPtr,
-                                //    sb_ptr,
-                                //    sb_origin_x,
-                                //    sb_origin_y,
-                                //    sb_index,
-                                //    context_ptr->md_context);
-                                perform_d1_d2_block_decision(
-                                    sequence_control_set_ptr,
-                                    picture_control_set_ptr,
-                                    mdcPtr,
-                                    sb_ptr,
-                                    sb_origin_x,
-                                    sb_origin_y,
-                                    sb_index,
-                                    context_ptr->md_context);
-
                                 // Save the current partitioning structure block indices, block count, and cost
                                 derive_part_struct_stats(
                                     sequence_control_set_ptr,
                                     picture_control_set_ptr,
                                     context_ptr->md_context,
-                                    mdcPtr, 
-                                    sb_index, 
-                                                                      
+                                    mdcPtr,
+                                    sb_index,
                                     part_struct_index);
 
                                 // Generate split flag(s)
@@ -3572,6 +3528,19 @@ void* enc_dec_kernel(void *input_ptr)
                                     sequence_control_set_ptr,
                                     picture_control_set_ptr,
                                     sb_index);
+
+                                // Perform d1 and d2 block decision (d1_non_square_block_decision() and d2_inter_depth_block_decision())
+                                // Input : mdc_cu_ptr = PD1 default candidate(s)
+                                // Output: md_cu_arr_nsq = best part_struct_index partitioning structure 
+                                perform_d1_d2_block_decision(
+                                    sequence_control_set_ptr,
+                                    picture_control_set_ptr,
+                                    mdcPtr,
+                                    sb_ptr,
+                                    sb_origin_x,
+                                    sb_origin_y,
+                                    sb_index,
+                                    context_ptr->md_context);
                             }
 
 
