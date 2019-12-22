@@ -3249,7 +3249,7 @@ void  d1_non_square_block_decision(
     for (blk_it = 0; blk_it < context_ptr->blk_geom->totns; blk_it++)
     {
         tot_cost += context_ptr->md_local_cu_unit[first_blk_idx + blk_it].cost;
-#if SHUT_SPLIT_COST // shut merge technique @ d1_non_square_block_decision
+#if SHUT_PART_MERGE // shut merge technique @ d1_non_square_block_decision
         if(context_ptr->pd_pass == PD_PASS_2)
 #endif
         if (context_ptr->blk_geom->sqi_mds != first_blk_idx + blk_it)

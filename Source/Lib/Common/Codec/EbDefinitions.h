@@ -55,9 +55,11 @@ extern "C" {
 #define IMPROVED_MULTI_PASS_PD       1
 #if IMPROVED_MULTI_PASS_PD
 #define ADD_SUPPORT_TO_SKIP_PART_N   1
-#define SHUT_D1_D2_EARLY_EXIT        0
 
+#define SHUT_D1_D2_EARLY_EXIT        0
+#define SHUT_PART_MERGE              0
 #define SHUT_SPLIT_COST              1
+
 #define POST_PD2_INTER_DEPTH         1
 
 #define DIVERSIFY_PART_STRUCT        0   
