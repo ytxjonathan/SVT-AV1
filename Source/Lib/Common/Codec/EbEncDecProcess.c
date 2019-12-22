@@ -1947,7 +1947,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->redundant_blk = EB_FALSE;
     else if (context_ptr->pd_pass == PD_PASS_1)
+#if POST_PD2_INTER_DEPTH
+        context_ptr->redundant_blk = EB_FALSE;
+#else
         context_ptr->redundant_blk = EB_TRUE;
+#endif
     else
 #endif
     if (sequence_control_set_ptr->static_config.enable_redundant_blk == DEFAULT)
@@ -2738,6 +2742,10 @@ static void perform_pred_depth_refinement(
                             &s_depth,
                             &e_depth,
                             blk_geom);
+#if HARD_CODE_32x32_DEPTH_ONLY
+                        s_depth = -5;
+                        e_depth =  5;
+#endif
                     }
                     else if (context_ptr->pd_pass == PD_PASS_1) {
 
@@ -2846,6 +2854,7 @@ static void derive_part_struct_stats(
     SequenceControlSet  *sequence_control_set_ptr,
     PictureControlSet   *picture_control_set_ptr,
     ModeDecisionContext *context_ptr,
+    MdcLcuData          *mdcPtr,
     uint32_t             sb_index,
     uint32_t             part_struct_index) {
 
@@ -2878,8 +2887,14 @@ static void derive_part_struct_stats(
                     
 
                 // Set cost to MAX to do not get selected @ next d1/d2 block decision (if any)
-                context_ptr->md_local_cu_unit[d1_itr].default_cost = MAX_MODE_COST;
-
+                mdcPtr->leaf_data_array[d1_itr].consider_block = 0;
+                //context_ptr->md_local_cu_unit[d1_itr].default_cost = MAX_MODE_COST;
+                //if (blk_geom->shape != PART_N) {
+                //    context_ptr->md_local_cu_unit[d1_itr].default_cost = (MAX_MODE_COST >> 4);
+                //}
+                //else {
+                //    context_ptr->md_local_cu_unit[d1_itr].default_cost = (MAX_MODE_COST >> 10);
+                //}
             }
             blk_it += ns_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][context_ptr->blk_geom->depth];
         }
@@ -2887,6 +2902,196 @@ static void derive_part_struct_stats(
             blk_it += d1_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][context_ptr->blk_geom->depth];
     }
 
+}
+
+static void generate_mdc_split_flag(
+    SequenceControlSet  *sequence_control_set_ptr,
+    PictureControlSet   *picture_control_set_ptr,
+    ModeDecisionContext *context_ptr,
+    MdcLcuData          *mdcPtr, 
+    uint32_t             sb_index) {
+
+
+    for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+        if (mdcPtr->leaf_data_array[blk_index].consider_block) {
+
+            const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+
+            // Get current depth
+            uint8_t current_depth = get_blk_geom_mds(blk_index)->depth;
+
+            // Loop through child block(s)
+            EbBool is_valid_child_present = EB_FALSE;
+            uint32_t next_blk_index = blk_index + 1;
+            const BlockGeom * next_blk_geom = get_blk_geom_mds(next_blk_index);
+
+            // Check the area under the selected/candidate block only, and return TRUE if possible split (selected/candidate block that belongs to an superior depth)
+            while ((next_blk_geom->origin_x < blk_geom->origin_x + blk_geom->sq_size) && (next_blk_geom->origin_y < blk_geom->origin_y + blk_geom->sq_size)) {
+                if (mdcPtr->leaf_data_array[next_blk_index].consider_block && next_blk_geom->depth > current_depth) {
+                    is_valid_child_present = EB_TRUE;
+                }
+                next_blk_index++;
+                next_blk_geom = get_blk_geom_mds(next_blk_index);
+            }
+
+            //
+            if (is_valid_child_present == EB_FALSE) {
+                while (get_blk_geom_mds(blk_index)->depth == current_depth) {
+                    mdcPtr->leaf_data_array[blk_index].refined_split_flag = EB_FALSE;
+                    blk_index++;
+                }
+            }
+            else {
+                while (get_blk_geom_mds(blk_index)->depth == current_depth) {
+                    mdcPtr->leaf_data_array[blk_index].refined_split_flag = EB_TRUE;
+                    blk_index++;
+                }
+            }
+        }
+    }
+}
+// Build the set to use to generate the N distinct pred struct
+static void build_target_block_set(
+    SequenceControlSet  *sequence_control_set_ptr,
+    PictureControlSet   *picture_control_set_ptr,
+    ModeDecisionContext *context_ptr,
+    uint32_t             sb_index) {
+
+    context_ptr->target_block_count = 0;
+    SuperBlock  *sb_ptr = picture_control_set_ptr->sb_ptr_array[sb_index];
+    uint32_t tot_d1_blocks, block_1d_idx;
+    EbBool split_flag;
+
+    uint32_t  blk_index = 0;
+    while (blk_index < sequence_control_set_ptr->max_block_cnt) {
+
+        const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+        tot_d1_blocks =
+            blk_geom->sq_size == 128 ? 17 :
+            blk_geom->sq_size > 8 ? 25 :
+            blk_geom->sq_size == 8 ? 5 : 1;
+
+        // if the parent square is inside inject this block
+        uint8_t is_blk_allowed = picture_control_set_ptr->slice_type != I_SLICE ? 1 : (blk_geom->sq_size < 128) ? 1 : 0;
+
+        // derive split_flag
+        split_flag = context_ptr->md_cu_arr_nsq[blk_index].split_flag;
+
+        if (sequence_control_set_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
+            if (blk_geom->shape == PART_N) {
+                if (context_ptr->md_cu_arr_nsq[blk_index].split_flag == EB_FALSE) {
+
+#if 0
+                    int8_t s_depth = 0;
+                    int8_t e_depth = 0;
+
+                    if (context_ptr->pd_pass == PD_PASS_0) {
+                        derive_start_end_depth(
+                            picture_control_set_ptr,
+                            sb_ptr,
+                            sequence_control_set_ptr->seq_header.sb_size,
+                            &s_depth,
+                            &e_depth,
+                            blk_geom);
+                    }
+                    else if (context_ptr->pd_pass == PD_PASS_1) {
+
+                        EbBool zero_coeff_present_flag = EB_FALSE;
+
+                        if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2)
+                            zero_coeff_present_flag = context_ptr->md_cu_arr_nsq[blk_index].block_has_coeff == 0;
+
+                        else if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_3) {
+                            switch (blk_geom->bsize) {
+
+                            case BLOCK_128X128:
+                                zero_coeff_present_flag = (context_ptr->md_local_cu_unit[blk_index].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index].block_has_coeff == 0) || // SQ
+                                    (context_ptr->md_local_cu_unit[blk_index + 1].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 1].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 2].block_has_coeff == 0) || // H
+                                    (context_ptr->md_local_cu_unit[blk_index + 3].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 3].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 4].block_has_coeff == 0) || // V
+                                    (context_ptr->md_local_cu_unit[blk_index + 5].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 5].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 6].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 7].block_has_coeff == 0) ||
+                                    (context_ptr->md_local_cu_unit[blk_index + 8].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 8].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 9].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 10].block_has_coeff == 0) ||
+                                    (context_ptr->md_local_cu_unit[blk_index + 11].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 11].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 12].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 13].block_has_coeff == 0) ||
+                                    (context_ptr->md_local_cu_unit[blk_index + 14].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 14].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 15].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 16].block_has_coeff == 0);
+                                break;
+
+                            case BLOCK_64X64:
+                            case BLOCK_32X32:
+                            case BLOCK_16X16:
+                                zero_coeff_present_flag = (context_ptr->md_local_cu_unit[blk_index].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index].block_has_coeff == 0) || // SQ
+                                    (context_ptr->md_local_cu_unit[blk_index + 1].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 1].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 2].block_has_coeff == 0) || // H
+                                    (context_ptr->md_local_cu_unit[blk_index + 3].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 3].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 4].block_has_coeff == 0) || // V
+                                    (context_ptr->md_local_cu_unit[blk_index + 5].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 5].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 6].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 7].block_has_coeff == 0) ||
+                                    (context_ptr->md_local_cu_unit[blk_index + 8].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 8].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 9].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 10].block_has_coeff == 0) ||
+                                    (context_ptr->md_local_cu_unit[blk_index + 11].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 11].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 12].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 13].block_has_coeff == 0) ||
+                                    (context_ptr->md_local_cu_unit[blk_index + 14].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 14].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 15].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 16].block_has_coeff == 0) ||
+                                    (context_ptr->md_local_cu_unit[blk_index + 17].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 17].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 18].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 19].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 20].block_has_coeff == 0) ||
+                                    (context_ptr->md_local_cu_unit[blk_index + 21].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 21].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 22].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 23].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 24].block_has_coeff == 0);
+                                break;
+
+                            case BLOCK_8X8:
+                                zero_coeff_present_flag = (context_ptr->md_local_cu_unit[blk_index].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index].block_has_coeff == 0) || // SQ
+                                    (context_ptr->md_local_cu_unit[blk_index + 1].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 1].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 2].block_has_coeff == 0) || // H
+                                    (context_ptr->md_local_cu_unit[blk_index + 3].avail_blk_flag && context_ptr->md_cu_arr_nsq[blk_index + 3].block_has_coeff == 0 && context_ptr->md_cu_arr_nsq[blk_index + 4].block_has_coeff == 0);  // V
+                                break;
+
+                            case BLOCK_4X4:
+                                zero_coeff_present_flag = (context_ptr->md_cu_arr_nsq[blk_index].block_has_coeff == 0); // SQ
+                                break;
+
+                            default:
+                                assert(0);
+                                break;
+                            }
+                        }
+
+                        if (zero_coeff_present_flag) {
+                            s_depth = 0;
+                            e_depth = 0;
+                        }
+                        else
+
+                            if (context_ptr->md_cu_arr_nsq[blk_index].best_d1_blk == blk_index) {
+                                s_depth = -1;
+                                e_depth = 0;
+                            }
+                            else {
+                                s_depth = 0;
+                                e_depth = 1;
+                            }
+                    }
+#endif
+                    // Add current pred depth block(s)
+                    for (block_1d_idx = 0; block_1d_idx < tot_d1_blocks; block_1d_idx++) {
+                        //resultsPtr->leaf_data_array[blk_index + block_1d_idx].consider_block = 1;
+                        //resultsPtr->leaf_data_array[blk_index + block_1d_idx].refined_split_flag = EB_FALSE;
+
+
+                        context_ptr->target_block_index_array[context_ptr->target_block_count++] = blk_index + block_1d_idx;
+                        //uint32_t target_block_index_count;
+
+                    }
+#if 0 
+                    // Add block indices of upper depth(s)
+                    if (s_depth != 0)
+                        set_parent_to_be_considered(
+                            resultsPtr,
+                            blk_index,
+                            sequence_control_set_ptr->seq_header.sb_size,
+                            s_depth);
+
+                    // Add block indices of lower depth(s)
+                    if (e_depth != 0)
+                        set_child_to_be_considered(
+                            resultsPtr,
+                            blk_index,
+                            sequence_control_set_ptr->seq_header.sb_size,
+                            e_depth);
+#endif
+                }
+            }
+        }
+        blk_index += split_flag ? d1_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][blk_geom->depth] : ns_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][blk_geom->depth];
+    }
 }
 
 EB_EXTERN EbErrorType perform_d1_d2_block_decision(
@@ -3244,7 +3449,7 @@ void* enc_dec_kernel(void *input_ptr)
 
                         if (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
                             picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
-                            picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_3 ){
+                            picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_3) {
 
                             // [PD_PASS_1] Signal(s) derivation
                             context_ptr->md_context->pd_pass = PD_PASS_1;
@@ -3271,16 +3476,50 @@ void* enc_dec_kernel(void *input_ptr)
                                 sb_index,
                                 context_ptr->md_context);
 #if POST_PD2_INTER_DEPTH && !BACK_TO_PRED_DEPTH
+#if 1
+                            build_target_block_set(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                context_ptr->md_context,
+                                sb_index);
+
+                            uint32_t target_block_index = 0;
+                            for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt, target_block_index < context_ptr->md_context->target_block_count; blk_index++) {
+                                const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+                                mdcPtr->leaf_data_array[blk_index].consider_block = 1;
+                                if (blk_index != context_ptr->md_context->target_block_index_array[target_block_index]) {
+                                    mdcPtr->leaf_data_array[blk_index].consider_block = 0;
+                                }
+                                else
+                                    target_block_index++;
+
+                            }
+#endif
                             // Save the best PD1 partitioning structure block indices, block count, and cost
                             derive_part_struct_stats(
                                 sequence_control_set_ptr,
                                 picture_control_set_ptr,
                                 context_ptr->md_context,
+                                mdcPtr,
                                 sb_index,
                                 0);
 
+                            // Generate split flag(s)
+                            generate_mdc_split_flag(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                context_ptr->md_context,
+                                mdcPtr,
+                                sb_index);
+
+                            // Re-build mdc_cu_ptr for the 3rd PD Pass [PD_PASS_2]
+                            build_cand_block_array(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                sb_index);
+
                             // Search the top NUMBER_DISTINCT_PART_STRUCT PD1 partitioning structure(s) (besides the best PD1 partitioning structure already derived @ the previous stage)
-                            uint32_t max_distinct_part_struct = 0; // Hsan: add the ability to set through an API signal
+                            uint32_t max_distinct_part_struct = 15; // Hsan: add the ability to set through an API signal
 
                             for (uint32_t part_struct_index = 1; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
 
@@ -3292,6 +3531,15 @@ void* enc_dec_kernel(void *input_ptr)
                                 // Perform d1 and d2 block decision (d1_non_square_block_decision() and d2_inter_depth_block_decision())
                                 // Input : mdc_cu_ptr = PD1 default candidate(s)
                                 // Output: md_cu_arr_nsq = best part_struct_index partitioning structure 
+                                //mode_decision_sb(
+                                //    sequence_control_set_ptr,
+                                //    picture_control_set_ptr,
+                                //    mdcPtr,
+                                //    sb_ptr,
+                                //    sb_origin_x,
+                                //    sb_origin_y,
+                                //    sb_index,
+                                //    context_ptr->md_context);
                                 perform_d1_d2_block_decision(
                                     sequence_control_set_ptr,
                                     picture_control_set_ptr,
@@ -3307,11 +3555,27 @@ void* enc_dec_kernel(void *input_ptr)
                                     sequence_control_set_ptr,
                                     picture_control_set_ptr,
                                     context_ptr->md_context,
-                                    sb_index,
+                                    mdcPtr, 
+                                    sb_index, 
+                                                                      
                                     part_struct_index);
+
+                                // Generate split flag(s)
+                                generate_mdc_split_flag(
+                                    sequence_control_set_ptr,
+                                    picture_control_set_ptr,
+                                    context_ptr->md_context,
+                                    mdcPtr,
+                                    sb_index);
+
+                                // Re-build mdc_cu_ptr for the 3rd PD Pass [PD_PASS_2]
+                                build_cand_block_array(
+                                    sequence_control_set_ptr,
+                                    picture_control_set_ptr,
+                                    sb_index);
                             }
 
-                                                    
+
                             // Merge the best max_distinct_part_struct partitioning structure into 1 block indices array
                             uint64_t part_struct_pruning_th = (uint64_t)~0;
                             uint32_t total_blk_count = 0;
@@ -3323,7 +3587,7 @@ void* enc_dec_kernel(void *input_ptr)
                                         context_ptr->md_context->part_struct_union_block_index_array[total_blk_count++] = context_ptr->md_context->part_struct_block_index_array[part_struct_index][block_count];
                                     }
                             }
-                 
+
                             uint32_t i, j, a;
                             for (i = 0; i < total_blk_count; ++i)
                             {
@@ -3368,43 +3632,12 @@ void* enc_dec_kernel(void *input_ptr)
                             }
 
                             // Generate split flag(s)
-                            for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
-                                if (mdcPtr->leaf_data_array[blk_index].consider_block) {
-
-                                    const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
-
-                                    // Get current depth
-                                    uint8_t current_depth = get_blk_geom_mds(blk_index)->depth;
-
-                                    // Loop through child block(s)
-                                    EbBool is_valid_child_present = EB_FALSE;
-                                    uint32_t next_blk_index = blk_index + 1;
-                                    const BlockGeom * next_blk_geom = get_blk_geom_mds(next_blk_index);
-
-                                    // Check the area under the selected/candidate block only, and return TRUE if possible split (selected/candidate block that belongs to an superior depth)
-                                    while ((next_blk_geom->origin_x < blk_geom->origin_x + blk_geom->sq_size) && (next_blk_geom->origin_y < blk_geom->origin_y + blk_geom->sq_size)) {
-                                        if (mdcPtr->leaf_data_array[next_blk_index].consider_block && next_blk_geom->depth > current_depth) {
-                                            is_valid_child_present = EB_TRUE;
-                                        }
-                                        next_blk_index++;
-                                        next_blk_geom = get_blk_geom_mds(next_blk_index);
-                                    }
-
-                                    //
-                                    if (is_valid_child_present == EB_FALSE) {
-                                        while (get_blk_geom_mds(blk_index)->depth == current_depth) {
-                                            mdcPtr->leaf_data_array[blk_index].refined_split_flag = EB_FALSE;
-                                            blk_index++;
-                                        }
-                                    }
-                                    else {
-                                        while (get_blk_geom_mds(blk_index)->depth == current_depth) {
-                                            mdcPtr->leaf_data_array[blk_index].refined_split_flag = EB_TRUE;
-                                            blk_index++;
-                                        }
-                                    }
-                                }
-                            }
+                            generate_mdc_split_flag(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                context_ptr->md_context,
+                                mdcPtr,
+                                sb_index);                     
 #else
                             // Perform Pred_1 depth refinement - Add blocks to be considered in the next stage(s) of PD based on depth cost.
                             perform_pred_depth_refinement(

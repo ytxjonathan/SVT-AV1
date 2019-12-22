@@ -9683,6 +9683,18 @@ EB_EXTERN EbErrorType mode_decision_sb(
                     lcuAddr,
                     bestcandidate_buffers);
 
+
+#if HARD_CODE_32x32_DEPTH_ONLY
+                if (context_ptr->pd_pass == PD_PASS_1) {
+                    if (context_ptr->blk_geom->depth == 1 && context_ptr->blk_geom->bwidth == 32  && context_ptr->blk_geom->bheight == 16) {
+                        context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = 0 ;
+                    }
+                    else {
+                        context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = MAX_MODE_COST;
+                    }
+                }
+#endif
+
             }
 #if AUTO_MAX_PARTITION
 #if REFACTOR_SQ_WEIGHT
