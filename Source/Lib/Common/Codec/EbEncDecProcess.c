@@ -2914,8 +2914,8 @@ static void generate_mdc_split_flag(
     MdcLcuData          *mdcPtr,
     uint32_t             sb_index) {
 
-
-    for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+    uint32_t blk_index = 0;
+    while (blk_index < sequence_control_set_ptr->max_block_cnt) {
         if (mdcPtr->leaf_data_array[blk_index].consider_block) {
 
             const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
@@ -2950,6 +2950,9 @@ static void generate_mdc_split_flag(
                     blk_index++;
                 }
             }
+        }
+        else {
+            blk_index++;
         }
     }
 }
