@@ -3477,7 +3477,7 @@ void* enc_dec_kernel(void *input_ptr)
 
 #else
                             // Search the top NUMBER_DISTINCT_PART_STRUCT PD1 partitioning structure(s) (besides the best PD1 partitioning structure already derived @ the previous stage)
-                            uint32_t max_distinct_part_struct = 100; // Hsan: add the ability to set through an API signal
+                            uint32_t max_distinct_part_struct = 20; // Hsan: add the ability to set through an API signal
 
                             for (uint32_t part_struct_index = 0; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
 
