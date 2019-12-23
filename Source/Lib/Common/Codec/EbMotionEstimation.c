@@ -14261,25 +14261,27 @@ EbErrorType motion_estimate_lcu(
     // HME
     uint32_t searchRegionNumberInWidth = 0;
     uint32_t searchRegionNumberInHeight = 0;
-    //int16_t xHmeLevel0SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
-    //                              [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    //int16_t yHmeLevel0SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
-    //                              [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    //uint64_t hmeLevel0Sad[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
-    //                     [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    //int16_t xHmeLevel1SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
-    //                              [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    //int16_t yHmeLevel1SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
-    //                              [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    //uint64_t hmeLevel1Sad[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
-    //                     [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    //int16_t xHmeLevel2/*SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
-    //                              [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];*/
-    //int16_t yHmeLevel2SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
-    //                              [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
-    //uint64_t hmeLevel2Sad[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
-    //                     [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+#if !MUS_ME
 
+    int16_t xHmeLevel0SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
+                                  [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    int16_t yHmeLevel0SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
+                                  [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    uint64_t hmeLevel0Sad[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
+                         [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    int16_t xHmeLevel1SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
+                                  [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    int16_t yHmeLevel1SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
+                                  [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    uint64_t hmeLevel1Sad[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
+                         [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    int16_t xHmeLevel2SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
+                                  [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    int16_t yHmeLevel2SearchCenter[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
+                                  [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+    uint64_t hmeLevel2Sad[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
+                         [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+#endif
     // Hierarchical ME Search Center
     int16_t xHmeSearchCenter = 0;
     int16_t yHmeSearchCenter = 0;
@@ -14310,25 +14312,27 @@ EbErrorType motion_estimate_lcu(
 
     MePredUnit *me_candidate;
     EbPictureBufferDesc *refPicPtr;
-    //EbPictureBufferDesc *quarterRefPicPtr;
-    //EbPictureBufferDesc *sixteenthRefPicPtr;
-
+#if !MUS_ME
+    EbPictureBufferDesc *quarterRefPicPtr;
+    EbPictureBufferDesc *sixteenthRefPicPtr;
+#endif
     int16_t tempXHmeSearchCenter = 0;
     int16_t tempYHmeSearchCenter = 0;
-
-    //uint32_t numQuadInWidth;
-    //uint32_t totalMeQuad;
-    //uint32_t quadIndex;
-    //uint32_t nextQuadIndex;
-    //uint64_t tempXHmeSad;
-
+#if !MUS_ME
+    uint32_t numQuadInWidth;
+    uint32_t totalMeQuad;
+    uint32_t quadIndex;
+    uint32_t nextQuadIndex;
+    uint64_t tempXHmeSad;
+#endif
     uint64_t ref0Poc = 0;
     uint64_t ref1Poc = 0;
 
     uint64_t i;
-
-    //int16_t hmeLevel1SearchAreaInWidth;
-    //int16_t hmeLevel1SearchAreaInHeight;
+#if !MUS_ME
+    int16_t hmeLevel1SearchAreaInWidth;
+    int16_t hmeLevel1SearchAreaInHeight;
+#endif
     // Configure HME level 0, level 1 and level 2 from static config parameters
     EbBool enable_hme_level0_flag =
         context_ptr->enable_hme_level0_flag;
