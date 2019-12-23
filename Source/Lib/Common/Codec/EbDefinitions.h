@@ -61,7 +61,7 @@ extern "C" {
 
 #define POST_PD2_INTER_DEPTH         1
 
-#define DIVERSIFY_PART_STRUCT        0   
+#define DIVERSIFY_PART_STRUCT        0
 
 #define HARD_CODE_32x32_DEPTH_ONLY   0
 

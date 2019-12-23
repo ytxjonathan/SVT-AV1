@@ -9638,7 +9638,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
 
 #if REFACTOR_SQ_WEIGHT
             EbBool a_b_shapes_skip_flag = EB_FALSE;
-            
+
             if (context_ptr->sq_weight != (uint32_t)~0 && blk_geom->bsize > BLOCK_8X8) {
 
                 if (context_ptr->blk_geom->shape == PART_HA || context_ptr->blk_geom->shape == PART_HB) {
