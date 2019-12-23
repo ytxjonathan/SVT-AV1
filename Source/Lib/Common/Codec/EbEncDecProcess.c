@@ -2992,7 +2992,11 @@ EB_EXTERN EbErrorType perform_d1_d2_block_decision(
 
         blk_idx_mds = leaf_data_array[blk_index].mds_idx;
 
-        context_ptr->md_local_cu_unit[blk_idx_mds].tested_cu_flag = EB_TRUE; //// !!!!!!!!!!!
+        context_ptr->md_local_cu_unit[blk_idx_mds].tested_cu_flag = EB_TRUE;!
+        // Set Partition context (as unknown)
+        context_ptr->md_local_cu_unit[blk_idx_mds].above_neighbor_partition = 0;
+        context_ptr->md_local_cu_unit[blk_idx_mds].left_neighbor_partition = 0;
+
         const BlockGeom * blk_geom = context_ptr->blk_geom = get_blk_geom_mds(blk_idx_mds);
         CodingUnit *cu_ptr = context_ptr->cu_ptr = &context_ptr->md_cu_arr_nsq[blk_idx_mds];
         const EbMdcLeafData * const leafDataPtr = &mdcResultTbPtr->leaf_data_array[blk_index];
