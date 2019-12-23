@@ -3179,8 +3179,12 @@ EB_API EbErrorType eb_svt_enc_set_parameter(
     EB_NO_THROW_NEW(
         pEncCompData->sequence_control_set_instance_array[instance_index]->encode_context_ptr->prediction_structure_group_ptr,
         prediction_structure_group_ctor,
+#if SC_PRESETS_OPT
+        pEncCompData->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->static_config);
+#else
         pEncCompData->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->static_config.enc_mode,
         pEncCompData->sequence_control_set_instance_array[instance_index]->sequence_control_set_ptr->static_config.base_layer_switch_mode);
+#endif
     if (!pEncCompData->sequence_control_set_instance_array[instance_index]->encode_context_ptr->prediction_structure_group_ptr) {
         eb_release_mutex(pEncCompData->sequence_control_set_instance_array[instance_index]->config_mutex);
         return EB_ErrorInsufficientResources;

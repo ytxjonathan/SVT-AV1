@@ -199,8 +199,12 @@ extern "C" {
      ************************************************/
     extern EbErrorType prediction_structure_group_ctor(
         PredictionStructureGroup   *predictionStructureGroupPtr,
-        uint8_t          enc_mode,
-        uint32_t                        base_layer_switch_mode);
+#if SC_PRESETS_OPT
+        EbSvtAv1EncConfiguration    static_config);
+#else
+        uint8_t                     enc_mode,
+        uint32_t                    base_layer_switch_mode);
+#endif
 
     extern PredictionStructure* get_prediction_structure(
         PredictionStructureGroup    *prediction_structure_group_ptr,

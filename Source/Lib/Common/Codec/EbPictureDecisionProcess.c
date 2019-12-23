@@ -1158,7 +1158,11 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->palette_mode =
             (sequence_control_set_ptr->static_config.encoder_bit_depth == EB_8BIT ||
             (sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT && sequence_control_set_ptr->static_config.enable_hbd_mode_decision == 0)) &&
+#if SC_PRESETS_OPT
+            picture_control_set_ptr->enc_mode <= ENC_M1 ? 6 : 0;
+#else
             picture_control_set_ptr->enc_mode == ENC_M0 ? 6 : 0;
+#endif
         else
             picture_control_set_ptr->palette_mode = sequence_control_set_ptr->static_config.enable_palette;
     else

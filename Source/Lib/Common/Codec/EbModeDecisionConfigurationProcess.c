@@ -2662,7 +2662,11 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
     if (sequence_control_set_ptr->static_config.enable_obmc) {
 #if PRESETS_TUNE
 #if M0_OPT
+#if SC_PRESETS_OPT
+        if (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0 || (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M1 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected))
+#else
         if (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0)
+#endif
             picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode =
 #if SC_PRESETS_OPT
             picture_control_set_ptr->slice_type != I_SLICE ? 2 : picture_control_set_ptr->parent_pcs_ptr->sc_content_detected ? 2 : 0;

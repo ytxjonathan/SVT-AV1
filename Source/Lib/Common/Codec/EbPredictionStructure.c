@@ -1753,9 +1753,18 @@ static void prediction_structure_group_dctor(EbPtr p)
 
 EbErrorType prediction_structure_group_ctor(
     PredictionStructureGroup   *predictionStructureGroupPtr,
-    uint8_t          enc_mode,
-    uint32_t                         baseLayerSwitchMode)
+#if SC_PRESETS_OPT
+    EbSvtAv1EncConfiguration    static_config)
+#else
+    uint8_t                     enc_mode,
+    uint32_t                    baseLayerSwitchMode)
+#endif
 {
+#if SC_PRESETS_OPT
+    uint8_t           enc_mode              = static_config.enc_mode;
+    uint32_t          baseLayerSwitchMode   = static_config.base_layer_switch_mode;
+    uint32_t          sc_detected           = static_config.screen_content_mode;
+#endif
     uint32_t          predStructIndex = 0;
     uint32_t          refIdx;
     uint32_t          hierarchicalLevelIdx;
@@ -1765,7 +1774,15 @@ EbErrorType prediction_structure_group_ctor(
     predictionStructureGroupPtr->dctor = prediction_structure_group_dctor;
 
 #if PRESETS_TUNE
+#if SC_PRESETS_OPT
+    uint8_t ref_count_used;
+    if (sc_detected == 1)
+        ref_count_used = enc_mode <= ENC_M0 ? MAX_REF_IDX : enc_mode <= ENC_M2 ? 2 : 1;
+    else
+        ref_count_used = enc_mode <= ENC_M1 ? MAX_REF_IDX : enc_mode <= ENC_M2 ? 2 : 1;
+#else
     uint8_t ref_count_used = enc_mode <= ENC_M1 ? MAX_REF_IDX : enc_mode <= ENC_M2 ? 2 : 1;
+#endif
 
     if (ref_count_used > 0 && ref_count_used < MAX_REF_IDX) {
 #if LOW_DELAY_TUNE
