@@ -2948,6 +2948,13 @@ uint8_t GetMaxDrlIndex(uint8_t  refmvCnt, PredictionMode   mode);
 #define EIGHT_PEL_REF_WINDOW 3
 #endif
 #endif
+#if MUS_ME
+uint8_t is_me_data_present(
+    struct ModeDecisionContext  *context_ptr,
+    const MeLcuResults          *me_results,
+    uint8_t                      list_idx,
+    uint8_t                      ref_idx);
+#endif
 void predictive_me_search(
     PictureControlSet            *picture_control_set_ptr,
     ModeDecisionContext          *context_ptr,
@@ -3008,6 +3015,11 @@ void predictive_me_search(
 #endif
             // Get the ME MV
             const MeLcuResults *me_results = picture_control_set_ptr->parent_pcs_ptr->me_results[context_ptr->me_sb_addr];
+#if MUS_ME
+            uint32_t pa_me_distortion = ~0;//any non zero value
+            if (is_me_data_present(context_ptr, me_results, list_idx, ref_idx))
+            {
+#endif
             int16_t me_mv_x;
             int16_t me_mv_y;
             if (list_idx == 0) {
@@ -3021,8 +3033,9 @@ void predictive_me_search(
             // Round-up to the closest integer the ME MV
             me_mv_x = (me_mv_x + 4)&~0x07;
             me_mv_y = (me_mv_y + 4)&~0x07;
-
-            uint32_t pa_me_distortion;
+#if !MUS_ME
+                uint32_t pa_me_distortion;
+#endif
             EbReferenceObject *refObj = picture_control_set_ptr->ref_pic_ptr_array[list_idx][ref_idx]->object_ptr;
             EbPictureBufferDesc *ref_pic = hbd_mode_decision ?
                 refObj->reference_picture16bit : refObj->reference_picture;
@@ -3063,6 +3076,9 @@ void predictive_me_search(
                         context_ptr->blk_geom->bwidth);
                 }
             }
+#if MUS_ME
+            }
+#endif
 
             if (pa_me_distortion != 0 || context_ptr->predictive_me_level >= 5) {
 

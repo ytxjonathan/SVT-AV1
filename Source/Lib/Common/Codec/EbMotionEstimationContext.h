@@ -293,7 +293,17 @@ extern "C" {
     typedef struct MotionEstimationTierZero {
         MePredUnit  pu[MAX_ME_PU_COUNT];
     } MotionEstimationTierZero;
-
+#if MUS_ME
+    typedef struct HmeResults
+    {
+        uint8_t  list_i;   // list index of this ref
+        uint8_t  ref_i;    // ref list lindex of this ref
+        int16_t  hme_sc_x; // hme search centre x
+        int16_t  hme_sc_y; // hme search centre y
+        uint64_t hme_sad;  // hme sad
+        uint8_t  do_ref;   // to process this ref in ME or not
+    } HmeResults;
+#endif
     typedef struct MeContext
     {
         EbDctor                       dctor;
@@ -455,6 +465,9 @@ extern "C" {
         EbBool                        me_alt_ref;
         void                          *alt_ref_reference_ptr;
         // -------
+#if  MUS_ME
+        HmeResults                   hme_results[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+#endif
     } MeContext;
 
     typedef uint64_t(*EB_ME_DISTORTION_FUNC)(
