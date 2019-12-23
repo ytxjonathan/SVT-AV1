@@ -3377,7 +3377,7 @@ void* enc_dec_kernel(void *input_ptr)
 
                             uint32_t ref_count = 0;
                             uint32_t block_count;
-                            while (max_distinct_part_struct < 50) {
+                            while (max_distinct_part_struct < 300) {
 
 
                                 block_count = 0;
@@ -3433,17 +3433,20 @@ void* enc_dec_kernel(void *input_ptr)
                                     const BlockGeom *blk_geom = get_blk_geom_mds(blk_index);
 
                                     if (blk_geom->shape == PART_N) {
-                                        context_ptr->md_context->md_local_cu_unit[blk_index].cost = MAX_MODE_COST;
+                                        context_ptr->md_context->md_local_cu_unit[blk_index].default_cost = MAX_MODE_COST;
                                         block_count++;
                                     }
                                     else {
                                         for (int32_t d1_itr = blk_index; d1_itr < blk_index + blk_geom->totns; d1_itr++) {
-                                            context_ptr->md_context->md_local_cu_unit[d1_itr].cost = MAX_MODE_COST;
+                                            context_ptr->md_context->md_local_cu_unit[d1_itr].default_cost = MAX_MODE_COST;
                                             block_count++;
                                         }
                                     }
                                 }
-
+                                // Reset block cost to default value(s) (i.e. do not consider the cost update(s) that happened d1_non_square_block_decision() and d2_inter_depth_block_decision() of the previous iteration)
+                                for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                                    context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
+                                }
                                 // Now modify the ref count
                                 ref_count = max_distinct_part_struct;
                                 // Perform d1 and d2 block decision (d1_non_square_block_decision() and d2_inter_depth_block_decision())
@@ -3525,7 +3528,7 @@ void* enc_dec_kernel(void *input_ptr)
 #endif
 
                             // Merge the best max_distinct_part_struct partitioning structure into 1 block indices array
-                            uint64_t part_struct_pruning_th = (uint64_t)~0;
+                            uint64_t part_struct_pruning_th = 100;// (uint64_t)~0;
                             uint32_t total_blk_count = 0;
                             for (uint32_t part_struct_index = 0; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
 

@@ -48,7 +48,7 @@ extern "C" {
 #define MULTI_PASS_PD                1 // Multi-Pass Partitioning Depth (Multi-Pass PD) performs multiple PD stages for the same SB towards 1 final Partitioning Structure. As we go from PDn to PDn + 1, the prediction accuracy of the MD feature(s) increases while the number of block(s) decreases
 
 
-#define IMPROVED_MULTI_PASS_PD       0
+#define IMPROVED_MULTI_PASS_PD       1
 
 #if IMPROVED_MULTI_PASS_PD
 
@@ -62,7 +62,7 @@ extern "C" {
 
 #define POST_PD2_INTER_DEPTH         1
 
-#define DIVERSIFY_PART_STRUCT        0
+#define DIVERSIFY_PART_STRUCT        1
 
 #define HARD_CODE_32x32_DEPTH_ONLY   0
 
