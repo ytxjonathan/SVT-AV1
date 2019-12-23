@@ -110,6 +110,9 @@ void* set_me_hme_params_oq(
 #if M2_SC_ME_HME_SEARCH_AREA
     hmeMeLevel = ENC_M2;
 #endif
+#if M3_SC_ME_HME_SEARCH_AREA
+    hmeMeLevel = ENC_M3;
+#endif
     // HME/ME default settings
     me_context_ptr->number_hme_search_region_in_width = 2;
     me_context_ptr->number_hme_search_region_in_height = 2;
@@ -288,6 +291,9 @@ EbErrorType signal_derivation_me_kernel_oq(
 #else
         context_ptr->me_context_ptr->hme_search_method = FULL_SAD_SEARCH;
 #endif
+#if SC_HME_SEARCH_SUB_SAD
+    context_ptr->me_context_ptr->hme_search_method = SUB_SAD_SEARCH;
+#endif
 
     // ME Search Method
     if (picture_control_set_ptr->sc_content_detected)
@@ -314,6 +320,9 @@ EbErrorType signal_derivation_me_kernel_oq(
 #endif
         FULL_SAD_SEARCH :
         SUB_SAD_SEARCH;
+#endif
+#if SC_ME_SEARCH_SUB_SAD
+        context_ptr->me_context_ptr->me_search_method = SUB_SAD_SEARCH;
 #endif
 
     if (sequence_control_set_ptr->static_config.enable_global_motion == EB_TRUE)
@@ -479,6 +488,9 @@ void* tf_set_me_hme_params_oq(
 
 #if M2_SC_ME_HME_SEARCH_AREA
     hmeMeLevel = ENC_M2;
+#endif
+#if M3_SC_ME_HME_SEARCH_AREA
+    hmeMeLevel = ENC_M3;
 #endif
 
     // HME Level0

@@ -36,12 +36,28 @@ extern "C" {
 // M0 SC adoptions
 #define M0_SC_ADOPTIONS                           1
 
+// MR to M0 - SC
+#define MR_INTERPOLATION_SEARCH_LEVEL             0
+#define MR_MD_STAGE_1_CLASS_PRUNE_TH              0
+#define MR_MD_STAGE_2_CLASS_PRUNE_TH              0
+#define MR_INTRA_PRED_MODE                        0
+
+#define SC_HME_SEARCH_SUB_SAD                     0
+#define SC_ME_SEARCH_SUB_SAD                      0
+#define SC_ENABLE_FILTER_INTRA_OFF                0
+#define SC_PIC_OBMC_MODE_2                        0
+#define SC_EDGE_BASED_SKIP_ANGLE_INTRA_0          0
+#define SC_PREDICTIVE_ME_LEVEL_3                  0
+
+#define SC_COMPOUND_MODE_0                        0
+
 // M0 to M1 - for SC
 #define M0_SC_EDGE_BASED_SKIP_ANGLE_INTRA         0
 #define M0_SC_PREDICTIVE_ME_LEVEL                 0
 #define M0_SC_PIC_OBMC_MODE                       0
 #define M0_SC_ENABLE_HME_FLAG                     0
 #define M0_SC_PALETTE                             0
+#define M2_SC_REF_COUNT_USED                      0
 
 // Old M1 settings
 #define M1_ME_HME_SEARCH_AREA                     0
@@ -49,7 +65,8 @@ extern "C" {
 
 // M2 to M1 - for SC
 #define ENABLE_M2_ON_M1                           0 // Give M2 bitstreams when run in M1
-#if ENABLE_M2_ON_M1
+#define ENABLE_M3_ON_M1                           0 // Give M3 bitstreams when run in M1
+#if ENABLE_M2_ON_M1 || ENABLE_M3_ON_M1
 #define M2_SC_GLOBAL_MV_INJECTION                 1
 #define M2_SC_PREDICTIVE_ME_LEVEL                 1
 #define M2_SC_FRACTIONAL_SEARCH_METHOD            1
@@ -59,6 +76,21 @@ extern "C" {
 #define M2_SC_REF_COUNT_USED                      1
 #define M2_SC_ENABLE_HME_FLAG                     1
 #define M2_SC_ME_HME_SEARCH_AREA                  1
+#endif
+
+// M3 to M2 - for SC - Not finished
+#if ENABLE_M3_ON_M1
+#define M3_SC_NX4_4XN_INJECT                      1
+#define M3_SC_UNIPRED3X3                          1
+#define M3_SC_TRELLIS                             1
+#define M3_SC_PIC_OBMC_MODE                       1
+#define M3_SC_ME_HME_SEARCH_AREA                  1
+#define M3_SC_ENABLE_HME_FLAG                     1
+#define M3_SC_PIC_DEPTH_MODE                      1
+#define M3_SC_NSQ_SEARCH_LEVEL                    1
+#define M3_INTRA_PRED_MODE                        1
+#define M3_SC_ATB_MODE                            1
+#define M3_SC_REF_COUNT_USED                      1
 #endif
 
 #define TX_SIZE_EARLY_EXIT          1 // Exit TX size search when all coefficients are zero.

@@ -2661,6 +2661,11 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
     // 4                                            OBMC @(MVP, PME ) + Opt2 NICs
     if (sequence_control_set_ptr->static_config.enable_obmc) {
 #if PRESETS_TUNE
+#if SC_PIC_OBMC_MODE_2
+        if (1)
+            picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode = 2;
+        else
+#endif
 #if M0_OPT
         if (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0)
             picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode =
@@ -2710,6 +2715,9 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
     }
     else
         picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode = 0;
+#endif
+#if M3_SC_PIC_OBMC_MODE
+    picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode = 0;
 #endif
 
     frm_hdr->is_motion_mode_switchable =

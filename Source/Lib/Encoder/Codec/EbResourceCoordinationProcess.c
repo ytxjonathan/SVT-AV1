@@ -99,6 +99,9 @@ EbErrorType signal_derivation_pre_analysis_oq(
 #if M2_SC_ENABLE_HME_FLAG
     hme_me_level = ENC_M2;
 #endif
+#if M3_SC_ENABLE_HME_FLAG
+    hme_me_level = ENC_M3;
+#endif
     // Derive HME Flag
     if (sequence_control_set_ptr->static_config.use_default_me_hme) {
         picture_control_set_ptr->enable_hme_flag = enable_hme_flag[0][input_resolution][hme_me_level] || enable_hme_flag[1][input_resolution][hme_me_level];
@@ -759,6 +762,9 @@ void* resource_coordination_kernel(void *input_ptr)
 #endif
             else
                 sequence_control_set_ptr->seq_header.enable_filter_intra        =  0;
+#endif
+#if SC_ENABLE_FILTER_INTRA_OFF
+            sequence_control_set_ptr->seq_header.enable_filter_intra = 0;
 #endif
             // Set compound mode      Settings
             // 0                 OFF: No compond mode search : AVG only
