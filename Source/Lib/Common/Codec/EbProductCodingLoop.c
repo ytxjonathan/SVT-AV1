@@ -9797,7 +9797,12 @@ EB_EXTERN EbErrorType mode_decision_sb(
         }
 #if !REFACTOR_SQ_WEIGHT
 #if LESS_RECTANGULAR_CHECK_LEVEL
+#if RESTRICT_SQ_WEIGHT
+        // Do not perform a/b shapes bypass if missing d1 blocks
+        if (leaf_data_array[cuIdx].tot_d1_blocks == (blk_geom->sq_size == 128 ? 17 : 25) && context_ptr->sq_weight != (uint32_t)~0 && blk_geom->bsize > BLOCK_8X8)
+#else
         if (context_ptr->sq_weight != (uint32_t)~0 && blk_geom->bsize > BLOCK_8X8)
+#endif
             update_skip_next_nsq_for_a_b_shapes(context_ptr, &sq_cost, &h_cost, &v_cost, &skip_next_nsq);
 #endif
 #endif

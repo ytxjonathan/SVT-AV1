@@ -50,8 +50,9 @@ extern "C" {
 
 #define IMPROVED_MULTI_PASS_PD       0
 
-#define MULTI_PASS_PD_COST           0 // Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
+#define MULTI_PASS_PD_COST           1 // Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
 #define REFACTOR_SQ_WEIGHT           0
+#define RESTRICT_SQ_WEIGHT           1
 
 
 #if IMPROVED_MULTI_PASS_PD
