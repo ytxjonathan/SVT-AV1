@@ -171,14 +171,7 @@ EbErrorType signal_derivation_me_kernel_oq(
 
     if (picture_control_set_ptr->sc_content_detected)
 #if PRESETS_TUNE
-#if SC_PRESETS_OPT
-        if (MR_MODE)
-            context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
-        else
-            context_ptr->me_context_ptr->fractional_search_method = SUB_SAD_SEARCH;
-#else
         context_ptr->me_context_ptr->fractional_search_method = (enc_mode == ENC_M0) ? FULL_SAD_SEARCH : SUB_SAD_SEARCH;
-#endif
 #else
         context_ptr->me_context_ptr->fractional_search_method = SUB_SAD_SEARCH;
 #endif
@@ -249,14 +242,6 @@ EbErrorType signal_derivation_me_kernel_oq(
     // 1: selective based on Full-Search SAD & MV.
     // 2: off
     if (context_ptr->me_context_ptr->use_subpel_flag == 1) {
-#if SC_PRESETS_OPT
-        if (picture_control_set_ptr->sc_content_detected)
-            if (MR_MODE)
-                context_ptr->me_context_ptr->fractional_search_model = 0;
-            else
-                context_ptr->me_context_ptr->fractional_search_model = 1;
-        else
-#endif
         if (enc_mode <= ENC_M6)
             context_ptr->me_context_ptr->fractional_search_model = 0;
         else
@@ -285,7 +270,7 @@ EbErrorType signal_derivation_me_kernel_oq(
     // ME Search Method
     if (picture_control_set_ptr->sc_content_detected)
 #if SC_PRESETS_OPT
-        context_ptr->me_context_ptr->hme_search_method = SUB_SAD_SEARCH;
+        context_ptr->me_context_ptr->me_search_method = SUB_SAD_SEARCH;
 #else
 #if PRESETS_TUNE
         if (enc_mode <= ENC_M5)
@@ -523,11 +508,7 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
     if (picture_control_set_ptr->sc_content_detected)
         if (enc_mode <= ENC_M1)
 #if M0_OPT
-#if SC_PRESETS_OPT
-            context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
-#else
             context_ptr->me_context_ptr->fractional_search_method = (enc_mode == ENC_M0) ? FULL_SAD_SEARCH : SSD_SEARCH;
-#endif
 #else
             context_ptr->me_context_ptr->fractional_search_method = SSD_SEARCH;
 #endif

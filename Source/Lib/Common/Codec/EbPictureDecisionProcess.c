@@ -1382,7 +1382,11 @@ EbErrorType signal_derivation_multi_processes_oq(
     else {
     if (sc_content_detected)
 #if M0_OPT
-
+#if SC_PRESETS_OPT
+        if (picture_control_set_ptr->enc_mode <= ENC_M0)
+            picture_control_set_ptr->intra_pred_mode = 0;
+        else
+#endif
         if (picture_control_set_ptr->enc_mode <= ENC_M2)
 #else
         if (picture_control_set_ptr->enc_mode == ENC_M0)
@@ -1569,11 +1573,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 
         if (sequence_control_set_ptr->static_config.prune_unipred_me == DEFAULT)
 #if M0_OPT
-#if SC_PRESETS_OPT
-            if (picture_control_set_ptr->enc_mode >= ENC_M4)
-#else
             if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode >= ENC_M4)
-#endif
 #else
             if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode == ENC_M0 || picture_control_set_ptr->enc_mode >= ENC_M4)
 #endif
