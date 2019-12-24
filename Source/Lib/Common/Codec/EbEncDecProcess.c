@@ -1947,11 +1947,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->redundant_blk = EB_FALSE;
     else if (context_ptr->pd_pass == PD_PASS_1)
-#if POST_PD2_INTER_DEPTH
-        context_ptr->redundant_blk = EB_FALSE;
-#else
         context_ptr->redundant_blk = EB_TRUE;
-#endif
     else
 #endif
     if (sequence_control_set_ptr->static_config.enable_redundant_blk == DEFAULT)
@@ -3480,7 +3476,7 @@ void* enc_dec_kernel(void *input_ptr)
 
 #else
                             // Search the top NUMBER_DISTINCT_PART_STRUCT PD1 partitioning structure(s) (besides the best PD1 partitioning structure already derived @ the previous stage)
-                            uint32_t max_distinct_part_struct = 0; // Hsan: add the ability to set through an API signal
+                            uint32_t max_distinct_part_struct = 100; // Hsan: add the ability to set through an API signal
 
                             for (uint32_t part_struct_index = 0; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
 
@@ -3528,7 +3524,7 @@ void* enc_dec_kernel(void *input_ptr)
 #endif
 
                             // Merge the best max_distinct_part_struct partitioning structure into 1 block indices array
-                            uint64_t part_struct_pruning_th = 100;// (uint64_t)~0;
+                            uint64_t part_struct_pruning_th = (uint64_t)~0;
                             uint32_t total_blk_count = 0;
                             for (uint32_t part_struct_index = 0; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
 
