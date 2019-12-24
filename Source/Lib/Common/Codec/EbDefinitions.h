@@ -53,17 +53,17 @@ extern "C" {
 #define MULTI_PASS_PD_COST           1 // Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
 #define REFACTOR_SQ_WEIGHT           0
 #define RESTRICT_SQ_WEIGHT           1
-
+#define UNIFY_MAX_COST               1
 
 #if IMPROVED_MULTI_PASS_PD
+
+#define REMOVE_USLESS_BLOCK          1
 #define ADD_SUPPORT_TO_SKIP_PART_N   1
 
 #define SHUT_D1_D2_EARLY_EXIT        0
 #define SHUT_PART_MERGE              0
 
 #define POST_PD2_INTER_DEPTH         1
-
-#define DIVERSIFY_PART_STRUCT        0
 
 #define HARD_CODE_32x32_DEPTH_ONLY   0
 

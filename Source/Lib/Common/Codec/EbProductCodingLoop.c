@@ -9703,6 +9703,10 @@ EB_EXTERN EbErrorType mode_decision_sb(
             else if (auto_max_partition_block_skip) {
 #endif
 #if MULTI_PASS_PD_COST
+#if UNIFY_MAX_COST
+                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = MAX_MODE_COST;
+                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
+#else
                 if (context_ptr->blk_geom->shape != PART_N) {
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = (MAX_MODE_COST >> 4);
@@ -9711,6 +9715,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 10);
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = (MAX_MODE_COST >> 10);
                 }
+#endif
 #else
                 if (context_ptr->blk_geom->shape != PART_N)
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
@@ -9721,8 +9726,13 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #endif
             else if (skip_next_sq) {
 #if MULTI_PASS_PD_COST
+#if UNIFY_MAX_COST
+                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = MAX_MODE_COST;
+                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
+#else
                 context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 10);
                 context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = (MAX_MODE_COST >> 10);
+#endif
 #else
                 context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 10);
 #endif
@@ -9734,8 +9744,13 @@ EB_EXTERN EbErrorType mode_decision_sb(
                 //   The value is set to MAX_MODE_COST >> 4 to make sure there is not overflow when adding costs.
 #if MULTI_PASS_PD_COST
                 if (context_ptr->blk_geom->shape != PART_N) {
+#if UNIFY_MAX_COST
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = MAX_MODE_COST;
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
+#else
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = (MAX_MODE_COST >> 4);
+#endif
                 }
                 else {
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = 0;
