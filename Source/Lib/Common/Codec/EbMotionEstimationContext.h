@@ -329,6 +329,17 @@ extern "C" {
         uint8_t                      *one_d_intermediate_results_buf1;
         int16_t                       x_search_area_origin[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
         int16_t                       y_search_area_origin[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
+#if MUS_ME_FP
+        // ME Parameters
+        /* Number of search positions in the horizontal direction.
+        *
+        * Default depends on input resolution. */
+        uint32_t                     sa_width[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
+        /* Number of search positions in the vertical direction.
+        *
+        * Default depends on input resolution. */
+        uint32_t                     sa_height[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
+#endif
         uint8_t                      *avctemp_buffer;
         uint32_t                     *p_best_sad8x8;
         uint32_t                     *p_best_sad16x16;
@@ -361,7 +372,22 @@ extern "C" {
         EB_ALIGN(16) uint32_t         p_sad32x32[4];
         EB_ALIGN(64) uint32_t         p_sad16x16[16];
         EB_ALIGN(64) uint32_t         p_sad8x8[64];
-
+#if MUS_ME_FP
+        uint32_t                     *best_8x8_dist;
+        uint32_t                     *best_16x16_dist;
+        uint32_t                     *best_32x32_dist;
+        uint32_t                     *best_64x64_dist;
+        uint32_t                     *best_64x32_dist;
+        uint32_t                     *best_32x16_dist;
+        uint32_t                     *best_16x8_dist;
+        uint32_t                     *best_32x64_dist;
+        uint32_t                     *best_16x32_dist;
+        uint32_t                     *best_8x16_dist;
+        uint32_t                     *best_32x8_dist;
+        uint32_t                     *best_8x32_dist;
+        uint32_t                     *best_64x16_dist;
+        uint32_t                     *best_16x64_dist;
+#endif
         uint8_t                       psub_pel_direction64x64;
         uint8_t                       psub_pel_direction32x32[4];
         uint8_t                       psub_pel_direction16x16[16];
