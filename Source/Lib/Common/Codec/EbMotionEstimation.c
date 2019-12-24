@@ -7196,8 +7196,10 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad16x32[idx],
                     &context_ptr->p_best_mv16x32[idx],
                     &context_ptr->psub_pel_direction16x32[idx]);
+#if MUS_ME_FP
             }
-        }
+#endif
+    }
 
         // 8x16
         for (pu_index = 0; pu_index < 32; ++pu_index) {
