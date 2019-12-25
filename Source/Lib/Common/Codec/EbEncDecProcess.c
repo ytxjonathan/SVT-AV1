@@ -2886,8 +2886,7 @@ static void derive_part_struct_stats(
 
 
                 // Set cost to MAX to do not get selected @ next d1/d2 block decision (if any)
-                //mdcPtr->leaf_data_array[d1_itr].consider_block = 0;
-                context_ptr->md_local_cu_unit[d1_itr].default_cost = (context_ptr->md_local_cu_unit[d1_itr].default_cost * 150) / 100;
+                context_ptr->md_local_cu_unit[d1_itr].weighted_cost = (context_ptr->md_local_cu_unit[d1_itr].weighted_cost * 150) / 100;
 
             }
             blk_it += ns_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][context_ptr->blk_geom->depth];
@@ -3351,6 +3350,12 @@ void* enc_dec_kernel(void *input_ptr)
                                 context_ptr->md_context,
                                 sb_index);
 
+                            // Re-build mdc_cu_ptr for the 3rd PD Pass [PD_PASS_2]
+                            build_cand_block_array(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                context_ptr->md_context,
+                                sb_index);
 
 #if REMOVE_USLESS_BLOCK
                             // Search the max cost per 4x4 for only the tested block(s)
@@ -3373,30 +3378,15 @@ void* enc_dec_kernel(void *input_ptr)
                                     const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
                                     context_ptr->md_context->md_local_cu_unit[blk_index].default_cost = norm_max_cost * (blk_geom->bwidth * blk_geom->bheight);
                                 }
+
+                                // == before...
+                                context_ptr->md_context->md_local_cu_unit[blk_index].weighted_cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
                             }
 
-
-                            //for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
-                            //    if (context_ptr->md_context->md_local_cu_unit[blk_index].tested_cu_flag == EB_FALSE /*&& context_ptr->md_context->md_local_cu_unit[blk_index].default_cost >= MAX_MODE_COST*/)
-                            //        mdcPtr->leaf_data_array[blk_index].consider_block = EB_FALSE;
-                            //}
-
-                            //// Generate split flag(s)
-                            //generate_mdc_split_flag(
-                            //    sequence_control_set_ptr,
-                            //    picture_control_set_ptr,
-                            //    context_ptr->md_context,
-                            //    mdcPtr,
-                            //    sb_index);
 #endif
 
-                            // Re-build mdc_cu_ptr for the 3rd PD Pass [PD_PASS_2]
-                            build_cand_block_array(
-                                sequence_control_set_ptr,
-                                picture_control_set_ptr,
-                                context_ptr->md_context,
-                                sb_index);
 #if 1
+
                             // Search the top NUMBER_DISTINCT_PART_STRUCT PD1 partitioning structure(s) (besides the best PD1 partitioning structure already derived @ the previous stage)
                             uint32_t max_distinct_part_struct = 100; // Hsan: add the ability to set through an API signal
 
@@ -3413,7 +3403,7 @@ void* enc_dec_kernel(void *input_ptr)
 
                                 // Reset block cost to default value(s) (i.e. do not consider the cost update(s) that happened d1_non_square_block_decision() and d2_inter_depth_block_decision() of the previous iteration)
                                 for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
-                                    context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
+                                    context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].weighted_cost;
                                 }
 
                                 // Perform d1 and d2 block decision (d1_non_square_block_decision() and d2_inter_depth_block_decision())
@@ -3431,7 +3421,41 @@ void* enc_dec_kernel(void *input_ptr)
                             }
                             
                             // Merge the best max_distinct_part_struct partitioning structure into 1 block indices array
+
+                            // Derive SB complexity
+                            unsigned  sb_score;
+
+                            if (sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128) {
+                                uint32_t me_sb_size = sequence_control_set_ptr->sb_sz;
+                                uint32_t me_pic_width_in_sb = (sequence_control_set_ptr->seq_header.max_frame_width + sequence_control_set_ptr->sb_sz - 1) / me_sb_size;
+                                uint32_t me_sb_x = (sb_origin_x / me_sb_size);
+                                uint32_t me_sb_y = (sb_origin_y / me_sb_size);
+
+                                sb_score =
+                                   (picture_control_set_ptr->parent_pcs_ptr->me_results[me_sb_x + me_sb_y * me_pic_width_in_sb]->me_candidate[RASTER_SCAN_CU_INDEX_64x64][0].distortion +
+                                    picture_control_set_ptr->parent_pcs_ptr->me_results[me_sb_x + 1 + me_sb_y * me_pic_width_in_sb]->me_candidate[RASTER_SCAN_CU_INDEX_64x64][0].distortion +
+                                    picture_control_set_ptr->parent_pcs_ptr->me_results[me_sb_x + (me_sb_y + 1) * me_pic_width_in_sb]->me_candidate[RASTER_SCAN_CU_INDEX_64x64][0].distortion +
+                                    picture_control_set_ptr->parent_pcs_ptr->me_results[me_sb_x + 1 + (me_sb_y + 1) * me_pic_width_in_sb]->me_candidate[RASTER_SCAN_CU_INDEX_64x64][0].distortion) >> 2;
+
+ 
+                            }
+                            else {
+
+                                sb_score = picture_control_set_ptr->parent_pcs_ptr->me_results[sb_index]->me_candidate[RASTER_SCAN_CU_INDEX_64x64][0].distortion;
+                            }
+#define HIGH_SB_SCORE             60000
+#define MEDIUM_SB_SCORE           16000
+#define LOW_SB_SCORE               6000
+
+
                             uint64_t part_struct_pruning_th = (uint64_t)~0;
+                            if(sb_score < LOW_SB_SCORE)
+                                part_struct_pruning_th = 25;
+                            else if (sb_score < MEDIUM_SB_SCORE)
+                                part_struct_pruning_th = 100;
+                            else
+                                part_struct_pruning_th = 500;
+                            
                             uint32_t total_blk_count = 0;
                             for (uint32_t part_struct_index = 0; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
 

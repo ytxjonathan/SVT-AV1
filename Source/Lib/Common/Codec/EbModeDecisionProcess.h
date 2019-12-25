@@ -90,7 +90,8 @@ extern "C" {
         PartitionContextType           above_neighbor_partition;
         uint64_t                    cost;
 #if MULTI_PASS_PD_COST
-        uint64_t                    default_cost; //  Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
+        uint64_t                    default_cost;  // Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
+        uint64_t                    weighted_cost; // Similar to default_cost but amplified each iteration of distinct partitioning structure(s) derivation
 #endif
         uint64_t                    cost_luma;
         CandidateMv ed_ref_mv_stack[MODE_CTX_REF_FRAMES][MAX_REF_MV_STACK_SIZE];//to be used in MD and EncDec
