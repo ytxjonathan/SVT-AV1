@@ -4912,8 +4912,8 @@ static void half_pel_refinement_block(
 #endif
 #if MUS_ME_FP
 uint32_t sub_pel_th[2] = {
-    10,
-    10
+    25,
+    25
 };
 #endif
 /*******************************************
@@ -15557,11 +15557,11 @@ EbErrorType motion_estimate_lcu(
 
             refPicPtr = (EbPictureBufferDesc*)referenceObject->input_padded_picture_ptr;
 #if MUS_ME
-#if !MUS_ME_FP
+
             if (context_ptr->hme_results[listIndex][ref_pic_index].do_ref == 0)
                 continue;  //so will not get ME results for those references. what will happen next, shall we just fill in max sads?
              //we can also make the ME small and shut subpel
-
+#if !MUS_ME_FP
             x_search_center = context_ptr->hme_results[listIndex][ref_pic_index].hme_sc_x;
             y_search_center = context_ptr->hme_results[listIndex][ref_pic_index].hme_sc_y;
 #endif
