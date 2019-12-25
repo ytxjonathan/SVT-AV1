@@ -1300,10 +1300,14 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->interpolation_search_level = IT_SEARCH_OFF;
     else if (context_ptr->pd_pass == PD_PASS_1) {
+#if UPGRADE_PD1_SPEED
+        context_ptr->interpolation_search_level = IT_SEARCH_OFF;
+#else
         if (picture_control_set_ptr->temporal_layer_index == 0)
             context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP_UV_BLIND;
         else
             context_ptr->interpolation_search_level = IT_SEARCH_OFF;
+#endif
     }
     else
     if (MR_MODE)
@@ -1479,7 +1483,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->new_nearest_injection = 0;
     else if (context_ptr->pd_pass == PD_PASS_1)
+#if UPGRADE_PD1_BDRATE
+        context_ptr->new_nearest_injection = 1;
+#else
         context_ptr->new_nearest_injection = 0;
+#endif
     else
         context_ptr->new_nearest_injection = 1;
 #endif
@@ -1549,7 +1557,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->warped_motion_injection = 0;
     }
     else if (context_ptr->pd_pass == PD_PASS_1) {
+#if UPGRADE_PD1_SPEED
+        context_ptr->warped_motion_injection = 0;
+#else
         context_ptr->warped_motion_injection = 1;
+#endif
     }
     else
 #endif
@@ -1568,7 +1580,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->unipred3x3_injection = 0;
     }
     else if (context_ptr->pd_pass == PD_PASS_1) {
+#if UPGRADE_PD1_SPEED
+        context_ptr->unipred3x3_injection = 0;
+#else
         context_ptr->unipred3x3_injection = 2;
+#endif
     }
     else
 #endif
@@ -1608,7 +1624,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->bipred3x3_injection = 0;
     }
     else if (context_ptr->pd_pass == PD_PASS_1) {
+#if UPGRADE_PD1_SPEED
+        context_ptr->bipred3x3_injection = 0;
+#else
         context_ptr->bipred3x3_injection = 2;
+#endif
     }
     else
 #endif
@@ -1655,7 +1675,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         if (context_ptr->pd_pass == PD_PASS_0)
             context_ptr->predictive_me_level = 0;
         else if (context_ptr->pd_pass == PD_PASS_1)
+#if UPGRADE_PD1_SPEED
+            context_ptr->predictive_me_level = 0;
+#else
             context_ptr->predictive_me_level = 2;
+#endif
     else
 #endif
         if (sequence_control_set_ptr->static_config.pred_me == DEFAULT) {
@@ -2059,11 +2083,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->md_exit_th = 0;
     else if (context_ptr->pd_pass == PD_PASS_1)
-#if SHUT_D1_D2_EARLY_EXIT
-        context_ptr->md_exit_th = 0;
-#else
         context_ptr->md_exit_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) ? 10 : 18;
-#endif
     else
 #endif
 #if M0_OPT
@@ -2203,11 +2223,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->sq_weight = (uint32_t)~0;
     else if (context_ptr->pd_pass == PD_PASS_1)
 #if ENHANCED_M0_SETTINGS // lossless change - PD_PASS_2 and PD_PASS_1 should be completely decoupled: previous merge conflict
-#if SHUT_D1_D2_EARLY_EXIT
-        context_ptr->sq_weight = (uint32_t)~0;
-#else
         context_ptr->sq_weight = 100;
-#endif
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
 #endif
@@ -2320,7 +2336,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->md_max_ref_count = 4;
     else if (context_ptr->pd_pass == PD_PASS_1)
+#if UPGRADE_PD1_BDRATE
+        context_ptr->md_max_ref_count = 4;
+#else
         context_ptr->md_max_ref_count = 1;
+#endif
     else
         context_ptr->md_max_ref_count = 4;
 
@@ -2525,9 +2545,6 @@ static void set_child_to_be_considered(
 static void build_cand_block_array(
     SequenceControlSet *sequence_control_set_ptr,
     PictureControlSet  *picture_control_set_ptr,
-#if IMPROVED_MULTI_PASS_PD
-    ModeDecisionContext *context_ptr,
-#endif
     uint32_t            sb_index) {
 
     MdcLcuData *resultsPtr = &picture_control_set_ptr->mdc_sb_array[sb_index];
@@ -2845,6 +2862,58 @@ static void perform_pred_depth_refinement(
     }
 }
 #endif
+#if REMOVE_USLESS_BLOCK || POST_PD2_INTER_DEPTH
+static void generate_mdc_split_flag(
+    SequenceControlSet  *sequence_control_set_ptr,
+    PictureControlSet   *picture_control_set_ptr,
+    ModeDecisionContext *context_ptr,
+    MdcLcuData          *mdcPtr,
+    uint32_t             sb_index) {
+
+    uint32_t blk_index = 0;
+    while (blk_index < sequence_control_set_ptr->max_block_cnt) {
+        if (mdcPtr->leaf_data_array[blk_index].consider_block) {
+
+            const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+
+            // Get current depth
+            uint8_t current_depth = get_blk_geom_mds(blk_index)->depth;
+
+            // Loop through child block(s)
+            EbBool is_valid_child_present = EB_FALSE;
+            uint32_t next_blk_index = blk_index + 1;
+            const BlockGeom * next_blk_geom = get_blk_geom_mds(next_blk_index);
+
+            // Check the area under the selected/candidate block only, and return TRUE if possible split (selected/candidate block that belongs to an superior depth)
+            while ((next_blk_geom->origin_x < blk_geom->origin_x + blk_geom->sq_size) && (next_blk_geom->origin_y < blk_geom->origin_y + blk_geom->sq_size)) {
+                if (mdcPtr->leaf_data_array[next_blk_index].consider_block && next_blk_geom->depth > current_depth) {
+                    is_valid_child_present = EB_TRUE;
+                }
+                next_blk_index++;
+                next_blk_geom = get_blk_geom_mds(next_blk_index);
+            }
+
+            //
+            if (is_valid_child_present == EB_FALSE) {
+                while (get_blk_geom_mds(blk_index)->depth == current_depth) {
+                    mdcPtr->leaf_data_array[blk_index].refined_split_flag = EB_FALSE;
+                    blk_index++;
+                }
+            }
+            else {
+                while (get_blk_geom_mds(blk_index)->depth == current_depth) {
+                    mdcPtr->leaf_data_array[blk_index].refined_split_flag = EB_TRUE;
+                    blk_index++;
+                }
+            }
+        }
+        else {
+            blk_index++;
+        }
+    }
+}
+#endif
+
 #if POST_PD2_INTER_DEPTH
 static const uint32_t ns_blk_offset[10] = { 0, 1, 3, 25, 5, 8, 11, 14 ,17, 21 };
 static const uint32_t ns_blk_num[10] = { 1, 2, 2, 4, 3, 3, 3, 3, 4, 4 };
@@ -2895,56 +2964,6 @@ static void derive_part_struct_stats(
             blk_it += d1_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][context_ptr->blk_geom->depth];
     }
 
-}
-
-static void generate_mdc_split_flag(
-    SequenceControlSet  *sequence_control_set_ptr,
-    PictureControlSet   *picture_control_set_ptr,
-    ModeDecisionContext *context_ptr,
-    MdcLcuData          *mdcPtr,
-    uint32_t             sb_index) {
-
-    uint32_t blk_index = 0;
-    while (blk_index < sequence_control_set_ptr->max_block_cnt) {
-        if (mdcPtr->leaf_data_array[blk_index].consider_block) {
-
-            const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
-
-            // Get current depth
-            uint8_t current_depth = get_blk_geom_mds(blk_index)->depth;
-
-            // Loop through child block(s)
-            EbBool is_valid_child_present = EB_FALSE;
-            uint32_t next_blk_index = blk_index + 1;
-            const BlockGeom * next_blk_geom = get_blk_geom_mds(next_blk_index);
-
-            // Check the area under the selected/candidate block only, and return TRUE if possible split (selected/candidate block that belongs to an superior depth)
-            while ((next_blk_geom->origin_x < blk_geom->origin_x + blk_geom->sq_size) && (next_blk_geom->origin_y < blk_geom->origin_y + blk_geom->sq_size)) {
-                if (mdcPtr->leaf_data_array[next_blk_index].consider_block && next_blk_geom->depth > current_depth) {
-                    is_valid_child_present = EB_TRUE;
-                }
-                next_blk_index++;
-                next_blk_geom = get_blk_geom_mds(next_blk_index);
-            }
-
-            //
-            if (is_valid_child_present == EB_FALSE) {
-                while (get_blk_geom_mds(blk_index)->depth == current_depth) {
-                    mdcPtr->leaf_data_array[blk_index].refined_split_flag = EB_FALSE;
-                    blk_index++;
-                }
-            }
-            else {
-                while (get_blk_geom_mds(blk_index)->depth == current_depth) {
-                    mdcPtr->leaf_data_array[blk_index].refined_split_flag = EB_TRUE;
-                    blk_index++;
-                }
-            }
-        }
-        else {
-            blk_index++;
-        }
-    }
 }
 
 EB_EXTERN EbErrorType perform_d1_d2_block_decision(
@@ -3299,9 +3318,6 @@ void* enc_dec_kernel(void *input_ptr)
                         build_cand_block_array(
                             sequence_control_set_ptr,
                             picture_control_set_ptr,
-#if POST_PD2_INTER_DEPTH
-                            context_ptr->md_context,
-#endif
                             sb_index);
 
                         // Reset neighnor information to current SB @ position (0,0)
@@ -3342,7 +3358,7 @@ void* enc_dec_kernel(void *input_ptr)
                                 sb_origin_y,
                                 sb_index,
                                 context_ptr->md_context);
-#if POST_PD2_INTER_DEPTH
+
                             // Perform Pred_1 depth refinement - Add blocks to be considered in the next stage(s) of PD based on depth cost.
                             perform_pred_depth_refinement(
                                 sequence_control_set_ptr,
@@ -3354,16 +3370,45 @@ void* enc_dec_kernel(void *input_ptr)
                             build_cand_block_array(
                                 sequence_control_set_ptr,
                                 picture_control_set_ptr,
-                                context_ptr->md_context,
                                 sb_index);
 
+
 #if REMOVE_USLESS_BLOCK
+#if 1 /// wiouw
+                            for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                                const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+                                if (mdcPtr->leaf_data_array[blk_index].consider_block == EB_TRUE) {
+                                    if (context_ptr->md_context->md_local_cu_unit[blk_index].tested_cu_flag == EB_FALSE) {
+                                        mdcPtr->leaf_data_array[blk_index].consider_block = EB_FALSE;
+                                    }
+                                    else if (context_ptr->md_context->md_local_cu_unit[blk_index].default_cost >= MAX_MODE_COST) {
+                                        for (uint32_t nsi_blk_index = blk_index - blk_geom->nsi; nsi_blk_index < (blk_index - blk_geom->nsi + blk_geom->totns); nsi_blk_index++) {
+                                            mdcPtr->leaf_data_array[nsi_blk_index].consider_block = EB_FALSE;
+                                        }
+                                    }
+                                }
+                            }
+
+                            // Generate split flag(s)
+                            generate_mdc_split_flag(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                context_ptr->md_context,
+                                mdcPtr,
+                                sb_index);
+
+                            // Re-build mdc_cu_ptr for the 3rd PD Pass [PD_PASS_2]
+                            build_cand_block_array(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                sb_index);
+#else
                             // Search the max cost per 4x4 for only the tested block(s)
                             uint64_t norm_max_cost = 0;
                             uint64_t norm_cost;
                             for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
                                 if (mdcPtr->leaf_data_array[blk_index].consider_block == EB_TRUE &&
-                                   (context_ptr->md_context->md_local_cu_unit[blk_index].tested_cu_flag == EB_TRUE && context_ptr->md_context->md_local_cu_unit[blk_index].default_cost < MAX_MODE_COST)) {
+                                    (context_ptr->md_context->md_local_cu_unit[blk_index].tested_cu_flag == EB_TRUE && context_ptr->md_context->md_local_cu_unit[blk_index].default_cost < MAX_MODE_COST)) {
 
                                     const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
                                     norm_cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost / (blk_geom->bwidth * blk_geom->bheight);
@@ -3373,7 +3418,7 @@ void* enc_dec_kernel(void *input_ptr)
                             // Set as a cost to invalid block(s)
                             for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
                                 if (mdcPtr->leaf_data_array[blk_index].consider_block == EB_TRUE &&
-                                   (context_ptr->md_context->md_local_cu_unit[blk_index].tested_cu_flag == EB_FALSE || context_ptr->md_context->md_local_cu_unit[blk_index].default_cost >= MAX_MODE_COST)) {
+                                    (context_ptr->md_context->md_local_cu_unit[blk_index].tested_cu_flag == EB_FALSE || context_ptr->md_context->md_local_cu_unit[blk_index].default_cost >= MAX_MODE_COST)) {
 
                                     const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
                                     context_ptr->md_context->md_local_cu_unit[blk_index].default_cost = norm_max_cost * (blk_geom->bwidth * blk_geom->bheight);
@@ -3382,13 +3427,12 @@ void* enc_dec_kernel(void *input_ptr)
                                 // == before...
                                 context_ptr->md_context->md_local_cu_unit[blk_index].weighted_cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
                             }
-
+#endif
 #endif
 
-#if 1
-
+#if POST_PD2_INTER_DEPTH
                             // Search the top NUMBER_DISTINCT_PART_STRUCT PD1 partitioning structure(s) (besides the best PD1 partitioning structure already derived @ the previous stage)
-                            uint32_t max_distinct_part_struct = 100; // Hsan: add the ability to set through an API signal
+                            uint32_t max_distinct_part_struct = 0; // Hsan: add the ability to set through an API signal
 
                             for (uint32_t part_struct_index = 0; part_struct_index <= max_distinct_part_struct; part_struct_index++) {
 
@@ -3518,24 +3562,9 @@ void* enc_dec_kernel(void *input_ptr)
                             build_cand_block_array(                                
                                 sequence_control_set_ptr,
                                 picture_control_set_ptr,
-                                context_ptr->md_context,
-                                sb_index);
-#endif
-#else
-                            // Perform Pred_1 depth refinement - Add blocks to be considered in the next stage(s) of PD based on depth cost.
-                            perform_pred_depth_refinement(
-                                sequence_control_set_ptr,
-                                picture_control_set_ptr,
-                                context_ptr->md_context,
                                 sb_index);
 
-                            // Re-build mdc_cu_ptr for the 3rd PD Pass [PD_PASS_2]
-                            build_cand_block_array(
-                                sequence_control_set_ptr,
-                                picture_control_set_ptr,
-                                sb_index);
 #endif
-
 
                             // Reset neighnor information to current SB @ position (0,0)
                             copy_neighbour_arrays(
