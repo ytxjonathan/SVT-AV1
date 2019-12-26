@@ -423,7 +423,7 @@ void get_txb_ctx(
         k = 0;
         do {
             sign = ((uint8_t)dc_sign_level_coeff_neighbor_array->left_array[k + dcSignLevelCoeffLeftNeighborIndex] >> COEFF_CONTEXT_BITS);
-            assert(sign <= 2);
+            //assert(sign <= 2);
             dc_sign += signs[sign];
         } while (++k < txb_h_unit);
     }

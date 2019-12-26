@@ -55,13 +55,11 @@ extern "C" {
 #define RESTRICT_SQ_WEIGHT           1
 #define UNIFY_MAX_COST               1
 
+#define UPGRADE_PD1_BDRATE           1
+#define UPGRADE_PD1_SPEED            1
+#define BYPASS_PD0                   0
 
-#define REMOVE_USLESS_BLOCK          0
-
-#define UPGRADE_PD1_BDRATE           0
-#define UPGRADE_PD1_SPEED            0
-
-#define IMPROVED_MULTI_PASS_PD       0
+#define IMPROVED_MULTI_PASS_PD       1
 #if IMPROVED_MULTI_PASS_PD
 
 #define ADD_SUPPORT_TO_SKIP_PART_N   1

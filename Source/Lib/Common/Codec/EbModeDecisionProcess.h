@@ -91,7 +91,7 @@ extern "C" {
         uint64_t                    cost;
 #if MULTI_PASS_PD_COST
         uint64_t                    default_cost;  // Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
-        uint64_t                    weighted_cost; // Similar to default_cost but amplified each iteration of distinct partitioning structure(s) derivation
+        //uint64_t                    weighted_cost; // Similar to default_cost but amplified each iteration of distinct partitioning structure(s) derivation
 #endif
         uint64_t                    cost_luma;
         CandidateMv ed_ref_mv_stack[MODE_CTX_REF_FRAMES][MAX_REF_MV_STACK_SIZE];//to be used in MD and EncDec
@@ -428,6 +428,7 @@ extern "C" {
     uint32_t part_struct_block_count_array[MAX_PART_STRUCT_CANDIDATES];
     uint64_t part_struct_cost_array[MAX_PART_STRUCT_CANDIDATES];
     uint32_t part_struct_union_block_index_array[MAX_PART_STRUCT_CANDIDATES * MAX_BLOCK_PER_PART_STRUCT];
+    uint32_t part_struct_best_array[MAX_PART_STRUCT_CANDIDATES];
 #endif
 #endif
     } ModeDecisionContext;
