@@ -14512,6 +14512,20 @@ void get_best_ref_integer_sb(
     if (context_ptr->me_alt_ref == EB_TRUE)
         num_of_list_to_search = 0;
 
+    if (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE)
+        initialize_buffer_32bits(
+            context_ptr->p_sb_best_sad[last_list][last_ref_pic_index],
+            52,
+            1,
+            MAX_SAD_VALUE);
+    else
+        initialize_buffer_32bits(
+            context_ptr->p_sb_best_ssd[last_list][last_ref_pic_index],
+            21,
+            1,
+            MAX_SAD_VALUE);
+                         
+
     for (list_index = REF_LIST_0; list_index <= num_of_list_to_search; ++list_index) {
 
         if (context_ptr->me_alt_ref == EB_TRUE) {
@@ -14527,6 +14541,11 @@ void get_best_ref_integer_sb(
         }
         // Ref Picture Loop
         for (ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search; ++ref_pic_index) {
+
+            // Get hme results
+            if (context_ptr->hme_results[list_index][ref_pic_index].do_ref == 0)
+                continue; 
+
             if (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE) {
                 context_ptr->p_best_sad64x64 = &(context_ptr->p_sb_best_sad[list_index][ref_pic_index][ME_TIER_ZERO_PU_64x64]);  
                 context_ptr->p_best_sad32x32 = &(context_ptr->p_sb_best_sad[list_index][ref_pic_index][ME_TIER_ZERO_PU_32x32_0]);
