@@ -22,7 +22,9 @@
 #include "EbSvtAv1ErrorCodes.h"
 #include "EbUtility.h"
 #include "grainSynthesis.h"
-
+#if POST_PD2_INTER_DEPTH
+#include "EbFullLoop.h"
+#endif
 
 #if MULTI_PASS_PD
 #define FC_SKIP_TX_SR_TH025 125 // Fast cost skip tx search threshold.
@@ -2861,6 +2863,220 @@ static void perform_pred_depth_refinement(
     }
 }
 #endif
+
+#if POST_PD2_INTER_DEPTH
+static void generate_mdc_split_flag(
+    SequenceControlSet  *sequence_control_set_ptr,
+    PictureControlSet   *picture_control_set_ptr,
+    ModeDecisionContext *context_ptr,
+    MdcLcuData          *mdcPtr,
+    uint32_t             sb_index) {
+
+    uint32_t blk_index = 0;
+    while (blk_index < sequence_control_set_ptr->max_block_cnt) {
+        if (mdcPtr->leaf_data_array[blk_index].consider_block) {
+
+            const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+
+            // Get current depth
+            uint8_t current_depth = get_blk_geom_mds(blk_index)->depth;
+
+            // Loop through child block(s)
+            EbBool is_valid_child_present = EB_FALSE;
+            uint32_t next_blk_index = blk_index + 1;
+            const BlockGeom * next_blk_geom = get_blk_geom_mds(next_blk_index);
+
+            // Check the area under the selected/candidate block only, and return TRUE if possible split (selected/candidate block that belongs to an superior depth)
+            while ((next_blk_geom->origin_x < blk_geom->origin_x + blk_geom->sq_size) && (next_blk_geom->origin_y < blk_geom->origin_y + blk_geom->sq_size)) {
+                if (mdcPtr->leaf_data_array[next_blk_index].consider_block && next_blk_geom->depth > current_depth) {
+                    is_valid_child_present = EB_TRUE;
+                }
+                next_blk_index++;
+                next_blk_geom = get_blk_geom_mds(next_blk_index);
+            }
+
+            //
+            if (is_valid_child_present == EB_FALSE) {
+                while (get_blk_geom_mds(blk_index)->depth == current_depth) {
+                    mdcPtr->leaf_data_array[blk_index].refined_split_flag = EB_FALSE;
+                    blk_index++;
+                }
+            }
+            else {
+                while (get_blk_geom_mds(blk_index)->depth == current_depth) {
+                    mdcPtr->leaf_data_array[blk_index].refined_split_flag = EB_TRUE;
+                    blk_index++;
+                }
+            }
+        }
+        else {
+            blk_index++;
+        }
+    }
+}
+
+static const uint32_t ns_blk_offset[10] = { 0, 1, 3, 25, 5, 8, 11, 14 ,17, 21 };
+static const uint32_t ns_blk_num[10] = { 1, 2, 2, 4, 3, 3, 3, 3, 4, 4 };
+
+static void derive_part_struct_stats(
+    SequenceControlSet  *sequence_control_set_ptr,
+    PictureControlSet   *picture_control_set_ptr,
+    ModeDecisionContext *context_ptr,
+    MdcLcuData          *mdcPtr,
+    uint32_t             sb_index,
+    uint64_t             norm_max_cost,
+    uint32_t             part_struct_index) {
+
+    // Reset the current partitioning structure block count
+    context_ptr->part_struct_block_count_array[part_struct_index] = 0;
+    // Reset the current partitioning structure block cost
+    context_ptr->part_struct_cost_array[part_struct_index] = 0;
+
+    uint32_t blk_it = 0;
+    while (blk_it < sequence_control_set_ptr->max_block_cnt) {
+        CodingUnit *cu_ptr = &context_ptr->md_cu_arr_nsq[blk_it];
+        PartitionType part = cu_ptr->part;
+
+        const BlockGeom * blk_geom = context_ptr->blk_geom = get_blk_geom_mds(blk_it);
+        UNUSED(blk_geom);
+
+        if (part != PARTITION_SPLIT && sequence_control_set_ptr->sb_geom[sb_index].block_is_allowed[blk_it]) {
+
+            int32_t offset_d1 = ns_blk_offset[(int32_t)part]; // cu_ptr->best_d1_blk; // TOCKECK
+            int32_t num_d1_block = ns_blk_num[(int32_t)part]; // context_ptr->blk_geom->totns; // TOCKECK
+
+            for (int32_t d1_itr = (int32_t)blk_it + offset_d1; d1_itr < (int32_t)blk_it + offset_d1 + num_d1_block; d1_itr++) {
+                const BlockGeom * blk_geom = context_ptr->blk_geom = get_blk_geom_mds(d1_itr);
+                CodingUnit *cu_ptr = &context_ptr->md_cu_arr_nsq[d1_itr];
+
+                // Tag block to be tested @ next PD Pass
+                context_ptr->part_struct_block_index_array[part_struct_index][context_ptr->part_struct_block_count_array[part_struct_index]] = d1_itr;
+                context_ptr->part_struct_cost_array[part_struct_index] += context_ptr->md_local_cu_unit[d1_itr].default_cost;
+                context_ptr->part_struct_block_count_array[part_struct_index] ++;
+
+                //To increase the granularity of the derived partitioning structure applied a cost penalty to best  @ each iteration rather than setting the cost to MAX.
+                // Set cost to MAX to do not get selected @ next d1/d2 block decision (if any)
+                //context_ptr->md_local_cu_unit[d1_itr].weighted_cost = (context_ptr->md_local_cu_unit[d1_itr].weighted_cost * 150) / 100;
+                context_ptr->md_local_cu_unit[d1_itr].default_cost = (context_ptr->md_local_cu_unit[d1_itr].default_cost * 125) / 100;
+            }
+            blk_it += ns_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][context_ptr->blk_geom->depth];
+        }
+        else
+            blk_it += d1_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][context_ptr->blk_geom->depth];
+    }
+
+}
+void init_sq_nsq_block(
+    SequenceControlSet    *sequence_control_set_ptr,
+    ModeDecisionContext   *context_ptr);
+
+void init_sq_non4_block(
+    SequenceControlSet    *sequence_control_set_ptr,
+    ModeDecisionContext   *context_ptr);
+
+EB_EXTERN EbErrorType perform_d1_d2_block_decision(
+    SequenceControlSet       *sequence_control_set_ptr,
+    PictureControlSet        *picture_control_set_ptr,
+    const MdcLcuData *const   mdcResultTbPtr,
+    SuperBlock               *sb_ptr,
+    uint16_t                  sb_origin_x,
+    uint16_t                  sb_origin_y,
+    uint32_t                  lcuAddr,
+    ModeDecisionContext      *context_ptr)
+{
+    EbErrorType return_error = EB_ErrorNone;
+    const EbMdcLeafData *const leaf_data_array = mdcResultTbPtr->leaf_data_array;
+    context_ptr->sb_ptr = sb_ptr;
+
+#if ADD_SUPPORT_TO_SKIP_PART_N
+    uint32_t  d1_block_itr = 0;
+    uint32_t  d1_first_block = 1;
+#endif
+
+#if NEW_MD_LAMBDA
+    uint32_t full_lambda = context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+#endif
+
+    uint32_t blk_index = 0;  // Index over mdc array
+    uint32_t blk_idx_mds = 0;
+    uint32_t  d1_blocks_accumlated = 0;
+    EbBool all_cu_init = (picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode <= PIC_SQ_DEPTH_MODE);
+    if (all_cu_init) {
+        init_sq_nsq_block(
+            sequence_control_set_ptr,
+            context_ptr);
+    }
+    else {
+        init_sq_non4_block(
+            sequence_control_set_ptr,
+            context_ptr);
+    }
+    do {
+
+        blk_idx_mds = leaf_data_array[blk_index].mds_idx;
+
+        context_ptr->md_local_cu_unit[blk_idx_mds].tested_cu_flag = EB_TRUE;
+        // Set Partition context (as unknown)
+        context_ptr->md_local_cu_unit[blk_idx_mds].above_neighbor_partition = 0;
+        context_ptr->md_local_cu_unit[blk_idx_mds].left_neighbor_partition = 0;
+
+        const BlockGeom * blk_geom = context_ptr->blk_geom = get_blk_geom_mds(blk_idx_mds);
+        CodingUnit *cu_ptr = context_ptr->cu_ptr = &context_ptr->md_cu_arr_nsq[blk_idx_mds];
+        const EbMdcLeafData * const leafDataPtr = &mdcResultTbPtr->leaf_data_array[blk_index];
+
+        cu_ptr->av1xd->sb_type = blk_geom->bsize;
+        cu_ptr->mds_idx = blk_idx_mds;
+        context_ptr->md_cu_arr_nsq[blk_idx_mds].mdc_split_flag = (uint16_t)leafDataPtr->split_flag;
+#if ADD_SUPPORT_TO_SKIP_PART_N
+        context_ptr->md_cu_arr_nsq[blk_geom->sqi_mds].split_flag = (uint16_t)leafDataPtr->split_flag;
+#endif
+
+        cu_ptr->split_flag = (uint16_t)leafDataPtr->split_flag; //mdc indicates smallest or non valid CUs with split flag=
+        cu_ptr->qp = context_ptr->qp;
+        cu_ptr->best_d1_blk = blk_idx_mds;
+
+        if (blk_geom->nsi + 1 == blk_geom->totns) {
+            d1_non_square_block_decision(context_ptr, d1_block_itr);
+            d1_block_itr++;
+        }
+
+#if ADD_SUPPORT_TO_SKIP_PART_N
+        d1_blocks_accumlated = d1_first_block == 1 ? 1 : d1_blocks_accumlated + 1;
+#else
+        d1_blocks_accumlated = blk_geom->shape == PART_N ? 1 : d1_blocks_accumlated + 1;
+#endif
+
+        if (d1_blocks_accumlated == leafDataPtr->tot_d1_blocks)
+        {
+            uint32_t  lastCuIndex_mds = d2_inter_depth_block_decision(
+                context_ptr,
+                blk_geom->sqi_mds,//input is parent square
+                sb_ptr,
+                lcuAddr,
+                sb_origin_x,
+                sb_origin_y,
+                full_lambda,
+                context_ptr->md_rate_estimation_ptr,
+                picture_control_set_ptr);
+#if ADD_SUPPORT_TO_SKIP_PART_N
+            d1_block_itr = 0;
+            d1_first_block = 1;
+#endif
+        }
+#if ADD_SUPPORT_TO_SKIP_PART_N
+        else if (d1_first_block)
+            d1_first_block = 0;
+#endif
+        // Next block index
+        blk_index++;
+
+    } while (blk_index < mdcResultTbPtr->leaf_count);// End of CU loop
+
+
+    return return_error;
+}
+#endif
+
 /******************************************************
  * EncDec Kernel
  ******************************************************/
@@ -3167,6 +3383,239 @@ void* enc_dec_kernel(void *input_ptr)
                                 sequence_control_set_ptr,
                                 picture_control_set_ptr,
                                 sb_index);
+#if POST_PD2_INTER_DEPTH
+                            // Set a cost to skipped block(s) to be able to generate (because of skip_next_sq or skip_next_nsq or sq_weight otr ...)
+
+                            // 1st: max cost of the performed block(s)  
+                            uint64_t norm_max_cost = 0;
+                            uint64_t norm_cost;
+                            for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                                if (mdcPtr->leaf_data_array[blk_index].consider_block == EB_TRUE &&
+                                    context_ptr->md_context->md_local_cu_unit[blk_index].tested_cu_flag == EB_TRUE &&
+                                    context_ptr->md_context->md_local_cu_unit[blk_index].default_cost < MAX_MODE_COST) {
+
+                                    const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+                                    norm_cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost / (blk_geom->bwidth * blk_geom->bheight);
+                                    norm_max_cost = MAX(norm_max_cost, norm_cost);
+                                }
+                            }
+
+                            // 2nd: assign the max cost to the skipped block(s)
+                            for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                                if (mdcPtr->leaf_data_array[blk_index].consider_block == EB_TRUE &&
+                                    (context_ptr->md_context->md_local_cu_unit[blk_index].tested_cu_flag == EB_FALSE ||
+                                        context_ptr->md_context->md_local_cu_unit[blk_index].default_cost >= MAX_MODE_COST)) {
+
+                                    const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+                                    context_ptr->md_context->md_local_cu_unit[blk_index].default_cost = norm_max_cost * (blk_geom->bwidth * blk_geom->bheight);
+                                }
+                            }
+
+                            // Reset block cost to default value(s) (i.e. do not consider the cost update(s) that happened d1_non_square_block_decision() and d2_inter_depth_block_decision() of the previous iteration)
+                            //for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                            //    context_ptr->md_context->md_local_cu_unit[blk_index].weighted_cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
+                            //}
+
+
+#if 0
+
+                                                        // Derive SB complexity
+                            unsigned  sb_score;
+
+                            if (sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128) {
+                                uint32_t me_sb_size = sequence_control_set_ptr->sb_sz;
+                                uint32_t me_pic_width_in_sb = (sequence_control_set_ptr->seq_header.max_frame_width + sequence_control_set_ptr->sb_sz - 1) / me_sb_size;
+                                uint32_t me_sb_x = (sb_origin_x / me_sb_size);
+                                uint32_t me_sb_y = (sb_origin_y / me_sb_size);
+
+                                sb_score =
+                                    (picture_control_set_ptr->parent_pcs_ptr->me_results[me_sb_x + me_sb_y * me_pic_width_in_sb]->me_candidate[RASTER_SCAN_CU_INDEX_64x64][0].distortion +
+                                        picture_control_set_ptr->parent_pcs_ptr->me_results[me_sb_x + 1 + me_sb_y * me_pic_width_in_sb]->me_candidate[RASTER_SCAN_CU_INDEX_64x64][0].distortion +
+                                        picture_control_set_ptr->parent_pcs_ptr->me_results[me_sb_x + (me_sb_y + 1) * me_pic_width_in_sb]->me_candidate[RASTER_SCAN_CU_INDEX_64x64][0].distortion +
+                                        picture_control_set_ptr->parent_pcs_ptr->me_results[me_sb_x + 1 + (me_sb_y + 1) * me_pic_width_in_sb]->me_candidate[RASTER_SCAN_CU_INDEX_64x64][0].distortion) >> 2;
+
+
+                            }
+                            else {
+
+                                sb_score = picture_control_set_ptr->parent_pcs_ptr->me_results[sb_index]->me_candidate[RASTER_SCAN_CU_INDEX_64x64][0].distortion;
+                            }
+#define HIGH_SB_SCORE             60000
+#define MEDIUM_SB_SCORE           16000
+#define LOW_SB_SCORE               6000
+
+                            //if (sb_score < LOW_SB_SCORE)
+                            //    max_distinct_part_struct = 5;
+                            //else if (sb_score < MEDIUM_SB_SCORE)
+                            //    max_distinct_part_struct = 100;
+                            //else
+                            //    max_distinct_part_struct = 100;
+
+
+                            //if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
+                            //    max_distinct_part_struct = 25;
+                            //else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+                            //    max_distinct_part_struct = 25;
+                            //else
+                            //    max_distinct_part_struct = 25;
+
+                            max_distinct_part_struct = 25;
+
+
+#endif
+
+                            // Search the top NUMBER_DISTINCT_PART_STRUCT PD1 partitioning structure(s) (besides the best PD1 partitioning structure already derived @ the previous stage)
+                            uint32_t max_distinct_part_struct;
+
+
+                            //if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
+                            //    max_distinct_part_struct = 200;
+                            //else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+                            //    max_distinct_part_struct = 100;
+                            //else
+                            //    max_distinct_part_struct = 50;
+
+                            max_distinct_part_struct = 25;
+
+                            uint32_t part_struct_index;
+                            for (part_struct_index = 0; part_struct_index < max_distinct_part_struct; part_struct_index++) {
+
+                                context_ptr->md_context->part_struct_best_array[part_struct_index] = part_struct_index;
+
+                                // Save the current partitioning structure block indices, block count, and cost
+                                derive_part_struct_stats(
+                                    sequence_control_set_ptr,
+                                    picture_control_set_ptr,
+                                    context_ptr->md_context,
+                                    mdcPtr,
+                                    sb_index,
+                                    norm_max_cost,
+                                    part_struct_index);
+
+                                // Reset block cost to default value(s) (i.e. do not consider the cost update(s) that happened d1_non_square_block_decision() and d2_inter_depth_block_decision() of the previous iteration)
+                                for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
+                                    context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].default_cost;
+                                    // context_ptr->md_context->md_local_cu_unit[blk_index].cost = context_ptr->md_context->md_local_cu_unit[blk_index].weighted_cost;
+                                }
+
+                                // Perform d1 and d2 block decision (d1_non_square_block_decision() and d2_inter_depth_block_decision())
+                                // Input : mdc_cu_ptr = PD1 default candidate(s)
+                                // Output: md_cu_arr_nsq = best part_struct_index partitioning structure
+                                perform_d1_d2_block_decision(
+                                    sequence_control_set_ptr,
+                                    picture_control_set_ptr,
+                                    mdcPtr,
+                                    sb_ptr,
+                                    sb_origin_x,
+                                    sb_origin_y,
+                                    sb_index,
+                                    context_ptr->md_context);
+
+                            }
+
+                            // Sort f(cost)
+                            //{
+                            //    uint32_t i, j, a;
+                            //    for (i = 0; i < max_distinct_part_struct; ++i)
+                            //    {
+                            //        for (j = i + 1; j < max_distinct_part_struct; ++j)
+                            //        {
+                            //            if (context_ptr->md_context->part_struct_cost_array[i] > context_ptr->md_context->part_struct_cost_array[j])
+                            //            {
+                            //                a = context_ptr->md_context->part_struct_best_array[i];
+                            //                context_ptr->md_context->part_struct_best_array[i] = context_ptr->md_context->part_struct_best_array[j];
+                            //                context_ptr->md_context->part_struct_best_array[j] = a;
+                            //            }
+                            //        }
+                            //    }
+                            ////}
+
+
+                            // Merge the best max_distinct_part_struct partitioning structure into 1 block indices array
+                            //uint64_t part_struct_pruning_th = (uint64_t)~0;
+
+                            uint32_t total_blk_count = 0;
+
+                            for (uint32_t part_struct_index = 0; part_struct_index < max_distinct_part_struct; part_struct_index++) {
+
+                                //if ((((context_ptr->md_context->part_struct_cost_array[part_struct_index] - context_ptr->md_context->part_struct_cost_array[0]) * 100) / context_ptr->md_context->part_struct_cost_array[0]) < part_struct_pruning_th)
+
+                                    for (uint32_t block_count = 0; block_count < context_ptr->md_context->part_struct_block_count_array[part_struct_index]; block_count++) {
+                                        context_ptr->md_context->part_struct_union_block_index_array[total_blk_count++] = context_ptr->md_context->part_struct_block_index_array[part_struct_index][block_count];
+                                    }
+                            }
+
+#if 1 // Add all SQs
+                            {
+                                uint32_t blk_index = 0;
+                                while (blk_index < sequence_control_set_ptr->max_block_cnt) {
+                                    if (mdcPtr->leaf_data_array[blk_index].consider_block) {
+                                        const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+                                        if (blk_geom->shape == PART_N) {
+                                            context_ptr->md_context->part_struct_union_block_index_array[total_blk_count++] = blk_index;                                            
+                                        }                                       
+                                    } 
+                                    blk_index++;
+                                }
+                            }
+#endif
+
+                            {
+                                uint32_t i, j, a;
+                                for (i = 0; i < total_blk_count; ++i)
+                                {
+                                    for (j = i + 1; j < total_blk_count; ++j)
+                                    {
+                                        if (context_ptr->md_context->part_struct_union_block_index_array[i] > context_ptr->md_context->part_struct_union_block_index_array[j])
+                                        {
+                                            a = context_ptr->md_context->part_struct_union_block_index_array[i];
+                                            context_ptr->md_context->part_struct_union_block_index_array[i] = context_ptr->md_context->part_struct_union_block_index_array[j];
+                                            context_ptr->md_context->part_struct_union_block_index_array[j] = a;
+                                        }
+                                    }
+                                }
+                            }
+                            // Reset mdc_sb_array
+                            uint32_t blk_index = 0;
+                            while (blk_index < sequence_control_set_ptr->max_block_cnt) {
+                                const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+                                mdcPtr->leaf_data_array[blk_index].consider_block = 0;
+                                mdcPtr->leaf_data_array[blk_index].split_flag = blk_geom->sq_size > 4 ? EB_TRUE : EB_FALSE;
+                                mdcPtr->leaf_data_array[blk_index].refined_split_flag = blk_geom->sq_size > 4 ? EB_TRUE : EB_FALSE;
+                                blk_index++;
+                            }
+
+                            // Generate consider_block
+                            uint32_t total_blk_index = 0;
+                            for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt, total_blk_index < total_blk_count; blk_index++) {
+
+                                if (blk_index == context_ptr->md_context->part_struct_union_block_index_array[total_blk_index]) {
+
+                                    mdcPtr->leaf_data_array[blk_index].consider_block = 1;
+                                    mdcPtr->leaf_data_array[blk_index].refined_split_flag = EB_FALSE;
+                                    // This to skip duplicated block indices
+                                    while (total_blk_index < total_blk_count && blk_index == context_ptr->md_context->part_struct_union_block_index_array[total_blk_index]) {
+                                        total_blk_index++;
+                                    }
+
+                                }
+                            }
+
+                            // Generate split flag(s)
+                            generate_mdc_split_flag(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                context_ptr->md_context,
+                                mdcPtr,
+                                sb_index);
+
+                            // Re-build mdc_cu_ptr for the 3rd PD Pass [PD_PASS_2]
+                            build_cand_block_array(
+                                sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                sb_index);
+
+#endif
 
                             // Reset neighnor information to current SB @ position (0,0)
                             copy_neighbour_arrays(

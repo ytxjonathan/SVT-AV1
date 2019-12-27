@@ -89,6 +89,9 @@ extern "C" {
         PartitionContextType           left_neighbor_partition;
         PartitionContextType           above_neighbor_partition;
         uint64_t                    cost;
+#if MULTI_PASS_PD_COST
+        uint64_t                    default_cost;  // Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
+#endif
         uint64_t                    cost_luma;
         CandidateMv ed_ref_mv_stack[MODE_CTX_REF_FRAMES][MAX_REF_MV_STACK_SIZE];//to be used in MD and EncDec
         uint8_t                     avail_blk_flag ;   //tells whether this CU is tested in MD and have a valid cu data
@@ -421,6 +424,16 @@ extern "C" {
 
     // Signal to control initial and final pass PD setting(s)
     PD_PASS pd_pass;
+
+#if POST_PD2_INTER_DEPTH
+#define  MAX_PART_STRUCT_CANDIDATES  1024 //
+#define  MAX_BLOCK_PER_PART_STRUCT   1024 // partitioning structure length when all 4x4
+    uint32_t part_struct_block_index_array[MAX_PART_STRUCT_CANDIDATES][MAX_BLOCK_PER_PART_STRUCT];
+    uint32_t part_struct_block_count_array[MAX_PART_STRUCT_CANDIDATES];
+    uint64_t part_struct_cost_array[MAX_PART_STRUCT_CANDIDATES];
+    uint32_t part_struct_union_block_index_array[MAX_PART_STRUCT_CANDIDATES * MAX_BLOCK_PER_PART_STRUCT];
+    uint32_t part_struct_best_array[MAX_PART_STRUCT_CANDIDATES];
+#endif
 #endif
     } ModeDecisionContext;
 
