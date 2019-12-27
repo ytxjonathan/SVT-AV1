@@ -4746,7 +4746,11 @@ EbErrorType update_neighbor_samples_array_open_loop(
         uint32_t                            src_origin_x,
         uint32_t                            src_origin_y,
         uint8_t                             bwidth,
-        uint8_t                             bheight)
+        uint8_t                             bheight
+#if USE_ORIGIN_YUV
+        , PictureParentControlSet *picture_control_set_ptr
+#endif
+        )
 {
     EbErrorType    return_error = EB_ErrorNone;
 
@@ -4760,7 +4764,11 @@ EbErrorType update_neighbor_samples_array_open_loop(
     uint32_t block_size_half = bwidth << 1;
 
     // Adjust the Source ptr to start at the origin of the block being updated
+#if USE_ORIGIN_YUV
+    src_ptr =  picture_control_set_ptr->save_enhanced_picture_ptr[0] + (((src_origin_y + input_ptr->origin_y) * stride) + (src_origin_x + input_ptr->origin_x));
+#else
     src_ptr = input_ptr->buffer_y + (((src_origin_y + input_ptr->origin_y) * stride) + (src_origin_x + input_ptr->origin_x));
+#endif
 
     //Initialise the Luma Intra Reference Array to the mid range value 128 (for CUs at the picture boundaries)
     EB_MEMSET(above_ref, 127, (bwidth << 1) + 1);
@@ -4773,7 +4781,7 @@ EbErrorType update_neighbor_samples_array_open_loop(
         *left_ref = *read_ptr;
         left_ref++;
         above_ref++;
-    }else {
+    } else {
         *above_ref = *left_ref = 128;
         left_ref++;
         above_ref++;
@@ -4782,6 +4790,8 @@ EbErrorType update_neighbor_samples_array_open_loop(
     count = block_size_half;
     if (src_origin_x != 0) {
         read_ptr = src_ptr - 1;
+        if(src_origin_y == 0)
+            *(left_ref - 1) = *read_ptr;
         count = ((src_origin_y + count) > height) ? count - ((src_origin_y + count) - height) : count;
         for (idx = 0; idx < count; ++idx) {
             *left_ref = *read_ptr;
@@ -4789,7 +4799,15 @@ EbErrorType update_neighbor_samples_array_open_loop(
             left_ref++;
         }
         left_ref += (block_size_half - count);
-    }else
+        // pading unknown left bottom pixels with value at(-1, -15)
+        for(idx = 0; idx < bheight; idx++)
+            *(left_ref - bheight + idx) = *(left_ref - bheight - 1);
+    } else
+    if (src_origin_x == 0 && src_origin_y != 0 ) {
+        count = ((src_origin_y + count) > height) ? count - ((src_origin_y + count) - height) : count;
+        EB_MEMSET(left_ref - 1, *(src_ptr - stride), count + 1);
+        *(above_ref - 1) = *(src_ptr - stride);
+    } else
         left_ref += count;
 
     // Get the top-row
@@ -4799,7 +4817,11 @@ EbErrorType update_neighbor_samples_array_open_loop(
         count = ((src_origin_x + count) > width) ? count - ((src_origin_x + count) - width) : count;
         EB_MEMCPY(above_ref, read_ptr, count);
         above_ref += (block_size_half - count);
-    }else
+    } else
+    if (src_origin_y == 0 && src_origin_x != 0 ) {
+        count = ((src_origin_x + count) > width) ? count - ((src_origin_x + count) - width) : count;
+        EB_MEMSET(above_ref - 1, *(left_ref - count), count + 1);
+    } else
         above_ref += count;
 
     return return_error;
@@ -4823,6 +4845,36 @@ EbErrorType intra_prediction_open_loop(
     const int32_t is_dr_mode = av1_is_directional_mode(mode);
     uint8_t *dst = (&(context_ptr->me_context_ptr->sb_buffer[0]));
     uint32_t dst_stride = context_ptr->me_context_ptr->sb_buffer_stride;
+
+    if (is_dr_mode)
+        dr_predictor(dst, dst_stride, tx_size, above_row, left_col, 0, 0, p_angle);
+    else {
+        // predict
+        if (mode == DC_PRED) {
+            dc_pred[src_origin_x > 0][src_origin_y > 0][tx_size](dst, dst_stride, above_row, left_col);
+        } else
+            pred[mode][tx_size](dst, dst_stride, above_row, left_col);
+    }
+    return return_error;
+}
+
+EbErrorType intra_prediction_open_loop_mb(
+     int32_t  p_angle ,
+        uint8_t                          ois_intra_mode,
+        uint32_t                         src_origin_x,
+        uint32_t                         src_origin_y,
+        TxSize                          tx_size,
+        uint8_t                         *above_row,
+        uint8_t                         *left_col,
+        uint8_t                         *dst,
+        uint32_t                        dst_stride)
+
+{
+    EbErrorType                return_error = EB_ErrorNone;
+    PredictionMode mode = ois_intra_mode;
+    const int32_t is_dr_mode = av1_is_directional_mode(mode);
+    //uint8_t *dst = (&(context_ptr->me_context_ptr->sb_buffer[0]));
+    //uint32_t dst_stride = context_ptr->me_context_ptr->sb_buffer_stride;
 
     if (is_dr_mode)
         dr_predictor(dst, dst_stride, tx_size, above_row, left_col, 0, 0, p_angle);

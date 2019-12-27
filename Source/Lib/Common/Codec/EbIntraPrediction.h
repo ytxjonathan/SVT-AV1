@@ -183,6 +183,7 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
     extern EbErrorType intra_open_loop_reference_samples_ctor(
         IntraReferenceSamplesOpenLoop *context_ptr);
 
+#define USE_ORIGIN_YUV 0
     extern EbErrorType update_neighbor_samples_array_open_loop(
         uint8_t                           *above_ref,
         uint8_t                            *left_ref,
@@ -191,7 +192,11 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
         uint32_t                            srcOriginX,
         uint32_t                            srcOriginY,
         uint8_t                             bwidth,
-        uint8_t                             bheight);
+        uint8_t                             bheight
+#if USE_ORIGIN_YUV
+        , PictureParentControlSet *picture_control_set_ptr
+#endif
+        );
     extern EbErrorType intra_prediction_open_loop(
          int32_t  p_angle ,
         uint8_t                          ois_intra_mode,
@@ -201,6 +206,19 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
         uint8_t                         *above_row,
         uint8_t                         *left_col,
         MotionEstimationContext_t       *context_ptr);                  // input parameter, ME context
+
+#if CUTREE_LA
+    extern EbErrorType intra_prediction_open_loop_mb(
+         int32_t  p_angle ,
+        uint8_t                          ois_intra_mode,
+        uint32_t                         srcOriginX,
+        uint32_t                         srcOriginY,
+        TxSize                          tx_size,
+        uint8_t                         *above_row,
+        uint8_t                         *left_col,
+        uint8_t                         *dst,
+        uint32_t                        dst_stride);
+#endif
 
     typedef void(*EB_INTRA_NOANG_TYPE)(
         const uint32_t      size,

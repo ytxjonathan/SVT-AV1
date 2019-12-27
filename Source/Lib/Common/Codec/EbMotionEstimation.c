@@ -15492,6 +15492,9 @@ EbErrorType open_loop_intra_search_sb(
             left_col = left_data + 16;
 
             // Fill Neighbor Arrays
+#if USE_ORIGIN_YUV
+            update_neighbor_samples_array_open_loop(above_row - 1, left_col - 1, input_ptr, input_ptr->stride_y, cu_origin_x, cu_origin_y, bsize, bsize, picture_control_set_ptr);
+#else
             update_neighbor_samples_array_open_loop(above_row - 1,
                                                     left_col - 1,
                                                     input_ptr,
@@ -15500,6 +15503,7 @@ EbErrorType open_loop_intra_search_sb(
                                                     cu_origin_y,
                                                     bsize,
                                                     bsize);
+#endif
             uint8_t ois_intra_mode;
             uint8_t ois_intra_count = 0;
             uint8_t best_intra_ois_index = 0;
@@ -15775,6 +15779,10 @@ EbErrorType av1_open_loop_intra_search(
 
 }
 
+static int is_smooth_luma(uint8_t mode) {
+    return (mode == SMOOTH_PRED || mode == SMOOTH_V_PRED || mode == SMOOTH_H_PRED);
+}
+
 static void filter_intra_edge(PictureParentControlSet *picture_control_set_ptr, OisMbResults *ois_mb_results_ptr, uint8_t mode, 
                               int32_t p_angle, uint32_t cu_origin_x, uint32_t cu_origin_y, uint8_t *above_row, uint8_t *left_col) {
     SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet *)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
@@ -15787,11 +15795,22 @@ static void filter_intra_edge(PictureParentControlSet *picture_control_set_ptr, 
     int need_left = extend_modes[mode] & NEED_LEFT;
     int need_above = extend_modes[mode] & NEED_ABOVE;
     int need_above_left = extend_modes[mode] & NEED_ABOVELEFT;
-    int ab_sm = (cu_origin_y > 0 && (ois_mb_results_ptr - mb_stride)) ? is_smooth((ois_mb_results_ptr - mb_stride)->intra_mode, 0) : 0;
-    int le_sm = (cu_origin_x > 0 && (ois_mb_results_ptr - 1)) ? is_smooth((ois_mb_results_ptr - 1)->intra_mode, 0) : 0;
+    int ab_sm = (cu_origin_y > 0 && (ois_mb_results_ptr - mb_stride)) ? is_smooth_luma((ois_mb_results_ptr - mb_stride)->intra_mode) : 0;
+    int le_sm = (cu_origin_x > 0 && (ois_mb_results_ptr - 1)) ? is_smooth_luma((ois_mb_results_ptr - 1)->intra_mode) : 0;
     const int filt_type = (ab_sm || le_sm) ? 1 : 0;
     int n_top_px  = cu_origin_y > 0 ? AOMMIN(txwpx, (mb_stride * 16 - cu_origin_x + txwpx)) : 0;
     int n_left_px = cu_origin_x > 0 ? AOMMIN(txhpx, (mb_height * 16 - cu_origin_y + txhpx)) : 0;
+
+#if 1
+    if (av1_is_directional_mode((PredictionMode)mode)) {
+        if (p_angle <= 90)
+            need_above = 1, need_left = 0, need_above_left = 1;
+        else if (p_angle < 180)
+            need_above = 1, need_left = 1, need_above_left = 1;
+        else
+            need_above = 0, need_left = 1, need_above_left = 1;
+    }
+#endif
 
     if (p_angle != 90 && p_angle != 180) {
         const int ab_le = need_above_left ? 1 : 0;
@@ -15844,8 +15863,12 @@ EbErrorType open_loop_intra_search_mb(
     OisMbResults *ois_mb_results_ptr;
     uint8_t *above_row;
     uint8_t *left_col;
+    uint8_t *above0_row;
+    uint8_t *left0_col;
     uint32_t mb_stride = (sequence_control_set_ptr->seq_header.max_frame_width + 15) / 16;
 
+    DECLARE_ALIGNED(16, uint8_t, left0_data[MAX_TX_SIZE * 2 + 32]);
+    DECLARE_ALIGNED(16, uint8_t, above0_data[MAX_TX_SIZE * 2 + 32]);
     DECLARE_ALIGNED(16, uint8_t, left_data[MAX_TX_SIZE * 2 + 32]);
     DECLARE_ALIGNED(16, uint8_t, above_data[MAX_TX_SIZE * 2 + 32]);
 
@@ -15867,13 +15890,25 @@ EbErrorType open_loop_intra_search_mb(
         if (sb_params->raster_scan_cu_validity[md_scan_to_raster_scan[pa_blk_index]]) {
             cu_origin_x = sb_params->origin_x + blk_stats_ptr->origin_x;
             cu_origin_y = sb_params->origin_y + blk_stats_ptr->origin_y;
+            above0_row = above0_data + 16;
+            left0_col = left0_data + 16;
             above_row = above_data + 16;
             left_col = left_data + 16;
             ois_mb_results_ptr = picture_control_set_ptr->ois_mb_results[(cu_origin_y >> 4) * mb_stride + cu_origin_x >> 4];
-            uint8_t *src = input_ptr->buffer_y + cu_origin_x + cu_origin_y * input_ptr->stride_y;
+#if USE_ORIGIN_YUV
+            uint8_t *src = picture_control_set_ptr->save_enhanced_picture_ptr[0] + picture_control_set_ptr->enhanced_picture_ptr->origin_x + cu_origin_x +
+                           (picture_control_set_ptr->enhanced_picture_ptr->origin_y + cu_origin_y) * input_ptr->stride_y;
+#else
+            uint8_t *src = input_ptr->buffer_y + picture_control_set_ptr->enhanced_picture_ptr->origin_x + cu_origin_x +
+                           (picture_control_set_ptr->enhanced_picture_ptr->origin_y + cu_origin_y) * input_ptr->stride_y;
+#endif
 
             // Fill Neighbor Arrays
-            update_neighbor_samples_array_open_loop(above_row - 1, left_col - 1, input_ptr, input_ptr->stride_y, cu_origin_x, cu_origin_y, bsize, bsize);
+#if USE_ORIGIN_YUV
+            update_neighbor_samples_array_open_loop(above0_row - 1, left0_col - 1, input_ptr, input_ptr->stride_y, cu_origin_x, cu_origin_y, bsize, bsize, picture_control_set_ptr);
+#else
+            update_neighbor_samples_array_open_loop(above0_row - 1, left0_col - 1, input_ptr, input_ptr->stride_y, cu_origin_x, cu_origin_y, bsize, bsize);
+#endif
             uint8_t ois_intra_mode;
             uint8_t ois_intra_count = 0;
             uint8_t best_intra_ois_index = 0;
@@ -15887,20 +15922,29 @@ EbErrorType open_loop_intra_search_mb(
             int64_t intra_cost;
             PredictionMode best_mode = DC_PRED;
             int64_t best_intra_cost = INT64_MAX;
+
             for (ois_intra_mode = intra_mode_start; ois_intra_mode <= intra_mode_end; ++ois_intra_mode) {
                 int32_t p_angle = av1_is_directional_mode((PredictionMode)ois_intra_mode) ? mode_to_angle_map[(PredictionMode)ois_intra_mode] : 0;
                 // Edge filter
-                if(av1_is_directional_mode((PredictionMode)ois_intra_mode) && sequence_control_set_ptr->seq_header.enable_intra_edge_filter) {
+                if(av1_is_directional_mode((PredictionMode)ois_intra_mode) && 1/*sequence_control_set_ptr->seq_header.enable_intra_edge_filter*/) {
+                    EB_MEMCPY(left_data,  left0_data,  sizeof(uint8_t)*(MAX_TX_SIZE * 2 + 32));
+                    EB_MEMCPY(above_data, above0_data, sizeof(uint8_t)*(MAX_TX_SIZE * 2 + 32));
+                    above_row = above_data + 16;
+                    left_col  = left_data + 16;
                     filter_intra_edge(picture_control_set_ptr, ois_mb_results_ptr, ois_intra_mode, p_angle, cu_origin_x, cu_origin_y, above_row, left_col);
+                } else {
+                    above_row = above0_row;
+                    left_col  = left0_col;
                 }
                 // PRED
-                intra_prediction_open_loop(p_angle, ois_intra_mode, cu_origin_x, cu_origin_y, tx_size, above_row, left_col, context_ptr);
+                intra_prediction_open_loop_mb(p_angle, ois_intra_mode, cu_origin_x, cu_origin_y, tx_size, above_row, left_col, predictor, 16/*dst_stride*/);
 
                 // Distortion
                 aom_subtract_block(16, 16, src_diff, 16, src, input_ptr->stride_y/*src_stride*/, predictor, 16/*dst_stride*/);
                 wht_fwd_txfm(src_diff, 16, coeff, 2/*TX_16X16*/, 8, 0/*is_cur_buf_hbd(xd)*/);
                 intra_cost = aom_satd(coeff, 16 * 16);
 
+printf("kelvin ---> aom_satd mbxy %d %d, mode=%d, satd=%d, dst[0~4]=0x%d,%d,%d,%d\n", cu_origin_x, cu_origin_y, ois_intra_mode, intra_cost, predictor[0], predictor[1], predictor[2], predictor[3]);
                 if (intra_cost < best_intra_cost) {
                     best_intra_cost = intra_cost;
                     best_mode = ois_intra_mode;
