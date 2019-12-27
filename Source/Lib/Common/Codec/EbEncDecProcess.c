@@ -3386,7 +3386,7 @@ void* enc_dec_kernel(void *input_ptr)
 #if POST_PD2_INTER_DEPTH
                             // Set a cost to skipped block(s) to be able to generate (because of skip_next_sq or skip_next_nsq or sq_weight otr ...)
 
-                            // 1st: max cost of the performed block(s)  
+                            // 1st: max cost of the performed block(s)
                             uint64_t norm_max_cost = 0;
                             uint64_t norm_cost;
                             for (uint32_t blk_index = 0; blk_index < sequence_control_set_ptr->max_block_cnt; blk_index++) {
@@ -3552,9 +3552,9 @@ void* enc_dec_kernel(void *input_ptr)
                                     if (mdcPtr->leaf_data_array[blk_index].consider_block) {
                                         const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
                                         if (blk_geom->shape == PART_N) {
-                                            context_ptr->md_context->part_struct_union_block_index_array[total_blk_count++] = blk_index;                                            
-                                        }                                       
-                                    } 
+                                            context_ptr->md_context->part_struct_union_block_index_array[total_blk_count++] = blk_index;
+                                        }
+                                    }
                                     blk_index++;
                                 }
                             }
