@@ -4912,8 +4912,8 @@ static void half_pel_refinement_block(
 #endif
 #if MUS_ME_FP
 uint32_t sub_pel_th[2] = {
-    25,
-    25
+    150,
+    150
 };
 #endif
 /*******************************************
@@ -4952,7 +4952,7 @@ void half_pel_refinement_sb(
     uint32_t posh_buffer_index;
     uint32_t posj_buffer_index;
     if (context_ptr->fractional_search64x64)
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
     {
         uint32_t best = context_ptr->best_64x64_dist[0];
         int32_t diff = best - context_ptr->p_best_sad64x64[0];
@@ -4980,12 +4980,12 @@ void half_pel_refinement_sb(
                 &context_ptr->psub_pel_direction64x64,
                 context_ptr->p_best_full_pel_mv64x64,
                 inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
     }
 #endif
     // 32x32 [4 partitions]
     for (pu_index = 0; pu_index < 4; ++pu_index) {
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
         uint32_t best = context_ptr->best_32x32_dist[pu_index];
         int32_t diff = best - context_ptr->p_best_sad32x32[pu_index];
         uint32_t abs_diff = ABS(diff);
@@ -5027,14 +5027,14 @@ void half_pel_refinement_sb(
                 &context_ptr->psub_pel_direction32x32[pu_index],
                 &context_ptr->p_best_full_pel_mv32x32[pu_index],
                 inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
         }
 #endif
     }
     // 16x16 [16 partitions]
     for (pu_index = 0; pu_index < 16; ++pu_index) {
         idx = tab16x16[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
         uint32_t best = context_ptr->best_16x16_dist[idx];
         int32_t diff = best - context_ptr->p_best_sad16x16[idx];
         uint32_t abs_diff = ABS(diff);
@@ -5075,14 +5075,14 @@ void half_pel_refinement_sb(
                 &context_ptr->psub_pel_direction16x16[idx],
                 &context_ptr->p_best_full_pel_mv16x16[idx],
                 inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
         }
 #endif
     }
     // 8x8   [64 partitions]
     for (pu_index = 0; pu_index < 64; ++pu_index) {
         idx = tab8x8[pu_index];  // TODO bitwise this
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
         uint32_t best = context_ptr->best_8x8_dist[idx];
         int32_t diff = best - context_ptr->p_best_sad8x8[idx];
         uint32_t abs_diff = ABS(diff);
@@ -5123,14 +5123,14 @@ void half_pel_refinement_sb(
                 &context_ptr->psub_pel_direction8x8[idx],
                 &context_ptr->p_best_full_pel_mv8x8[idx],
                 inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
         }
 #endif
     }
     if (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE) {
         // 64x32
         for (pu_index = 0; pu_index < 2; ++pu_index) {
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_64x32_dist[pu_index];
             int32_t diff = best - context_ptr->p_best_sad64x32[pu_index];
             uint32_t abs_diff = ABS(diff);
@@ -5172,14 +5172,14 @@ void half_pel_refinement_sb(
                     &context_ptr->psub_pel_direction64x32[pu_index],
                     &context_ptr->p_best_full_pel_mv64x32[pu_index],
                     inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
         // 32x16
         for (pu_index = 0; pu_index < 8; ++pu_index) {
             idx = tab32x16[pu_index];  // TODO bitwise this
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_32x16_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad32x16[idx];
             uint32_t abs_diff = ABS(diff);
@@ -5221,14 +5221,14 @@ void half_pel_refinement_sb(
                     &context_ptr->psub_pel_direction32x16[idx],
                     &context_ptr->p_best_full_pel_mv32x16[idx],
                     inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
         // 16x8
         for (pu_index = 0; pu_index < 32; ++pu_index) {
             idx = tab16x8[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_16x8_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad16x8[idx];
             uint32_t abs_diff = ABS(diff);
@@ -5270,13 +5270,13 @@ void half_pel_refinement_sb(
                     &context_ptr->psub_pel_direction16x8[idx],
                     &context_ptr->p_best_full_pel_mv16x8[idx],
                     inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
         // 32x64
         for (pu_index = 0; pu_index < 2; ++pu_index) {
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_32x64_dist[pu_index];
             int32_t diff = best - context_ptr->p_best_sad32x64[pu_index];
             uint32_t abs_diff = ABS(diff);
@@ -5318,14 +5318,14 @@ void half_pel_refinement_sb(
                     &context_ptr->psub_pel_direction32x64[pu_index],
                     &context_ptr->p_best_full_pel_mv32x64[pu_index],
                     inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
         // 16x32
         for (pu_index = 0; pu_index < 8; ++pu_index) {
             idx = tab16x32[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_16x32_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad16x32[idx];
             uint32_t abs_diff = ABS(diff);
@@ -5367,14 +5367,14 @@ void half_pel_refinement_sb(
                     &context_ptr->psub_pel_direction16x32[idx],
                     &context_ptr->p_best_full_pel_mv16x32[idx],
                     inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
         // 8x16
         for (pu_index = 0; pu_index < 32; ++pu_index) {
             idx = tab8x16[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_8x16_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad8x16[idx];
             uint32_t abs_diff = ABS(diff);
@@ -5416,14 +5416,14 @@ void half_pel_refinement_sb(
                     &context_ptr->psub_pel_direction8x16[idx],
                     &context_ptr->p_best_full_pel_mv8x16[idx],
                     inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
         // 32x8
         for (pu_index = 0; pu_index < 16; ++pu_index) {
             idx = tab32x8[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_32x8_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad32x8[idx];
             uint32_t abs_diff = ABS(diff);
@@ -5465,13 +5465,13 @@ void half_pel_refinement_sb(
                     &context_ptr->psub_pel_direction32x8[idx],
                     &context_ptr->p_best_full_pel_mv32x8[idx],
                     inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
         for (pu_index = 0; pu_index < 16; ++pu_index) {
             idx = tab8x32[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_8x32_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad8x32[idx];
             uint32_t abs_diff = ABS(diff);
@@ -5513,13 +5513,13 @@ void half_pel_refinement_sb(
                     &context_ptr->psub_pel_direction8x32[idx],
                     &context_ptr->p_best_full_pel_mv8x32[idx],
                     inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
         for (pu_index = 0; pu_index < 4; ++pu_index) {
             idx = pu_index;
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_64x16_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad64x16[idx];
             uint32_t abs_diff = ABS(diff);
@@ -5561,13 +5561,13 @@ void half_pel_refinement_sb(
                     &context_ptr->psub_pel_direction64x16[idx],
                     &context_ptr->p_best_full_pel_mv64x16[idx],
                     inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
         for (pu_index = 0; pu_index < 4; ++pu_index) {
             idx = pu_index;
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_16x64_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad16x64[idx];
             uint32_t abs_diff = ABS(diff);
@@ -5609,7 +5609,7 @@ void half_pel_refinement_sb(
                     &context_ptr->psub_pel_direction16x64[idx],
                     &context_ptr->p_best_full_pel_mv16x64[idx],
                     inetger_mv);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -6818,7 +6818,7 @@ void HalfPelSearch_LCU(
     uint32_t posjBufferIndex;
 
     if (context_ptr->fractional_search64x64)
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
     {
         uint32_t best = context_ptr->best_64x64_dist[0];
         int32_t diff = best - context_ptr->p_best_sad64x64[0];
@@ -6841,14 +6841,14 @@ void HalfPelSearch_LCU(
                 context_ptr->p_best_sad64x64,
                 context_ptr->p_best_mv64x64,
                 &context_ptr->psub_pel_direction64x64);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
     }
 #endif
 
     if (enableHalfPel32x32) {
         // 32x32 [4 partitions]
         for (pu_index = 0; pu_index < 4; ++pu_index) {
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_32x32_dist[pu_index];
             int32_t diff = best - context_ptr->p_best_sad32x32[pu_index];
             uint32_t abs_diff = ABS(diff);
@@ -6883,7 +6883,7 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad32x32[pu_index],
                     &context_ptr->p_best_mv32x32[pu_index],
                     &context_ptr->psub_pel_direction32x32[pu_index]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -6892,7 +6892,7 @@ void HalfPelSearch_LCU(
         // 16x16 [16 partitions]
         for (pu_index = 0; pu_index < 16; ++pu_index) {
             idx = tab16x16[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_16x16_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad16x16[idx];
             uint32_t abs_diff = ABS(diff);
@@ -6927,7 +6927,7 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad16x16[idx],
                     &context_ptr->p_best_mv16x16[idx],
                     &context_ptr->psub_pel_direction16x16[idx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -6937,7 +6937,7 @@ void HalfPelSearch_LCU(
         if (!disable8x8CuInMeFlag) {
             for (pu_index = 0; pu_index < 64; ++pu_index) {
                 idx = tab8x8[pu_index];  // TODO bitwise this
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
                 uint32_t best = context_ptr->best_8x8_dist[idx];
                 int32_t diff = best - context_ptr->p_best_sad8x8[idx];
                 uint32_t abs_diff = ABS(diff);
@@ -6976,7 +6976,7 @@ void HalfPelSearch_LCU(
                         &context_ptr->p_best_sad8x8[idx],
                         &context_ptr->p_best_mv8x8[idx],
                         &context_ptr->psub_pel_direction8x8[idx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
                 }
 #endif
             }
@@ -6985,7 +6985,7 @@ void HalfPelSearch_LCU(
     if (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE) {
         // 64x32
         for (pu_index = 0; pu_index < 2; ++pu_index) {
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_64x32_dist[pu_index];
             int32_t diff = best - context_ptr->p_best_sad64x32[pu_index];
             uint32_t abs_diff = ABS(diff);
@@ -7021,7 +7021,7 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad64x32[pu_index],
                     &context_ptr->p_best_mv64x32[pu_index],
                     &context_ptr->psub_pel_direction64x32[pu_index]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -7029,7 +7029,7 @@ void HalfPelSearch_LCU(
         // 32x16
         for (pu_index = 0; pu_index < 8; ++pu_index) {
             idx = tab32x16[pu_index];  // TODO bitwise this
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_32x16_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad32x16[idx];
             uint32_t abs_diff = ABS(diff);
@@ -7065,7 +7065,7 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad32x16[idx],
                     &context_ptr->p_best_mv32x16[idx],
                     &context_ptr->psub_pel_direction32x16[idx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -7073,7 +7073,7 @@ void HalfPelSearch_LCU(
         // 16x8
         for (pu_index = 0; pu_index < 32; ++pu_index) {
             idx = tab16x8[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_16x8_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad16x8[idx];
             uint32_t abs_diff = ABS(diff);
@@ -7109,14 +7109,14 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad16x8[idx],
                     &context_ptr->p_best_mv16x8[idx],
                     &context_ptr->psub_pel_direction16x8[idx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
 
         // 32x64
         for (pu_index = 0; pu_index < 2; ++pu_index) {
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_32x64_dist[pu_index];
             int32_t diff = best - context_ptr->p_best_sad32x64[pu_index];
             uint32_t abs_diff = ABS(diff);
@@ -7152,7 +7152,7 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad32x64[pu_index],
                     &context_ptr->p_best_mv32x64[pu_index],
                     &context_ptr->psub_pel_direction32x64[pu_index]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -7160,7 +7160,7 @@ void HalfPelSearch_LCU(
         // 16x32
         for (pu_index = 0; pu_index < 8; ++pu_index) {
             idx = tab16x32[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_16x32_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad16x32[idx];
             uint32_t abs_diff = ABS(diff);
@@ -7196,7 +7196,7 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad16x32[idx],
                     &context_ptr->p_best_mv16x32[idx],
                     &context_ptr->psub_pel_direction16x32[idx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
     }
@@ -7204,7 +7204,7 @@ void HalfPelSearch_LCU(
         // 8x16
         for (pu_index = 0; pu_index < 32; ++pu_index) {
             idx = tab8x16[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_8x16_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad8x16[idx];
             uint32_t abs_diff = ABS(diff);
@@ -7240,7 +7240,7 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad8x16[idx],
                     &context_ptr->p_best_mv8x16[idx],
                     &context_ptr->psub_pel_direction8x16[idx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -7248,7 +7248,7 @@ void HalfPelSearch_LCU(
         // 32x8
         for (pu_index = 0; pu_index < 16; ++pu_index) {
             idx = tab32x8[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_32x8_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad32x8[idx];
             uint32_t abs_diff = ABS(diff);
@@ -7284,14 +7284,14 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad32x8[idx],
                     &context_ptr->p_best_mv32x8[idx],
                     &context_ptr->psub_pel_direction32x8[idx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
 
         for (pu_index = 0; pu_index < 16; ++pu_index) {
             idx = tab8x32[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_8x32_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad8x32[idx];
             uint32_t abs_diff = ABS(diff);
@@ -7326,14 +7326,14 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad8x32[idx],
                     &context_ptr->p_best_mv8x32[idx],
                     &context_ptr->psub_pel_direction8x32[idx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
 
         for (pu_index = 0; pu_index < 4; ++pu_index) {
             idx = pu_index;
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_64x16_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad64x16[idx];
             uint32_t abs_diff = ABS(diff);
@@ -7368,14 +7368,14 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad64x16[idx],
                     &context_ptr->p_best_mv64x16[idx],
                     &context_ptr->psub_pel_direction64x16[idx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
 
         for (pu_index = 0; pu_index < 4; ++pu_index) {
             idx = pu_index;
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_16x64_dist[idx];
             int32_t diff = best - context_ptr->p_best_sad16x64[idx];
             uint32_t abs_diff = ABS(diff);
@@ -7410,7 +7410,7 @@ void HalfPelSearch_LCU(
                     &context_ptr->p_best_sad16x64[idx],
                     &context_ptr->p_best_mv16x64[idx],
                     &context_ptr->psub_pel_direction16x64[idx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -8298,7 +8298,7 @@ static void QuarterPelSearch_LCU(
     uint32_t nidx;
 
     if (context_ptr->fractional_search64x64) {
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
         uint32_t best = context_ptr->best_64x64_dist[0];
         int32_t diff = best - context_ptr->p_best_sad64x64[0];
         uint32_t abs_diff = ABS(diff);
@@ -8351,7 +8351,7 @@ static void QuarterPelSearch_LCU(
                 context_ptr->p_best_sad64x64,
                 context_ptr->p_best_mv64x64,
                 context_ptr->psub_pel_direction64x64);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
         }
 #endif
     }
@@ -8359,7 +8359,7 @@ static void QuarterPelSearch_LCU(
     {
         // 32x32 [4 partitions]
         for (pu_index = 0; pu_index < 4; ++pu_index) {
-#if MUS_ME_FP
+#if MUS_ME_FP_PUMUS_ME_FP
             uint32_t best = context_ptr->best_32x32_dist[pu_index];
             int32_t diff = best - context_ptr->p_best_sad32x32[pu_index];
             uint32_t abs_diff = ABS(diff);
@@ -8419,7 +8419,7 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad32x32[pu_index],
                     &context_ptr->p_best_mv32x32[pu_index],
                     context_ptr->psub_pel_direction32x32[pu_index]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -8430,7 +8430,7 @@ static void QuarterPelSearch_LCU(
         // 16x16 [16 partitions]
         for (pu_index = 0; pu_index < 16; ++pu_index) {
             nidx = tab16x16[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_16x16_dist[nidx];
             int32_t diff = best - context_ptr->p_best_sad16x16[nidx];
             uint32_t abs_diff = ABS(diff);
@@ -8490,7 +8490,7 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad16x16[nidx],
                     &context_ptr->p_best_mv16x16[nidx],
                     context_ptr->psub_pel_direction16x16[nidx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -8502,7 +8502,7 @@ static void QuarterPelSearch_LCU(
         if (!disable8x8CuInMeFlag) {
             for (pu_index = 0; pu_index < 64; ++pu_index) {
                 nidx = tab8x8[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
                 uint32_t best = context_ptr->best_8x8_dist[nidx];
                 int32_t diff = best - context_ptr->p_best_sad8x8[nidx];
                 uint32_t abs_diff = ABS(diff);
@@ -8579,7 +8579,7 @@ static void QuarterPelSearch_LCU(
                         &context_ptr->p_best_sad8x8[nidx],
                         &context_ptr->p_best_mv8x8[nidx],
                         context_ptr->psub_pel_direction8x8[nidx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
                 }
 #endif
             }
@@ -8589,7 +8589,7 @@ static void QuarterPelSearch_LCU(
     if (ext_block_flag) {
         // 64x32
         for (pu_index = 0; pu_index < 2; ++pu_index) {
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_64x32_dist[pu_index];
             int32_t diff = best - context_ptr->p_best_sad64x32[pu_index];
             uint32_t abs_diff = ABS(diff);
@@ -8649,7 +8649,7 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad64x32[pu_index],
                     &context_ptr->p_best_mv64x32[pu_index],
                     context_ptr->psub_pel_direction64x32[pu_index]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -8657,7 +8657,7 @@ static void QuarterPelSearch_LCU(
         // 32x16
         for (pu_index = 0; pu_index < 8; ++pu_index) {
             nidx = tab32x16[pu_index];  // TODO bitwise this
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_32x16_dist[nidx];
             int32_t diff = best - context_ptr->p_best_sad32x16[nidx];
             uint32_t abs_diff = ABS(diff);
@@ -8717,7 +8717,7 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad32x16[nidx],
                     &context_ptr->p_best_mv32x16[nidx],
                     context_ptr->psub_pel_direction32x16[nidx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -8725,7 +8725,7 @@ static void QuarterPelSearch_LCU(
         // 16x8
         for (pu_index = 0; pu_index < 32; ++pu_index) {
             nidx = tab16x8[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_16x8_dist[nidx];
             int32_t diff = best - context_ptr->p_best_sad16x8[nidx];
             uint32_t abs_diff = ABS(diff);
@@ -8785,14 +8785,14 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad16x8[nidx],
                     &context_ptr->p_best_mv16x8[nidx],
                     context_ptr->psub_pel_direction16x8[nidx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
 
         // 32x64
         for (pu_index = 0; pu_index < 2; ++pu_index) {
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_32x64_dist[pu_index];
             int32_t diff = best - context_ptr->p_best_sad32x64[pu_index];
             uint32_t abs_diff = ABS(diff);
@@ -8852,7 +8852,7 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad32x64[pu_index],
                     &context_ptr->p_best_mv32x64[pu_index],
                     context_ptr->psub_pel_direction32x64[pu_index]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -8860,7 +8860,7 @@ static void QuarterPelSearch_LCU(
         // 16x32
         for (pu_index = 0; pu_index < 8; ++pu_index) {
             nidx = tab16x32[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_16x32_dist[nidx];
             int32_t diff = best - context_ptr->p_best_sad16x32[nidx];
             uint32_t abs_diff = ABS(diff);
@@ -8920,7 +8920,7 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad16x32[nidx],
                     &context_ptr->p_best_mv16x32[nidx],
                     context_ptr->psub_pel_direction16x32[nidx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -8928,7 +8928,7 @@ static void QuarterPelSearch_LCU(
         // 8x16
         for (pu_index = 0; pu_index < 32; ++pu_index) {
             nidx = tab8x16[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_8x16_dist[nidx];
             int32_t diff = best - context_ptr->p_best_sad8x16[nidx];
             uint32_t abs_diff = ABS(diff);
@@ -8988,7 +8988,7 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad8x16[nidx],
                     &context_ptr->p_best_mv8x16[nidx],
                     context_ptr->psub_pel_direction8x16[nidx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -8996,7 +8996,7 @@ static void QuarterPelSearch_LCU(
         // 32x8
         for (pu_index = 0; pu_index < 16; ++pu_index) {
             nidx = tab32x8[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_32x8_dist[nidx];
             int32_t diff = best - context_ptr->p_best_sad32x8[nidx];
             uint32_t abs_diff = ABS(diff);
@@ -9056,7 +9056,7 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad32x8[nidx],
                     &context_ptr->p_best_mv32x8[nidx],
                     context_ptr->psub_pel_direction32x8[nidx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -9064,7 +9064,7 @@ static void QuarterPelSearch_LCU(
         // 8x32
         for (pu_index = 0; pu_index < 16; ++pu_index) {
             nidx = tab8x32[pu_index];
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_8x32_dist[nidx];
             int32_t diff = best - context_ptr->p_best_sad8x32[nidx];
             uint32_t abs_diff = ABS(diff);
@@ -9124,7 +9124,7 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad8x32[nidx],
                     &context_ptr->p_best_mv8x32[nidx],
                     context_ptr->psub_pel_direction8x32[nidx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -9132,7 +9132,7 @@ static void QuarterPelSearch_LCU(
         // 64x16
         for (pu_index = 0; pu_index < 4; ++pu_index) {
             nidx = pu_index;
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_64x16_dist[nidx];
             int32_t diff = best - context_ptr->p_best_sad64x16[nidx];
             uint32_t abs_diff = ABS(diff);
@@ -9192,7 +9192,7 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad64x16[nidx],
                     &context_ptr->p_best_mv64x16[nidx],
                     context_ptr->psub_pel_direction64x16[nidx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -9200,7 +9200,7 @@ static void QuarterPelSearch_LCU(
         // 16x64
         for (pu_index = 0; pu_index < 4; ++pu_index) {
             nidx = pu_index;
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             uint32_t best = context_ptr->best_16x64_dist[nidx];
             int32_t diff = best - context_ptr->p_best_sad16x64[nidx];
             uint32_t abs_diff = ABS(diff);
@@ -9260,7 +9260,7 @@ static void QuarterPelSearch_LCU(
                     &context_ptr->p_best_sad16x64[nidx],
                     &context_ptr->p_best_mv16x64[nidx],
                     context_ptr->psub_pel_direction16x64[nidx]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
             }
 #endif
         }
@@ -14598,6 +14598,122 @@ void get_best_ref_integer_sb(
 }
 
 #endif
+#if MUS_ME_FP_SB
+void prune_references_fp(
+    PictureParentControlSet   *picture_control_set_ptr,
+    uint32_t                   sb_index,
+    uint32_t                   sb_origin_x,
+    uint32_t                   sb_origin_y,
+    MeContext                 *context_ptr,
+    EbPictureBufferDesc       *input_ptr
+)
+{
+    HmeResults sorted[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+    uint32_t num_of_cand_to_sort = MAX_NUM_OF_REF_PIC_LIST * REF_LIST_MAX_DEPTH;
+    uint8_t list_index, ref_pic_index;
+    uint8_t num_of_ref_pic_to_search, num_of_list_to_search;
+    uint32_t idx;
+    uint32_t pu_index;
+    num_of_list_to_search = (picture_control_set_ptr->slice_type == P_SLICE)
+        ? (uint32_t)REF_LIST_0
+        : (uint32_t)REF_LIST_1;
+
+    if (context_ptr->me_alt_ref == EB_TRUE)
+        num_of_list_to_search = 0;
+
+    //if (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE)
+    //    initialize_buffer_32bits(
+    //        context_ptr->p_sb_best_sad[last_list][last_ref_pic_index],
+    //        52,
+    //        1,
+    //        MAX_SAD_VALUE);
+    //else
+    //    initialize_buffer_32bits(
+    //        context_ptr->p_sb_best_ssd[last_list][last_ref_pic_index],
+    //        21,
+    //        1,
+    //        MAX_SAD_VALUE);
+                         
+
+    for (list_index = REF_LIST_0; list_index <= num_of_list_to_search; ++list_index) {
+
+        if (context_ptr->me_alt_ref == EB_TRUE) {
+            num_of_ref_pic_to_search = 1;
+        }
+        else {
+            num_of_ref_pic_to_search =
+                (picture_control_set_ptr->slice_type == P_SLICE)
+                ? picture_control_set_ptr->ref_list0_count
+                : (list_index == REF_LIST_0)
+                ? picture_control_set_ptr->ref_list0_count
+                : picture_control_set_ptr->ref_list1_count;
+        }
+        // Ref Picture Loop
+        for (ref_pic_index = 0; ref_pic_index < num_of_ref_pic_to_search; ++ref_pic_index) {
+            context_ptr->hme_results[list_index][ref_pic_index].hme_sad = 0;
+            // Get hme results
+            if (context_ptr->hme_results[list_index][ref_pic_index].do_ref == 0) {
+                context_ptr->hme_results[list_index][ref_pic_index].hme_sad = MAX_SAD_VALUE * 64;
+                continue;
+            }
+            context_ptr->p_best_sad8x8 = &(context_ptr->p_sb_best_sad[list_index][ref_pic_index][ME_TIER_ZERO_PU_8x8_0]);
+            // 8x8   [64 partitions]          
+            for (pu_index = 0; pu_index < 64; ++pu_index) {
+                idx = tab8x8[pu_index];
+                context_ptr->hme_results[list_index][ref_pic_index].hme_sad += context_ptr->p_best_sad8x8[idx];
+            }
+        }
+    }
+
+    memcpy(sorted, context_ptr->hme_results, sizeof(HmeResults)*MAX_NUM_OF_REF_PIC_LIST*REF_LIST_MAX_DEPTH);
+
+    HmeResults     * res_p = sorted[0];
+
+#if 0
+    printf("before \n ");
+    for (uint32_t li = 0; li < MAX_NUM_OF_REF_PIC_LIST; li++)
+        for (uint32_t ri = 0; ri < REF_LIST_MAX_DEPTH; ri++)
+            printf( "%i(%i,%i)  ", context_ptr->hme_results[li][ri].hme_sad, context_ptr->hme_results[li][ri].list_i, context_ptr->hme_results[li][ri].ref_i) ;
+#endif
+
+    uint32_t i, j;
+    for (i = 0; i < num_of_cand_to_sort - 1; ++i) {
+        for (j = i + 1; j < num_of_cand_to_sort; ++j) {
+            if (res_p[j].hme_sad < res_p[i].hme_sad) {
+                HmeResults temp = res_p[i];
+                res_p[i] = res_p[j];
+                res_p[j]= temp;
+            }
+        }
+    }
+
+#if 1
+    uint8_t  BIGGER_THAN_TH = 50;
+    uint64_t best = sorted[0][0].hme_sad;//is this always the best?
+    for (uint32_t li = 0; li < MAX_NUM_OF_REF_PIC_LIST; li++) {
+        for (uint32_t ri = 0; ri < REF_LIST_MAX_DEPTH; ri++){
+           // uint32_t dev = ((context_ptr->hme_results[li][ri].hme_sad - best) * 100) / best;
+            if ((context_ptr->hme_results[li][ri].hme_sad - best) * 100  > BIGGER_THAN_TH*best)
+                context_ptr->hme_results[li][ri].do_ref = 0;
+        }
+    }
+#endif
+
+#if 0
+    printf("\n after \n");
+    for (uint32_t li = 0; li < MAX_NUM_OF_REF_PIC_LIST; li++)
+        for (uint32_t ri = 0; ri < REF_LIST_MAX_DEPTH; ri++)
+            if(context_ptr->hme_results[li][ri].do_ref==0)
+              printf("%i(%i,%i)NON  ", context_ptr->hme_results[li][ri].hme_sad, context_ptr->hme_results[li][ri].list_i, context_ptr->hme_results[li][ri].ref_i);
+            else
+                printf("%i(%i,%i)  ", context_ptr->hme_results[li][ri].hme_sad, context_ptr->hme_results[li][ri].list_i, context_ptr->hme_results[li][ri].ref_i);
+
+    printf("\n ");
+#endif
+
+}
+
+#endif
 /*******************************************
  *   performs hierarchical ME
  *******************************************/
@@ -15503,7 +15619,7 @@ EbErrorType motion_estimate_lcu(
         sb_origin_y,
         context_ptr,
         input_ptr  );
-
+#if !MUS_ME_FP_SB
     //pruning of the references is not done for alt-ref / Base-Layer (HME not done for list1 refs) / non-complete-SBs when HMeLevel2 is done
     if(context_ptr->enable_hme_flag && context_ptr->enable_hme_level2_flag &&
         context_ptr->me_alt_ref == EB_FALSE && picture_control_set_ptr->temporal_layer_index>0 && sb_height==BLOCK_SIZE_64)
@@ -15514,6 +15630,7 @@ EbErrorType motion_estimate_lcu(
             sb_origin_y,
             context_ptr,
             input_ptr );
+#endif
 #if MUS_ME_FP
     integer_search_sb(
         picture_control_set_ptr,
@@ -15522,9 +15639,23 @@ EbErrorType motion_estimate_lcu(
         sb_origin_y,
         context_ptr,
         input_ptr);
+#if MUS_ME_FP_PU
     get_best_ref_integer_sb(
         picture_control_set_ptr,
         context_ptr);
+#endif
+#if MUS_ME_FP_SB
+    //pruning of the references is not done for alt-ref / Base-Layer (HME not done for list1 refs) / non-complete-SBs when HMeLevel2 is done
+    if(context_ptr->enable_hme_flag && context_ptr->enable_hme_level2_flag &&
+        context_ptr->me_alt_ref == EB_FALSE && picture_control_set_ptr->temporal_layer_index>0 && sb_height==BLOCK_SIZE_64)
+        prune_references_fp(
+            picture_control_set_ptr,
+            sb_index,
+            sb_origin_x,
+            sb_origin_y,
+            context_ptr,
+            input_ptr );
+#endif
 #endif
 #endif
     if (context_ptr->me_alt_ref == EB_TRUE)
@@ -16427,7 +16558,7 @@ EbErrorType motion_estimate_lcu(
                             &(context_ptr
                                   ->p_sb_best_ssd[listIndex][ref_pic_index]
                                                  [ME_TIER_ZERO_PU_16x64_0]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
                         uint8_t last_list = 1;
                         uint8_t last_ref_pic_index = 3;
                         context_ptr->best_64x64_dist = &(context_ptr->p_sb_best_sad[last_list][last_ref_pic_index][ME_TIER_ZERO_PU_64x64]);
@@ -16676,7 +16807,7 @@ EbErrorType motion_estimate_lcu(
                         context_ptr->p_best_ssd8x8 = &(
                             context_ptr->p_sb_best_ssd[listIndex][ref_pic_index]
                                                       [ME_TIER_ZERO_PU_8x8_0]);
-#if MUS_ME_FP
+#if MUS_ME_FP_PU
                         uint8_t last_list = 1;
                         uint8_t last_ref_pic_index = 3;
                         context_ptr->best_64x64_dist = &(context_ptr->p_sb_best_sad[last_list][last_ref_pic_index][ME_TIER_ZERO_PU_64x64]);
