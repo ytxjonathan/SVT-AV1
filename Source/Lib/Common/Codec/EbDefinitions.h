@@ -32,8 +32,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define SHUT_HME_L1_CHECK      0//Remove usage of ME results for list=0 refIndex=0 to be decide HME centre. Feauture assumes no MRP. and list1 distance = list0 distance.
-#define MUS_ME                 0 //MUlti-Stage ME
+#define SHUT_HME_L1_CHECK      1//Remove usage of ME results for list=0 refIndex=0 to be decide HME centre. Feauture assumes no MRP. and list1 distance = list0 distance.
+#define MUS_ME                 1 //MUlti-Stage ME
 
 
 #define LOW_DELAY_TUNE 1 // Tuning the 0B, 1B and 3B settings
