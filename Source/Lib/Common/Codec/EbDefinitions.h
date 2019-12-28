@@ -85,14 +85,20 @@ extern "C" {
 
 #define RESTRICT_SQ_WEIGHT           1
 #define FIX_SQ_WEIGHT                0
-#define REFACTOR_SQ_WEIGHT           0
+#define REFACTOR_SQ_WEIGHT_0         0
+
+
+#define REFACTOR_SQ_WEIGHT_1         1
+#if REFACTOR_SQ_WEIGHT_1
+#define H4_V4_SKIP                   0
+#endif
 
 #define ADD_SUPPORT_TO_SKIP_PART_N   1
 
 #define UPGRADE_PD1_BDRATE           1
 #define UPGRADE_PD1_SPEED            1
 
-#define POST_PD2_INTER_DEPTH         1
+#define POST_PD2_INTER_DEPTH         0
 #endif
 
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements
