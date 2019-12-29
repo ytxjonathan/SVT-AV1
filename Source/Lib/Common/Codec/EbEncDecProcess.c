@@ -2228,15 +2228,15 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // Weighting (expressed as a percentage) applied to
     // square shape costs for determining if a and b
     // shapes should be skipped. Namely:
-    // skip HA and HB if h_cost > (weighted sq_cost)
-    // skip VA and VB if v_cost > (weighted sq_cost)
+    // skip HA, HB, and H4 if h_cost > (weighted sq_cost)
+    // skip VA, VB, and V4 if v_cost > (weighted sq_cost)
 
 #if MULTI_PASS_PD // Shut sq_to_h_v_weight_to_skip_a_b
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->sq_weight = (uint32_t)~0;
     else if (context_ptr->pd_pass == PD_PASS_1)
 #if ENHANCED_M0_SETTINGS // lossless change - PD_PASS_2 and PD_PASS_1 should be completely decoupled: previous merge conflict
-#if REFACTOR_SQ_WEIGHT_1
+#if ENHANCED_SQ_WEIGHT
         context_ptr->sq_weight = (uint32_t)~0;
 #else
         context_ptr->sq_weight = 100;

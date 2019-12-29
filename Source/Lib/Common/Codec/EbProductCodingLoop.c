@@ -9052,25 +9052,19 @@ void md_encode_block(
     else
     {
         context_ptr->md_local_cu_unit[cu_ptr->mds_idx].cost = MAX_MODE_COST;
-#if MULTI_PASS_PD_COST
+#if ENHANCED_SQ_WEIGHT
         context_ptr->md_local_cu_unit[cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
 #endif
         cu_ptr->prediction_unit_array->ref_frame_type = 0;
     }
 }
-
+#if !ENHANCED_SQ_WEIGHT
 #if LESS_RECTANGULAR_CHECK_LEVEL
-#if REFACTOR_SQ_WEIGHT_0
-void update_skip_next_nsq_for_a_b_shapes(
-    ModeDecisionContext *context_ptr,
-    uint64_t *sq_cost, uint64_t *h_cost,
-    uint64_t *v_cost, int *skip_next_h_a_b, int *skip_next_v_a_b) {
-#else
 void update_skip_next_nsq_for_a_b_shapes(
     ModeDecisionContext *context_ptr,
     uint64_t *sq_cost, uint64_t *h_cost,
     uint64_t *v_cost, int *skip_next_nsq) {
-#endif
+
     switch (context_ptr->blk_geom->d1i)
     {
 
@@ -9087,9 +9081,6 @@ void update_skip_next_nsq_for_a_b_shapes(
         break;
     case 2:
         *h_cost += context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost;
-#if REFACTOR_SQ_WEIGHT_0
-        *skip_next_h_a_b = (*h_cost > ((*sq_cost * context_ptr->sq_weight) / 100));
-#endif
         break;
 
     // V
@@ -9098,13 +9089,8 @@ void update_skip_next_nsq_for_a_b_shapes(
         break;
     case 4:
         *v_cost += context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost;
-#if REFACTOR_SQ_WEIGHT_0
-        *skip_next_v_a_b = (*v_cost > ((*sq_cost * context_ptr->sq_weight) / 100));
-#else
         *skip_next_nsq = (*h_cost > ((*sq_cost * context_ptr->sq_weight) / 100)) ? 1 : *skip_next_nsq;
-#endif
         break;
-#if !REFACTOR_SQ_WEIGHT_0
     // HA
     case 5:
     case 6:
@@ -9127,11 +9113,10 @@ void update_skip_next_nsq_for_a_b_shapes(
     case 15:
         *skip_next_nsq = (*v_cost > ((*sq_cost * context_ptr->sq_weight) / 100)) ? 1 : *skip_next_nsq;
         break;
-#endif
     }
 }
 #endif
-
+#endif
 #if AUTO_MAX_PARTITION
 #define FLT_MAX          3.402823466e+38F        // max value
 #define FEATURE_SIZE_MAX_MIN_PART_PRED 13
@@ -9541,7 +9526,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
 
     //CU Loop
     cuIdx = 0;  //index over mdc array
-#if !REFACTOR_SQ_WEIGHT_1
+#if !ENHANCED_SQ_WEIGHT
 #if LESS_RECTANGULAR_CHECK_LEVEL
     uint64_t sq_cost = 0;
     uint64_t h_cost;
@@ -9552,10 +9537,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
     uint32_t  d1_blocks_accumlated = 0;
     int skip_next_nsq = 0;
     int skip_next_sq = 0;
-#if REFACTOR_SQ_WEIGHT_0
-    int skip_next_h_a_b = 0;
-    int skip_next_v_a_b = 0;
-#endif
+
     uint32_t next_non_skip_blk_idx_mds = 0;
     uint8_t skip_sub_blocks;
 #if MULTI_PASS_PD
@@ -9745,26 +9727,25 @@ EB_EXTERN EbErrorType mode_decision_sb(
                 skip_next_sq = 0;
 
 
-#if REFACTOR_SQ_WEIGHT_0
-            skip_next_nsq =
-                ((context_ptr->blk_geom->shape == PART_HA || context_ptr->blk_geom->shape == PART_HB) && skip_next_h_a_b) ||
-                ((context_ptr->blk_geom->shape == PART_VA || context_ptr->blk_geom->shape == PART_VB) && skip_next_v_a_b) ?
-                1 :
-                skip_next_nsq;
-#endif
-#if REFACTOR_SQ_WEIGHT_1
+#if ENHANCED_SQ_WEIGHT
             EbBool a_b_shapes_skip_flag = EB_FALSE;
 
             if (context_ptr->sq_weight != (uint32_t)~0) {
                 // sq_weight derivation = BASE + OFFSET = f(block size, shape to skip)
                 uint32_t sq_weight = context_ptr->sq_weight;
-                if(context_ptr->blk_geom->sq_size <= 16)
-                    sq_weight += 50;
-#if H4_V4_SKIP
+
+                //if(context_ptr->blk_geom->sq_size <= 16)
+                //    sq_weight += 5;
+
+
+                if (context_ptr->blk_geom->shape == PART_H4 || context_ptr->blk_geom->shape == PART_V4)
+                    sq_weight += 5;
+
+
+                //if (context_ptr->blk_geom->sq_size >= 32)
+                //    sq_weight -= 10;
+
                 if (context_ptr->blk_geom->shape == PART_HA || context_ptr->blk_geom->shape == PART_HB || context_ptr->blk_geom->shape == PART_H4) {
-#else
-                if (context_ptr->blk_geom->shape == PART_HA || context_ptr->blk_geom->shape == PART_HB) {
-#endif
                     if (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 1].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 2].avail_blk_flag) {
                         uint64_t sq_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].default_cost;
                         uint64_t h_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 1].default_cost + context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 2].default_cost;
@@ -9772,11 +9753,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
                         a_b_shapes_skip_flag = (h_cost > ((sq_cost * sq_weight) / 100));
                     }
                 }
-#if H4_V4_SKIP
                 if (context_ptr->blk_geom->shape == PART_VA || context_ptr->blk_geom->shape == PART_VB || context_ptr->blk_geom->shape == PART_V4) {
-#else
-                if (context_ptr->blk_geom->shape == PART_VA || context_ptr->blk_geom->shape == PART_VB) {
-#endif
                     if (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 3].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 4].avail_blk_flag) {
 
                         uint64_t sq_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].default_cost;
@@ -9793,7 +9770,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
 
 #if AUTO_MAX_PARTITION
             EbBool auto_max_partition_block_skip = (context_ptr->blk_geom->bwidth > block_size_wide[max_bsize] || context_ptr->blk_geom->bheight > block_size_high[max_bsize]) && (mdcResultTbPtr->leaf_data_array[cuIdx].split_flag == EB_TRUE);
-#if REFACTOR_SQ_WEIGHT_1
+#if ENHANCED_SQ_WEIGHT
             if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->sb_geom[lcuAddr].block_is_allowed[cu_ptr->mds_idx] && !skip_next_nsq && !skip_next_sq && !auto_max_partition_block_skip && !a_b_shapes_skip_flag) {
 #else
             if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->sb_geom[lcuAddr].block_is_allowed[cu_ptr->mds_idx] && !skip_next_nsq && !skip_next_sq && !auto_max_partition_block_skip) {
@@ -9812,49 +9789,37 @@ EB_EXTERN EbErrorType mode_decision_sb(
 
             }
 #if AUTO_MAX_PARTITION
-#if REFACTOR_SQ_WEIGHT_1
+#if ENHANCED_SQ_WEIGHT
             else if (auto_max_partition_block_skip || a_b_shapes_skip_flag) {
 #else
             else if (auto_max_partition_block_skip) {
 #endif
-#if MULTI_PASS_PD_COST
-                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = MAX_MODE_COST;
-                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
-#else
                 if (context_ptr->blk_geom->shape != PART_N)
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
                 else
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 10);
+#if ENHANCED_SQ_WEIGHT
+                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
 #endif
             }
 #endif
             else if (skip_next_sq) {
-#if MULTI_PASS_PD_COST
-                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = MAX_MODE_COST;
-                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
-#else
                 context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 10);
+#if ENHANCED_SQ_WEIGHT
+                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
 #endif
             }
             else {
                 // If the block is out of the boundaries, md is not performed.
                 // - For square blocks, since the blocks can be further splitted, they are considered in d2_inter_depth_block_decision with cost of zero.
-#if MULTI_PASS_PD_COST
-                if (context_ptr->blk_geom->shape != PART_N) {
-                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = MAX_MODE_COST;
-                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
-                }
-                else {
-                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = 0;
-                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = 0;
-                }
-#else
                 // - For non square blocks, since they can not be splitted further the cost is set to a large value (MAX_MODE_COST >> 4) to make sure they are not selected.
                 //   The value is set to MAX_MODE_COST >> 4 to make sure there is not overflow when adding costs.
                 if (context_ptr->blk_geom->shape != PART_N)
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
                 else
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = 0;
+#if ENHANCED_SQ_WEIGHT
+                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
 #endif
             }
 #if FIX_SKIP_REDUNDANT_BLOCK
@@ -9900,21 +9865,10 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #endif
                 skip_next_nsq = 1;
         }
-#if !REFACTOR_SQ_WEIGHT_1
+#if !ENHANCED_SQ_WEIGHT
 #if LESS_RECTANGULAR_CHECK_LEVEL
-#if FIX_SQ_WEIGHT
-        // Do not perform a/b shapes bypass if missing d1 blocks
-        if (context_ptr->sq_weight != (uint32_t)~0 && blk_geom->sq_size > 8)
-            update_skip_next_nsq_for_a_b_shapes(context_ptr, &sq_cost, &h_cost, &v_cost, &skip_next_h_a_b, &skip_next_v_a_b);
-#else
-#if RESTRICT_SQ_WEIGHT
-        // Do not perform a/b shapes bypass if missing d1 blocks
-        if (leaf_data_array[cuIdx].tot_d1_blocks == (blk_geom->sq_size == 128 ? 17 : 25) && context_ptr->sq_weight != (uint32_t)~0 && blk_geom->bsize > BLOCK_8X8)
-#else
         if (context_ptr->sq_weight != (uint32_t)~0 && blk_geom->bsize > BLOCK_8X8)
-#endif
             update_skip_next_nsq_for_a_b_shapes(context_ptr, &sq_cost, &h_cost, &v_cost, &skip_next_nsq);
-#endif
 #endif
 #endif
         if (blk_geom->shape != PART_N) {
@@ -9943,10 +9897,6 @@ EB_EXTERN EbErrorType mode_decision_sb(
 
         if (d1_blocks_accumlated == leafDataPtr->tot_d1_blocks)
         {
-#if REFACTOR_SQ_WEIGHT_0
-            skip_next_h_a_b = 0;
-            skip_next_v_a_b = 0;
-#endif
 #if MULTI_PASS_PD
             //Sorting
             {
