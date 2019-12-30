@@ -35,6 +35,8 @@ extern "C" {
 #define SHUT_HME_L1_CHECK      1//Remove usage of ME results for list=0 refIndex=0 to be decide HME centre. Feauture assumes no MRP. and list1 distance = list0 distance.
 #define MUS_ME                 1 //MUlti-Stage ME
 
+#define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
+
 
 #define LOW_DELAY_TUNE 1 // Tuning the 0B, 1B and 3B settings
                                       // 0. tunr OFF AVX512
