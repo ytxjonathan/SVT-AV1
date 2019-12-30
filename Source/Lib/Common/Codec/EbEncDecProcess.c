@@ -2237,7 +2237,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else if (context_ptr->pd_pass == PD_PASS_1)
 #if ENHANCED_M0_SETTINGS // lossless change - PD_PASS_2 and PD_PASS_1 should be completely decoupled: previous merge conflict
 #if ENHANCED_SQ_WEIGHT
-        context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? (uint32_t)~0 : 100;
+        context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? (uint32_t)~0 : 100;
 #else
         context_ptr->sq_weight = 100;
 #endif
@@ -2254,7 +2254,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->sq_weight = (uint32_t)~0;
     else
 #if ENHANCED_SQ_WEIGHT
-        context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? (uint32_t)~0 : sequence_control_set_ptr->static_config.sq_weight;
+        context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? (uint32_t)~0 : sequence_control_set_ptr->static_config.sq_weight;
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
 #endif
