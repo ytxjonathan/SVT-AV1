@@ -645,8 +645,12 @@ void av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
                                  const int num_planes) {
     int ss_x = 1; // TODO: change to correct chroma sub-sampling
     int ss_y = 1; // TODO: change to correct chroma sub-sampling
+
+    int highbd_implemented = 0; // TODO: In the current implementation src->buffer_y, cb and cr are the 8-bit buffers only
+                                // Packing of buffer_y and buffer_inc_y to create the 16-bit buffers needs to be be done.
+
     for (int plane = 0; plane < AOMMIN(num_planes, MAX_MB_PLANE); ++plane) {
-        if (bd > 8) {
+        if (highbd_implemented && bd > 8) {
             switch (plane) {
                 case 0:
                     av1_highbd_resize_plane(src->buffer_y + src->origin_y * src->stride_y + src->origin_x,

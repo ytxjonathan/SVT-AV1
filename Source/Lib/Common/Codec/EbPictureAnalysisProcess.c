@@ -37,6 +37,8 @@
 #define SAMPLE_THRESHOLD_PRECENT_BORDER_LINE      15
 #define SAMPLE_THRESHOLD_PRECENT_TWO_BORDER_LINES 10
 
+#define DEBUG_SUPERRES 1
+
 void save_YUV_to_file(char *filename, EbByte buffer_y, EbByte buffer_u, EbByte buffer_v,
                       uint16_t width, uint16_t height,
                       uint16_t stride_y, uint16_t stride_u, uint16_t stride_v,
@@ -4382,7 +4384,13 @@ void* picture_analysis_kernel(void *input_ptr)
             downscaled_source_buffer_ctor(&picture_control_set_ptr->enhanced_downscaled_picture_ptr,
                                           input_picture_ptr);
 
-            save_YUV_to_file("unscaled_pic.yuv",
+#if DEBUG_SUPERRES
+            char unscaled_pic_str[50];
+            char scaled_pic_str[50];
+            sprintf(unscaled_pic_str, "unscaled_pic_%d.yuv", (int)picture_control_set_ptr->picture_number);
+            sprintf(scaled_pic_str, "downscaled_pic_%d.yuv", (int)picture_control_set_ptr->picture_number);
+
+            save_YUV_to_file(unscaled_pic_str,
                              input_picture_ptr->buffer_y,
                              input_picture_ptr->buffer_cb,
                              input_picture_ptr->buffer_cr,
@@ -4395,14 +4403,15 @@ void* picture_analysis_kernel(void *input_ptr)
                              0,
                              1,
                              1);
-
+#endif
             // Test here: if superres is enabled, downsample the souce picture
             av1_resize_and_extend_frame(input_picture_ptr,
                                         picture_control_set_ptr->enhanced_downscaled_picture_ptr,
                                         picture_control_set_ptr->enhanced_downscaled_picture_ptr->bit_depth, // bit depth
                                         3); // number of planes
 
-            save_YUV_to_file("downscaled_pic.yuv",
+#if DEBUG_SUPERRES
+            save_YUV_to_file(scaled_pic_str,
                              picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_y,
                              picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_cb,
                              picture_control_set_ptr->enhanced_downscaled_picture_ptr->buffer_cr,
@@ -4415,7 +4424,7 @@ void* picture_analysis_kernel(void *input_ptr)
                              0,
                              1,
                              1);
-
+#endif
            // Gathering statistics of input picture, including Variance Calculation, Histogram Bins
             GatheringPictureStatistics(
                 sequence_control_set_ptr,
