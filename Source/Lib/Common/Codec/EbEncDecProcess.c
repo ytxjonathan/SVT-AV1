@@ -2237,7 +2237,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else if (context_ptr->pd_pass == PD_PASS_1)
 #if ENHANCED_M0_SETTINGS // lossless change - PD_PASS_2 and PD_PASS_1 should be completely decoupled: previous merge conflict
 #if ENHANCED_SQ_WEIGHT
-        context_ptr->sq_weight = (uint32_t)~0;
+        context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? (uint32_t)~0 : 100;
 #else
         context_ptr->sq_weight = 100;
 #endif
@@ -2246,10 +2246,18 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
     else
 #endif
+#if ENHANCED_SQ_WEIGHT
+    if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#else
     if (MR_MODE)
+#endif
         context_ptr->sq_weight = (uint32_t)~0;
     else
+#if ENHANCED_SQ_WEIGHT
+        context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? (uint32_t)~0 : sequence_control_set_ptr->static_config.sq_weight;
+#else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
+#endif
 
 #endif
 #if !ENHANCED_M0_SETTINGS // lossless change - enable_auto_max_partition is properly derived using pd_pass @ the bottom: previous merge conflict
@@ -2961,7 +2969,7 @@ static void derive_part_struct_stats(
                 //To increase the granularity of the derived partitioning structure applied a cost penalty to best  @ each iteration rather than setting the cost to MAX.
                 // Set cost to MAX to do not get selected @ next d1/d2 block decision (if any)
                 //context_ptr->md_local_cu_unit[d1_itr].weighted_cost = (context_ptr->md_local_cu_unit[d1_itr].weighted_cost * 150) / 100;
-                context_ptr->md_local_cu_unit[d1_itr].default_cost = (context_ptr->md_local_cu_unit[d1_itr].default_cost * 200) / 100;
+                context_ptr->md_local_cu_unit[d1_itr].default_cost = (context_ptr->md_local_cu_unit[d1_itr].default_cost * 110) / 100;
             }
             blk_it += ns_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][context_ptr->blk_geom->depth];
         }
@@ -3479,7 +3487,7 @@ void* enc_dec_kernel(void *input_ptr)
                             //else
                             //    max_distinct_part_struct = 50;
 
-                            max_distinct_part_struct = 500;
+                            max_distinct_part_struct = 35;
 
                             uint32_t part_struct_index;
                             for (part_struct_index = 0; part_struct_index < max_distinct_part_struct; part_struct_index++) {

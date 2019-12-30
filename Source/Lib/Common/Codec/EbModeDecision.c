@@ -6364,7 +6364,7 @@ uint32_t product_full_mode_decision(
     candidate_ptr = buffer_ptr_array[lowestCostIndex]->candidate_ptr;
 
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].cost = *(buffer_ptr_array[lowestCostIndex]->full_cost_ptr);
-#if ENHANCED_SQ_WEIGHT
+#if ENHANCED_SQ_WEIGHT || IMPROVED_MULTI_PASS_PD
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].default_cost = *(buffer_ptr_array[lowestCostIndex]->full_cost_ptr);
 #endif
     context_ptr->md_local_cu_unit[cu_ptr->mds_idx].cost = (context_ptr->md_local_cu_unit[cu_ptr->mds_idx].cost - buffer_ptr_array[lowestCostIndex]->candidate_ptr->chroma_distortion) + buffer_ptr_array[lowestCostIndex]->candidate_ptr->chroma_distortion_inter_depth;

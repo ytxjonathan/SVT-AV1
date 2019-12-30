@@ -89,7 +89,7 @@ extern "C" {
         PartitionContextType           left_neighbor_partition;
         PartitionContextType           above_neighbor_partition;
         uint64_t                    cost;
-#if ENHANCED_SQ_WEIGHT
+#if ENHANCED_SQ_WEIGHT || IMPROVED_MULTI_PASS_PD
         uint64_t                    default_cost;  // Similar to cost but does not get updated @ d1_non_square_block_decision() and d2_inter_depth_block_decision()
 #endif
         uint64_t                    cost_luma;

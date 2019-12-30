@@ -9052,7 +9052,7 @@ void md_encode_block(
     else
     {
         context_ptr->md_local_cu_unit[cu_ptr->mds_idx].cost = MAX_MODE_COST;
-#if ENHANCED_SQ_WEIGHT
+#if ENHANCED_SQ_WEIGHT || IMPROVED_MULTI_PASS_PD
         context_ptr->md_local_cu_unit[cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
 #endif
         cu_ptr->prediction_unit_array->ref_frame_type = 0;
@@ -9798,14 +9798,14 @@ EB_EXTERN EbErrorType mode_decision_sb(
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
                 else
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 10);
-#if ENHANCED_SQ_WEIGHT
+#if ENHANCED_SQ_WEIGHT || IMPROVED_MULTI_PASS_PD
                 context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
 #endif
             }
 #endif
             else if (skip_next_sq) {
                 context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 10);
-#if ENHANCED_SQ_WEIGHT
+#if ENHANCED_SQ_WEIGHT || IMPROVED_MULTI_PASS_PD
                 context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
 #endif
             }
@@ -9818,8 +9818,11 @@ EB_EXTERN EbErrorType mode_decision_sb(
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = (MAX_MODE_COST >> 4);
                 else
                     context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].cost = 0;
-#if ENHANCED_SQ_WEIGHT
-                context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
+#if ENHANCED_SQ_WEIGHT || IMPROVED_MULTI_PASS_PD
+                if (context_ptr->blk_geom->shape != PART_N)
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = MAX_MODE_COST;
+                else
+                    context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].default_cost = 0;
 #endif
             }
 #if FIX_SKIP_REDUNDANT_BLOCK
