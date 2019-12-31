@@ -42,6 +42,8 @@ extern "C" {
                                       // 0. tunr OFF AVX512
 #define FIXED_QP_M                  1 // 1. core only
 
+#define GM_DOWNSAMPLED              1 // Adopt global motion Downsampled
+
 #if 1
 
 

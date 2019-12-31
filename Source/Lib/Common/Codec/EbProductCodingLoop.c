@@ -9819,7 +9819,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
 
 #if 0
                         if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds].block_has_coeff) {
-                            if (context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].prediction_mode_flag == INTER_MODE && 
+                            if (context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].prediction_mode_flag == INTER_MODE &&
                                 context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 2].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 2].prediction_mode_flag == INTER_MODE ){
                                 sq_weight += 10;
                             }
