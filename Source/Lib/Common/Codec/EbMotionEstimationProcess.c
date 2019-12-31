@@ -996,7 +996,6 @@ void* motion_estimation_kernel(void *input_ptr)
 #if CUTREE_LA
             if (sequence_control_set_ptr->static_config.look_ahead_distance != 0 && sequence_control_set_ptr->static_config.enable_cutree_in_la) {
                 //kelvinhack
-                //av1_open_loop_intra_search(picture_control_set_ptr, context_ptr, input_picture_ptr);
                 for (y_lcu_index = yLcuStartIndex; y_lcu_index < yLcuEndIndex; ++y_lcu_index) {
                     for (x_lcu_index = xLcuStartIndex; x_lcu_index < xLcuEndIndex; ++x_lcu_index) {
                         sb_origin_x = x_lcu_index * sequence_control_set_ptr->sb_sz;

@@ -15672,179 +15672,6 @@ EbErrorType open_loop_intra_search_sb(
 }
 
 #if CUTREE_LA
-EbErrorType av1_open_loop_intra_search(
-    PictureParentControlSet *picture_control_set_ptr, MotionEstimationContext_t *context_ptr, EbPictureBufferDesc *input_ptr)
-{
-    EbErrorType return_error = EB_ErrorNone;
-    SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet *)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
-
-    uint32_t pa_blk_index = 0;
-//#if !PAETH_HBD
-    uint8_t is_16_bit =
-        (sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT);
-//#endif
-    //SbParams *sb_params = &sequence_control_set_ptr->sb_params_array[sb_index];
-    uint8_t *above_row;
-    uint8_t *left_col;
-
-    DECLARE_ALIGNED(32, uint8_t, predictor8[256 * 2]);
-    DECLARE_ALIGNED(32, int16_t, src_diff[256]);
-    DECLARE_ALIGNED(32, int32_t, coeff[256]);
-    DECLARE_ALIGNED(32, int32_t, qcoeff[256]);
-
-    uint8_t *predictor = is_16_bit/*is_cur_buf_hbd(xd)*/ ? CONVERT_TO_BYTEPTR(predictor8) : predictor8;
-
-    int mi_row, mi_col;
-    Av1Common *cm = picture_control_set_ptr->av1_cm;
-    const BlockSize bsize = BLOCK_16X16;
-    const TxSize tx_size = TX_16X16;//max_txsize_lookup[bsize];
-    const int mi_height = mi_size_high[bsize];
-    const int mi_width = mi_size_wide[bsize];
-
-    for (mi_row = 0; mi_row < cm->mi_rows; mi_row += mi_height) {
-        for (mi_col = 0; mi_col < cm->mi_cols; mi_col += mi_width) {
-            OisMbResults *ois_mb_results_ptr = picture_control_set_ptr->ois_mb_results[ (mi_col >> 2) * (cm->mi_rows >> 2) + mi_col >> 2];
-            uint32_t mb_origin_x = mi_col << 2;
-            uint32_t mb_origin_y = mi_row << 2;
-            PredictionMode best_mode = DC_PRED;
-            int64_t best_intra_cost = INT64_MAX;
-            for (PredictionMode mode = DC_PRED; mode <= PAETH_PRED; ++mode) {
-                uint8_t *src = input_ptr->buffer_y + mb_origin_x + mb_origin_y * input_ptr->stride_y;
-                int src_stride = input_ptr->stride_y;
-                uint8_t *dst = predictor;
-                int dst_stride = 16;
-                uint8_t topNeighArray[64 * 2 + 1];
-                uint8_t leftNeighArray[64 * 2 + 1];
-                uint8_t buffer_y[16 * 16];
-                BlockGeom blk_geom;
-                EbPictureBufferDesc  recon_buffer;
-                int64_t intra_cost;
-                recon_buffer.buffer_y = buffer_y;
-                blk_geom.shape = PART_N;
-                if (mb_origin_y != 0)
-                   memcpy(topNeighArray + 1, input_ptr->buffer_y + mb_origin_x + (mb_origin_y - 1) * input_ptr->stride_y, 32);
-                if (mb_origin_x != 0) {
-                   for(int i = 0; i < 32; i++)
-                      *(leftNeighArray + 1 + i) = *(input_ptr->buffer_y + mb_origin_x - 1 + (mb_origin_y + i) * input_ptr->stride_y);
-                }
-
-                /*if(is16bit)
-                    eb_av1_predict_intra_block_16bit();
-                else*/
-                    eb_av1_predict_intra_block(
-                        &cm->tiles_info,
-                        !ED_STAGE,
-                        &blk_geom,
-                        cm,
-                        16,
-                        16,
-                        tx_size,
-                        mode,
-                        0, //angle_delta
-#if PAL_SUP
-                        0,
-                        0,
-#else
-                        0, //use_palette
-#endif
-                        FILTER_INTRA_MODES,
-                        topNeighArray + 1,
-                        leftNeighArray + 1,
-                        &recon_buffer,
-                        0,
-                        0,
-                        0,
-                        bsize,
-                        mb_origin_x,
-                        mb_origin_y,
-                        mb_origin_x,
-                        mb_origin_y,
-                        0,
-                        0);
-
-                aom_subtract_block(16, 16, src_diff, 16, src, src_stride, dst, dst_stride);
-                wht_fwd_txfm(src_diff, 16, coeff, 2/*TX_16X16*/, 8, 0/*is_cur_buf_hbd(xd)*/);
-                intra_cost = aom_satd(coeff, 16 * 16);
-
-                if (intra_cost < best_intra_cost) {
-                    best_intra_cost = intra_cost;
-                    best_mode = mode;
-                }
-            }
-            // store intra_cost to pcs
-            ois_mb_results_ptr->intra_mode = best_mode;
-            ois_mb_results_ptr->intra_cost = best_intra_cost;
-        }
-    }
-
-}
-
-static int is_smooth_luma(uint8_t mode) {
-    return (mode == SMOOTH_PRED || mode == SMOOTH_V_PRED || mode == SMOOTH_H_PRED);
-}
-
-static void filter_intra_edge(PictureParentControlSet *picture_control_set_ptr, OisMbResults *ois_mb_results_ptr, uint8_t mode, 
-                              int32_t p_angle, uint32_t cu_origin_x, uint32_t cu_origin_y, uint8_t *above_row, uint8_t *left_col) {
-    SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet *)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
-    uint32_t mb_stride = (sequence_control_set_ptr->seq_header.max_frame_width + 15) / 16;
-    uint32_t mb_height = (sequence_control_set_ptr->seq_header.max_frame_height + 15) / 16;
-    const int txwpx = tx_size_wide[TX_16X16];
-    const int txhpx = tx_size_high[TX_16X16];
-    const int need_right = p_angle < 90;
-    const int need_bottom = p_angle > 180;
-    int need_left = extend_modes[mode] & NEED_LEFT;
-    int need_above = extend_modes[mode] & NEED_ABOVE;
-    int need_above_left = extend_modes[mode] & NEED_ABOVELEFT;
-    int ab_sm = (cu_origin_y > 0 && (ois_mb_results_ptr - mb_stride)) ? is_smooth_luma((ois_mb_results_ptr - mb_stride)->intra_mode) : 0;
-    int le_sm = (cu_origin_x > 0 && (ois_mb_results_ptr - 1)) ? is_smooth_luma((ois_mb_results_ptr - 1)->intra_mode) : 0;
-    const int filt_type = (ab_sm || le_sm) ? 1 : 0;
-    int n_top_px  = cu_origin_y > 0 ? AOMMIN(txwpx, (mb_stride * 16 - cu_origin_x + txwpx)) : 0;
-    int n_left_px = cu_origin_x > 0 ? AOMMIN(txhpx, (mb_height * 16 - cu_origin_y + txhpx)) : 0;
-
-#if 1
-    if (av1_is_directional_mode((PredictionMode)mode)) {
-        if (p_angle <= 90)
-            need_above = 1, need_left = 0, need_above_left = 1;
-        else if (p_angle < 180)
-            need_above = 1, need_left = 1, need_above_left = 1;
-        else
-            need_above = 0, need_left = 1, need_above_left = 1;
-    }
-#endif
-
-    if (p_angle != 90 && p_angle != 180) {
-        const int ab_le = need_above_left ? 1 : 0;
-        if (need_above && need_left && (txwpx + txhpx >= 24)) {
-            filter_intra_edge_corner(above_row, left_col);
-        }
-        if (need_above && n_top_px > 0) {
-            const int strength =
-                intra_edge_filter_strength(txwpx, txhpx, p_angle - 90, filt_type);
-            const int n_px = n_top_px + ab_le + (need_right ? txhpx : 0);
-            eb_av1_filter_intra_edge(above_row - ab_le, n_px, strength);
-        }
-        if (need_left && n_left_px > 0) {
-            const int strength = intra_edge_filter_strength(
-                    txhpx, txwpx, p_angle - 180, filt_type);
-            const int n_px = n_left_px + ab_le + (need_bottom ? txwpx : 0);
-            eb_av1_filter_intra_edge(left_col - ab_le, n_px, strength);
-        }
-    }
-    int upsample_above =
-        use_intra_edge_upsample(txwpx, txhpx, p_angle - 90, filt_type);
-    if (need_above && upsample_above) {
-        const int n_px = txwpx + (need_right ? txhpx : 0);
-        eb_av1_upsample_intra_edge(above_row, n_px);
-    }
-    int upsample_left =
-        use_intra_edge_upsample(txhpx, txwpx, p_angle - 180, filt_type);
-    if (need_left && upsample_left) {
-        const int n_px = txhpx + (need_bottom ? txwpx : 0);
-        eb_av1_upsample_intra_edge(left_col, n_px);
-    }
-    return;
-}
-
 EbErrorType open_loop_intra_search_mb(
     PictureParentControlSet *picture_control_set_ptr, uint32_t sb_index,
     MotionEstimationContext_t *context_ptr, EbPictureBufferDesc *input_ptr)
@@ -15944,7 +15771,7 @@ EbErrorType open_loop_intra_search_mb(
                 wht_fwd_txfm(src_diff, 16, coeff, 2/*TX_16X16*/, 8, 0/*is_cur_buf_hbd(xd)*/);
                 intra_cost = aom_satd(coeff, 16 * 16);
 
-printf("kelvin ---> aom_satd mbxy %d %d, mode=%d, satd=%d, dst[0~4]=0x%d,%d,%d,%d\n", cu_origin_x, cu_origin_y, ois_intra_mode, intra_cost, predictor[0], predictor[1], predictor[2], predictor[3]);
+//printf("kelvin ---> aom_satd mbxy %d %d, mode=%d, satd=%d, dst[0~4]=0x%d,%d,%d,%d\n", cu_origin_x, cu_origin_y, ois_intra_mode, intra_cost, predictor[0], predictor[1], predictor[2], predictor[3]);
                 if (intra_cost < best_intra_cost) {
                     best_intra_cost = intra_cost;
                     best_mode = ois_intra_mode;
@@ -15958,7 +15785,5 @@ printf("kelvin ---> aom_satd mbxy %d %d, mode=%d, satd=%d, dst[0~4]=0x%d,%d,%d,%
     }
     return return_error;
 }
-
-
 #endif
 

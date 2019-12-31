@@ -1460,11 +1460,12 @@ void av1_make_inter_predictor(const uint8_t *src, int src_stride, uint8_t *dst,
         dst_stride, inter_pred_params->subsampling_x,
         inter_pred_params->subsampling_y, &inter_pred_params->conv_params);
   } else if (inter_pred_params->mode == UNIFORM_PRED) {
+    uint32_t interp_filters = (EIGHTTAP_REGULAR << 16) | EIGHTTAP_REGULAR;
     svt_inter_predictor(
         src, src_stride, dst, dst_stride, subpel_params,
         inter_pred_params->scale_factors, inter_pred_params->block_width,
         inter_pred_params->block_height, &inter_pred_params->conv_params,
-        inter_pred_params->interp_filter_params, 0);
+        interp_filters, 0);
   }
 }
 

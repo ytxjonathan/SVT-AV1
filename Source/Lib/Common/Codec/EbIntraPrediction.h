@@ -208,6 +208,8 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
         MotionEstimationContext_t       *context_ptr);                  // input parameter, ME context
 
 #if CUTREE_LA
+    extern void filter_intra_edge(PictureParentControlSet *picture_control_set_ptr, OisMbResults *ois_mb_results_ptr, uint8_t mode,
+                              int32_t p_angle, uint32_t cu_origin_x, uint32_t cu_origin_y, uint8_t *above_row, uint8_t *left_col);
     extern EbErrorType intra_prediction_open_loop_mb(
          int32_t  p_angle ,
         uint8_t                          ois_intra_mode,

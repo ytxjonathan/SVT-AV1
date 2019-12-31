@@ -4858,6 +4858,73 @@ EbErrorType intra_prediction_open_loop(
     return return_error;
 }
 
+#if CUTREE_LA
+static int is_smooth_luma(uint8_t mode) {
+    return (mode == SMOOTH_PRED || mode == SMOOTH_V_PRED || mode == SMOOTH_H_PRED);
+}
+
+void filter_intra_edge(PictureParentControlSet *picture_control_set_ptr, OisMbResults *ois_mb_results_ptr, uint8_t mode, 
+                              int32_t p_angle, uint32_t cu_origin_x, uint32_t cu_origin_y, uint8_t *above_row, uint8_t *left_col) {
+    SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet *)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
+    uint32_t mb_stride = (sequence_control_set_ptr->seq_header.max_frame_width + 15) / 16;
+    uint32_t mb_height = (sequence_control_set_ptr->seq_header.max_frame_height + 15) / 16;
+    const int txwpx = tx_size_wide[TX_16X16];
+    const int txhpx = tx_size_high[TX_16X16];
+    const int need_right = p_angle < 90;
+    const int need_bottom = p_angle > 180;
+    int need_left = extend_modes[mode] & NEED_LEFT;
+    int need_above = extend_modes[mode] & NEED_ABOVE;
+    int need_above_left = extend_modes[mode] & NEED_ABOVELEFT;
+    int ab_sm = (cu_origin_y > 0 && (ois_mb_results_ptr - mb_stride)) ? is_smooth_luma((ois_mb_results_ptr - mb_stride)->intra_mode) : 0;
+    int le_sm = (cu_origin_x > 0 && (ois_mb_results_ptr - 1)) ? is_smooth_luma((ois_mb_results_ptr - 1)->intra_mode) : 0;
+    const int filt_type = (ab_sm || le_sm) ? 1 : 0;
+    int n_top_px  = cu_origin_y > 0 ? AOMMIN(txwpx, (mb_stride * 16 - cu_origin_x + txwpx)) : 0;
+    int n_left_px = cu_origin_x > 0 ? AOMMIN(txhpx, (mb_height * 16 - cu_origin_y + txhpx)) : 0;
+
+#if 1
+    if (av1_is_directional_mode((PredictionMode)mode)) {
+        if (p_angle <= 90)
+            need_above = 1, need_left = 0, need_above_left = 1;
+        else if (p_angle < 180)
+            need_above = 1, need_left = 1, need_above_left = 1;
+        else
+            need_above = 0, need_left = 1, need_above_left = 1;
+    }
+#endif
+
+    if (p_angle != 90 && p_angle != 180) {
+        const int ab_le = need_above_left ? 1 : 0;
+        if (need_above && need_left && (txwpx + txhpx >= 24)) {
+            filter_intra_edge_corner(above_row, left_col);
+        }
+        if (need_above && n_top_px > 0) {
+            const int strength =
+                intra_edge_filter_strength(txwpx, txhpx, p_angle - 90, filt_type);
+            const int n_px = n_top_px + ab_le + (need_right ? txhpx : 0);
+            eb_av1_filter_intra_edge(above_row - ab_le, n_px, strength);
+        }
+        if (need_left && n_left_px > 0) {
+            const int strength = intra_edge_filter_strength(
+                    txhpx, txwpx, p_angle - 180, filt_type);
+            const int n_px = n_left_px + ab_le + (need_bottom ? txwpx : 0);
+            eb_av1_filter_intra_edge(left_col - ab_le, n_px, strength);
+        }
+    }
+    int upsample_above =
+        use_intra_edge_upsample(txwpx, txhpx, p_angle - 90, filt_type);
+    if (need_above && upsample_above) {
+        const int n_px = txwpx + (need_right ? txhpx : 0);
+        eb_av1_upsample_intra_edge(above_row, n_px);
+    }
+    int upsample_left =
+        use_intra_edge_upsample(txhpx, txwpx, p_angle - 180, filt_type);
+    if (need_left && upsample_left) {
+        const int n_px = txhpx + (need_bottom ? txwpx : 0);
+        eb_av1_upsample_intra_edge(left_col, n_px);
+    }
+    return;
+}
+
 EbErrorType intra_prediction_open_loop_mb(
      int32_t  p_angle ,
         uint8_t                          ois_intra_mode,
@@ -4873,8 +4940,6 @@ EbErrorType intra_prediction_open_loop_mb(
     EbErrorType                return_error = EB_ErrorNone;
     PredictionMode mode = ois_intra_mode;
     const int32_t is_dr_mode = av1_is_directional_mode(mode);
-    //uint8_t *dst = (&(context_ptr->me_context_ptr->sb_buffer[0]));
-    //uint32_t dst_stride = context_ptr->me_context_ptr->sb_buffer_stride;
 
     if (is_dr_mode)
         dr_predictor(dst, dst_stride, tx_size, above_row, left_col, 0, 0, p_angle);
@@ -4887,3 +4952,4 @@ EbErrorType intra_prediction_open_loop_mb(
     }
     return return_error;
 }
+#endif
