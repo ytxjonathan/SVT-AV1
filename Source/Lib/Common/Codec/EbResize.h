@@ -195,10 +195,12 @@ static const int16_t av1_resize_filter_normative[(
 #define filteredinterp_filters1000 av1_resize_filter_normative
 
 
-void av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
-                                 EbPictureBufferDesc *dst,
-                                 int bd,
-                                 const int num_planes);
+EbErrorType av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
+                                        EbPictureBufferDesc *dst,
+                                        int bd,
+                                        const int num_planes,
+                                        const uint32_t ss_x,
+                                        const uint32_t ss_y);
 
 #endif //SVT_AV1_SCALE_H
 

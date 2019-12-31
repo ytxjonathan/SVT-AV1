@@ -17,6 +17,8 @@
 #include <string.h>
 #include "EbResize.h"
 
+#define DEBUG_SUPERRES 1
+
 // Filters for factor of 2 downsampling.
 static const int16_t av1_down2_symeven_half_filter[] = { 56, 12, -3, -1 };
 static const int16_t av1_down2_symodd_half_filter[] = { 64, 35, 0, -3 };
@@ -604,9 +606,9 @@ static void highbd_fill_arr_to_col(uint16_t *img, int stride, int len,
     }
 }
 
-EbErrorType av1_highbd_resize_plane(const uint8_t *const input, int height, int width,
-                             int in_stride, uint8_t *output, int height2,
-                             int width2, int out_stride, int bd) {
+EbErrorType av1_highbd_resize_plane(const uint16_t *const input, int height, int width,
+                                    int in_stride, uint16_t *output, int height2,
+                                    int width2, int out_stride, int bd) {
     int i;
     uint16_t *intbuf;
     uint16_t *tmpbuf;
@@ -625,13 +627,13 @@ EbErrorType av1_highbd_resize_plane(const uint8_t *const input, int height, int 
         return EB_ErrorInsufficientResources;
     }
     for (i = 0; i < height; ++i) {
-        highbd_resize_multistep(CONVERT_TO_SHORTPTR(input + in_stride * i), width,
+        highbd_resize_multistep(input + in_stride * i, width,
                                 intbuf + width2 * i, width2, tmpbuf, bd);
     }
     for (i = 0; i < width2; ++i) {
         highbd_fill_col_to_arr(intbuf + i, width2, height, arrbuf);
         highbd_resize_multistep(arrbuf, height, arrbuf2, height2, tmpbuf, bd);
-        highbd_fill_arr_to_col(CONVERT_TO_SHORTPTR(output + i), out_stride, height2,
+        highbd_fill_arr_to_col(output + i, out_stride, height2,
                                arrbuf2);
     }
 
@@ -639,35 +641,100 @@ EbErrorType av1_highbd_resize_plane(const uint8_t *const input, int height, int 
 
 }
 
-void av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
+void pack_highbd_pic(const EbPictureBufferDesc *pic_ptr,
+                     uint16_t *buffer_16bit[3],
+                     uint32_t ss_x,
+                     uint32_t ss_y,
+                     EbBool include_padding);
+
+void unpack_highbd_pic(uint16_t *buffer_highbd[3],
+                       EbPictureBufferDesc *pic_ptr,
+                       uint32_t ss_x,
+                       uint32_t ss_y,
+                       EbBool include_padding);
+
+void save_YUV_to_file(char *filename, EbByte buffer_y, EbByte buffer_u, EbByte buffer_v,
+                      uint16_t width, uint16_t height,
+                      uint16_t stride_y, uint16_t stride_u, uint16_t stride_v,
+                      uint16_t origin_y, uint16_t origin_x,
+                      uint32_t ss_x, uint32_t ss_y);
+
+void save_YUV_to_file_highbd(char *filename, uint16_t* buffer_y, uint16_t* buffer_u, uint16_t* buffer_v,
+                             uint16_t width, uint16_t height,
+                             uint16_t stride_y, uint16_t stride_u, uint16_t stride_v,
+                             uint16_t origin_y, uint16_t origin_x,
+                             uint32_t ss_x, uint32_t ss_y);
+
+EbErrorType av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
                                  EbPictureBufferDesc *dst,
                                  int bd,
-                                 const int num_planes) {
-    int ss_x = 1; // TODO: change to correct chroma sub-sampling
-    int ss_y = 1; // TODO: change to correct chroma sub-sampling
+                                 const int num_planes,
+                                 const uint32_t ss_x,
+                                 const uint32_t ss_y) {
 
-    int highbd_implemented = 0; // TODO: In the current implementation src->buffer_y, cb and cr are the 8-bit buffers only
-                                // Packing of buffer_y and buffer_inc_y to create the 16-bit buffers needs to be be done.
+    uint16_t *src_buffer_highbd[MAX_MB_PLANE];
+    uint16_t *dst_buffer_highbd[MAX_MB_PLANE];
+
+    if(bd > 8){
+        EB_MALLOC_ARRAY(src_buffer_highbd[0], src->luma_size);
+        EB_MALLOC_ARRAY(src_buffer_highbd[1], src->chroma_size);
+        EB_MALLOC_ARRAY(src_buffer_highbd[2], src->chroma_size);
+        EB_MALLOC_ARRAY(dst_buffer_highbd[0], dst->luma_size);
+        EB_MALLOC_ARRAY(dst_buffer_highbd[1], dst->chroma_size);
+        EB_MALLOC_ARRAY(dst_buffer_highbd[2], dst->chroma_size);
+        pack_highbd_pic(src, src_buffer_highbd, ss_x, ss_y, EB_TRUE);
+    }
+
+#if DEBUG_SUPERRES
+    if(bd > 8)
+        save_YUV_to_file_highbd("unscaled_pic_highbd.yuv",
+                                src_buffer_highbd[0],
+                                src_buffer_highbd[1],
+                                src_buffer_highbd[2],
+                                src->width + src->origin_x*2,
+                                src->height + src->origin_y*2,
+                                src->stride_y,
+                                src->stride_cb,
+                                src->stride_cr,
+                                0,
+                                0,
+                                1,
+                                1);
+    else
+        save_YUV_to_file("unscaled_pic.yuv",
+                         src->buffer_y,
+                         src->buffer_cb,
+                         src->buffer_cr,
+                         src->width + src->origin_x*2,
+                         src->height + src->origin_y*2,
+                         src->stride_y,
+                         src->stride_cb,
+                         src->stride_cr,
+                         0,
+                         0,
+                         1,
+                         1);
+#endif
 
     for (int plane = 0; plane < AOMMIN(num_planes, MAX_MB_PLANE); ++plane) {
-        if (highbd_implemented && bd > 8) {
+        if (bd > 8) {
             switch (plane) {
                 case 0:
-                    av1_highbd_resize_plane(src->buffer_y + src->origin_y * src->stride_y + src->origin_x,
+                    av1_highbd_resize_plane(src_buffer_highbd[0] + src->origin_y * src->stride_y + src->origin_x,
                                             src->height, src->width, src->stride_y,
-                                            dst->buffer_y + dst->origin_y * dst->stride_y + dst->origin_x,
+                                            dst_buffer_highbd[0] + dst->origin_y * dst->stride_y + dst->origin_x,
                                             dst->height, dst->width, dst->stride_y, bd);
                     break;
                 case 1:
-                    av1_highbd_resize_plane(src->buffer_cb + (src->origin_y >> ss_y) * src->stride_cb + (src->origin_x >> ss_x),
+                    av1_highbd_resize_plane(src_buffer_highbd[1] + (src->origin_y >> ss_y) * src->stride_cb + (src->origin_x >> ss_x),
                                             src->height >> ss_y, src->width >> ss_x, src->stride_cb,
-                                            dst->buffer_cb + (dst->origin_y >> ss_y) * dst->stride_cb + (dst->origin_x >> ss_x),
+                                            dst_buffer_highbd[1] + (dst->origin_y >> ss_y) * dst->stride_cb + (dst->origin_x >> ss_x),
                                             dst->height >> ss_y, dst->width >> ss_x, dst->stride_cb, bd);
                     break;
                 case 2:
-                    av1_highbd_resize_plane(src->buffer_cr + (src->origin_y >> ss_y) * src->stride_cr + (src->origin_x >> ss_x),
+                    av1_highbd_resize_plane(src_buffer_highbd[2] + (src->origin_y >> ss_y) * src->stride_cr + (src->origin_x >> ss_x),
                                             src->height >> ss_y, src->width >> ss_x, src->stride_cr,
-                                            dst->buffer_cr + (dst->origin_y >> ss_y) * dst->stride_cr + (dst->origin_x >> ss_x),
+                                            dst_buffer_highbd[2] + (dst->origin_y >> ss_y) * dst->stride_cr + (dst->origin_x >> ss_x),
                                             dst->height >> ss_y, dst->width >> ss_x, dst->stride_cr, bd);
                     break;
                 default:
@@ -701,6 +768,57 @@ void av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
         }
 
     }
+
+#if DEBUG_SUPERRES
+    if(bd > 8)
+        save_YUV_to_file_highbd("scaled_pic_highbd.yuv",
+                                dst_buffer_highbd[0],
+                                dst_buffer_highbd[1],
+                                dst_buffer_highbd[2],
+                                dst->width + dst->origin_x*2,
+                                dst->height + dst->origin_y*2,
+                                dst->stride_y,
+                                dst->stride_cb,
+                                dst->stride_cr,
+                                0,
+                                0,
+                                1,
+                                1);
+    else
+        save_YUV_to_file("scaled_pic.yuv",
+                         dst->buffer_y,
+                         dst->buffer_cb,
+                         dst->buffer_cr,
+                         dst->width + dst->origin_x*2,
+                         dst->height + dst->origin_y*2,
+                         dst->stride_y,
+                         dst->stride_cb,
+                         dst->stride_cr,
+                         0,
+                         0,
+                         1,
+                         1);
+#endif
+
+    if(bd > 8){
+        unpack_highbd_pic(dst_buffer_highbd,
+                          dst,
+                          ss_x,
+                          ss_y,
+                          EB_TRUE);
+
+        EB_FREE(src_buffer_highbd[0]);
+        EB_FREE(src_buffer_highbd[1]);
+        EB_FREE(src_buffer_highbd[2]);
+        EB_FREE(dst_buffer_highbd[0]);
+        EB_FREE(dst_buffer_highbd[1]);
+        EB_FREE(dst_buffer_highbd[2]);
+    }
+
+    // TODO: extend frame borders
     // use eb_extend_frame() instead
     // aom_extend_frame_borders(dst, num_planes);
+
+    return EB_ErrorNone;
+
 }
