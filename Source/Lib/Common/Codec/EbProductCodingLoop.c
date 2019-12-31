@@ -2514,8 +2514,14 @@ void md_stage_0(
     uint32_t                      candidate_buffer_start_index,
     uint32_t                      maxBuffers,
     EbBool                        scratch_buffer_pesent_flag,
+#if COST_BASED_EARLY_EXIT
+    EbBool                       *early_exit,
+#endif
     EbBool                        use_ssd)
 {
+#if COST_BASED_EARLY_EXIT
+    uint32_t count = 0;
+#endif
     int32_t  fastLoopCandidateIndex;
     uint64_t lumaFastDistortion;
     uint32_t highestCostIndex;
@@ -2618,6 +2624,10 @@ void md_stage_0(
             ModeDecisionCandidate       *candidate_ptr = candidate_buffer->candidate_ptr = &fast_candidate_array[fastLoopCandidateIndex];
             // Initialize tx_depth
             candidate_buffer->candidate_ptr->tx_depth = 0;
+#if COST_BASED_EARLY_EXIT
+            *(candidate_buffer->fast_cost_ptr)= MAX_CU_COST;
+            if(*early_exit == EB_FALSE)
+#endif
             if (!candidate_ptr->distortion_ready || fastLoopCandidateIndex == bestFirstFastCostSearchCandidateIndex) {
 
                 // Prediction
@@ -2662,6 +2672,26 @@ void md_stage_0(
                         highestCostIndex = bufferIndex;
                 } while (++bufferIndex < bufferIndexEnd);
             }
+#if COST_BASED_EARLY_EXIT
+            if (*early_exit == EB_FALSE) {
+                count++;
+
+                // Normalized cost per block size, per component
+                uint64_t normalized_fast_cost = *(candidate_buffer->fast_cost_ptr);
+
+                // Assumes 420 input video
+                if (context_ptr->blk_geom->has_uv && context_ptr->chroma_level <= CHROMA_MODE_1 && context_ptr->md_staging_skip_inter_chroma_pred == EB_FALSE)
+                    normalized_fast_cost = (normalized_fast_cost * 4) / 6;
+
+                // Block size
+                normalized_fast_cost = normalized_fast_cost / (context_ptr->blk_geom->bwidth * context_ptr->blk_geom->bheight);
+                
+                if (normalized_fast_cost < 10000) {
+                    context_ptr->md_stage_0_count[context_ptr->target_class] = count;
+                    *early_exit = EB_TRUE;
+                }
+            }
+#endif
         }
         --fastLoopCandidateIndex;
     }
@@ -8634,8 +8664,12 @@ void md_encode_block(
 #if INTER_INTRA_CLASS_PRUNING
         uint64_t best_md_stage_cost = (uint64_t)~0;
 #endif
+#if COST_BASED_EARLY_EXIT     
+        EbBool early_exit = EB_FALSE;
+        for (cand_class_it = CAND_CLASS_0; cand_class_it < CAND_CLASS_TOTAL && early_exit == EB_FALSE; cand_class_it++) {
+#else
         for (cand_class_it = CAND_CLASS_0; cand_class_it < CAND_CLASS_TOTAL; cand_class_it++) {
-
+#endif
             //number of next level candidates could not exceed number of curr level candidates
             context_ptr->md_stage_1_count[cand_class_it] = MIN(context_ptr->md_stage_0_count[cand_class_it], context_ptr->md_stage_1_count[cand_class_it]);
 
@@ -8666,7 +8700,24 @@ void md_encode_block(
                     buffer_start_idx,
                     buffer_count_for_curr_class,
                     context_ptr->md_stage_0_count[cand_class_it] > context_ptr->md_stage_1_count[cand_class_it],  //is there need to max the temp buffer
+#if COST_BASED_EARLY_EXIT
+                    &early_exit,
+#endif
                     0);
+
+
+#if COST_BASED_EARLY_EXIT
+                if (early_exit) {
+                    for (CAND_CLASS current_class_it = cand_class_it + 1; current_class_it < CAND_CLASS_TOTAL; current_class_it++) {
+                        context_ptr->md_stage_0_count[current_class_it] = 0;
+                        context_ptr->md_stage_1_count[current_class_it] = 0;
+                        context_ptr->md_stage_2_count[current_class_it] = 0;
+                    }
+                    context_ptr->md_stage_1_count[cand_class_it] = MIN(context_ptr->md_stage_0_count[cand_class_it], context_ptr->md_stage_1_count[cand_class_it]);
+                    context_ptr->md_stage_2_count[cand_class_it] = MIN(context_ptr->md_stage_0_count[cand_class_it], context_ptr->md_stage_2_count[cand_class_it]);
+
+                }
+#endif
 
                 //Sort:  md_stage_1_count[cand_class_it]
                 memset(context_ptr->cand_buff_indices[cand_class_it], 0xFFFFFFFF, MAX_NFL_BUFF * sizeof(uint32_t));
@@ -9817,13 +9868,20 @@ EB_EXTERN EbErrorType mode_decision_sb(
                         }
 
 
-#if 0
-                        if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds].block_has_coeff) {
-                            if (context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].prediction_mode_flag == INTER_MODE &&
-                                context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 2].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 2].prediction_mode_flag == INTER_MODE ){
-                                sq_weight += 10;
-                            }
+#if 1
+                        if (context_ptr->blk_geom->shape == PART_HA) {
+                            if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].block_has_coeff)
+                                sq_weight -= 15;
                         }
+
+                        if (context_ptr->blk_geom->shape == PART_HB) {
+                            if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 2].block_has_coeff)
+                                sq_weight -= 15;
+                        }
+
+
+                        //if (context_ptr->blk_geom->shape == PART_H4 && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 2].block_has_coeff)
+                        //    sq_weight -= 10;
 #endif
 
 
@@ -9847,14 +9905,24 @@ EB_EXTERN EbErrorType mode_decision_sb(
                                     sq_weight += 5;
                             }
                         }
-#if 0
-                        if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds].block_has_coeff) {
-                            if (context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 3].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 3].prediction_mode_flag == INTER_MODE &&
-                                context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 4].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 4].prediction_mode_flag == INTER_MODE) {
-                                sq_weight += 10;
-                            }
+
+#if 1
+                        if (context_ptr->blk_geom->shape == PART_VA) {
+                            if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 3].block_has_coeff)
+                                sq_weight -= 15;
                         }
+
+                        if (context_ptr->blk_geom->shape == PART_VB) {
+                            if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 4].block_has_coeff)
+                                sq_weight -= 15;
+                        }
+
+
+
+                        //if (context_ptr->blk_geom->shape == PART_V4 && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 3].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 4].block_has_coeff)
+                        //    sq_weight -= 10;
 #endif
+
                         uint64_t sq_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].default_cost;
                         uint64_t v_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 3].default_cost + context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 4].default_cost;
 
