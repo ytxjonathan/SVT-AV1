@@ -9734,19 +9734,38 @@ EB_EXTERN EbErrorType mode_decision_sb(
                 // sq_weight derivation = BASE + OFFSET = f(block size, shape to skip)
                 uint32_t sq_weight = context_ptr->sq_weight;
 
-                //if(context_ptr->blk_geom->sq_size <= 16)
-                //    sq_weight += 5;
-
 
                 if (context_ptr->blk_geom->shape == PART_H4 || context_ptr->blk_geom->shape == PART_V4)
                     sq_weight += 5;
 
-
-                //if (context_ptr->blk_geom->sq_size >= 32)
-                //    sq_weight -= 10;
-
+                // context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds].prediction_mode_flag == INTRA_MODE
                 if (context_ptr->blk_geom->shape == PART_HA || context_ptr->blk_geom->shape == PART_HB || context_ptr->blk_geom->shape == PART_H4) {
+
                     if (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 1].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 2].avail_blk_flag) {
+
+                        if (picture_control_set_ptr->slice_type != I_SLICE) {
+                            if (context_ptr->blk_geom->shape == PART_HA) {
+                                if (context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].prediction_mode_flag == INTRA_MODE)
+                                    sq_weight += 5;
+                            }
+
+                            if (context_ptr->blk_geom->shape == PART_HB) {
+                                if (context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 2].prediction_mode_flag == INTRA_MODE)
+                                    sq_weight += 5;
+                            }
+                        }
+
+
+#if 0
+                        if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds].block_has_coeff) {
+                            if (context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].prediction_mode_flag == INTER_MODE && 
+                                context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 2].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 2].prediction_mode_flag == INTER_MODE ){
+                                sq_weight += 10;
+                            }
+                        }
+#endif
+
+
                         uint64_t sq_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].default_cost;
                         uint64_t h_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 1].default_cost + context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 2].default_cost;
 
@@ -9756,6 +9775,25 @@ EB_EXTERN EbErrorType mode_decision_sb(
                 if (context_ptr->blk_geom->shape == PART_VA || context_ptr->blk_geom->shape == PART_VB || context_ptr->blk_geom->shape == PART_V4) {
                     if (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 3].avail_blk_flag && context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 4].avail_blk_flag) {
 
+                        if (picture_control_set_ptr->slice_type != I_SLICE) {
+                            if (context_ptr->blk_geom->shape == PART_VA) {
+                                if (context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 3].prediction_mode_flag == INTRA_MODE)
+                                    sq_weight += 5;
+                            }
+
+                            if (context_ptr->blk_geom->shape == PART_VB) {
+                                if (context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 4].prediction_mode_flag == INTRA_MODE)
+                                    sq_weight += 5;
+                            }
+                        }
+#if 0
+                        if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds].block_has_coeff) {
+                            if (context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 3].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 3].prediction_mode_flag == INTER_MODE &&
+                                context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 4].block_has_coeff && context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 4].prediction_mode_flag == INTER_MODE) {
+                                sq_weight += 10;
+                            }
+                        }
+#endif
                         uint64_t sq_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].default_cost;
                         uint64_t v_cost = context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 3].default_cost + context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds + 4].default_cost;
 
