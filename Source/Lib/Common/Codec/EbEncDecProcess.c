@@ -2236,7 +2236,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->sq_weight = (uint32_t)~0;
     else if (context_ptr->pd_pass == PD_PASS_1)
 #if ENHANCED_M0_SETTINGS // lossless change - PD_PASS_2 and PD_PASS_1 should be completely decoupled: previous merge conflict
-#if ENHANCED_SQ_WEIGHT
+#if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
         context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?  125 : 100;
 #else
         context_ptr->sq_weight = 100;
@@ -2246,14 +2246,14 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
     else
 #endif
-#if ENHANCED_SQ_WEIGHT
+#if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
     if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #else
     if (MR_MODE)
 #endif
         context_ptr->sq_weight = (uint32_t)~0;
     else
-#if ENHANCED_SQ_WEIGHT
+#if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
         context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? sequence_control_set_ptr->static_config.sq_weight + 25 : sequence_control_set_ptr->static_config.sq_weight;
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
