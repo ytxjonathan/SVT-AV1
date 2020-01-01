@@ -14004,6 +14004,13 @@ void integer_search_sb(
             // Constrain x_ME to be a multiple of 8 (round up)
             search_area_width = (context_ptr->search_area_width + 7) & ~0x07;
             search_area_height = context_ptr->search_area_height;
+#if SKIP_ME_BASED_ON_HME
+            // Update ME search reagion size based on hme-data
+            if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
+                search_area_width = ((context_ptr->search_area_width/4) + 7) & ~0x07;
+                search_area_height = (context_ptr->search_area_height/4);
+            }
+#endif
             if ((x_search_center != 0 || y_search_center != 0) &&
                 (picture_control_set_ptr->is_used_as_reference_flag ==
                     EB_TRUE)) {
@@ -14688,13 +14695,17 @@ void prune_references_fp(
     }
 
 #if 1
-    uint8_t  BIGGER_THAN_TH = 50;
+    uint8_t  BIGGER_THAN_TH = 30;
     uint64_t best = sorted[0][0].hme_sad;//is this always the best?
     for (uint32_t li = 0; li < MAX_NUM_OF_REF_PIC_LIST; li++) {
         for (uint32_t ri = 0; ri < REF_LIST_MAX_DEPTH; ri++){
            // uint32_t dev = ((context_ptr->hme_results[li][ri].hme_sad - best) * 100) / best;
             if ((context_ptr->hme_results[li][ri].hme_sad - best) * 100  > BIGGER_THAN_TH*best)
                 context_ptr->hme_results[li][ri].do_ref = 0;
+#if UPDATE_HALF_PEL_MODE
+            if (context_ptr->hme_results[li][ri].hme_sad > best) 
+                context_ptr->local_hp_mode[li][ri] = REFINMENT_HP_MODE;
+#endif
         }
     }
 #endif
@@ -15406,7 +15417,7 @@ void prune_references(
     }
 
 #if 1
-    uint8_t  BIGGER_THAN_TH = 50;
+    uint8_t  BIGGER_THAN_TH = 80;
     uint64_t best = sorted[0][0].hme_sad;//is this always the best?
 
     for (uint32_t li = 0; li < MAX_NUM_OF_REF_PIC_LIST; li++) {
@@ -15415,6 +15426,10 @@ void prune_references(
            // uint32_t dev = ((context_ptr->hme_results[li][ri].hme_sad - best) * 100) / best;
             if ((context_ptr->hme_results[li][ri].hme_sad - best) * 100  > BIGGER_THAN_TH*best)
                 context_ptr->hme_results[li][ri].do_ref = 0;
+#if SKIP_ME_BASED_ON_HME
+            if (context_ptr->hme_results[li][ri].hme_sad < 5000/*UPDATE_ME_SR_TH*/)
+                context_ptr->reduce_me_sr_flag[li][ri] = 1;
+#endif
         }
     }
 #endif
@@ -15609,6 +15624,12 @@ EbErrorType motion_estimate_lcu(
             context_ptr->hme_results[li][ri].ref_i = ri;
             context_ptr->hme_results[li][ri].do_ref = 1;
             context_ptr->hme_results[li][ri].hme_sad = 0xFFFFFFFF;
+#if UPDATE_HALF_PEL_MODE
+            context_ptr->local_hp_mode[listIndex][ref_pic_index] = context_ptr->half_pel_mode;
+#endif
+#if SKIP_ME_BASED_ON_HME
+            context_ptr->reduce_me_sr_flag[li][ri] = 0;
+#endif
         }
     }
 
@@ -15619,7 +15640,7 @@ EbErrorType motion_estimate_lcu(
         sb_origin_y,
         context_ptr,
         input_ptr  );
-#if !MUS_ME_FP_SB
+
     //pruning of the references is not done for alt-ref / Base-Layer (HME not done for list1 refs) / non-complete-SBs when HMeLevel2 is done
     if(context_ptr->enable_hme_flag && context_ptr->enable_hme_level2_flag &&
         context_ptr->me_alt_ref == EB_FALSE && picture_control_set_ptr->temporal_layer_index>0 && sb_height==BLOCK_SIZE_64)
@@ -15630,7 +15651,7 @@ EbErrorType motion_estimate_lcu(
             sb_origin_y,
             context_ptr,
             input_ptr );
-#endif
+
 #if MUS_ME_FP
     integer_search_sb(
         picture_control_set_ptr,
@@ -16219,6 +16240,13 @@ EbErrorType motion_estimate_lcu(
             // Constrain x_ME to be a multiple of 8 (round up)
             search_area_width = (context_ptr->search_area_width + 7) & ~0x07;
             search_area_height = context_ptr->search_area_height;
+#if SKIP_ME_BASED_ON_HME
+            // Update ME search reagion size based on hme-data
+            if (context_ptr->reduce_me_sr_flag[listIndex][ref_pic_index]) {
+                search_area_width = ((context_ptr->search_area_width/4) + 7) & ~0x07;
+                search_area_height = (context_ptr->search_area_height/4);
+            }
+#endif
             if ((x_search_center != 0 || y_search_center != 0) &&
                 (picture_control_set_ptr->is_used_as_reference_flag ==
                  EB_TRUE)) {
@@ -16586,9 +16614,13 @@ EbErrorType motion_estimate_lcu(
                                                            search_area_height);
 #endif
                         context_ptr->full_quarter_pel_refinement = 0;
-
+#if UPDATE_HALF_PEL_MODE
+                        if (context_ptr->half_pel_mode ==
+                            EX_HP_MODE && context_ptr->local_hp_mode[listIndex][ref_pic_index] == EX_HP_MODE) {
+#else
                         if (context_ptr->half_pel_mode ==
                             EX_HP_MODE) {
+#endif
                             // Move to the top left of the search region
 #if MUS_ME_FP
                             xTopLeftSearchRegion =
@@ -16882,9 +16914,13 @@ EbErrorType motion_estimate_lcu(
 #endif
                     // Interpolate the search region for Half-Pel Refinements
                     // H - AVC Style
-
+#if UPDATE_HALF_PEL_MODE
+                    if (context_ptr->half_pel_mode ==
+                            REFINMENT_HP_MODE || context_ptr->local_hp_mode[listIndex][ref_pic_index] == EX_HP_MODE) {
+#else
                     if (context_ptr->half_pel_mode ==
                         REFINMENT_HP_MODE) {
+#endif
                         InterpolateSearchRegionAVC(
                             context_ptr,
                             listIndex,

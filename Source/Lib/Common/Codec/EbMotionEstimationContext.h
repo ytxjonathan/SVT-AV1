@@ -465,11 +465,17 @@ extern "C" {
 
         EbBool                        use_subpel_flag;
         EbBool                        half_pel_mode;
+#if UPDATE_HALF_PEL_MODE
+        EbBool                        local_hp_mode[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+#endif
         EbBool                        quarter_pel_mode;
 
         EbBool                        compute_global_motion;
 
         // ME
+#if SKIP_ME_BASED_ON_HME
+        EbBool                       reduce_me_sr_flag[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+#endif
         uint16_t                      search_area_width;
         uint16_t                      search_area_height;
         // HME
