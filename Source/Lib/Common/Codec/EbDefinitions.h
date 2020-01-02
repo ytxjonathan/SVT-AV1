@@ -32,6 +32,20 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+// Remove temporal Layer
+#if 1
+#define IFS_TL              1
+#define CHROMA_TL           1
+#define NEW_NN_TL           1
+#define F_INTRA_TL          1
+#define ME_ZZ_TL            1
+#define BLK8X8_TL           1 // SC only
+#define ATB_TL              1
+#define NIC_TL              1
+#define NIC_ICS_TL          1
+#define LOOPFILTER_TL       1 // SC only
+#define PALETTE_TL          1 // SC only
+#endif
 #define SHUT_HME_L1_CHECK      1//Remove usage of ME results for list=0 refIndex=0 to be decide HME centre. Feauture assumes no MRP. and list1 distance = list0 distance.
 #define MUS_ME                 1 //MUlti-Stage ME - HME pruning
 #if MUS_ME

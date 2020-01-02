@@ -517,7 +517,6 @@ int av1_count_colors_highbd(uint16_t *src, int stride, int rows, int cols,
                  (*tot_palette_cands)++;
              assert((*tot_palette_cands) <= 14);
          }
-
          if (picture_control_set_ptr->parent_pcs_ptr->palette_mode == 3)
              if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == 0)
                  return;

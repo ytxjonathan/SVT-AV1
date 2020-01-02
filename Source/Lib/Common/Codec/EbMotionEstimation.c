@@ -15650,8 +15650,12 @@ EbErrorType motion_estimate_lcu(
             search_area_width = (context_ptr->search_area_width + 7) & ~0x07;
             search_area_height = context_ptr->search_area_height;
             if ((x_search_center != 0 || y_search_center != 0) &&
+#if ME_ZZ_TL
+                (1)) {
+#else
                 (picture_control_set_ptr->is_used_as_reference_flag ==
                  EB_TRUE)) {
+#endif
                 CheckZeroZeroCenter(refPicPtr,
                                     context_ptr,
                                     sb_origin_x,

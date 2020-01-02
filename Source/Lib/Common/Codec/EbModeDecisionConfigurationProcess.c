@@ -2608,7 +2608,11 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #if FILTER_INTRA_FLAG
     //Filter Intra Mode : 0: OFF  1: ON
     if (sequence_control_set_ptr->seq_header.enable_filter_intra)
+#if F_INTRA_TL
+        picture_control_set_ptr->pic_filter_intra_mode = picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0  ? 1 : 0;
+#else
         picture_control_set_ptr->pic_filter_intra_mode = picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->temporal_layer_index == 0 ? 1 : 0;
+#endif
     else
         picture_control_set_ptr->pic_filter_intra_mode = 0;
 #endif
@@ -2641,7 +2645,7 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #if PRESETS_TUNE && !PRESETS_OPT
             (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M1 && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ||
 #endif
-            (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M5 && picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)) ? EB_TRUE : EB_FALSE;
+            (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M5 && 0/*picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index*/ == 0)) ? EB_TRUE : EB_FALSE;
 #else
         enable_wm = (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M5) || MR_MODE ? EB_TRUE : EB_FALSE;
 #endif

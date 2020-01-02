@@ -1200,7 +1200,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         if (picture_control_set_ptr->enc_mode <= ENC_M6)
             context_ptr->tx_search_level = TX_SEARCH_FULL_LOOP;
         else
-            if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+            if (1/*picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag*/)
                 context_ptr->tx_search_level = TX_SEARCH_FULL_LOOP;
             else
                 context_ptr->tx_search_level = TX_SEARCH_ENC_DEC;
@@ -1208,7 +1208,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         if (picture_control_set_ptr->enc_mode <= ENC_M4)
             context_ptr->tx_search_level = TX_SEARCH_FULL_LOOP;
         else if (picture_control_set_ptr->enc_mode <= ENC_M7) {
-            if (picture_control_set_ptr->temporal_layer_index == 0)
+            if (0/*picture_control_set_ptr->temporal_layer_index*/ == 0)
                 context_ptr->tx_search_level = TX_SEARCH_FULL_LOOP;
             else
                 context_ptr->tx_search_level = TX_SEARCH_ENC_DEC;
@@ -1231,7 +1231,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             else if (!MR_MODE && picture_control_set_ptr->enc_mode <= ENC_M5)
                 context_ptr->tx_weight = FC_SKIP_TX_SR_TH025;
             else if (!MR_MODE) {
-                if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+                if (1/*picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag*/)
                     context_ptr->tx_weight = FC_SKIP_TX_SR_TH025;
                 else
                     context_ptr->tx_weight = FC_SKIP_TX_SR_TH010;
@@ -1347,7 +1347,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->interpolation_search_level = IT_SEARCH_OFF;
 #endif
     else if (picture_control_set_ptr->enc_mode <= ENC_M7)
-        if (picture_control_set_ptr->temporal_layer_index == 0)
+        if (0/*picture_control_set_ptr->temporal_layer_index*/ == 0)
             context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP_UV_BLIND;
         else
             context_ptr->interpolation_search_level = IT_SEARCH_OFF;
@@ -1364,7 +1364,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->chroma_level = CHROMA_MODE_2; // or CHROMA_MODE_3
     else if (context_ptr->pd_pass == PD_PASS_1) {
+#if CHROMA_TL
+        if (1)
+#else
         if (picture_control_set_ptr->temporal_layer_index == 0)
+#endif
             context_ptr->chroma_level = CHROMA_MODE_0;
         else
             context_ptr->chroma_level = CHROMA_MODE_1;
@@ -1376,7 +1380,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             if (picture_control_set_ptr->enc_mode <= ENC_M6)
                 context_ptr->chroma_level = CHROMA_MODE_1;
             else
-                if (picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index == 0)
+                if (0/*picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index*/ == 0)
                     context_ptr->chroma_level = CHROMA_MODE_1;
                 else
                     context_ptr->chroma_level = (sequence_control_set_ptr->encoder_bit_depth == EB_8BIT) ?
@@ -1392,7 +1396,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                 context_ptr->chroma_level = CHROMA_MODE_0;
 #endif
             else
-                if (picture_control_set_ptr->enc_mode <= ENC_M5 && picture_control_set_ptr->temporal_layer_index == 0)
+                if (picture_control_set_ptr->enc_mode <= ENC_M5 && 0/*picture_control_set_ptr->temporal_layer_index*/ == 0)
                     context_ptr->chroma_level = CHROMA_MODE_0;
                 else
                     if (picture_control_set_ptr->enc_mode <= ENC_M5)
@@ -1521,7 +1525,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
 #endif
 #if FIX_NEAREST_NEW
+#if NEW_NN_TL
+            if (picture_control_set_ptr->enc_mode <= ENC_M0)
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+#endif
 #else
             if (picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
