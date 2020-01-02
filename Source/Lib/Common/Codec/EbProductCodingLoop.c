@@ -2673,6 +2673,9 @@ void md_stage_0(
                 } while (++bufferIndex < bufferIndexEnd);
             }
 #if COST_BASED_EARLY_EXIT
+#if EARLY_EXIT_PER_CLASS
+            if(context_ptr->target_class == CAND_CLASS_3)
+#endif
             if (*early_exit == EB_FALSE) {
                 count++;
 
@@ -2686,7 +2689,7 @@ void md_stage_0(
                 // Block size
                 normalized_fast_cost = normalized_fast_cost / (context_ptr->blk_geom->bwidth * context_ptr->blk_geom->bheight);
                 
-                if (normalized_fast_cost < 10000) {
+                if (normalized_fast_cost < ~(uint32_t) 0) {
                     context_ptr->md_stage_0_count[context_ptr->target_class] = count;
                     *early_exit = EB_TRUE;
                 }
@@ -8664,7 +8667,7 @@ void md_encode_block(
 #if INTER_INTRA_CLASS_PRUNING
         uint64_t best_md_stage_cost = (uint64_t)~0;
 #endif
-#if COST_BASED_EARLY_EXIT     
+#if COST_BASED_EARLY_EXIT && !EARLY_EXIT_PER_CLASS
         EbBool early_exit = EB_FALSE;
         for (cand_class_it = CAND_CLASS_0; cand_class_it < CAND_CLASS_TOTAL && early_exit == EB_FALSE; cand_class_it++) {
 #else
@@ -8680,6 +8683,9 @@ void md_encode_block(
                 buffer_total_count += buffer_count_for_curr_class;
                 assert(buffer_total_count <= MAX_NFL_BUFF && "not enough cand buffers");
 
+#if EARLY_EXIT_PER_CLASS
+                EbBool early_exit = EB_FALSE;
+#endif
                 //Input: md_stage_0_count[cand_class_it]  Output:  md_stage_1_count[cand_class_it]
                 context_ptr->target_class = cand_class_it;
 
@@ -8708,14 +8714,15 @@ void md_encode_block(
 
 #if COST_BASED_EARLY_EXIT
                 if (early_exit) {
+#if !EARLY_EXIT_PER_CLASS
                     for (CAND_CLASS current_class_it = cand_class_it + 1; current_class_it < CAND_CLASS_TOTAL; current_class_it++) {
                         context_ptr->md_stage_0_count[current_class_it] = 0;
                         context_ptr->md_stage_1_count[current_class_it] = 0;
                         context_ptr->md_stage_2_count[current_class_it] = 0;
                     }
+#endif
                     context_ptr->md_stage_1_count[cand_class_it] = MIN(context_ptr->md_stage_0_count[cand_class_it], context_ptr->md_stage_1_count[cand_class_it]);
                     context_ptr->md_stage_2_count[cand_class_it] = MIN(context_ptr->md_stage_0_count[cand_class_it], context_ptr->md_stage_2_count[cand_class_it]);
-
                 }
 #endif
 
@@ -9871,12 +9878,12 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #if 1
                         if (context_ptr->blk_geom->shape == PART_HA) {
                             if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 1].block_has_coeff)
-                                sq_weight -= 15;
+                                sq_weight -= 10;
                         }
 
                         if (context_ptr->blk_geom->shape == PART_HB) {
                             if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 2].block_has_coeff)
-                                sq_weight -= 15;
+                                sq_weight -= 10;
                         }
 
 
@@ -9909,12 +9916,12 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #if 1
                         if (context_ptr->blk_geom->shape == PART_VA) {
                             if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 3].block_has_coeff)
-                                sq_weight -= 15;
+                                sq_weight -= 10;
                         }
 
                         if (context_ptr->blk_geom->shape == PART_VB) {
                             if (!context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds + 4].block_has_coeff)
-                                sq_weight -= 15;
+                                sq_weight -= 10;
                         }
 
 
