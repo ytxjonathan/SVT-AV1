@@ -37,7 +37,7 @@ extern "C" {
 #define MUS_ME_FP              1
 #define MUS_ME_FP_PU           0
 #define MUS_ME_FP_SB           1
-#define UPDATE_HALF_PEL_MODE   0
+#define UPDATE_HALF_PEL_MODE   1
 #define SKIP_ME_BASED_ON_HME   0
 
 

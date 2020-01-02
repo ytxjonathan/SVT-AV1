@@ -15625,7 +15625,7 @@ EbErrorType motion_estimate_lcu(
             context_ptr->hme_results[li][ri].do_ref = 1;
             context_ptr->hme_results[li][ri].hme_sad = 0xFFFFFFFF;
 #if UPDATE_HALF_PEL_MODE
-            context_ptr->local_hp_mode[listIndex][ref_pic_index] = context_ptr->half_pel_mode;
+            context_ptr->local_hp_mode[li][ri] = context_ptr->half_pel_mode;
 #endif
 #if SKIP_ME_BASED_ON_HME
             context_ptr->reduce_me_sr_flag[li][ri] = 0;
@@ -16916,7 +16916,7 @@ EbErrorType motion_estimate_lcu(
                     // H - AVC Style
 #if UPDATE_HALF_PEL_MODE
                     if (context_ptr->half_pel_mode ==
-                            REFINMENT_HP_MODE || context_ptr->local_hp_mode[listIndex][ref_pic_index] == EX_HP_MODE) {
+                            REFINMENT_HP_MODE || context_ptr->local_hp_mode[listIndex][ref_pic_index] == REFINMENT_HP_MODE) {
 #else
                     if (context_ptr->half_pel_mode ==
                         REFINMENT_HP_MODE) {
