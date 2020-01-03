@@ -15721,7 +15721,7 @@ EbErrorType open_loop_intra_search_mb(
             left0_col = left0_data + 16;
             above_row = above_data + 16;
             left_col = left_data + 16;
-            ois_mb_results_ptr = picture_control_set_ptr->ois_mb_results[(cu_origin_y >> 4) * mb_stride + cu_origin_x >> 4];
+            ois_mb_results_ptr = picture_control_set_ptr->ois_mb_results[(cu_origin_y >> 4) * mb_stride + (cu_origin_x >> 4)];
 #if USE_ORIGIN_YUV
             uint8_t *src = picture_control_set_ptr->save_enhanced_picture_ptr[0] + picture_control_set_ptr->enhanced_picture_ptr->origin_x + cu_origin_x +
                            (picture_control_set_ptr->enhanced_picture_ptr->origin_y + cu_origin_y) * input_ptr->stride_y;
@@ -15780,6 +15780,7 @@ EbErrorType open_loop_intra_search_mb(
             // store intra_cost to pcs
             ois_mb_results_ptr->intra_mode = best_mode;
             ois_mb_results_ptr->intra_cost = best_intra_cost;
+//printf("kelvincost0 poc%d sb_index=%d, mb_origin_xy=%d %d, best_mode=%d, best_intra_cost=%d, offset=%d\n", picture_control_set_ptr->picture_number, sb_index, cu_origin_x, cu_origin_y, best_mode, best_intra_cost, (cu_origin_y >> 4) * mb_stride + (cu_origin_x >> 4));
         }
         pa_blk_index++;
     }
