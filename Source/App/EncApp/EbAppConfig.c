@@ -476,13 +476,13 @@ static void set_enable_overlays(const char *value, EbConfig *cfg) {
 // --- end: ALTREF_FILTERING_SUPPORT
 // --- start: SUPER-RESOLUTION SUPPORT
 static void SetSuperresMode(const char *value, EbConfig *cfg) {
-	cfg->superres_mode = (uint8_t)strtoul(value, NULL, 0);
+    cfg->superres_mode = (uint8_t)strtoul(value, NULL, 0);
 };
 static void SetSuperresDenom(const char *value, EbConfig *cfg) {
-	cfg->superres_denom = (uint8_t)strtoul(value, NULL, 0);
+    cfg->superres_denom = (uint8_t)strtoul(value, NULL, 0);
 };
 static void SetSuperresQthres(const char *value, EbConfig *cfg) {
-	cfg->superres_qthres = (uint8_t)strtoul(value, NULL, 0);
+    cfg->superres_qthres = (uint8_t)strtoul(value, NULL, 0);
 };
 // --- end: SUPER-RESOLUTION SUPPORT
 static void set_enable_hbd_mode_decision(const char *value, EbConfig *cfg) {
