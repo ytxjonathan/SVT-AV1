@@ -944,6 +944,9 @@ extern "C" {
 #if TX_SIZE_EARLY_EXIT
         uint8_t                                tx_size_early_exit;
 #endif
+#if MUS_ME
+        uint8_t                                prune_ref_based_me;
+#endif
     } PictureParentControlSet;
 
     typedef struct PictureControlSetInitData

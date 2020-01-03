@@ -33,7 +33,12 @@
 extern "C" {
 #endif
 #define SHUT_HME_L1_CHECK      1//Remove usage of ME results for list=0 refIndex=0 to be decide HME centre. Feauture assumes no MRP. and list1 distance = list0 distance.
-#define MUS_ME                 1 //MUlti-Stage ME
+#define MUS_ME                 1 //MUlti-Stage ME - HME pruning
+#if MUS_ME
+#define MUS_ME_FP              1 //MUlti-Stage ME - Decouple full-pel from subpel
+#define MUS_ME_FP_SB           1 //MUlti-Stage ME - Full-pel pruning 
+#define SKIP_ME_BASED_ON_HME   1 //MUlti-Stage ME - Reduce SR based on HME distortion
+#endif
 
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 

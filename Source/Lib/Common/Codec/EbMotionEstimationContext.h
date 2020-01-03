@@ -329,6 +329,17 @@ extern "C" {
         uint8_t                      *one_d_intermediate_results_buf1;
         int16_t                       x_search_area_origin[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
         int16_t                       y_search_area_origin[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
+#if MUS_ME_FP
+        // ME Parameters
+        /* Number of search positions in the horizontal direction.
+        *
+        * Default depends on input resolution. */
+        uint32_t                     sa_width[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
+        /* Number of search positions in the vertical direction.
+        *
+        * Default depends on input resolution. */
+        uint32_t                     sa_height[MAX_NUM_OF_REF_PIC_LIST][MAX_REF_IDX];
+#endif
         uint8_t                      *avctemp_buffer;
         uint32_t                     *p_best_sad8x8;
         uint32_t                     *p_best_sad16x16;
@@ -467,6 +478,9 @@ extern "C" {
         // -------
 #if  MUS_ME
         HmeResults                   hme_results[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+#endif
+#if SKIP_ME_BASED_ON_HME
+        EbBool                       reduce_me_sr_flag[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
 #endif
     } MeContext;
 
