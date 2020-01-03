@@ -1311,6 +1311,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->interpolation_search_level = IT_SEARCH_OFF;
     else if (context_ptr->pd_pass == PD_PASS_1) {
+#if IFS_TL
+        if (picture_control_set_ptr->enc_mode <= ENC_M0)
+            context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP_UV_BLIND;
+        else
+#endif
         if (picture_control_set_ptr->temporal_layer_index == 0)
             context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP_UV_BLIND;
         else
