@@ -2076,7 +2076,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // Derive INTER/INTER WEDGE variance TH
 #if PRESETS_OPT
     // Phoenix: Active only when inter/inter compound is on
+#if COMPOUND_WEDGE_OPT
+    if (MR_MODE || picture_control_set_ptr->enc_mode <= ENC_M0)
+#else
     if (picture_control_set_ptr->enc_mode <= ENC_M7)
+#endif
 #else
 #if M0_OPT
     if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0))

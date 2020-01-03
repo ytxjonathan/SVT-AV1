@@ -52,6 +52,7 @@ extern "C" {
 
 #define IFS_TL                   1   // remove temporal layer check for interpolation filter search @ PD1
 #define ATB_TL                   1   // remove temporal layer check for ATB for 360p only
+#define COMPOUND_WEDGE_OPT       1   // optimize compound wedge For M1 and higher
 #if 1
 
 

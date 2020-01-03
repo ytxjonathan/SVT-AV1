@@ -1518,9 +1518,14 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 1                 Fast: If two predictors are very similar, skip wedge compound mode search
         // 2                 Fast: estimate Wedge sign
         // 3                 Fast: Mode 1 & Mode 2
-
+#if COMPOUND_WEDGE_OPT
+    if (MR_MODE || picture_control_set_ptr->enc_mode <= ENC_M0)
         picture_control_set_ptr->wedge_mode = 0;
-
+    else
+        picture_control_set_ptr->wedge_mode = 1;
+#else
+        picture_control_set_ptr->wedge_mode = 0;
+#endif
         // inter intra pred                      Settings
         // 0                                     OFF
         // 1                                     ON
