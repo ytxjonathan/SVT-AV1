@@ -17,7 +17,7 @@
 #include <string.h>
 #include "EbResize.h"
 
-#define DEBUG_SUPERRES 1
+#define DEBUG_SCALING 0
 
 // Filters for factor of 2 downsampling.
 static const int16_t av1_down2_symeven_half_filter[] = { 56, 12, -3, -1 };
@@ -685,7 +685,7 @@ EbErrorType av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
         pack_highbd_pic(src, src_buffer_highbd, ss_x, ss_y, EB_TRUE);
     }
 
-#if DEBUG_SUPERRES
+#if DEBUG_SCALING
     if(bd > 8)
         save_YUV_to_file_highbd("unscaled_pic_highbd.yuv",
                                 src_buffer_highbd[0],
@@ -769,7 +769,7 @@ EbErrorType av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
 
     }
 
-#if DEBUG_SUPERRES
+#if DEBUG_SCALING
     if(bd > 8)
         save_YUV_to_file_highbd("scaled_pic_highbd.yuv",
                                 dst_buffer_highbd[0],

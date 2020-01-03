@@ -6358,18 +6358,18 @@ void *picture_analysis_kernel(void *input_ptr) {
             }
 
             // Super-resolution test: if superres is enabled, downsample the source picture
-            if(sequence_control_set_ptr->static_config.superres_mode != SUPERRES_NONE){
+            if(scs_ptr->static_config.superres_mode != SUPERRES_NONE){
                 // Allocate picture buffer descriptor
-                downscaled_source_buffer_ctor(&picture_control_set_ptr->enhanced_downscaled_picture_ptr,
+                downscaled_source_buffer_ctor(&pcs_ptr->enhanced_downscaled_picture_ptr,
                                               input_picture_ptr);
 
-                const int32_t num_planes = av1_num_planes(&sequence_control_set_ptr->seq_header.color_config);
-                const uint32_t ss_x = sequence_control_set_ptr->subsampling_x;
-                const uint32_t ss_y = sequence_control_set_ptr->subsampling_y;
+                const int32_t num_planes = av1_num_planes(&scs_ptr->seq_header.color_config);
+                const uint32_t ss_x = scs_ptr->subsampling_x;
+                const uint32_t ss_y = scs_ptr->subsampling_y;
 
                 av1_resize_and_extend_frame(input_picture_ptr,
-                                            picture_control_set_ptr->enhanced_downscaled_picture_ptr,
-                                            picture_control_set_ptr->enhanced_downscaled_picture_ptr->bit_depth,
+                                            pcs_ptr->enhanced_downscaled_picture_ptr,
+                                            pcs_ptr->enhanced_downscaled_picture_ptr->bit_depth,
                                             num_planes,
                                             ss_x,
                                             ss_y);

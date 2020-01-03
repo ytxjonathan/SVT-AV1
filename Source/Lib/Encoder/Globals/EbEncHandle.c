@@ -2188,9 +2188,9 @@ void copy_api_from_app(
     scs_ptr->static_config.altref_nframes = config_struct->altref_nframes;
     scs_ptr->static_config.enable_overlays = config_struct->enable_overlays;
 
-    sequence_control_set_ptr->static_config.superres_mode = pComponentParameterStructure->superres_mode;
-    sequence_control_set_ptr->static_config.superres_denom = pComponentParameterStructure->superres_denom;
-    sequence_control_set_ptr->static_config.superres_qthres = pComponentParameterStructure->superres_qthres;
+    scs_ptr->static_config.superres_mode = config_struct->superres_mode;
+    scs_ptr->static_config.superres_denom = config_struct->superres_denom;
+    scs_ptr->static_config.superres_qthres = config_struct->superres_qthres;
 
     scs_ptr->static_config.sq_weight = config_struct->sq_weight;
     scs_ptr->static_config.enable_auto_max_partition = config_struct->enable_auto_max_partition;
@@ -2696,12 +2696,12 @@ static EbErrorType verify_settings(
     // TODO: add limits for superres-mode when known
 
     if (config->superres_qthres > 63) {
-        SVT_LOG("Error instance %u: invalid superres-qthres, should be in the range [%d - %d] \n", channelNumber + 1, MIN_QP_VALUE, MAX_QP_VALUE);
+        SVT_LOG("Error instance %u: invalid superres-qthres, should be in the range [%d - %d] \n", channel_number + 1, MIN_QP_VALUE, MAX_QP_VALUE);
         return_error = EB_ErrorBadParameter;
     }
 
     if (config->superres_denom < MIN_SUPERRES_DENOM || config->superres_denom > MAX_SUPERRES_DENOM) {
-        SVT_LOG("Error instance %u: invalid superres-denom, should be in the range [%d - %d] \n", channelNumber + 1, MIN_SUPERRES_DENOM, MAX_SUPERRES_DENOM);
+        SVT_LOG("Error instance %u: invalid superres-denom, should be in the range [%d - %d] \n", channel_number + 1, MIN_SUPERRES_DENOM, MAX_SUPERRES_DENOM);
         return_error = EB_ErrorBadParameter;
     }
 

@@ -25,6 +25,8 @@
 #include "EbReferenceObject.h"
 #include "EbPictureControlSet.h"
 
+#define DEBUG_UPSCALING 0
+
 /**************************************
  * Rest Context
  **************************************/
@@ -64,12 +66,13 @@ void rest_finish_search(Macroblock *x, Av1Common *const cm);
 void av1_upscale_normative_rows(const Av1Common *cm, const uint8_t *src,
                                 int src_stride, uint8_t *dst, int dst_stride, int rows, int sub_x, int bd);
 
-// delete - for debug purposes
+#if DEBUG_UPSCALING
 void save_YUV_to_file(char *filename, EbByte buffer_y, EbByte buffer_u, EbByte buffer_v,
                       uint16_t width, uint16_t height,
                       uint16_t stride_y, uint16_t stride_u, uint16_t stride_v,
                       uint16_t origin_y, uint16_t origin_x,
                       uint32_t ss_x, uint32_t ss_y);
+#endif
 
 static void rest_context_dctor(EbPtr p)
 {
@@ -291,7 +294,7 @@ void derive_blk_pointers_enc(EbPictureBufferDesc *recon_picture_buf, int32_t pla
     }
 }
 
-EbErrorType copy_recon_enc(SequenceControlSet *sequence_control_set_ptr,
+EbErrorType copy_recon_enc(SequenceControlSet *scs_ptr,
                            EbPictureBufferDesc*recon_picture_src,
                            EbPictureBufferDesc *recon_picture_dst,
                            int num_planes,
@@ -312,13 +315,13 @@ EbErrorType copy_recon_enc(SequenceControlSet *sequence_control_set_ptr,
 
     recon_picture_dst->luma_size    = recon_picture_src->luma_size;
     recon_picture_dst->chroma_size  = recon_picture_src->chroma_size;
-    recon_picture_dst->packedFlag   = recon_picture_src->packedFlag;
+    recon_picture_dst->packed_flag   = recon_picture_src->packed_flag;
 
     recon_picture_dst->stride_bit_inc_y = recon_picture_src->stride_bit_inc_y;
     recon_picture_dst->stride_bit_inc_cb = recon_picture_src->stride_bit_inc_cb;
     recon_picture_dst->stride_bit_inc_cr = recon_picture_src->stride_bit_inc_cr;
 
-    recon_picture_dst->buffer_enable_mask = sequence_control_set_ptr->seq_header.color_config.mono_chrome ?
+    recon_picture_dst->buffer_enable_mask = scs_ptr->seq_header.color_config.mono_chrome ?
                                             PICTURE_BUFFER_DESC_LUMA_MASK : PICTURE_BUFFER_DESC_FULL_MASK;
 
     uint32_t bytesPerPixel = (recon_picture_dst->bit_depth == EB_8BIT) ? 1 : 2;
@@ -346,15 +349,15 @@ EbErrorType copy_recon_enc(SequenceControlSet *sequence_control_set_ptr,
     else
         recon_picture_dst->buffer_cr = 0;
 
-    int use_highbd = (sequence_control_set_ptr->static_config.encoder_bit_depth > 8);
+    int use_highbd = (scs_ptr->static_config.encoder_bit_depth > 8);
 
     if(!skip_copy){
         for (int plane = 0; plane < num_planes; ++plane) {
             uint8_t *src_buf, *dst_buf;
             int32_t src_stride, dst_stride;
 
-            int sub_x = plane ? sequence_control_set_ptr->subsampling_x : 0;
-            int sub_y = plane ? sequence_control_set_ptr->subsampling_y : 0;
+            int sub_x = plane ? scs_ptr->subsampling_x : 0;
+            int sub_y = plane ? scs_ptr->subsampling_y : 0;
 
             derive_blk_pointers_enc(recon_picture_src, plane, 0, 0, (void *)&src_buf,
                                     &src_stride, sub_x, sub_y);
@@ -397,11 +400,11 @@ void downsample_width(const uint8_t *input_samples,      // input parameter, inp
     }
 }
 
-void downsample_width_YUV(SequenceControlSet *sequence_control_set_ptr,
+void downsample_width_YUV(SequenceControlSet *scs_ptr,
                           EbPictureBufferDesc *src_ptr,
                           EbPictureBufferDesc *dst_ptr){
-    uint16_t ss_x = sequence_control_set_ptr->subsampling_x;
-    uint16_t ss_y = sequence_control_set_ptr->subsampling_y;
+    uint16_t ss_x = scs_ptr->subsampling_x;
+    uint16_t ss_y = scs_ptr->subsampling_y;
 
     downsample_width(
             &src_ptr->buffer_y[src_ptr->origin_x + src_ptr->origin_y * src_ptr->stride_y],
@@ -432,73 +435,74 @@ void downsample_width_YUV(SequenceControlSet *sequence_control_set_ptr,
 }
 
 void replace_recon_pic(EbPictureBufferDesc *recon_ptr,
-                   PictureControlSet *picture_control_set_ptr){
-    if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
-        ((EbReferenceObject*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture = recon_ptr;
+                   PictureControlSet *pcs_ptr){
+    if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
+        ((EbReferenceObject*)pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture = recon_ptr;
     else
-        picture_control_set_ptr->recon_picture_ptr = recon_ptr;
+        pcs_ptr->recon_picture_ptr = recon_ptr;
 }
 
-void get_recon_pic(PictureControlSet *picture_control_set_ptr,
+void get_recon_pic(PictureControlSet *pcs_ptr,
                EbPictureBufferDesc **recon_ptr){
-    if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
-        *recon_ptr = ((EbReferenceObject*)picture_control_set_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture;
+    if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
+        *recon_ptr = ((EbReferenceObject*)pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture;
     else
-        *recon_ptr = picture_control_set_ptr->recon_picture_ptr;
+        *recon_ptr = pcs_ptr->recon_picture_ptr;
 }
 
 // This function applies the normative upscaling of the recontructed picture if downscaling was used before encoding
 void downscale_recon_for_test(EbPictureBufferDesc *recon_ptr_half,
-                              PictureControlSet *picture_control_set_ptr,
-                              SequenceControlSet *sequence_control_set_ptr){
+                              PictureControlSet *pcs_ptr,
+                              SequenceControlSet *scs_ptr){
     // Set these parameters for testing since they are not correctly populated yet
     EbPictureBufferDesc *recon_ptr;
-    const int num_planes = sequence_control_set_ptr->seq_header.color_config.mono_chrome ? 1 : MAX_MB_PLANE;
+    const int num_planes = scs_ptr->seq_header.color_config.mono_chrome ? 1 : MAX_MB_PLANE;
 
-    get_recon_pic(picture_control_set_ptr,
+    get_recon_pic(pcs_ptr,
               &recon_ptr);
 
-    EbErrorType return_error = copy_recon_enc(sequence_control_set_ptr, recon_ptr,
+    EbErrorType return_error = copy_recon_enc(scs_ptr, recon_ptr,
                                               recon_ptr_half, num_planes, 1);
     if (return_error != EB_ErrorNone) {
         recon_ptr_half = NULL;
         assert(0);
     }
 
-    downsample_width_YUV(sequence_control_set_ptr, recon_ptr, recon_ptr_half);
+    downsample_width_YUV(scs_ptr, recon_ptr, recon_ptr_half);
 
-    // debug only
+#if DEBUG_UPSCALING
     save_YUV_to_file("recon_640x720.yuv", recon_ptr_half->buffer_y, recon_ptr_half->buffer_cb, recon_ptr_half->buffer_cr,
                      recon_ptr_half->width >> 1, recon_ptr_half->height,
                      recon_ptr_half->stride_y, recon_ptr_half->stride_cb, recon_ptr_half->stride_cr,
                      recon_ptr_half->origin_y, recon_ptr_half->origin_x,
                      1, 1);
+#endif
 
     replace_recon_pic(recon_ptr_half,
-                  picture_control_set_ptr);
+                  pcs_ptr);
 
 
 }
 
 void eb_av1_superres_upscale_frame(struct Av1Common *cm,
-                                   PictureControlSet *picture_control_set_ptr,
-                                   SequenceControlSet *sequence_control_set_ptr)
+                                   PictureControlSet *pcs_ptr,
+                                   SequenceControlSet *scs_ptr)
 {
     // Set these parameters for testing since they are not correctly populated yet
     EbPictureBufferDesc *recon_ptr;
 
-    get_recon_pic(picture_control_set_ptr,
+    get_recon_pic(pcs_ptr,
               &recon_ptr);
 
-    uint16_t ss_x = sequence_control_set_ptr->subsampling_x;
-    uint16_t ss_y = sequence_control_set_ptr->subsampling_y;
-    const int num_planes = sequence_control_set_ptr->seq_header.color_config.mono_chrome ? 1 : MAX_MB_PLANE;
+    uint16_t ss_x = scs_ptr->subsampling_x;
+    uint16_t ss_y = scs_ptr->subsampling_y;
+    const int num_planes = scs_ptr->seq_header.color_config.mono_chrome ? 1 : MAX_MB_PLANE;
 
     EbPictureBufferDesc recon_pic_temp;
     EbPictureBufferDesc *ps_recon_pic_temp;
     ps_recon_pic_temp = &recon_pic_temp;
 
-    EbErrorType return_error = copy_recon_enc(sequence_control_set_ptr, recon_ptr, ps_recon_pic_temp, num_planes, 0);
+    EbErrorType return_error = copy_recon_enc(scs_ptr, recon_ptr, ps_recon_pic_temp, num_planes, 0);
 
     if (return_error != EB_ErrorNone) {
         ps_recon_pic_temp = NULL;
@@ -616,42 +620,45 @@ void *rest_kernel(void *input_ptr) {
                         EbPictureBufferDesc *curr_recon_ptr;
                         EbPictureBufferDesc *recon_save_ptr;
 
-                        get_recon_pic(picture_control_set_ptr,
+                        get_recon_pic(pcs_ptr,
                                       &recon_save_ptr);
 
-                        // debug only
+#if DEBUG_UPSCALING
                         save_YUV_to_file("recon_before_1280x720.yuv", recon_save_ptr->buffer_y,
                                          recon_save_ptr->buffer_cb, recon_save_ptr->buffer_cr,
                                          recon_save_ptr->width, recon_save_ptr->height,
                                          recon_save_ptr->stride_y, recon_save_ptr->stride_cb, recon_save_ptr->stride_cr,
                                          recon_save_ptr->origin_y, recon_save_ptr->origin_x,
                                          1, 1);
+#endif
 
                         downscale_recon_for_test(&recon_ptr_half,
-                                                 picture_control_set_ptr,
-                                                 sequence_control_set_ptr);
+                                                 pcs_ptr,
+                                                 scs_ptr);
 
                         eb_av1_superres_upscale_frame(cm,
-                                                      picture_control_set_ptr,
-                                                      sequence_control_set_ptr);
+                                                      pcs_ptr,
+                                                      scs_ptr);
 
-                        get_recon_pic(picture_control_set_ptr,
+                        get_recon_pic(pcs_ptr,
                                       &curr_recon_ptr);
 
-                        // debug only
+#if DEBUG_UPSCALING
                         save_YUV_to_file("recon_donscaled_av1upscaled_1280x720.yuv", curr_recon_ptr->buffer_y,
                                          curr_recon_ptr->buffer_cb, curr_recon_ptr->buffer_cr,
                                          curr_recon_ptr->width, curr_recon_ptr->height,
                                          curr_recon_ptr->stride_y, curr_recon_ptr->stride_cb, curr_recon_ptr->stride_cr,
                                          curr_recon_ptr->origin_y, curr_recon_ptr->origin_x,
                                          1, 1);
+#endif
 
                         replace_recon_pic(recon_save_ptr,
-                                          picture_control_set_ptr);
+                                          pcs_ptr);
 
-                        get_recon_pic(picture_control_set_ptr,
+                        get_recon_pic(pcs_ptr,
                                       &curr_recon_ptr);
 
+#if DEBUG_UPSCALING
                         // debug only
                         save_YUV_to_file("recon_after_1280x720.yuv", curr_recon_ptr->buffer_y,
                                          curr_recon_ptr->buffer_cb, curr_recon_ptr->buffer_cr,
@@ -659,6 +666,7 @@ void *rest_kernel(void *input_ptr) {
                                          curr_recon_ptr->stride_y, curr_recon_ptr->stride_cb, curr_recon_ptr->stride_cr,
                                          curr_recon_ptr->origin_y, curr_recon_ptr->origin_x,
                                          1, 1);
+#endif
 
                         // free the memory
                         EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_y);
