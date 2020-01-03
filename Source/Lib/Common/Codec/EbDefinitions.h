@@ -88,6 +88,8 @@ extern "C" {
 #define EARLY_EXIT_PER_CLASS         1
 #endif
 
+#define MD_STAGE_1_EARLY_EXIT        0
+
 #define FASTER_SQ_WEIGHT             0
 #define ENHANCED_SQ_WEIGHT           1
 #define IMPROVED_MULTI_PASS_PD       0
