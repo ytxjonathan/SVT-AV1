@@ -65,9 +65,9 @@ extern "C" {
 #define GM_DOWNSAMPLED              1 // Adopt global motion Downsampled
 
 
-#define IFS_TL                   1   // remove temporal layer check for interpolation filter search @ PD1
-#define ATB_TL                   1   // remove temporal layer check for ATB for 360p only
-#define PALETTE_TL               1   // remove temporal layer check for palette SC
+//#define IFS_TL                   1   // remove temporal layer check for interpolation filter search @ PD1
+//#define ATB_TL                   1   // remove temporal layer check for ATB for 360p only
+//#define PALETTE_TL               1   // remove temporal layer check for palette SC
 #define COMPOUND_WEDGE_OPT       1   // optimize compound wedge For M1 and higher
 #if 1
 
