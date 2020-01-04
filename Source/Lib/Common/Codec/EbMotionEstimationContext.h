@@ -482,6 +482,9 @@ extern "C" {
 #if SKIP_ME_BASED_ON_HME
         EbBool                       reduce_me_sr_flag[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
 #endif
+#if SWITCHED_HALF_PEL_MODE
+        EbBool                       local_hp_mode[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+#endif
     } MeContext;
 
     typedef uint64_t(*EB_ME_DISTORTION_FUNC)(

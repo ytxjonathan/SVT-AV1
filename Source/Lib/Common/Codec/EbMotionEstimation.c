@@ -14113,7 +14113,7 @@ void prune_references_fp(
            // uint32_t dev = ((context_ptr->hme_results[li][ri].hme_sad - best) * 100) / best;
             if ((context_ptr->hme_results[li][ri].hme_sad - best) * 100  > BIGGER_THAN_TH*best)
                 context_ptr->hme_results[li][ri].do_ref = 0;
-#if UPDATE_HALF_PEL_MODE
+#if SWITCHED_HALF_PEL_MODE
             if (context_ptr->hme_results[li][ri].hme_sad > sorted[0][1].hme_sad) 
                 context_ptr->local_hp_mode[li][ri] = REFINMENT_HP_MODE;
 #endif
@@ -15045,6 +15045,9 @@ EbErrorType motion_estimate_lcu(
             context_ptr->hme_results[li][ri].hme_sad = 0xFFFFFFFF;
 #if SKIP_ME_BASED_ON_HME
             context_ptr->reduce_me_sr_flag[li][ri] = 0;
+#endif
+#if SWITCHED_HALF_PEL_MODE
+            context_ptr->local_hp_mode[li][ri] = context_ptr->half_pel_mode;
 #endif
         }
     }
@@ -15993,9 +15996,13 @@ EbErrorType motion_estimate_lcu(
                                                            search_area_height);
 #endif
                         context_ptr->full_quarter_pel_refinement = 0;
-
+#if SWITCHED_HALF_PEL_MODE
+                        if (context_ptr->half_pel_mode ==
+                            EX_HP_MODE && context_ptr->local_hp_mode[listIndex][ref_pic_index] == EX_HP_MODE) {
+#else
                         if (context_ptr->half_pel_mode ==
                             EX_HP_MODE) {
+#endif
                             // Move to the top left of the search region
 #if MUS_ME_FP
                             xTopLeftSearchRegion =
@@ -16274,9 +16281,13 @@ EbErrorType motion_estimate_lcu(
 
                     // Interpolate the search region for Half-Pel Refinements
                     // H - AVC Style
-
+#if SWITCHED_HALF_PEL_MODE
+                    if (context_ptr->half_pel_mode ==
+                            REFINMENT_HP_MODE || context_ptr->local_hp_mode[listIndex][ref_pic_index] == REFINMENT_HP_MODE) {
+#else
                     if (context_ptr->half_pel_mode ==
                         REFINMENT_HP_MODE) {
+#endif
                         InterpolateSearchRegionAVC(
                             context_ptr,
                             listIndex,
