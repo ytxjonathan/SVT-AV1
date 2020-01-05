@@ -2043,10 +2043,11 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
     SET_SSE2(picture_average_kernel1_line,
              picture_average_kernel1_line_c,
              picture_average_kernel1_line_sse2_intrin);
-    SET_SSE41_AVX2(get_eight_horizontal_search_point_results_8x8_16x16_pu,
-                   get_eight_horizontal_search_point_results_8x8_16x16_pu_c,
-                   get_eight_horizontal_search_point_results_8x8_16x16_pu_sse41_intrin,
-                   get_eight_horizontal_search_point_results_8x8_16x16_pu_avx2_intrin);
+    SET_SSE41_AVX2_AVX512(get_eight_horizontal_search_point_results_8x8_16x16_pu,
+                          get_eight_horizontal_search_point_results_8x8_16x16_pu_c,
+                          get_eight_horizontal_search_point_results_8x8_16x16_pu_sse41_intrin,
+                          get_eight_horizontal_search_point_results_8x8_16x16_pu_avx2_intrin,
+                          get_eight_horizontal_search_point_results_8x8_16x16_pu_avx512_intrin);
     SET_SSE41_AVX2(get_eight_horizontal_search_point_results_32x32_64x64_pu,
                    get_eight_horizontal_search_point_results_32x32_64x64_pu_c,
                    get_eight_horizontal_search_point_results_32x32_64x64_pu_sse41_intrin,
