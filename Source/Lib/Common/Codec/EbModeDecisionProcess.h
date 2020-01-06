@@ -422,6 +422,9 @@ extern "C" {
     // Signal to control initial and final pass PD setting(s)
     PD_PASS pd_pass;
 #endif
+#if SKIP_PD_PASS_2
+    uint8_t                skip_final_pass;
+#endif
     } ModeDecisionContext;
 
     typedef void(*EbAv1LambdaAssignFunc)(

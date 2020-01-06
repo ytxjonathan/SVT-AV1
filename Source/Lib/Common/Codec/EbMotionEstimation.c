@@ -14007,8 +14007,8 @@ void integer_search_sb(
 #if SKIP_ME_BASED_ON_HME
             // Update ME search reagion size based on hme-data
             if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
-                search_area_width = ((context_ptr->search_area_width/4) + 7) & ~0x07;
-                search_area_height = (context_ptr->search_area_height/4);
+                search_area_width = ((context_ptr->search_area_width/8) + 7) & ~0x07;
+                search_area_height = (context_ptr->search_area_height/8);
             }
 #endif
             if ((x_search_center != 0 || y_search_center != 0) &&
@@ -14703,7 +14703,7 @@ void prune_references_fp(
             if ((context_ptr->hme_results[li][ri].hme_sad - best) * 100  > BIGGER_THAN_TH*best)
                 context_ptr->hme_results[li][ri].do_ref = 0;
 #if UPDATE_HALF_PEL_MODE
-            if (context_ptr->hme_results[li][ri].hme_sad > best) 
+            if (context_ptr->hme_results[li][ri].hme_sad > sorted[0][1].hme_sad) 
                 context_ptr->local_hp_mode[li][ri] = REFINMENT_HP_MODE;
 #endif
         }
@@ -15427,7 +15427,7 @@ void prune_references(
             if ((context_ptr->hme_results[li][ri].hme_sad - best) * 100  > BIGGER_THAN_TH*best)
                 context_ptr->hme_results[li][ri].do_ref = 0;
 #if SKIP_ME_BASED_ON_HME
-            if (context_ptr->hme_results[li][ri].hme_sad < 5000/*UPDATE_ME_SR_TH*/)
+            if (context_ptr->hme_results[li][ri].hme_sad < 6000/*UPDATE_ME_SR_TH*/)
                 context_ptr->reduce_me_sr_flag[li][ri] = 1;
 #endif
         }
@@ -16243,8 +16243,8 @@ EbErrorType motion_estimate_lcu(
 #if SKIP_ME_BASED_ON_HME
             // Update ME search reagion size based on hme-data
             if (context_ptr->reduce_me_sr_flag[listIndex][ref_pic_index]) {
-                search_area_width = ((context_ptr->search_area_width/4) + 7) & ~0x07;
-                search_area_height = (context_ptr->search_area_height/4);
+                search_area_width = ((context_ptr->search_area_width/8) + 7) & ~0x07;
+                search_area_height = (context_ptr->search_area_height/8);
             }
 #endif
             if ((x_search_center != 0 || y_search_center != 0) &&

@@ -28,7 +28,9 @@
 #define FC_SKIP_TX_SR_TH025 125 // Fast cost skip tx search threshold.
 #define FC_SKIP_TX_SR_TH010 110 // Fast cost skip tx search threshold.
 #endif
-
+#if SKIP_PD_PASS_2
+#include "EbRateDistortionCost.h"
+#endif
 void eb_av1_cdef_search(
     EncDecContext                *context_ptr,
     SequenceControlSet           *sequence_control_set_ptr,
@@ -2706,7 +2708,65 @@ void derive_start_end_depth(
     else
         *e_depth = 0;
 }
+#if SKIP_PD_PASS_2
+PART convert_part_to_shape[] = {
+    PART_N,
+    PART_H,
+    PART_V,
+    PART_S,
+    PART_HA,
+    PART_HB,
+    PART_VA,
+    PART_VB,
+    PART_H4,
+    PART_V4 
+};
+static void check_for_sufficient(
+    SequenceControlSet  *sequence_control_set_ptr,
+    PictureControlSet   *picture_control_set_ptr,
+    ModeDecisionContext *context_ptr,
+    uint32_t             sb_index) {
+    uint32_t  blk_index = 0;
+    uint32_t  sb_has_coef = 0;
+    uint64_t  sb_cost = 0;
+    uint32_t tot_d1_blocks, block_1d_idx;
+    EbBool split_flag;
 
+    while (blk_index < sequence_control_set_ptr->max_block_cnt) {
+
+        const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+        tot_d1_blocks =
+            blk_geom->sq_size == 128 ? 17 :
+            blk_geom->sq_size > 8 ? 25 :
+            blk_geom->sq_size == 8 ? 5 : 1;
+
+        // if the parent square is inside inject this block
+        uint8_t is_blk_allowed = picture_control_set_ptr->slice_type != I_SLICE ? 1 : (blk_geom->sq_size < 128) ? 1 : 0;
+
+        // derive split_flag
+        split_flag = context_ptr->md_cu_arr_nsq[blk_index].split_flag;
+
+        if (sequence_control_set_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
+            if (blk_geom->shape == PART_N) {
+                if (context_ptr->md_cu_arr_nsq[blk_index].split_flag == EB_FALSE) {
+                    //if(context_ptr->md_cu_arr_nsq[blk_index].part == blk_geom->shape)
+                    sb_has_coef += context_ptr->md_cu_arr_nsq[blk_index].block_has_coeff > 0 ? 1 : 0;
+                    sb_cost += (sb_cost < MAX_MODE_COST) ?  context_ptr->md_local_cu_unit[blk_index].cost : 0;
+                }
+                    
+            }
+        }
+        blk_index += split_flag ? d1_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][blk_geom->depth] : ns_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][blk_geom->depth];
+    }
+     uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD];
+     uint64_t tot_mse = 40000000;// RDCOST(full_lambda, 1000, 1000000);
+    context_ptr->skip_final_pass = (sb_has_coef == 0) && (sb_cost < tot_mse) ? 1 : context_ptr->skip_final_pass;
+    if (sb_cost < tot_mse) {
+        printf("%d\t%d\n", sb_cost, tot_mse);
+    }
+    
+}
+#endif
 static void perform_pred_depth_refinement(
     SequenceControlSet  *sequence_control_set_ptr,
     PictureControlSet   *picture_control_set_ptr,
@@ -3060,7 +3120,9 @@ void* enc_dec_kernel(void *input_ptr)
                     // deviation between the current depth cost and candidate depth cost. The generated blocks are used as input candidates to PD1.
                     // The PD1 predicted Partitioning Structure is also refined (up to Pred - 1 / Pred + 1 refinement) using the square (SQ) vs. non-square (NSQ) decision(s)
                     // inside the predicted depth and using coefficient information. The final set of blocks is evaluated in PD2 to output the final Partitioning Structure
-
+#if SKIP_PD_PASS_2
+                    context_ptr->md_context->skip_final_pass = 0;
+#endif
                     if ((picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
                          picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
                          picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
@@ -3174,6 +3236,16 @@ void* enc_dec_kernel(void *input_ptr)
                                 sb_origin_x,
                                 sb_origin_y);
                         }
+#if SKIP_PD_PASS_2
+                        
+                        check_for_sufficient(
+                            sequence_control_set_ptr,
+                                picture_control_set_ptr,
+                                context_ptr->md_context,
+                                sb_index);
+
+                        //context_ptr->md_context->skip_final_pass = 1;
+#endif
                     }
 
                     // [PD_PASS_2] Signal(s) derivation
@@ -3189,6 +3261,9 @@ void* enc_dec_kernel(void *input_ptr)
                     // Output: md_cu_arr_nsq reduced set of block(s)
 
                     // PD2 MD Tool(s): default MD Tool(s)
+#endif
+#if SKIP_PD_PASS_2
+                    if (!context_ptr->md_context->skip_final_pass)
 #endif
                     mode_decision_sb(
                         sequence_control_set_ptr,

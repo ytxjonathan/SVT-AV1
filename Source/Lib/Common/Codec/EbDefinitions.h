@@ -37,9 +37,9 @@ extern "C" {
 #define MUS_ME_FP              1
 #define MUS_ME_FP_PU           0
 #define MUS_ME_FP_SB           1
-#define UPDATE_HALF_PEL_MODE   1
-#define SKIP_ME_BASED_ON_HME   0
-
+#define UPDATE_HALF_PEL_MODE   0
+#define SKIP_ME_BASED_ON_HME   1
+#define SKIP_PD_PASS_2         1
 
 #define LOW_DELAY_TUNE 1 // Tuning the 0B, 1B and 3B settings
                                       // 0. tunr OFF AVX512

@@ -3436,6 +3436,10 @@ void   compute_depth_costs(
     uint32_t                  curr_depth_mds,
     uint32_t                  above_depth_mds,
     uint32_t                  step,
+#if SKIP_PD_PASS_2
+    uint8_t                  *above_has_coeff,
+    uint8_t                  *curr_has_coeff,
+#endif
     uint64_t                 *above_depth_cost,
     uint64_t                 *curr_depth_cost)
 {
@@ -3491,9 +3495,15 @@ void   compute_depth_costs(
 #endif
             context_ptr->md_rate_estimation_ptr,
             sequence_control_set_ptr->max_sb_depth);
+#if SKIP_PD_PASS_2
+    *above_has_coeff =
+        context_ptr->md_cu_arr_nsq[above_depth_mds].block_has_coeff;
+#endif
     }
-    else
+    else {
         *above_depth_cost = MAX_MODE_COST;
+        *above_has_coeff = 1;
+    }
     if (context_ptr->blk_geom->bsize > BLOCK_4X4) {
         if (context_ptr->md_local_cu_unit[curr_depth_blk0_mds].tested_cu_flag)
             if (context_ptr->md_cu_arr_nsq[curr_depth_blk0_mds].mdc_split_flag == 0)
@@ -3571,6 +3581,13 @@ void   compute_depth_costs(
         context_ptr->md_local_cu_unit[curr_depth_mds - 2 * step].cost + curr_non_split_rate_blk1 +
         context_ptr->md_local_cu_unit[curr_depth_mds - 3 * step].cost + curr_non_split_rate_blk0 +
         above_split_rate;
+#if SKIP_PD_PASS_2
+    *curr_has_coeff =
+        context_ptr->md_cu_arr_nsq[curr_depth_mds].block_has_coeff ||
+        context_ptr->md_cu_arr_nsq[curr_depth_mds - 1 * step].block_has_coeff ||
+        context_ptr->md_cu_arr_nsq[curr_depth_mds - 2 * step].block_has_coeff  ||
+        context_ptr->md_cu_arr_nsq[curr_depth_mds - 3 * step].block_has_coeff;
+#endif
 }
 
 uint32_t d2_inter_depth_block_decision(
@@ -3608,6 +3625,10 @@ uint32_t d2_inter_depth_block_decision(
     blk_geom = get_blk_geom_mds(blk_mds);
     uint32_t    parent_depth_idx_mds = blk_mds;
     uint32_t    current_depth_idx_mds = blk_mds;
+#if SKIP_PD_PASS_2
+    uint8_t    above_has_coeff = 1;
+    uint8_t    curr_has_coeff = 1;
+#endif
 
     if (lastDepthFlag) {
         while (blk_geom->is_last_quadrant) {
@@ -3616,16 +3637,32 @@ uint32_t d2_inter_depth_block_decision(
             if (picture_control_set_ptr->slice_type == I_SLICE && parent_depth_idx_mds == 0 && sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128)
                 parent_depth_cost = MAX_MODE_COST;
             else
-                compute_depth_costs(context_ptr, sequence_control_set_ptr, current_depth_idx_mds, parent_depth_idx_mds, ns_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][blk_geom->depth], &parent_depth_cost, &current_depth_cost);
+                compute_depth_costs(context_ptr,
+                    sequence_control_set_ptr,
+                    current_depth_idx_mds,
+                    parent_depth_idx_mds,
+                    ns_depth_offset[sequence_control_set_ptr->seq_header.sb_size == BLOCK_128X128][blk_geom->depth],
+#if SKIP_PD_PASS_2
+                    &above_has_coeff,
+                    &curr_has_coeff,
+#endif
+                    &parent_depth_cost,
+                    &current_depth_cost);
             if (!sequence_control_set_ptr->sb_geom[lcuAddr].block_is_allowed[parent_depth_idx_mds])
                 parent_depth_cost = MAX_MODE_COST;
             if (parent_depth_cost <= current_depth_cost) {
                 context_ptr->md_cu_arr_nsq[parent_depth_idx_mds].split_flag = EB_FALSE;
                 context_ptr->md_local_cu_unit[parent_depth_idx_mds].cost = parent_depth_cost;
+#if SKIP_PD_PASS_2
+                context_ptr->md_cu_arr_nsq[parent_depth_idx_mds].block_has_coeff =  above_has_coeff;
+#endif
                 lastCuIndex = parent_depth_idx_mds;
             }
             else {
                 context_ptr->md_local_cu_unit[parent_depth_idx_mds].cost = current_depth_cost;
+#if SKIP_PD_PASS_2
+                context_ptr->md_cu_arr_nsq[parent_depth_idx_mds].block_has_coeff =  curr_has_coeff;
+#endif
                 context_ptr->md_cu_arr_nsq[parent_depth_idx_mds].part = PARTITION_SPLIT;
             }
 
