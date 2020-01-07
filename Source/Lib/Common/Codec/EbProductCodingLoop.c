@@ -2688,7 +2688,7 @@ void md_stage_0(
 
                 // Block size
                 normalized_fast_cost = normalized_fast_cost / (context_ptr->blk_geom->bwidth * context_ptr->blk_geom->bheight);
-                
+
                 if (normalized_fast_cost < ~(uint32_t) 0) {
                     context_ptr->md_stage_0_count[context_ptr->target_class] = count;
                     *early_exit = EB_TRUE;

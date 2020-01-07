@@ -14075,7 +14075,7 @@ void prune_references_fp(
                 continue;
             }
             context_ptr->p_best_sad8x8 = &(context_ptr->p_sb_best_sad[list_index][ref_pic_index][ME_TIER_ZERO_PU_8x8_0]);
-            // 8x8   [64 partitions]          
+            // 8x8   [64 partitions]
             for (pu_index = 0; pu_index < 64; ++pu_index) {
                 idx = tab8x8[pu_index];
                 context_ptr->hme_results[list_index][ref_pic_index].hme_sad += context_ptr->p_best_sad8x8[idx];
@@ -14114,7 +14114,7 @@ void prune_references_fp(
             if ((context_ptr->hme_results[li][ri].hme_sad - best) * 100  > BIGGER_THAN_TH*best)
                 context_ptr->hme_results[li][ri].do_ref = 0;
 #if SWITCHED_HALF_PEL_MODE
-            if (context_ptr->hme_results[li][ri].hme_sad > sorted[0][1].hme_sad) 
+            if (context_ptr->hme_results[li][ri].hme_sad > sorted[0][1].hme_sad)
                 context_ptr->local_hp_mode[li][ri] = REFINMENT_HP_MODE;
 #endif
         }
@@ -15067,7 +15067,7 @@ EbErrorType motion_estimate_lcu(
             sb_origin_y,
             context_ptr,
             input_ptr);
-    
+
 #if MUS_ME_FP
     integer_search_sb(
         picture_control_set_ptr,

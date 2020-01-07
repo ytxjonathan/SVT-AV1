@@ -1470,7 +1470,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if SPEED_OPT
 #if SC_PRESETS_OPT
 #if ATB_TL
-            picture_control_set_ptr->atb_mode = (picture_control_set_ptr->temporal_layer_index == 0 || 
+            picture_control_set_ptr->atb_mode = (picture_control_set_ptr->temporal_layer_index == 0 ||
                                                 (sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER && !picture_control_set_ptr->sc_content_detected )) ? 1 : 0;
 #else
             picture_control_set_ptr->atb_mode = ((MR_MODE && !picture_control_set_ptr->sc_content_detected) || picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 0;
@@ -1634,7 +1634,7 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->prune_ref_based_me = 1;
         else
             picture_control_set_ptr->prune_ref_based_me = 0;
-        
+
 #endif
     return return_error;
 }
