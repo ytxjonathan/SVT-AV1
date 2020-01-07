@@ -4816,7 +4816,15 @@ EbErrorType update_neighbor_samples_array_open_loop(
         read_ptr = src_ptr - stride;
         count = ((src_origin_x + count) > width) ? count - ((src_origin_x + count) - width) : count;
         EB_MEMCPY(above_ref, read_ptr, count);
+#if 0
         above_ref += (block_size_half - count);
+#else
+        // pading unknown top right pixels with value at(15, -1)
+        if(src_origin_x != 0)
+            for(idx = 0; idx < bwidth; idx++)
+                *(above_ref + bwidth + idx) = *(above_ref + bwidth - 1);
+#endif
+
     } else
     if (src_origin_y == 0 && src_origin_x != 0 ) {
         count = ((src_origin_x + count) > width) ? count - ((src_origin_x + count) - width) : count;

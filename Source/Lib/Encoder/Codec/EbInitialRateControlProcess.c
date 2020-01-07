@@ -1334,10 +1334,14 @@ void cutree_mc_flow_dispenser(
     DECLARE_ALIGNED(32, tran_low_t, coeff[256]);
     DECLARE_ALIGNED(32, tran_low_t, qcoeff[256]);
     DECLARE_ALIGNED(32, tran_low_t, dqcoeff[256]);
+    DECLARE_ALIGNED(32, tran_low_t, best_coeff[256]);
     uint8_t *predictor = predictor8;
 
     blk_geom.bwidth  = 16;
     blk_geom.bheight = 16;
+    blk_geom.origin_x = 0;
+    blk_geom.origin_y = 0;
+
 
     av1_setup_scale_factors_for_frame(
                 &sf, picture_width_in_sb * BLOCK_SIZE_64,
@@ -1347,6 +1351,20 @@ void cutree_mc_flow_dispenser(
 
     MacroblockPlane mb_plane;
     int32_t qIndex = quantizer_to_qindex[(uint8_t)sequence_control_set_ptr->qp];
+    Quants *const quantsMd = &picture_control_set_ptr->quantsMd;
+    Dequants *const dequantsMd = &picture_control_set_ptr->deqMd;
+    eb_av1_set_quantizer(
+        picture_control_set_ptr,
+        picture_control_set_ptr->frm_hdr.quantization_params.base_q_idx);
+    eb_av1_build_quantizer(
+        /*picture_control_set_ptr->hbd_mode_decision ? AOM_BITS_10 :*/ AOM_BITS_8,
+        picture_control_set_ptr->frm_hdr.quantization_params.delta_q_dc[AOM_PLANE_Y],
+        picture_control_set_ptr->frm_hdr.quantization_params.delta_q_dc[AOM_PLANE_U],
+        picture_control_set_ptr->frm_hdr.quantization_params.delta_q_ac[AOM_PLANE_U],
+        picture_control_set_ptr->frm_hdr.quantization_params.delta_q_dc[AOM_PLANE_V],
+        picture_control_set_ptr->frm_hdr.quantization_params.delta_q_ac[AOM_PLANE_V],
+        quantsMd,
+        dequantsMd);
     mb_plane.quant_QTX       = picture_control_set_ptr->quantsMd.y_quant[qIndex];
     mb_plane.quant_fp_QTX    = picture_control_set_ptr->quantsMd.y_quant_fp[qIndex];
     mb_plane.round_fp_QTX    = picture_control_set_ptr->quantsMd.y_round_fp[qIndex];
@@ -1423,19 +1441,21 @@ void cutree_mc_flow_dispenser(
 
                         inter_cost = aom_satd(coeff, 256);
                         if (inter_cost < best_inter_cost) {
-                            uint16_t eob;
+                            memcpy(best_coeff, coeff, sizeof(best_coeff));
                             best_rf_idx = rf_idx;
                             best_inter_cost = inter_cost;
                             final_best_mv = best_mv;
-                            get_quantize_error(&mb_plane, 0, coeff, qcoeff, dqcoeff, tx_size, &eob, &recon_error, &sse);
-                            int rate_cost = rate_estimator(qcoeff, eob, tx_size);
-                            ois_mb_results_ptr->srcrf_rate = rate_cost << TPL_DEP_COST_SCALE_LOG2;
 
                             if (best_inter_cost < best_intra_cost) best_mode = NEWMV;
                         }
                     } // rf_idx
+                    if(best_inter_cost < INT64_MAX) {
+                        uint16_t eob;
+                        get_quantize_error(&mb_plane, 0, best_coeff, qcoeff, dqcoeff, tx_size, &eob, &recon_error, &sse);
+                        int rate_cost = rate_estimator(qcoeff, eob, tx_size);
+                        ois_mb_results_ptr->srcrf_rate = rate_cost << TPL_DEP_COST_SCALE_LOG2;
+                    }
                     best_intra_cost = AOMMAX(best_intra_cost, 1);
-//printf("kelvincost1 poc%d sb_index=%d, mb_origin_xy=%d %d, best_mode=%d, best_intra/inter_cost=%d %d\n", picture_control_set_ptr->picture_number, sb_index, mb_origin_x, mb_origin_y, best_mode, best_intra_cost, best_inter_cost);
 //printf("kelvincost1 poc%d sb_index=%d, mb_origin_xy=%d %d, best_mode=%d, best_intra_cost=%d, offset=%d\n", picture_control_set_ptr->picture_number, sb_index, mb_origin_x, mb_origin_y, ois_mb_results_ptr->intra_mode, best_intra_cost, (mb_origin_y >> 4) * picture_width_in_mb + (mb_origin_x >> 4));
                     if (0)//(frame_idx == 0)
                         best_inter_cost = 0;
@@ -1483,7 +1503,11 @@ void cutree_mc_flow_dispenser(
                         TxSize tx_size = TX_16X16;
                         uint8_t *src = input_picture_ptr->buffer_y + picture_control_set_ptr->enhanced_picture_ptr->origin_x + mb_origin_x +
                             (picture_control_set_ptr->enhanced_picture_ptr->origin_y + mb_origin_y) * input_picture_ptr->stride_y;
+#if USE_ORIGIN_YUV
+                        update_neighbor_samples_array_open_loop(above_row - 1, left_col - 1, input_picture_ptr, input_picture_ptr->stride_y, mb_origin_x, mb_origin_y, 16, 16, picture_control_set_ptr);
+#else
                         update_neighbor_samples_array_open_loop(above_row - 1, left_col - 1, input_picture_ptr, input_picture_ptr->stride_y, mb_origin_x, mb_origin_y, 16, 16);
+#endif
                         uint8_t ois_intra_mode = ois_mb_results_ptr->intra_mode;
                         int32_t p_angle = av1_is_directional_mode((PredictionMode)ois_intra_mode) ? mode_to_angle_map[(PredictionMode)ois_intra_mode] : 0;
                         // Edge filter
@@ -1498,19 +1522,18 @@ void cutree_mc_flow_dispenser(
 
                     aom_subtract_block(16, 16, src_diff, 16, src_mb, input_picture_ptr->stride_y, predictor, 16);
                     wht_fwd_txfm(src_diff, 16, coeff, tx_size, 8/*xd->bd*/, 0/*s_cur_buf_hbd(xd)*/);
-//                    if (best_mode != NEWMV) {
-//		       int64_t intra_cost = aom_satd(coeff, 16 * 16);
-//printf("kelvincost1 poc%d sb_index=%d, mb_origin_xy=%d %d, best_intra_mode=%d, best_intra_cost=%d %d %d\n", picture_control_set_ptr->picture_number, sb_index, mb_origin_x, mb_origin_y, ois_mb_results_ptr->intra_mode, best_intra_cost, ois_mb_results_ptr->intra_cost, intra_cost);
-//		    }
 
                     uint16_t eob;
                     get_quantize_error(&mb_plane, 0, coeff, qcoeff, dqcoeff, tx_size, &eob, &recon_error, &sse);
 
                     int rate_cost = rate_estimator(qcoeff, eob, tx_size);
-                    /*if(is16bit)
-                      av1_inv_transform_recon16bit();
-                    else*/
-                    av1_inv_transform_recon8bit((int32_t*)dqcoeff, predictor, 16, predictor, 16, TX_16X16, DCT_DCT, PLANE_TYPE_Y, eob, 0 /*lossless*/);
+                    if(eob) {
+                        /*if(is16bit)
+                            av1_inv_transform_recon16bit();
+                        else*/
+//printf("kelvincost1 poc%d sb_index=%d, mb_origin_xy=%d %d, before av1_inv_transform_recon8bit, eob=%d\n", picture_control_set_ptr->picture_number, sb_index, mb_origin_x, mb_origin_y, eob);
+                            av1_inv_transform_recon8bit((int32_t*)dqcoeff, predictor, 16, predictor, 16, TX_16X16, DCT_DCT, PLANE_TYPE_Y, eob, 0 /*lossless*/);
+                    }
 
                     ois_mb_results_ptr->recrf_dist = recon_error << (TPL_DEP_COST_SCALE_LOG2);
                     ois_mb_results_ptr->recrf_rate = rate_cost << TPL_DEP_COST_SCALE_LOG2;
@@ -1832,7 +1855,7 @@ void* initial_rate_control_kernel(void *input_ptr)
                     picture_control_set_ptr);
             }
             if (sequence_control_set_ptr->static_config.look_ahead_distance != 0 && sequence_control_set_ptr->static_config.enable_cutree_in_la) {
-                if (picture_control_set_ptr->slice_type != I_SLICE)
+                //if (picture_control_set_ptr->slice_type != I_SLICE)
                     //kelvinhack
                     cutree_mc_flow_dispenser(encode_context_ptr, sequence_control_set_ptr, picture_control_set_ptr);
             }
