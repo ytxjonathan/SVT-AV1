@@ -3226,11 +3226,33 @@ void* enc_dec_kernel(void *input_ptr)
 
                     if (picture_control_set_ptr->update_cdf) {
                         picture_control_set_ptr->rate_est_array[sb_index] = *picture_control_set_ptr->md_rate_estimation_array;
-#if CABAC_SERIAL
-                        if (sb_index == 0)
-                            picture_control_set_ptr->ec_ctx_array[sb_index] = *picture_control_set_ptr->coeff_est_entropy_coder_ptr->fc;
-                        else
-                            picture_control_set_ptr->ec_ctx_array[sb_index] = picture_control_set_ptr->ec_ctx_array[sb_index - 1];
+#if ENCDEC_SERIAL
+                        if (sequence_control_set_ptr->enc_dec_segment_row_count_array[0] == 1 && sequence_control_set_ptr->enc_dec_segment_col_count_array[0] == 1) {
+                            if (sb_index == 0)
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = *picture_control_set_ptr->coeff_est_entropy_coder_ptr->fc;
+                            else
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = picture_control_set_ptr->ec_ctx_array[sb_index - 1];
+                        }
+                        else {
+                            // Use the latest available CDF for the current SB
+                            // Use the weighted average of left (3x) and top (1x) if available.
+                            int8_t up_available = ((int32_t)(sb_origin_y >> MI_SIZE_LOG2) > sb_ptr->tile_info.mi_row_start);
+                            int8_t left_available = ((int32_t)(sb_origin_x >> MI_SIZE_LOG2) > sb_ptr->tile_info.mi_col_start);
+                            if (!left_available && !up_available)
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = *picture_control_set_ptr->coeff_est_entropy_coder_ptr->fc;
+                            else if (!left_available)
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = picture_control_set_ptr->ec_ctx_array[sb_index - picture_width_in_sb];
+                            else if (!up_available)
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = picture_control_set_ptr->ec_ctx_array[sb_index - 1];
+                            else {
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = picture_control_set_ptr->ec_ctx_array[sb_index - 1];
+                                avg_cdf_symbols(
+                                    &picture_control_set_ptr->ec_ctx_array[sb_index],
+                                    &picture_control_set_ptr->ec_ctx_array[sb_index - picture_width_in_sb],
+                                    AVG_CDF_WEIGHT_LEFT,
+                                    AVG_CDF_WEIGHT_TOP);
+                            }
+                        }
 #else
 #if RATE_ESTIMATION_UPDATE
                         // Use the latest available CDF for the current SB

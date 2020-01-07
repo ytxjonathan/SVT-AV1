@@ -365,16 +365,29 @@ int32_t set_parent_pcs(EbSvtAv1EncConfiguration*   config, uint32_t core_count, 
 EbErrorType load_default_buffer_configuration_settings(
     SequenceControlSet       *sequence_control_set_ptr){
     EbErrorType           return_error = EB_ErrorNone;
+
+#if ENCDEC_SERIAL
+    uint32_t encDecSegH;
+    uint32_t encDecSegW;
+    if (sequence_control_set_ptr->static_config.enc_mode <= ENC_M3) {
+        encDecSegH = 1;
+        encDecSegW = 1;
+    }
+    else {
+        encDecSegH = (sequence_control_set_ptr->static_config.super_block_size == 128) ?
+            ((sequence_control_set_ptr->max_input_luma_height + 64) / 128) :
+            ((sequence_control_set_ptr->max_input_luma_height + 32) / 64);
+        encDecSegW = (sequence_control_set_ptr->static_config.super_block_size == 128) ?
+            ((sequence_control_set_ptr->max_input_luma_width + 64) / 128) :
+            ((sequence_control_set_ptr->max_input_luma_width + 32) / 64);
+    }
+#else
     uint32_t encDecSegH = (sequence_control_set_ptr->static_config.super_block_size == 128) ?
         ((sequence_control_set_ptr->max_input_luma_height + 64) / 128) :
         ((sequence_control_set_ptr->max_input_luma_height + 32) / 64);
     uint32_t encDecSegW = (sequence_control_set_ptr->static_config.super_block_size == 128) ?
         ((sequence_control_set_ptr->max_input_luma_width + 64) / 128) :
         ((sequence_control_set_ptr->max_input_luma_width + 32) / 64);
-
-#if CABAC_SERIAL
-    encDecSegH = 1;
-    encDecSegW = 1;
 #endif
 
     uint32_t meSegH     = (((sequence_control_set_ptr->max_input_luma_height + 32) / BLOCK_SIZE_64) < 6) ? 1 : 6;
