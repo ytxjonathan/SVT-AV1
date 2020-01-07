@@ -6545,6 +6545,9 @@ void md_stage_2(
             ref_fast_cost);
 
 #if MD_STAGE_1_EARLY_EXIT
+//#if MD_STAGE_1_EARLY_EXIT_PER_CLASS
+//        if (context_ptr->target_class == CAND_CLASS_3)
+//#endif
             if (*early_exit == EB_FALSE) {
                 count++;
 
@@ -6557,8 +6560,11 @@ void md_stage_2(
 
                 // Block size
                 normalized_full_cost = normalized_full_cost / (context_ptr->blk_geom->bwidth * context_ptr->blk_geom->bheight);
-
+#if MD_STAGE_1_EARLY_EXIT_PER_CLASS
+                if (!candidate_ptr->block_has_coeff) {
+#else
                 if (normalized_full_cost < 500) {
+#endif
                     context_ptr->md_stage_1_count[context_ptr->target_class] = count;
                     *early_exit = EB_TRUE;
                 }
@@ -8876,7 +8882,7 @@ void md_encode_block(
         best_md_stage_cost = (uint64_t)~0;
 #endif
 #if REMOVE_MD_STAGE_1
-#if MD_STAGE_1_EARLY_EXIT
+#if MD_STAGE_1_EARLY_EXIT && !MD_STAGE_1_EARLY_EXIT_PER_CLASS
         EbBool early_exit = EB_FALSE;
         for (cand_class_it = CAND_CLASS_0; cand_class_it < CAND_CLASS_TOTAL && early_exit == EB_FALSE; cand_class_it++) {
 #else
@@ -8896,6 +8902,10 @@ void md_encode_block(
             context_ptr->md_stage_3_total_count += context_ptr->md_stage_3_count[cand_class_it];
 
             if (context_ptr->bypass_stage2[cand_class_it] == EB_FALSE && context_ptr->md_stage_2_count[cand_class_it] > 0 && context_ptr->md_stage_3_count[cand_class_it] > 0) {
+#endif
+
+#if MD_STAGE_1_EARLY_EXIT_PER_CLASS
+                EbBool early_exit = EB_FALSE;
 #endif
                 context_ptr->target_class = cand_class_it;
 #if REMOVE_MD_STAGE_1
@@ -8920,11 +8930,12 @@ void md_encode_block(
 
 #if MD_STAGE_1_EARLY_EXIT
                 if (early_exit) {
-
+#if !MD_STAGE_1_EARLY_EXIT_PER_CLASS
                     for (CAND_CLASS current_class_it = cand_class_it + 1; current_class_it < CAND_CLASS_TOTAL; current_class_it++) {
                         context_ptr->md_stage_1_count[current_class_it] = 0;
                         context_ptr->md_stage_2_count[current_class_it] = 0;
                     }
+#endif
                     context_ptr->md_stage_2_count[cand_class_it] = MIN(context_ptr->md_stage_1_count[cand_class_it], context_ptr->md_stage_2_count[cand_class_it]);
                 }
 #endif

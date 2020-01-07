@@ -100,8 +100,12 @@ extern "C" {
 #endif
 
 #define MD_STAGE_1_EARLY_EXIT        0
+#if MD_STAGE_1_EARLY_EXIT
+#define MD_STAGE_1_EARLY_EXIT_PER_CLASS  1
+#endif
 
-#define CHROMA_OPT_0                 1
+#define CHROMA_OPT_0                 0
+#define CHROMA_OPT_1                 0
 
 #define FASTER_SQ_WEIGHT             0
 #define ENHANCED_SQ_WEIGHT           1
