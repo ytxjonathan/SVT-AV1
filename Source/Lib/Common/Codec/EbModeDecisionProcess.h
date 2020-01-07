@@ -435,6 +435,9 @@ extern "C" {
     uint32_t part_struct_best_array[MAX_PART_STRUCT_CANDIDATES];
 #endif
 #endif
+#if SKIP_PD_PASS_2
+    uint8_t                skip_final_pass;
+#endif
     } ModeDecisionContext;
 
     typedef void(*EbAv1LambdaAssignFunc)(

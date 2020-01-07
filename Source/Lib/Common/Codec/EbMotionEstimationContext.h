@@ -485,6 +485,10 @@ extern "C" {
 #if SWITCHED_HALF_PEL_MODE
         EbBool                       local_hp_mode[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
 #endif
+#if GM_ME_OPT || GM_ME_OPT2
+        uint8_t                      is_translation[2];
+        int16_t                      is_g_mvx[2][2];
+#endif
     } MeContext;
 
     typedef uint64_t(*EB_ME_DISTORTION_FUNC)(

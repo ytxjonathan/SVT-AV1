@@ -13479,6 +13479,64 @@ static void hme_mv_center_check(EbPictureBufferDesc *ref_pic_ptr,
 
     else
         SVT_LOG("error no center selected");
+#if GM_ME_OPT2
+    if ((context_ptr->is_g_mvx[list_index][1] != search_center_x) || (context_ptr->is_g_mvx[list_index][0] != search_center_y)) {
+        int16_t best_center_x = search_center_x;
+        int16_t best_center_y = search_center_y;
+        // Global MV test
+        search_center_x = context_ptr->is_g_mvx[list_index][1];
+        search_center_y = context_ptr->is_g_mvx[list_index][0];
+        (context_ptr->hme_level0_total_search_area_height * sparce_scale);
+        // Correct the left edge of the Search Area if it is not on the reference
+        // Picture
+        search_center_x = ((origin_x + search_center_x) < -pad_width)
+            ? -pad_width - origin_x
+            : search_center_x;
+        // Correct the right edge of the Search Area if its not on the reference
+        // Picture
+        search_center_x =
+            ((origin_x + search_center_x) > (int16_t)ref_pic_ptr->width - 1)
+            ? search_center_x - ((origin_x + search_center_x) -
+            ((int16_t)ref_pic_ptr->width - 1))
+            : search_center_x;
+        // Correct the top edge of the Search Area if it is not on the reference
+        // Picture
+        search_center_y = ((origin_y + search_center_y) < -pad_height)
+            ? -pad_height - origin_y
+            : search_center_y;
+        // Correct the bottom edge of the Search Area if its not on the reference
+        // Picture
+        search_center_y =
+            ((origin_y + search_center_y) > (int16_t)ref_pic_ptr->height - 1)
+            ? search_center_y - ((origin_y + search_center_y) -
+            ((int16_t)ref_pic_ptr->height - 1))
+            : search_center_y;
+        search_region_index =
+            (int16_t)(ref_pic_ptr->origin_x + origin_x) + search_center_x +
+            ((int16_t)(ref_pic_ptr->origin_y + origin_y) + search_center_y) *
+            ref_pic_ptr->stride_y;
+        uint64_t mv_g_sad = nxm_sad_kernel(
+            context_ptr->sb_src_ptr,
+            context_ptr->sb_src_stride << sub_sampled_sad,
+            &(ref_pic_ptr->buffer_y[search_region_index]),
+            ref_pic_ptr->stride_y << sub_sampled_sad,
+            sb_height >> sub_sampled_sad,
+            sb_width);
+
+        mv_g_sad = mv_g_sad << sub_sampled_sad;
+
+        uint64_t mv_g_cost = mv_g_sad << COST_PRECISION;
+
+        if (mv_g_cost < best_cost) {
+            search_center_x = context_ptr->is_g_mvx[list_index][1];
+            search_center_y = context_ptr->is_g_mvx[list_index][0];
+        }
+        else {
+            search_center_x = best_center_x;
+            search_center_y = best_center_y;
+        }
+    }
+#endif
     *xsc = search_center_x;
     *ysc = search_center_y;
 }
@@ -14835,13 +14893,25 @@ void prune_references(
 #endif
 
     for (uint32_t li = 0; li < MAX_NUM_OF_REF_PIC_LIST; li++) {
+#if GM_ME_OPT
+        uint8_t  BIGGER_THAN_TH_20 = 20;
+        uint64_t hme_th = context_ptr->is_translation[li] ? BIGGER_THAN_TH_20 : BIGGER_THAN_TH;
+#endif
         for (uint32_t ri = 0; ri < REF_LIST_MAX_DEPTH; ri++){
 
            // uint32_t dev = ((context_ptr->hme_results[li][ri].hme_sad - best) * 100) / best;
+#if GM_ME_OPT
+            if ((context_ptr->hme_results[li][ri].hme_sad - best) * 100  > hme_th*best)
+#else
             if ((context_ptr->hme_results[li][ri].hme_sad - best) * 100  > BIGGER_THAN_TH*best)
+#endif
                 context_ptr->hme_results[li][ri].do_ref = 0;
 #if SKIP_ME_BASED_ON_HME
             if (context_ptr->hme_results[li][ri].hme_sad < REDUCE_SR_TH)
+                context_ptr->reduce_me_sr_flag[li][ri] = 1;
+#endif
+#if GM_ME_OPT3
+            if (context_ptr->hme_results[li][ri].hme_sc_x <= 4 && context_ptr->hme_results[li][ri].hme_sc_y <= 4 && context_ptr->hme_results[li][ri].hme_sad < (2*REDUCE_SR_TH))
                 context_ptr->reduce_me_sr_flag[li][ri] = 1;
 #endif
         }
@@ -15028,6 +15098,39 @@ EbErrorType motion_estimate_lcu(
         is_nsq_table_used = picture_control_set_ptr->enc_mode == ENC_M0 ? EB_FALSE : is_nsq_table_used;
     else
         is_nsq_table_used = sequence_control_set_ptr->static_config.nsq_table;
+#endif
+
+#if GM_ME_OPT || GM_ME_OPT2
+    context_ptr->is_translation[0] = 0;
+    context_ptr->is_translation[1] = 0;
+#if GM_ME_OPT2
+    context_ptr->is_g_mvx[0][0] = 0;
+    context_ptr->is_g_mvx[0][1] = 0;
+    context_ptr->is_g_mvx[1][0] = 0;
+    context_ptr->is_g_mvx[1][1] = 0;
+#endif
+    uint8_t is_global_motion[2] = { 0 };
+    is_global_motion[0] = picture_control_set_ptr->global_motion_estimation[get_list_idx(LAST_FRAME)][get_ref_frame_idx(LAST_FRAME)].wmtype > TRANSLATION ? 1 : 0;
+    is_global_motion[1] = picture_control_set_ptr->global_motion_estimation[get_list_idx(BWDREF_FRAME)][get_ref_frame_idx(BWDREF_FRAME)].wmtype > TRANSLATION ? 1 : 0;
+
+    if (is_global_motion[0]) {
+        if (picture_control_set_ptr->global_motion_estimation[get_list_idx(LAST_FRAME)][get_ref_frame_idx(LAST_FRAME)].wmtype == TRANSLATION) {
+            context_ptr->is_translation[0] = 1;
+        }
+#if GM_ME_OPT2
+        context_ptr->is_g_mvx[0][0] = picture_control_set_ptr->global_motion_estimation[get_list_idx(LAST_FRAME)][get_ref_frame_idx(LAST_FRAME)].wmmat[0];
+        context_ptr->is_g_mvx[0][1] = picture_control_set_ptr->global_motion_estimation[get_list_idx(LAST_FRAME)][get_ref_frame_idx(LAST_FRAME)].wmmat[1];
+#endif
+    }
+    if (is_global_motion[1]) {
+        if (picture_control_set_ptr->global_motion_estimation[get_list_idx(BWDREF_FRAME)][get_ref_frame_idx(BWDREF_FRAME)].wmtype == TRANSLATION) {
+            context_ptr->is_translation[1] = 1;
+        }
+#if GM_ME_OPT2
+        context_ptr->is_g_mvx[1][0] = picture_control_set_ptr->global_motion_estimation[get_list_idx(BWDREF_FRAME)][get_ref_frame_idx(BWDREF_FRAME)].wmmat[0];
+        context_ptr->is_g_mvx[1][1] = picture_control_set_ptr->global_motion_estimation[get_list_idx(BWDREF_FRAME)][get_ref_frame_idx(BWDREF_FRAME)].wmmat[1];
+#endif
+    }
 #endif
 
 #if MUS_ME

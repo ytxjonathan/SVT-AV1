@@ -41,7 +41,10 @@ extern "C" {
 #define SKIP_ME_BASED_ON_HME   1 //MUlti-Stage ME - Reduce SR based on HME distortion
 #define SWITCHED_HALF_PEL_MODE   1 //MUlti-Stage ME - Swich between half_pel mode based on fulpel distortion
 #endif
-
+#define SKIP_PD_PASS_2          0
+#define GM_ME_OPT               0
+#define GM_ME_OPT2              0
+#define GM_ME_OPT3              0
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 
 

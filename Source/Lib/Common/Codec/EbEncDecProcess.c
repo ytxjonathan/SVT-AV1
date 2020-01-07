@@ -3323,7 +3323,9 @@ void* enc_dec_kernel(void *input_ptr)
                     // deviation between the current depth cost and candidate depth cost. The generated blocks are used as input candidates to PD1.
                     // The PD1 predicted Partitioning Structure is also refined (up to Pred - 1 / Pred + 1 refinement) using the square (SQ) vs. non-square (NSQ) decision(s)
                     // inside the predicted depth and using coefficient information. The final set of blocks is evaluated in PD2 to output the final Partitioning Structure
-
+#if SKIP_PD_PASS_2
+                    context_ptr->md_context->skip_final_pass = 0;
+#endif
                     if ((picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
                          picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
                          picture_control_set_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
@@ -3670,6 +3672,10 @@ void* enc_dec_kernel(void *input_ptr)
                                 sb_origin_x,
                                 sb_origin_y);
                         }
+
+#if SKIP_PD_PASS_2
+                        context_ptr->md_context->skip_final_pass = 1;
+#endif
                     }
 
                     // [PD_PASS_2] Signal(s) derivation
@@ -3686,16 +3692,21 @@ void* enc_dec_kernel(void *input_ptr)
 
                     // PD2 MD Tool(s): default MD Tool(s)
 #endif
-                    mode_decision_sb(
-                        sequence_control_set_ptr,
-                        picture_control_set_ptr,
-                        mdcPtr,
-                        sb_ptr,
-                        sb_origin_x,
-                        sb_origin_y,
-                        sb_index,
-                        context_ptr->md_context);
-
+#if SKIP_PD_PASS_2
+                    if (!context_ptr->md_context->skip_final_pass) {
+#endif
+                        mode_decision_sb(
+                            sequence_control_set_ptr,
+                            picture_control_set_ptr,
+                            mdcPtr,
+                            sb_ptr,
+                            sb_origin_x,
+                            sb_origin_y,
+                            sb_index,
+                            context_ptr->md_context);
+#if SKIP_PD_PASS_2
+                    }
+#endif
                     // Configure the LCU
                     EncDecConfigureLcu(
                         context_ptr,
