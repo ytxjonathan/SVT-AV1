@@ -1364,10 +1364,14 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->chroma_level = CHROMA_MODE_2; // or CHROMA_MODE_3
     else if (context_ptr->pd_pass == PD_PASS_1) {
+#if CHROMA_OPT_0
+        context_ptr->chroma_level = CHROMA_MODE_1;
+#else
         if (picture_control_set_ptr->temporal_layer_index == 0)
             context_ptr->chroma_level = CHROMA_MODE_0;
         else
             context_ptr->chroma_level = CHROMA_MODE_1;
+#endif
     }
     else
 #endif

@@ -7943,13 +7943,22 @@ void search_best_independent_uv_mode(
 
     // Derive uv_mode_nfl_count
     uint8_t uv_mode_nfl_count;
+#if CHROMA_OPT_0
+    SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;;
+    if (picture_control_set_ptr->slice_type == I_SLICE)
+        uv_mode_nfl_count = uv_mode_total_count;
+    else if (sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER)
+        uv_mode_nfl_count = 32;
+    else
+        uv_mode_nfl_count = 8;
+#else
     if (picture_control_set_ptr->temporal_layer_index == 0)
         uv_mode_nfl_count = uv_mode_total_count;
     else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
         uv_mode_nfl_count = 16;
     else
         uv_mode_nfl_count = 8;
-
+#endif
     // Full-loop search uv_mode
     for (uint8_t uv_mode_count = 0; uv_mode_count < MIN(uv_mode_total_count, uv_mode_nfl_count); uv_mode_count++) {
 
