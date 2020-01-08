@@ -35,6 +35,7 @@
 #include "EbInterPrediction.h"
 #include "EbComputeVariance_C.h"
 #include "EbLog.h"
+#include "EbResize.h"
 
 #undef _MM_HINT_T2
 #define _MM_HINT_T2 1
@@ -2138,6 +2139,75 @@ static EbErrorType save_src_pic_buffers(PictureParentControlSet *picture_control
     return EB_ErrorNone;
 }
 
+EbErrorType downscaled_source_buffer_desc_ctor(EbPictureBufferDesc **picture_ptr,
+                                               EbPictureBufferDesc *picture_ptr_for_reference,
+                                               superres_params_type spr_params) {
+
+    EbPictureBufferDescInitData initData;
+
+    initData.buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK;
+    initData.max_width = spr_params.encoding_width; // width = width / 2
+    initData.max_height = spr_params.encoding_height;
+    initData.bit_depth = picture_ptr_for_reference->bit_depth;
+    initData.color_format = picture_ptr_for_reference->color_format;
+    initData.split_mode = EB_TRUE;
+    initData.left_padding = PAD_VALUE; // or PAD_VALUE_SCALED?
+    initData.right_padding = PAD_VALUE;
+    initData.top_padding = PAD_VALUE;
+    initData.bot_padding = PAD_VALUE;
+
+    EB_NEW(*picture_ptr,
+           eb_picture_buffer_desc_ctor,
+           (EbPtr)&initData);
+
+    return EB_ErrorNone;
+}
+
+void scale_frame_if_necessary(SequenceControlSet* scs_ptr,
+                              PictureParentControlSet* pcs_ptr){
+
+    EbPictureBufferDesc* input_picture_ptr = pcs_ptr->enhanced_picture_ptr;
+
+    // ---- super-resolution ---- downsample source picture, if necessary
+    superres_params_type spr_params = {input_picture_ptr->width, // encoding_width
+                                       input_picture_ptr->height, // encoding_height
+                                       scs_ptr->static_config.superres_mode};
+
+    // determine super-resolution parameters - encoding resolution
+    // given configs and frame type
+    calc_superres_params(&spr_params,
+                         scs_ptr,
+                         pcs_ptr);
+
+    //printf("picture number = %d, frame type = %d\n", (int)pcs_ptr->picture_number, pcs_ptr->frm_hdr.frame_type);
+
+    if(spr_params.superres_denom != SCALE_NUMERATOR){
+        // Allocate downsampled picture buffer descriptor
+        downscaled_source_buffer_desc_ctor(&pcs_ptr->enhanced_downscaled_picture_ptr,
+                                           input_picture_ptr,
+                                           spr_params);
+
+        const int32_t num_planes = av1_num_planes(&scs_ptr->seq_header.color_config);
+        const uint32_t ss_x = scs_ptr->subsampling_x;
+        const uint32_t ss_y = scs_ptr->subsampling_y;
+
+        // downsample picture buffer
+        av1_resize_and_extend_frame(input_picture_ptr,
+                                    pcs_ptr->enhanced_downscaled_picture_ptr,
+                                    pcs_ptr->enhanced_downscaled_picture_ptr->bit_depth,
+                                    num_planes,
+                                    ss_x,
+                                    ss_y);
+
+        // TODO: use downscaled picture instead of original res for mode decision, full-loop etc
+        // after temporal filtering and motion estimation
+
+        pcs_ptr->enhanced_picture_ptr = pcs_ptr->enhanced_downscaled_picture_ptr; // just a test, delete
+
+    }
+    // ---- super-resolution ---- end of processing
+}
+
 EbErrorType svt_av1_init_temporal_filtering(
     PictureParentControlSet ** list_picture_control_set_ptr,
     PictureParentControlSet *  picture_control_set_ptr_central,
@@ -2168,6 +2238,9 @@ EbErrorType svt_av1_init_temporal_filtering(
     eb_block_on_mutex(picture_control_set_ptr_central->temp_filt_mutex);
     if (picture_control_set_ptr_central->temp_filt_prep_done == 0) {
         picture_control_set_ptr_central->temp_filt_prep_done = 1;
+
+        scale_frame_if_necessary(picture_control_set_ptr_central->scs_ptr,
+                                 picture_control_set_ptr_central);
 
         // allocate 16 bit buffer
         if (is_highbd) {
