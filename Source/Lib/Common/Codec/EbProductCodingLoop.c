@@ -3042,6 +3042,16 @@ void predictive_me_search(
             MvReferenceFrame frame_type = rf[0];
             uint8_t list_idx = get_list_idx(rf[0]);
             uint8_t ref_idx = get_ref_frame_idx(rf[0]);
+
+#if DIST_BASED_PME_SEARCH_AREA
+            int16_t full_pel_ref_window_width_th = context_ptr->full_pel_ref_window_width_th;
+            int16_t full_pel_ref_window_height_th = context_ptr->full_pel_ref_window_height_th;
+
+            uint16_t dist = ABS((int16_t)(picture_control_set_ptr->picture_number - picture_control_set_ptr->parent_pcs_ptr->ref_pic_poc_array[list_idx][ref_idx]));
+            full_pel_ref_window_width_th = MIN((full_pel_ref_window_width_th  * dist), 64);
+            full_pel_ref_window_height_th = MIN((full_pel_ref_window_height_th * dist), 64);
+#endif
+
 #if MULTI_PASS_PD
             if (ref_idx > context_ptr->md_max_ref_count - 1)
                 continue;
@@ -3214,10 +3224,17 @@ void predictive_me_search(
                     best_mvp_y,
 #if M0_OPT
 #if MULTI_PASS_PD
+#if DIST_BASED_PME_SEARCH_AREA
+                   - (full_pel_ref_window_width_th >> 1),
+                    +(full_pel_ref_window_width_th >> 1),
+                    -(full_pel_ref_window_height_th >> 1),
+                    +(full_pel_ref_window_height_th >> 1),
+#else
                    - (context_ptr->full_pel_ref_window_width_th >> 1),
                     +(context_ptr->full_pel_ref_window_width_th >> 1),
                     -(context_ptr->full_pel_ref_window_height_th >> 1),
                     +(context_ptr->full_pel_ref_window_height_th >> 1),
+#endif
 #else
                     - (full_pel_ref_window_width_th >> 1),
                     +(full_pel_ref_window_width_th >> 1),

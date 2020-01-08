@@ -169,6 +169,11 @@ EbErrorType signal_derivation_me_kernel_oq(
             sequence_control_set_ptr,
             context_ptr->me_context_ptr);
 
+#if DIST_BASED_ME_SEARCH_AREA // ME
+    context_ptr->me_context_ptr->max_search_area_width  = 256;
+    context_ptr->me_context_ptr->max_search_area_height = 256;
+#endif
+
     if (picture_control_set_ptr->sc_content_detected)
 #if PRESETS_TUNE
         context_ptr->me_context_ptr->fractional_search_method = (enc_mode == ENC_M0) ? FULL_SAD_SEARCH : SUB_SAD_SEARCH;
@@ -508,6 +513,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
         picture_control_set_ptr,
         sequence_control_set_ptr,
         sequence_control_set_ptr->input_resolution);
+
+#if DIST_BASED_ME_SEARCH_AREA // TF
+    context_ptr->me_context_ptr->max_search_area_width  = 256;
+    context_ptr->me_context_ptr->max_search_area_height = 256;
+#endif
 
     if (picture_control_set_ptr->sc_content_detected)
         if (enc_mode <= ENC_M1)
