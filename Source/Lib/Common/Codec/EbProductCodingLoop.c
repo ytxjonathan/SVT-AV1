@@ -9927,6 +9927,8 @@ EB_EXTERN EbErrorType mode_decision_sb(
                 // sq_weight derivation = BASE + OFFSET = f(block size, shape to skip)
                 uint32_t sq_weight = context_ptr->sq_weight;
 
+                if (sequence_control_set_ptr->static_config.qp <= 20)
+                    sq_weight -= 10;
 
                 if (context_ptr->blk_geom->shape == PART_H4 || context_ptr->blk_geom->shape == PART_V4)
                     sq_weight += 5;
