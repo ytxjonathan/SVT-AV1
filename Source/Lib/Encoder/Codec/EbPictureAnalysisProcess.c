@@ -6226,15 +6226,15 @@ void downsample_filtering_input_picture(PictureParentControlSet *pcs_ptr,
     }
 }
 
-EbErrorType downscaled_source_buffer_ctor(
-        EbPictureBufferDesc    **picture_ptr,
-        EbPictureBufferDesc    *picture_ptr_for_reference) {
+EbErrorType downscaled_source_buffer_desc_ctor(EbPictureBufferDesc **picture_ptr,
+                                               EbPictureBufferDesc *picture_ptr_for_reference,
+                                               superres_params_type spr_params) {
 
     EbPictureBufferDescInitData initData;
 
     initData.buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK;
-    initData.max_width = picture_ptr_for_reference->max_width >> 1; // width = width / 2
-    initData.max_height = picture_ptr_for_reference->max_height;
+    initData.max_width = spr_params.encoding_width; // width = width / 2
+    initData.max_height = spr_params.encoding_height;
     initData.bit_depth = picture_ptr_for_reference->bit_depth;
     initData.color_format = picture_ptr_for_reference->color_format;
     initData.split_mode = EB_TRUE;
@@ -6357,16 +6357,28 @@ void *picture_analysis_kernel(void *input_ptr) {
                     (EbPictureBufferDesc *)pa_ref_obj_->sixteenth_filtered_picture_ptr);
             }
 
-            // Super-resolution test: if superres is enabled, downsample the source picture
-            if(scs_ptr->static_config.superres_mode != SUPERRES_NONE){
-                // Allocate picture buffer descriptor
-                downscaled_source_buffer_ctor(&pcs_ptr->enhanced_downscaled_picture_ptr,
-                                              input_picture_ptr);
+            // ---- super-resolution ---- downsample source picture, if necessary
+            superres_params_type spr_params = {input_picture_ptr->width, // encoding_width
+                                               input_picture_ptr->height, // encoding_height
+                                               scs_ptr->static_config.superres_mode};
+
+            // determine super-resolution parameters - encoding resolution
+            // given configs and frame type
+            calc_superres_params(&spr_params,
+                                 scs_ptr,
+                                 pcs_ptr);
+
+            if(spr_params.superres_denom != SCALE_NUMERATOR){
+                // Allocate downsampled picture buffer descriptor
+                downscaled_source_buffer_desc_ctor(&pcs_ptr->enhanced_downscaled_picture_ptr,
+                                                   input_picture_ptr,
+                                                   spr_params);
 
                 const int32_t num_planes = av1_num_planes(&scs_ptr->seq_header.color_config);
                 const uint32_t ss_x = scs_ptr->subsampling_x;
                 const uint32_t ss_y = scs_ptr->subsampling_y;
 
+                // downsample picture buffer
                 av1_resize_and_extend_frame(input_picture_ptr,
                                             pcs_ptr->enhanced_downscaled_picture_ptr,
                                             pcs_ptr->enhanced_downscaled_picture_ptr->bit_depth,
@@ -6374,7 +6386,8 @@ void *picture_analysis_kernel(void *input_ptr) {
                                             ss_x,
                                             ss_y);
             }
-            
+            // ---- super-resolution ---- end of processing
+
             // Gathering statistics of input picture, including Variance Calculation, Histogram Bins
             gathering_picture_statistics(
                 scs_ptr,

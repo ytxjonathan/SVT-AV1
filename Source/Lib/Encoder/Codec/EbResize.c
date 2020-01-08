@@ -18,10 +18,13 @@
 #include "EbResize.h"
 
 #define DEBUG_SCALING 0
+#define DIVIDE_AND_ROUND(x, y) (((x) + ((y) >> 1)) / (y))
 
 // Filters for factor of 2 downsampling.
 static const int16_t av1_down2_symeven_half_filter[] = { 56, 12, -3, -1 };
 static const int16_t av1_down2_symodd_half_filter[] = { 64, 35, 0, -3 };
+
+void calculate_scaled_size_helper(uint16_t *dim, uint8_t denom);
 
 static int get_down2_length(int length, int steps) {
     for (int s = 0; s < steps; ++s) length = (length + 1) >> 1;
@@ -820,5 +823,99 @@ EbErrorType av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
     // aom_extend_frame_borders(dst, num_planes);
 
     return EB_ErrorNone;
+
+}
+
+// Generate a random number in the range [0, 32768).
+static INLINE unsigned int lcg_rand16(unsigned int *state) {
+    *state = (unsigned int)(*state * 1103515245ULL + 12345);
+    return *state / 65536 % 32768;
+}
+
+// Given the superres configurations and the frame type, determine the denominator and
+// encoding resolution
+void calc_superres_params(superres_params_type* spr_params,
+                          SequenceControlSet* scs_ptr,
+                          PictureParentControlSet* pcs_ptr){
+
+    spr_params->superres_denom = SCALE_NUMERATOR;
+    static unsigned int seed = 34567;
+    FrameHeader *frm_hdr = &pcs_ptr->frm_hdr;
+
+    uint8_t superres_mode = scs_ptr->static_config.superres_mode;
+    uint8_t cfg_denom = scs_ptr->static_config.superres_denom;
+    uint8_t cfg_kf_denom = scs_ptr->static_config.superres_kf_denom;
+    //uint8_t superres_qthres = scs_ptr->static_config.superres_qthres;
+
+    // For now, super-resolution can only be enabled for intra only frames or key frames
+    if(frm_hdr->frame_type != KEY_FRAME && frm_hdr->frame_type != INTRA_ONLY_FRAME){
+        return;
+    }
+
+    switch (superres_mode) {
+        case SUPERRES_NONE: spr_params->superres_denom = SCALE_NUMERATOR; break;
+        case SUPERRES_FIXED:
+            if (frm_hdr->frame_type == KEY_FRAME)
+                spr_params->superres_denom = cfg_kf_denom;
+            else
+                spr_params->superres_denom = cfg_denom;
+            break;
+        case SUPERRES_RANDOM: spr_params->superres_denom = (uint8_t)(lcg_rand16(&seed) % 9 + 8); break;
+
+        // SUPERRES_QTHRESH and SUPERRES_AUTO are not yet implemented
+//        case SUPERRES_QTHRESH: {
+//            // Do not use superres when screen content tools are used.
+//            //if (cpi->common.allow_screen_content_tools) break; TODO
+//            if (oxcf->rc_mode == AOM_VBR || oxcf->rc_mode == AOM_CQ)
+//                av1_set_target_rate(cpi, cpi->oxcf.width, cpi->oxcf.height);
+//
+//            // Now decide the use of superres based on 'q'.
+//            int bottom_index, top_index;
+//            const int q = av1_rc_pick_q_and_bounds(
+//                    cpi, &cpi->rc, cpi->oxcf.width, cpi->oxcf.height, cpi->gf_group.index,
+//                    &bottom_index, &top_index);
+//
+//            const int qthresh = (frame_is_intra_only(&cpi->common))
+//                                ? oxcf->superres_kf_qthresh
+//                                : oxcf->superres_qthresh;
+//            if (q <= qthresh) {
+//                new_denom = SCALE_NUMERATOR;
+//            } else {
+//                new_denom = get_superres_denom_for_qindex(cpi, q, 1, 1);
+//            }
+//            break;
+//        }
+//        case SUPERRES_AUTO: {
+//            // Do not use superres when screen content tools are used.
+//            if (cpi->common.allow_screen_content_tools) break;
+//            if (oxcf->rc_mode == AOM_VBR || oxcf->rc_mode == AOM_CQ)
+//                av1_set_target_rate(cpi, cpi->oxcf.width, cpi->oxcf.height);
+//
+//            // Now decide the use of superres based on 'q'.
+//            int bottom_index, top_index;
+//            const int q = av1_rc_pick_q_and_bounds(
+//                    cpi, &cpi->rc, cpi->oxcf.width, cpi->oxcf.height, cpi->gf_group.index,
+//                    &bottom_index, &top_index);
+//
+//            const int qthresh = 128;
+//            if (q <= qthresh) {
+//                new_denom = SCALE_NUMERATOR;
+//            } else {
+//#if SUPERRES_RECODE_ALL_RATIOS
+//                if (cpi->common.current_frame.frame_type == KEY_FRAME)
+//      new_denom = oxcf->superres_kf_scale_denominator;
+//    else
+//      new_denom = oxcf->superres_scale_denominator;
+//#else
+//                new_denom = get_superres_denom_for_qindex(cpi, q, 1, 1);
+//#endif  // SUPERRES_RECODE_ALL_RATIOS
+//            }
+//            break;
+//        }
+        default: break;
+    }
+
+    // only encoding width is adjusted
+    calculate_scaled_size_helper(&spr_params->encoding_width, spr_params->superres_denom);
 
 }

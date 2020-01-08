@@ -4,6 +4,7 @@
 #include "EbDefinitions.h"
 #include "EbPictureBufferDesc.h"
 #include "EbInterPrediction.h"
+#include "EbSequenceControlSet.h"
 
 #define UPSCALE_NORMATIVE_TAPS 8
 
@@ -194,6 +195,11 @@ static const int16_t av1_resize_filter_normative[(
 // Filters for interpolation (full-band) - no filtering for integer pixels
 #define filteredinterp_filters1000 av1_resize_filter_normative
 
+typedef struct {
+    uint16_t encoding_width;
+    uint16_t encoding_height;
+    uint8_t superres_denom;
+} superres_params_type;
 
 EbErrorType av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
                                         EbPictureBufferDesc *dst,
@@ -201,6 +207,10 @@ EbErrorType av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
                                         const int num_planes,
                                         const uint32_t ss_x,
                                         const uint32_t ss_y);
+
+void calc_superres_params(superres_params_type* spr_params,
+                          SequenceControlSet* scs_ptr,
+                          PictureParentControlSet* pcs_ptr);
 
 #endif //SVT_AV1_SCALE_H
 
