@@ -39,6 +39,7 @@ extern "C" {
 #define MUS_ME_FP              1 //MUlti-Stage ME - Decouple full-pel from subpel
 #define MUS_ME_FP_SB           1 //MUlti-Stage ME - Full-pel pruning
 #define SKIP_ME_BASED_ON_HME   1 //MUlti-Stage ME - Reduce SR based on HME distortion
+#define REDUCE_ME_FOR_LOW_M_SB   1 //MUlti-Stage ME - Reduce SR based on HME distortion and HME MV
 #define SWITCHED_HALF_PEL_MODE   1 //MUlti-Stage ME - Swich between half_pel mode based on fulpel distortion
 #endif
 

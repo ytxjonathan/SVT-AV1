@@ -14852,6 +14852,10 @@ void prune_references(
             if (context_ptr->hme_results[li][ri].hme_sad < REDUCE_SR_TH)
                 context_ptr->reduce_me_sr_flag[li][ri] = 1;
 #endif
+#if REDUCE_ME_FOR_LOW_M_SB
+            if (context_ptr->hme_results[li][ri].hme_sc_x <= 4 && context_ptr->hme_results[li][ri].hme_sc_y <= 4 && context_ptr->hme_results[li][ri].hme_sad < (2*REDUCE_SR_TH))
+                context_ptr->reduce_me_sr_flag[li][ri] = 1;
+#endif
         }
     }
 #endif
