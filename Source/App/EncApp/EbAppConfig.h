@@ -449,6 +449,7 @@ typedef struct EbConfig {
      ****************************************/
     SUPERRES_MODE           superres_mode;
     uint8_t                 superres_denom;
+    uint8_t                 superres_kf_denom;
     uint8_t                 superres_qthres;
 
     // square cost weighting for deciding if a/b shapes could be skipped

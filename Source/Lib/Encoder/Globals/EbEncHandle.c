@@ -2190,6 +2190,7 @@ void copy_api_from_app(
 
     scs_ptr->static_config.superres_mode = config_struct->superres_mode;
     scs_ptr->static_config.superres_denom = config_struct->superres_denom;
+    scs_ptr->static_config.superres_kf_denom = config_struct->superres_kf_denom;
     scs_ptr->static_config.superres_qthres = config_struct->superres_qthres;
 
     scs_ptr->static_config.sq_weight = config_struct->sq_weight;
@@ -2848,6 +2849,7 @@ EbErrorType eb_svt_enc_init_parameter(
     // Super-resolution default values
     config_ptr->superres_mode = SUPERRES_NONE;
     config_ptr->superres_denom = 8;
+    config_ptr->superres_kf_denom = 8;
     config_ptr->superres_qthres = 43; // random threshold, change
 
     config_ptr->sq_weight = 100;

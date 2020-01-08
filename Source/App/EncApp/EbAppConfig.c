@@ -112,6 +112,7 @@
 // --- start: ALTREF_FILTERING_SUPPORT
 #define SUPERRES_MODE "-superres-mode"
 #define SUPERRES_DENOM "-superres-denom"
+#define SUPERRES_KF_DENOM "-superres-kf-denom"
 #define SUPERRES_QTHRES "-superres-qthres"
 // --- end: SUPER-RESOLUTION SUPPORT
 #define HBD_MD_ENABLE_TOKEN "-hbd-md"
@@ -481,6 +482,9 @@ static void SetSuperresMode(const char *value, EbConfig *cfg) {
 static void SetSuperresDenom(const char *value, EbConfig *cfg) {
     cfg->superres_denom = (uint8_t)strtoul(value, NULL, 0);
 };
+static void SetSuperresKfDenom(const char *value, EbConfig *cfg) {
+    cfg->superres_kf_denom = (uint8_t)strtoul(value, NULL, 0);
+};
 static void SetSuperresQthres(const char *value, EbConfig *cfg) {
     cfg->superres_qthres = (uint8_t)strtoul(value, NULL, 0);
 };
@@ -828,6 +832,7 @@ ConfigEntry config_entry[] = {
     // Super-resolution support
     { SINGLE_INPUT, SUPERRES_MODE, "SuperresMode", SetSuperresMode },
     { SINGLE_INPUT, SUPERRES_DENOM, "SuperresDenom", SetSuperresDenom },
+    { SINGLE_INPUT, SUPERRES_KF_DENOM, "SuperresKfDenom", SetSuperresKfDenom },
     { SINGLE_INPUT, SUPERRES_QTHRES, "SuperresQthres", SetSuperresQthres },
 
     {SINGLE_INPUT, SQ_WEIGHT_TOKEN, "SquareWeight", set_square_weight},
@@ -935,6 +940,7 @@ void eb_config_ctor(EbConfig *config_ptr) {
     // start - super-resolution support
     config_ptr->superres_mode = SUPERRES_NONE; // disabled
     config_ptr->superres_denom = 8; // no scaling
+    config_ptr->superres_kf_denom = 8; // no scaling
     config_ptr->superres_qthres = 43; // random threshold for now
     // end - super-resolution support
 

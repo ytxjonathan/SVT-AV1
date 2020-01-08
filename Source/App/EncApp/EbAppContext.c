@@ -254,6 +254,7 @@ EbErrorType copy_configuration_parameters(EbConfig *config, EbAppContext *callba
     // --- start: SUPER-RESOLUTION SUPPORT
     callback_data->eb_enc_parameters.superres_mode = config->superres_mode;
     callback_data->eb_enc_parameters.superres_denom = config->superres_denom;
+    callback_data->eb_enc_parameters.superres_kf_denom = config->superres_kf_denom;
     callback_data->eb_enc_parameters.superres_qthres = config->superres_qthres;
     // --- end: SUPER-RESOLUTION SUPPORT
 
