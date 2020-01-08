@@ -1474,8 +1474,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if SPEED_OPT
 #if SC_PRESETS_OPT
 #if ATB_TL
-            picture_control_set_ptr->atb_mode = (picture_control_set_ptr->temporal_layer_index == 0 ||
-                                                (sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER && !picture_control_set_ptr->sc_content_detected )) ? 1 : 0;
+            picture_control_set_ptr->atb_mode = (picture_control_set_ptr->temporal_layer_index == 0 || !picture_control_set_ptr->sc_content_detected ) ? 1 : 0;
 #else
             picture_control_set_ptr->atb_mode = ((MR_MODE && !picture_control_set_ptr->sc_content_detected) || picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 0;
 #endif
@@ -1488,11 +1487,6 @@ EbErrorType signal_derivation_multi_processes_oq(
         else
             picture_control_set_ptr->atb_mode = 0;
 
-#if ATB_TL
-#if MR_MODE
-        picture_control_set_ptr->atb_mode = ((!picture_control_set_ptr->sc_content_detected) || picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 0;
-#endif
-#endif
         // Set skip atb                          Settings
         // 0                                     OFF
         // 1                                     ON

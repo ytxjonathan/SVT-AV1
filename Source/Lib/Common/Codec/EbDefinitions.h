@@ -52,14 +52,19 @@ extern "C" {
 
 #define GM_DOWNSAMPLED              1 // Adopt global motion Downsampled
 
-
+#define REMOVE_TEMPORAL_LAYER_CHECK     1
+#if REMOVE_TEMPORAL_LAYER_CHECK
 #define IFS_TL                   1   // remove temporal layer check for interpolation filter search @ PD1
-#define ATB_TL                   1   // remove temporal layer check for ATB for 360p only
+#define ATB_TL                   1   // remove temporal layer check for ATB
+#define NEW_NN_TL                1   // remove temporal layer check for NEW NEAREST NEAR COMP
+#define F_INTRA_TL               1   // remove temporal layer check for Filter Intra
 #define PALETTE_TL               1   // remove temporal layer check for palette SC
+#endif
 #define COMPOUND_WEDGE_OPT       1   // optimize compound wedge For M1 and higher
+
+
+
 #if 1
-
-
 #define OMARK_LAMBDA                1 // 2. fix lambda calculation for HBD0
 
 #define OMARK_HBD1_CDEF             1 // 3. fix CDEF lambda for hbd1/2

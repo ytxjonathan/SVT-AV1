@@ -1525,7 +1525,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
 #endif
 #if FIX_NEAREST_NEW
+#if NEW_NN_TL
+            if (picture_control_set_ptr->enc_mode <= ENC_M0)
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+#endif
 #else
             if (picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
