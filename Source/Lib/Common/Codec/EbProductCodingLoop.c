@@ -9684,9 +9684,12 @@ EB_EXTERN EbErrorType mode_decision_sb(
     BlockSize max_bsize = BLOCK_128X128;
     if (context_ptr->enable_auto_max_partition == 1)
         if (picture_control_set_ptr->slice_type != I_SLICE && sequence_control_set_ptr->static_config.super_block_size == 128) {
+#if TUNE_AUTO_MAX_PARTITION
+            if(sequence_control_set_ptr->sb_geom[lcuAddr].is_complete_sb) {
+#else
             if ((sb_origin_x + sequence_control_set_ptr->static_config.super_block_size) < picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->seq_header.max_frame_width &&
                 (sb_origin_y + sequence_control_set_ptr->static_config.super_block_size) < picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->seq_header.max_frame_height) {
-
+#endif
                 float features[FEATURE_SIZE_MAX_MIN_PART_PRED] = { 0.0f };
 
                 av1_get_max_min_partition_features(sequence_control_set_ptr, picture_control_set_ptr, context_ptr, features, input_picture_ptr, sb_origin_x, sb_origin_y);
