@@ -6282,6 +6282,32 @@ EbErrorType generate_md_stage_0_cand(
         }
 #endif
     }
+
+
+#if P_MODE_PRUNING
+    if (context_ptr->pd_pass == PD_PASS_2 && context_ptr->md_local_cu_unit[context_ptr->cu_ptr->mds_idx].pd_pass_p_prune) {
+        
+        assert(canTotalCnt >= context_ptr->md_stage_0_count[CAND_CLASS_1]);
+        canTotalCnt -= context_ptr->md_stage_0_count[CAND_CLASS_1];
+        context_ptr->md_stage_0_count[CAND_CLASS_1]=0;
+
+        assert(canTotalCnt >= context_ptr->md_stage_0_count[CAND_CLASS_3]);
+        canTotalCnt -= context_ptr->md_stage_0_count[CAND_CLASS_3];
+        context_ptr->md_stage_0_count[CAND_CLASS_3] = 0;
+
+        assert(canTotalCnt >= context_ptr->md_stage_0_count[CAND_CLASS_5]);
+        canTotalCnt -= context_ptr->md_stage_0_count[CAND_CLASS_5];
+        context_ptr->md_stage_0_count[CAND_CLASS_5] = 0;
+
+        assert(canTotalCnt >= context_ptr->md_stage_0_count[CAND_CLASS_8]);
+        canTotalCnt -= context_ptr->md_stage_0_count[CAND_CLASS_8];
+        context_ptr->md_stage_0_count[CAND_CLASS_8] = 0;
+
+    }
+#endif
+
+
+
     uint32_t fast_accum = 0;
     for (cand_class_it = CAND_CLASS_0; cand_class_it < CAND_CLASS_TOTAL; cand_class_it++) {
         fast_accum += context_ptr->md_stage_0_count[cand_class_it];
@@ -6290,6 +6316,26 @@ EbErrorType generate_md_stage_0_cand(
 
     return EB_ErrorNone;
 }
+
+#if P_MODE_PRUNING
+void sort_md_candidates(
+    struct ModeDecisionContext   *context_ptr,
+    uint32_t                      num_of_cand_to_sort,
+    uint32_t                     *cand_buff_indices)
+{
+    uint32_t i, j, index;
+    ModeDecisionCandidateBuffer **buffer_ptr_array = context_ptr->candidate_buffer_ptr_array;
+    for (i = 0; i < num_of_cand_to_sort - 1; ++i) {
+        for (j = i + 1; j < num_of_cand_to_sort; ++j) {
+            if (*(buffer_ptr_array[cand_buff_indices[j]]->full_cost_ptr) < *(buffer_ptr_array[cand_buff_indices[i]]->full_cost_ptr)) {
+                index = cand_buff_indices[i];
+                cand_buff_indices[i] = (uint32_t)cand_buff_indices[j];
+                cand_buff_indices[j] = (uint32_t)index;
+            }
+        }
+    }
+}
+#endif
 
 /***************************************
 * Full Mode Decision
@@ -6307,6 +6353,23 @@ uint32_t product_full_mode_decision(
     uint64_t                  lowestCost = 0xFFFFFFFFFFFFFFFFull;
     uint64_t                  lowestIntraCost = 0xFFFFFFFFFFFFFFFFull;
     uint32_t                  lowestCostIndex = 0;
+
+#if P_MODE_PRUNING   
+  
+    if (context_ptr->pd_pass == PD_PASS_1 && candidate_total_count>1) {  
+       
+        sort_md_candidates(context_ptr, candidate_total_count, best_candidate_index_array);
+        
+        if (buffer_ptr_array[0]->candidate_ptr->type == INTRA_MODE) {
+            //the best is intra and way better then inter--assumption there is only one intra 
+            uint8_t  BIGGER_THAN_TH = 30;
+            if ((*buffer_ptr_array[1]->full_cost_ptr - *buffer_ptr_array[0]->full_cost_ptr) * 100 > BIGGER_THAN_TH* (*buffer_ptr_array[0]->full_cost_ptr))
+                context_ptr->md_local_cu_unit[cu_ptr->mds_idx].pd_pass_p_prune = 1;
+
+        }
+    }
+#endif
+
     if (prune_ref_frame_for_rec_partitions) {
         if (context_ptr->blk_geom->shape == PART_N) {
             for (uint32_t i = 0; i < candidate_total_count; ++i) {

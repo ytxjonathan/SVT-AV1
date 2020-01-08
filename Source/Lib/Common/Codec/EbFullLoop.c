@@ -1943,6 +1943,9 @@ void product_full_loop(
                 full_distortion_kernel16_bits :
                 spatial_full_distortion_kernel;
 
+#if P_MODE_PRUNING
+            if(context_ptr->pd_pass!=PD_PASS_0)
+#endif
             tuFullDistortion[0][DIST_CALC_PREDICTION] = spatial_full_dist_type_fun(
                 input_picture_ptr->buffer_y,
                 input_tu_origin_index,

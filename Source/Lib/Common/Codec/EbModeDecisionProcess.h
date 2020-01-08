@@ -95,6 +95,10 @@ extern "C" {
         uint64_t                    cost_luma;
         CandidateMv ed_ref_mv_stack[MODE_CTX_REF_FRAMES][MAX_REF_MV_STACK_SIZE];//to be used in MD and EncDec
         uint8_t                     avail_blk_flag ;   //tells whether this CU is tested in MD and have a valid cu data
+
+#if P_MODE_PRUNING                
+        uint8_t                     pd_pass_p_prune;
+#endif
     } MdCodingUnit;
 
     typedef struct ModeDecisionContext

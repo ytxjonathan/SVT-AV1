@@ -1051,6 +1051,10 @@ void init_sq_nsq_block(
     do {
         const BlockGeom * blk_geom = get_blk_geom_mds(blk_idx);
         context_ptr->md_local_cu_unit[blk_idx].avail_blk_flag = EB_FALSE;
+#if P_MODE_PRUNING
+        if(context_ptr->pd_pass==PD_PASS_0 || context_ptr->pd_pass == PD_PASS_1)
+            context_ptr->md_local_cu_unit[blk_idx].pd_pass_p_prune = 0;
+#endif
         if (blk_geom->shape == PART_N)
         {
             context_ptr->md_cu_arr_nsq[blk_idx].split_flag = EB_TRUE;
@@ -9035,6 +9039,9 @@ void md_encode_block(
             context_ptr->parent_sq_pred_mode[sq_index] = candidate_buffer->candidate_ptr->pred_mode;
         }
 
+#if P_MODE_PRUNING
+        if(context_ptr->pd_pass!=PD_PASS_0)
+#endif
         AV1PerformInverseTransformRecon(
             picture_control_set_ptr,
             context_ptr,
