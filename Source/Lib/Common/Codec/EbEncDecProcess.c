@@ -2125,7 +2125,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if M0_OPT
+#if M1_OPT
+    if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#else
     if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#endif
 #else
     if (MR_MODE || picture_control_set_ptr->enc_mode == ENC_M0 || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
@@ -2159,7 +2163,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #if M0_OPT
 #if SC_PRESETS_OPT
+#if M1_OPT
+        if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#else
         if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#endif
 #else
     if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
@@ -2182,7 +2190,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if M0_OPT || PRESETS_TUNE
-#if PRESETS_TUNE && !PRESETS_OPT
+#if (PRESETS_TUNE && !PRESETS_OPT) || M1_OPT
         if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M1)
 #else
         if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M0)
@@ -2290,8 +2298,13 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
     }
     else {
+#if M1_OPT
+        context_ptr->full_pel_ref_window_width_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode <= ENC_M1) ? FULL_PEL_REF_WINDOW_WIDTH_EXTENDED : FULL_PEL_REF_WINDOW_WIDTH;
+        context_ptr->full_pel_ref_window_height_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode <= ENC_M1) ? FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED : FULL_PEL_REF_WINDOW_HEIGHT;
+#else
         context_ptr->full_pel_ref_window_width_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode == ENC_M0) ? FULL_PEL_REF_WINDOW_WIDTH_EXTENDED : FULL_PEL_REF_WINDOW_WIDTH;
         context_ptr->full_pel_ref_window_height_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode == ENC_M0) ? FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED : FULL_PEL_REF_WINDOW_HEIGHT;
+#endif
     }
 
     // set compound_types_to_try

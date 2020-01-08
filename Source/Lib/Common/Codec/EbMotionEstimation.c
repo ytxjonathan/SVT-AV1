@@ -13564,7 +13564,11 @@ void integer_search_sb(
         : EB_FALSE;
 
 #if MULTI_PASS_PD
+#if M1_OPT
+    is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M1 ||
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
+#endif
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
@@ -14284,7 +14288,11 @@ void hme_sb(
         : EB_FALSE;
 
 #if MULTI_PASS_PD
+#if M1_OPT
+    is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M1 ||
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
+#endif
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
@@ -15018,7 +15026,11 @@ EbErrorType motion_estimate_lcu(
         : EB_FALSE;
 
 #if MULTI_PASS_PD
+#if M1_OPT
+    is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M1 ||
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
+#endif
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||

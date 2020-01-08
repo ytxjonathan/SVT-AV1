@@ -831,7 +831,11 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if MULTI_PASS_PD
         else if (MR_MODE)
             picture_control_set_ptr->pic_depth_mode = PIC_ALL_DEPTH_MODE;
+#if M1_OPT
+        else if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#else
         else if (picture_control_set_ptr->enc_mode == ENC_M0)
+#endif
             // Use a single-stage PD if I_SLICE
 #if LOW_DELAY_TUNE
             picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE :
@@ -1519,7 +1523,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 2                 Fast: estimate Wedge sign
         // 3                 Fast: Mode 1 & Mode 2
 #if COMPOUND_WEDGE_OPT
+#if M1_OPT
+    if (MR_MODE || picture_control_set_ptr->enc_mode <= ENC_M1)
+#else
     if (MR_MODE || picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
         picture_control_set_ptr->wedge_mode = 0;
     else
         picture_control_set_ptr->wedge_mode = 1;
@@ -1630,11 +1638,8 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 1: ON
         if (picture_control_set_ptr->sc_content_detected || MR_MODE)
             picture_control_set_ptr->prune_ref_based_me = 0;
-        else if (picture_control_set_ptr->enc_mode == ENC_M0)
-            picture_control_set_ptr->prune_ref_based_me = 1;
         else
-            picture_control_set_ptr->prune_ref_based_me = 0;
-
+            picture_control_set_ptr->prune_ref_based_me = 1;
 #endif
     return return_error;
 }

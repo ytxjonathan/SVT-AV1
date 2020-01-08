@@ -125,6 +125,7 @@ extern "C" {
 #define ATB_FIX                      1
 
 #define M0_OPT                       1
+#define M1_OPT                       1
 #define PRESETS_TUNE                 1
 #define PRESETS_OPT                  1
 #define SC_PRESETS_OPT               1
