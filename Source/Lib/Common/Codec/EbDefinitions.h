@@ -72,6 +72,7 @@ extern "C" {
 #define ALL_LAYERS                        0 // ATB INTRA Depth 2
 #define COEFF_SKIP_OFF                    0
 #endif
+#define ATB_FIX                           1
 
 #define RDOQ_CHROMA                       1
 //FOR DEBUGGING - Do not remove

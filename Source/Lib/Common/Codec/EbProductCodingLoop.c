@@ -4008,6 +4008,44 @@ void tx_reset_neighbor_arrays(
 #endif
 #if UPDATE_ATB_INTRA_2_DEPTH
         if (!is_inter) {
+#if ATB_FIX
+            if (tx_depth == 2) {
+                copy_neigh_arr(
+                    picture_control_set_ptr->md_luma_recon_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
+                    picture_control_set_ptr->md_tx_depth_2_luma_recon_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
+                    context_ptr->sb_origin_x + context_ptr->blk_geom->origin_x,
+                    context_ptr->sb_origin_y + context_ptr->blk_geom->origin_y,
+                    context_ptr->blk_geom->bwidth,
+                    context_ptr->blk_geom->bheight,
+                    NEIGHBOR_ARRAY_UNIT_TOPLEFT_MASK);
+                copy_neigh_arr(
+                    picture_control_set_ptr->md_luma_recon_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
+                    picture_control_set_ptr->md_tx_depth_2_luma_recon_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
+                    context_ptr->sb_origin_x + context_ptr->blk_geom->origin_x,
+                    context_ptr->sb_origin_y + context_ptr->blk_geom->origin_y,
+                    context_ptr->blk_geom->bwidth *2 ,
+                    context_ptr->blk_geom->bheight *2 ,
+                    NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+            }
+            else {
+                copy_neigh_arr(
+                    picture_control_set_ptr->md_luma_recon_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
+                    picture_control_set_ptr->md_tx_depth_1_luma_recon_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
+                    context_ptr->sb_origin_x + context_ptr->blk_geom->origin_x,
+                    context_ptr->sb_origin_y + context_ptr->blk_geom->origin_y,
+                    context_ptr->blk_geom->bwidth,
+                    context_ptr->blk_geom->bheight,
+                    NEIGHBOR_ARRAY_UNIT_TOPLEFT_MASK);
+                copy_neigh_arr(
+                    picture_control_set_ptr->md_luma_recon_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
+                    picture_control_set_ptr->md_tx_depth_1_luma_recon_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
+                    context_ptr->sb_origin_x + context_ptr->blk_geom->origin_x,
+                    context_ptr->sb_origin_y + context_ptr->blk_geom->origin_y,
+                    context_ptr->blk_geom->bwidth *2 ,
+                    context_ptr->blk_geom->bheight *2 ,
+                    NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
+            }
+#else
             if (tx_depth == 2)
                 copy_neigh_arr(
                     picture_control_set_ptr->md_luma_recon_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
@@ -4026,6 +4064,8 @@ void tx_reset_neighbor_arrays(
                     context_ptr->blk_geom->bwidth,
                     context_ptr->blk_geom->bheight,
                     NEIGHBOR_ARRAY_UNIT_FULL_MASK);
+
+#endif
         }
 #else
         if (!is_inter)
