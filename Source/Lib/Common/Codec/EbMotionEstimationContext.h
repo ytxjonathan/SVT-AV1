@@ -442,7 +442,9 @@ extern "C" {
         uint8_t                       fractional_search_model;
         uint8_t                       hme_search_method;
         uint8_t                       me_search_method;
-
+#if OPT_REC_ME
+        uint8_t                       use_best_sq_mv;
+#endif
         EbBool                        enable_hme_flag;
         EbBool                        enable_hme_level0_flag;
         EbBool                        enable_hme_level1_flag;

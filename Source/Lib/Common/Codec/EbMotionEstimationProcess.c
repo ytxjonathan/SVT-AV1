@@ -316,7 +316,9 @@ EbErrorType signal_derivation_me_kernel_oq(
     }
     else
         context_ptr->me_context_ptr->compute_global_motion = EB_FALSE;
-
+#if OPT_REC_ME
+        context_ptr->me_context_ptr->use_best_sq_mv = sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER ? 0 : 1;
+#endif
     return return_error;
 };
 #else
@@ -627,6 +629,9 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
 #endif
         FULL_SAD_SEARCH :
         SUB_SAD_SEARCH;
+#if OPT_REC_ME
+        context_ptr->me_context_ptr->use_best_sq_mv = sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER ? 0 : 1;
+#endif
     return return_error;
 };
 #else
