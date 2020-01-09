@@ -789,6 +789,9 @@ void *resource_coordination_kernel(void *input_ptr) {
             sb_geom_init(scs_ptr);
             scs_ptr->enable_altrefs = scs_ptr->static_config.enable_altrefs ? EB_TRUE : EB_FALSE;
 
+            if(scs_ptr->static_config.superres_mode > SUPERRES_NONE)
+                scs_ptr->seq_header.enable_superres = 1;
+
             if (scs_ptr->static_config.inter_intra_compound == DEFAULT) {
                 // Set inter-intra mode      Settings
                 // 0                 OFF

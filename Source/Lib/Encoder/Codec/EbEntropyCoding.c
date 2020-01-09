@@ -3260,26 +3260,48 @@ static void write_render_size(struct AomWriteBitBuffer *wb, SequenceControlSet *
     eb_aom_wb_write_literal(wb, render_height_minus_1, 16);
 }
 
-static void write_frame_size(PictureParentControlSet *pcs_ptr, int32_t frame_size_override,
+static AOM_INLINE void write_superres_scale(struct AomWriteBitBuffer *wb,
+                                            PictureParentControlSet *pcs_ptr) {
+    SequenceControlSet *scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
+    Av1Common *cm = pcs_ptr->av1_cm;
+    uint8_t superres_denom = cm->frm_size.superres_denominator;
+
+    if (!scs_ptr->seq_header.enable_superres) {
+        assert(cm->frm_size.superres_denominator == SCALE_NUMERATOR);
+        return;
+    }
+
+    // First bit is whether to to scale or not
+    if (superres_denom == SCALE_NUMERATOR) {
+        eb_aom_wb_write_bit(wb, 0); // no scaling
+    } else {
+        eb_aom_wb_write_bit(wb, 1); // scaling, write scale factor
+        assert(superres_denom >= SUPERRES_SCALE_DENOMINATOR_MIN);
+        assert(superres_denom < SUPERRES_SCALE_DENOMINATOR_MIN + (1 << SUPERRES_SCALE_BITS));
+        eb_aom_wb_write_literal(wb,
+                superres_denom - SUPERRES_SCALE_DENOMINATOR_MIN,
+                SUPERRES_SCALE_BITS);
+    }
+}
+
+static void write_frame_size(PictureParentControlSet *pcs_ptr,
+                             int32_t frame_size_override,
                              struct AomWriteBitBuffer *wb) {
     SequenceControlSet *scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
     (void)(*pcs_ptr);
     (void)frame_size_override;
-    //const int32_t coded_width = cm->superres_upscaled_width - 1;
-    //const int32_t coded_height = cm->superres_upscaled_height - 1;
+    Av1Common *cm = pcs_ptr->av1_cm;
+    const int32_t coded_width = cm->frm_size.superres_upscaled_width - 1;
+    const int32_t coded_height = cm->frm_size.superres_upscaled_height - 1;
 
-    //if (frame_size_override) {
-    //    const SequenceHeader *seq_params = &cm->seq_params;
-    //    int32_t num_bits_width = seq_params->num_bits_width;
-    //    int32_t num_bits_height = seq_params->num_bits_height;
-    //    eb_aom_wb_write_literal(wb, coded_width, num_bits_width);
-    //    eb_aom_wb_write_literal(wb, coded_height, num_bits_height);
-    //}
-    if (scs_ptr->seq_header.enable_superres) {
-        SVT_LOG("ERROR[AN]: enable_superres not supported yet\n");
-        //write_superres_scale(cm, wb);
+    if (frame_size_override) {
+        int32_t num_bits_width = scs_ptr->seq_header.frame_width_bits;
+        int32_t num_bits_height = scs_ptr->seq_header.frame_height_bits;
+        eb_aom_wb_write_literal(wb, coded_width, num_bits_width);
+        eb_aom_wb_write_literal(wb, coded_height, num_bits_height);
     }
 
+    write_superres_scale(wb, pcs_ptr);
     write_render_size(wb, scs_ptr);
 }
 
@@ -3985,15 +4007,16 @@ static void write_uncompressed_header_obu(SequenceControlSet *     scs_ptr /*Av1
 
     if (frm_hdr->frame_type == KEY_FRAME) {
         write_frame_size(pcs_ptr, frame_size_override_flag, wb);
-        //assert(av1_superres_unscaled(cm) ||
-        //    !(cm->allow_intrabc && NO_FILTER_FOR_IBC));
-        if (frm_hdr->allow_screen_content_tools) eb_aom_wb_write_bit(wb, frm_hdr->allow_intrabc);
+        assert(av1_superres_unscaled(&(pcs_ptr->av1_cm->frm_size)) || !(frm_hdr->allow_intrabc));
+        if (frm_hdr->allow_screen_content_tools && av1_superres_unscaled(&(pcs_ptr->av1_cm->frm_size)))
+            eb_aom_wb_write_bit(wb, frm_hdr->allow_intrabc);
         // all eight fbs are refreshed, pick one that will live long enough
         pcs_ptr->fb_of_context_type[REGULAR_FRAME] = 0;
     } else {
         if (frm_hdr->frame_type == INTRA_ONLY_FRAME) {
             write_frame_size(pcs_ptr, frame_size_override_flag, wb);
-            if (frm_hdr->allow_screen_content_tools)
+            assert(av1_superres_unscaled(&(pcs_ptr->av1_cm->frm_size)) || !(frm_hdr->allow_intrabc));
+            if (frm_hdr->allow_screen_content_tools && av1_superres_unscaled(&(pcs_ptr->av1_cm->frm_size)))
                 eb_aom_wb_write_bit(wb, frm_hdr->allow_intrabc);
         } else if (frm_hdr->frame_type == INTER_FRAME || frame_is_sframe(pcs_ptr)) {
             MvReferenceFrame ref_frame;

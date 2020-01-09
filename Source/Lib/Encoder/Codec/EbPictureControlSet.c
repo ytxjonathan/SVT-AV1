@@ -1238,6 +1238,7 @@ EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
     object_ptr->av1_cm->frm_size.frame_height             = init_data_ptr->picture_height;
     object_ptr->av1_cm->frm_size.superres_upscaled_width  = init_data_ptr->picture_width;
     object_ptr->av1_cm->frm_size.superres_upscaled_height = init_data_ptr->picture_height;
+    object_ptr->av1_cm->frm_size.superres_denominator     = SCALE_NUMERATOR;
 
     object_ptr->av1_cm->mi_cols = init_data_ptr->picture_width >> MI_SIZE_LOG2;
     object_ptr->av1_cm->mi_rows = init_data_ptr->picture_height >> MI_SIZE_LOG2;
