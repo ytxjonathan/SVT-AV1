@@ -32,6 +32,21 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+    
+#define DIST_BASED_ME_SEARCH_AREA       1
+
+#define SET_MAX_REF                     1
+
+
+#define SET_MIN_VALUE                   8
+
+
+
+
+
+
+
 #define ENCDEC_SERIAL           1 // No ENCDec Segment. To improme MD rate estimation. Active for M0-M3
 #define SHUT_HME_L1_CHECK      1//Remove usage of ME results for list=0 refIndex=0 to be decide HME centre. Feauture assumes no MRP. and list1 distance = list0 distance.
 #define MUS_ME                 1 //MUlti-Stage ME - HME pruning
@@ -111,7 +126,6 @@ extern "C" {
 #define CHROMA_OPT_0                 1
 #define CHROMA_OPT_1                 0
 
-#define DIST_BASED_ME_SEARCH_AREA    0
 #define DIST_BASED_PME_SEARCH_AREA   0
 
 #define TUNE_AUTO_MAX_PARTITION      1
@@ -3797,10 +3811,10 @@ static const uint16_t search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPP
     {
 #if PRESETS_TUNE
 #if DIST_BASED_ME_SEARCH_AREA // ME
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         { 128,  64,  64,  64,   64,   64,   64,   64,   48,   16,   16,    16,   16 },
         { 160,  64,  64,  64,   64,   64,   64,   64,   48,   16,   16,    16,   16 },
@@ -3816,10 +3830,10 @@ static const uint16_t search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPP
     } , {
 #if M0_OPT
 #if DIST_BASED_ME_SEARCH_AREA  // ME SC
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {480 ,  480,  480,  144,  144,   88,   48,   48,   48,   48,   48,    48,   48 },
         {480 ,  480,  480,  144,  144,   88,   48,   48,   48,   48,   48,    48,   48 },
@@ -3838,10 +3852,10 @@ static const uint16_t search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUP
     {
 #if PRESETS_TUNE
 #if DIST_BASED_ME_SEARCH_AREA // ME
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         { 128,  32,  32,  32,   32,   32,   32,   32,   16,    9,    9,     9,    9 },
         { 160,  32,  32,  32,   32,   32,   32,   32,   16,    9,    9,     9,    9 },
@@ -3857,10 +3871,10 @@ static const uint16_t search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUP
     } , {
 #if M0_OPT
 #if DIST_BASED_ME_SEARCH_AREA // ME SC
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {480 ,  480,  480,  144,  144,   88,   48,   48,   48,   48,   48,    48,   48 },
         {480 ,  480,  480,  144,  144,   88,   48,   48,   48,   48,   48,    48,   48 },
@@ -3878,6 +3892,36 @@ static const uint16_t search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUP
     //     M0    M1    M2    M3    M4    M5    M6    M7    M8    M9    M10    M11    M12
 };
 
+#if SET_MAX_REF
+static const uint16_t search_area_width_max[SC_MAX_LEVEL][INPUT_SIZE_COUNT] = {
+    {
+        {  128, },
+        {  160, },
+        {  192, },
+        {  192, }
+
+    } , {
+        {   320, },
+        {   480, },
+        {   640, },
+        {   640, }
+    }
+};
+static const uint16_t search_area_height_max[SC_MAX_LEVEL][INPUT_SIZE_COUNT] = {
+    {
+        {  128, },
+        {  160, },
+        {  192, },
+        {  192, }
+
+    } , {
+        {   320, },
+        {   480, },
+        {   640, },
+        {   640, }
+    }
+};
+#endif
 /******************************************************************************
                             ME/HME settings for Altref Temporal Filtering
 *******************************************************************************/
@@ -4128,10 +4172,10 @@ static const uint16_t tf_hme_level2_search_area_in_height_array_bottom[SC_MAX_LE
 static const uint16_t tf_search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {
 #if DIST_BASED_ME_SEARCH_AREA // TF
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {  64,   64,   64,   64,   64,   64,   64,   64,   48,   16,   16,    16,   16 },
         { 112,  112,   64,   64,   64,   64,   64,   64,   48,   16,   16,    16,   16 },
@@ -4140,10 +4184,10 @@ static const uint16_t tf_search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_S
 #endif
     } , {
 #if DIST_BASED_ME_SEARCH_AREA // TF SC
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {  64,   64,   64,   64,   64,   64,   64,   64,   48,   16,   16,    16,   16 },
         { 112,  112,   64,   64,   64,   64,   64,   64,   48,   16,   16,    16,   16 },
@@ -4155,10 +4199,10 @@ static const uint16_t tf_search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_S
 static const uint16_t tf_search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {
 #if DIST_BASED_ME_SEARCH_AREA // TF
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {  64,   64,   64,   64,   32,   32,   32,   32,   16,    9,    9,     9,    9 },
         { 112,  112,   64,   64,   32,   32,   32,   32,   16,    9,    9,     9,    9 },
@@ -4167,10 +4211,10 @@ static const uint16_t tf_search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_
 #endif
     } , {
 #if DIST_BASED_ME_SEARCH_AREA // TF SC
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {  64,   64,   64,   64,   32,   32,   32,   32,   16,    9,    9,     9,    9 },
         { 112,  112,   64,   64,   32,   32,   32,   32,   16,    9,    9,     9,    9 },
@@ -4181,7 +4225,6 @@ static const uint16_t tf_search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_
 
     //     M0    M1    M2    M3    M4    M5    M6    M7    M8    M9    M10    M11    M12
 };
-
 static const uint16_t ep_to_pa_block_index[BLOCK_MAX_COUNT_SB_64] = {
     0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,
     1 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,0 ,

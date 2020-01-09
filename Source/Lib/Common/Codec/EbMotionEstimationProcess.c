@@ -170,8 +170,14 @@ EbErrorType signal_derivation_me_kernel_oq(
             context_ptr->me_context_ptr);
 
 #if DIST_BASED_ME_SEARCH_AREA // ME
+#if SET_MAX_REF
+    context_ptr->me_context_ptr->max_search_area_width  = search_area_width_max[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution];
+    context_ptr->me_context_ptr->max_search_area_height = search_area_height_max[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution];
+
+#else
     context_ptr->me_context_ptr->max_search_area_width  = 256;
     context_ptr->me_context_ptr->max_search_area_height = 256;
+#endif
 #endif
 
     if (picture_control_set_ptr->sc_content_detected)
@@ -515,8 +521,15 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
         sequence_control_set_ptr->input_resolution);
 
 #if DIST_BASED_ME_SEARCH_AREA // TF
+#if SET_MAX_REF
+    context_ptr->me_context_ptr->max_search_area_width  = search_area_width_max[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution];
+    context_ptr->me_context_ptr->max_search_area_height = search_area_height_max[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution];
+
+#else
     context_ptr->me_context_ptr->max_search_area_width  = 256;
     context_ptr->me_context_ptr->max_search_area_height = 256;
+
+#endif
 #endif
 
     if (picture_control_set_ptr->sc_content_detected)
