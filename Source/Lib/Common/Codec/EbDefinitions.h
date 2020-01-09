@@ -37,6 +37,7 @@ extern "C" {
 #define DIST_BASED_ME_SEARCH_AREA       1
 
 #define SET_MAX_REF                     1
+#define SET_MAX_V2                      0
 
 
 #define SET_MIN_VALUE                   8
@@ -3811,9 +3812,9 @@ static const uint16_t search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPP
     {
 #if PRESETS_TUNE
 #if DIST_BASED_ME_SEARCH_AREA // ME
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   64,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   32,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   64,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         { 128,  64,  64,  64,   64,   64,   64,   64,   48,   16,   16,    16,   16 },
@@ -3830,9 +3831,9 @@ static const uint16_t search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPP
     } , {
 #if M0_OPT
 #if DIST_BASED_ME_SEARCH_AREA  // ME SC
+        {   32,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   96,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {480 ,  480,  480,  144,  144,   88,   48,   48,   48,   48,   48,    48,   48 },
@@ -3852,9 +3853,9 @@ static const uint16_t search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUP
     {
 #if PRESETS_TUNE
 #if DIST_BASED_ME_SEARCH_AREA // ME
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   64,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   32,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   64,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         { 128,  32,  32,  32,   32,   32,   32,   32,   16,    9,    9,     9,    9 },
@@ -3871,9 +3872,9 @@ static const uint16_t search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUP
     } , {
 #if M0_OPT
 #if DIST_BASED_ME_SEARCH_AREA // ME SC
+        {   32,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   96,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {480 ,  480,  480,  144,  144,   88,   48,   48,   48,   48,   48,    48,   48 },
@@ -3893,6 +3894,37 @@ static const uint16_t search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUP
 };
 
 #if SET_MAX_REF
+#if SET_MAX_V2
+static const uint16_t search_area_width_max[SC_MAX_LEVEL][INPUT_SIZE_COUNT] = {
+    {
+        {  128, },
+        {  256, },
+        {  384, },
+        {  192, }
+
+    } , {
+        {   320, },
+        {   480, },
+        {   640, },
+        {   640, }
+    }
+};
+static const uint16_t search_area_height_max[SC_MAX_LEVEL][INPUT_SIZE_COUNT] = {
+    {
+        {  128, },
+        {  256, },
+        {  384, },
+        {  192, }
+
+    } , {
+        {   320, },
+        {   480, },
+        {   640, },
+        {   640, }
+    }
+};
+#else
+
 static const uint16_t search_area_width_max[SC_MAX_LEVEL][INPUT_SIZE_COUNT] = {
     {
         {  128, },
@@ -3921,6 +3953,7 @@ static const uint16_t search_area_height_max[SC_MAX_LEVEL][INPUT_SIZE_COUNT] = {
         {   640, }
     }
 };
+#endif
 #endif
 /******************************************************************************
                             ME/HME settings for Altref Temporal Filtering
@@ -4172,9 +4205,9 @@ static const uint16_t tf_hme_level2_search_area_in_height_array_bottom[SC_MAX_LE
 static const uint16_t tf_search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {
 #if DIST_BASED_ME_SEARCH_AREA // TF
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   64,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   32,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   64,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {  64,   64,   64,   64,   64,   64,   64,   64,   48,   16,   16,    16,   16 },
@@ -4184,9 +4217,9 @@ static const uint16_t tf_search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_S
 #endif
     } , {
 #if DIST_BASED_ME_SEARCH_AREA // TF SC
+        {   32,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   96,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {  64,   64,   64,   64,   64,   64,   64,   64,   48,   16,   16,    16,   16 },
@@ -4199,9 +4232,9 @@ static const uint16_t tf_search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_S
 static const uint16_t tf_search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {
 #if DIST_BASED_ME_SEARCH_AREA // TF
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   64,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   32,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   64,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {  64,   64,   64,   64,   32,   32,   32,   32,   16,    9,    9,     9,    9 },
@@ -4211,9 +4244,9 @@ static const uint16_t tf_search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_
 #endif
     } , {
 #if DIST_BASED_ME_SEARCH_AREA // TF SC
+        {   32,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
-        {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
+        {   96,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8},
         {   SET_MIN_VALUE,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8,   8}
 #else
         {  64,   64,   64,   64,   32,   32,   32,   32,   16,    9,    9,     9,    9 },
