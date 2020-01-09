@@ -40,7 +40,7 @@ extern "C" {
 #define MUS_ME_FP_SB           1 //MUlti-Stage ME - Full-pel pruning
 #define SKIP_ME_BASED_ON_HME   1 //MUlti-Stage ME - Reduce SR based on HME distortion
 #define REDUCE_ME_FOR_LOW_M_SB   1 //MUlti-Stage ME - Reduce SR based on HME distortion and HME MV
-#define SWITCHED_HALF_PEL_MODE   1 //MUlti-Stage ME - Swich between half_pel mode based on fulpel distortion
+#define SWITCHED_HALF_PEL_MODE   0 //MUlti-Stage ME - Swich between half_pel mode based on fulpel distortion
 #endif
 
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
