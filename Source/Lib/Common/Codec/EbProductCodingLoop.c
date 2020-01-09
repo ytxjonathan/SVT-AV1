@@ -2784,6 +2784,24 @@ void predictive_me_full_pel_search(
     EbReferenceObject *refObj = picture_control_set_ptr->ref_pic_ptr_array[list_idx][ref_idx]->object_ptr;
     EbPictureBufferDesc *ref_pic = hbd_mode_decision ?
         refObj->reference_picture16bit : refObj->reference_picture;
+
+
+
+#if FIXED_PME_LARGE_SEARCH_AREA
+    // Search area adjustment
+    if ((context_ptr->cu_origin_x + (mvx >> 3) + search_position_start_x) < (-ref_pic->origin_x + 1))
+        search_position_start_x = (-ref_pic->origin_x + 1) - (context_ptr->cu_origin_x + (mvx >> 3));
+
+    if ((context_ptr->cu_origin_x + (mvx >> 3) + search_position_end_x) > (ref_pic->origin_x + ref_pic->max_width - 1))
+        search_position_end_x = (ref_pic->origin_x + ref_pic->max_width - 1) - (context_ptr->cu_origin_x + (mvx >> 3));
+
+    if ((context_ptr->cu_origin_y + (mvy >> 3) + search_position_start_y) < (-ref_pic->origin_y + 1))
+        search_position_start_y = (-ref_pic->origin_y + 1) - (context_ptr->cu_origin_y + (mvy >> 3));
+        
+    if ((context_ptr->cu_origin_y + (mvy >> 3) + search_position_end_y) > (ref_pic->origin_y + ref_pic->max_height - 1))
+        search_position_end_y = (ref_pic->origin_y + ref_pic->max_height - 1) - (context_ptr->cu_origin_y + (mvy >> 3) + search_position_end_y);
+#endif
+
     for (int32_t refinement_pos_x = search_position_start_x; refinement_pos_x <= search_position_end_x; ++refinement_pos_x) {
         for (int32_t refinement_pos_y = search_position_start_y; refinement_pos_y <= search_position_end_y; ++refinement_pos_y) {
 
