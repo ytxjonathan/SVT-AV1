@@ -44,7 +44,11 @@ extern "C" {
 #define SKIP_PD_PASS_2          0
 #define GM_ME_OPT               0
 #define GM_ME_OPT2              0
-#define GM_ME_OPT3              0
+#define GM_ME_OPT3              1
+#define SPARCE_CHECK            0
+#define OPT_REC_ME              1
+#define USE_INTRA_FOR_EARLY_EXIT     0
+
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 
 

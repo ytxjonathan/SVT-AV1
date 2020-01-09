@@ -1634,7 +1634,9 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->prune_ref_based_me = 1;
         else
             picture_control_set_ptr->prune_ref_based_me = 0;
-
+#if SPARCE_CHECK
+        picture_control_set_ptr->prune_ref_based_me = 1;
+#endif
 #endif
     return return_error;
 }

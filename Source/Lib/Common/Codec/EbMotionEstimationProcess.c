@@ -1040,7 +1040,14 @@ void* motion_estimation_kernel(void *input_ptr)
                             }
                         }
                         context_ptr->me_context_ptr->me_alt_ref = EB_FALSE;
+#if USE_INTRA_FOR_EARLY_EXIT
+                        post_open_loop_intra_search_sb(
+                            picture_control_set_ptr,
+                            sb_index,
+                            context_ptr,
+                            input_picture_ptr);
 
+#endif
                         motion_estimate_lcu(
                             picture_control_set_ptr,
                             sb_index,

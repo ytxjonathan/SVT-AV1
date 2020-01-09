@@ -489,6 +489,10 @@ extern "C" {
         uint8_t                      is_translation[2];
         int16_t                      is_g_mvx[2][2];
 #endif
+#if SPARCE_CHECK
+        uint8_t                      sr_dw_y[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+        uint8_t                      sr_dw_x[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+#endif
     } MeContext;
 
     typedef uint64_t(*EB_ME_DISTORTION_FUNC)(
