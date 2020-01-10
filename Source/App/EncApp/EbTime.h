@@ -1,7 +1,5 @@
-/*
-* Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
+/*!< Copyright(c) 2019 Intel Corporation
+* SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 #ifndef EbTime_h
 #define EbTime_h
@@ -10,7 +8,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif // __cplusplus
+#endif /*!< __cplusplus */
 
 #define NANOSECS_PER_SEC ((uint32_t)(1000000000L))
 
@@ -23,7 +21,7 @@ void injector(uint64_t processed_frame_count, uint32_t injector_frame_rate);
 
 #ifdef __cplusplus
 }
-#endif // __cplusplus
+#endif /*!< __cplusplus */
 
-#endif // EbTime_h
-/* File EOF */
+#endif /*!< EbTime_h */
+/*!< File EOF */
