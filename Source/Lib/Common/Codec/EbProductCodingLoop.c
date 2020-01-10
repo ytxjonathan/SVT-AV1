@@ -2797,7 +2797,7 @@ void predictive_me_full_pel_search(
 
     if ((context_ptr->cu_origin_y + (mvy >> 3) + search_position_start_y) < (-ref_pic->origin_y + 1))
         search_position_start_y = (-ref_pic->origin_y + 1) - (context_ptr->cu_origin_y + (mvy >> 3));
-        
+
     if ((context_ptr->cu_origin_y + (mvy >> 3) + search_position_end_y) > (ref_pic->origin_y + ref_pic->max_height - 1))
         search_position_end_y = (ref_pic->origin_y + ref_pic->max_height - 1) - (context_ptr->cu_origin_y + (mvy >> 3) + search_position_end_y);
 #endif
