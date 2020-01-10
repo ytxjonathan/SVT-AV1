@@ -115,7 +115,7 @@ extern "C" {
 #define DIST_BASED_ME_SEARCH_AREA    0
 #define DIST_BASED_PME_SEARCH_AREA   0
 #define FIXED_PME_LARGE_SEARCH_AREA  1
-
+#define FP_QUANT_BOTH_INTRA_INTER    1
 #define TUNE_AUTO_MAX_PARTITION      1
 #define FASTER_SQ_WEIGHT             0
 #define ENHANCED_SQ_WEIGHT           1
