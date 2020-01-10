@@ -43,6 +43,7 @@ extern "C" {
 #define SWITCHED_HALF_PEL_MODE   0 //MUlti-Stage ME - Swich between half_pel mode based on fulpel distortion
 #define OPT_REC_ME              1
 #define OPT_REC_SUBP            1
+#define REDUCE_NSQ_COMP         1
 #endif
 
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering

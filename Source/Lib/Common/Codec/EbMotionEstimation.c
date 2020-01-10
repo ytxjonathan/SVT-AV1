@@ -16839,6 +16839,10 @@ if (context_ptr->me_alt_ref == EB_FALSE) {
         mePuResult->total_me_candidate_index[pu_index] =
             MIN(total_me_candidate_index, ME_RES_CAND_MRP_MODE_0);
         // Assining the ME candidates to the me Results buffer
+#if REDUCE_NSQ_COMP
+        uint8_t adjusted_total_me_candidate_index = total_me_candidate_index;
+        uint64_t best =  MAX_CU_COST;
+#endif
         for (candidateIndex = 0; candidateIndex < total_me_candidate_index;
              ++candidateIndex) {
             me_candidate =
@@ -16846,6 +16850,12 @@ if (context_ptr->me_alt_ref == EB_FALSE) {
             picture_control_set_ptr->me_results[sb_index]
                 ->me_candidate[pu_index][candidateIndex]
                 .distortion = me_candidate->distortion;
+#if REDUCE_NSQ_COMP
+            uint8_t  BIGGER_THAN_TH = 10;
+            best = candidateIndex == 0 ? me_candidate->distortion : best;
+            if ((me_candidate->distortion - best) * 100  > BIGGER_THAN_TH*best)
+                adjusted_total_me_candidate_index--;
+#endif
             picture_control_set_ptr->me_results[sb_index]
                 ->me_candidate[pu_index][candidateIndex]
                 .direction = me_candidate->prediction_direction;
@@ -16862,7 +16872,11 @@ if (context_ptr->me_alt_ref == EB_FALSE) {
                 ->me_candidate[pu_index][candidateIndex]
                 .ref1_list = me_candidate->ref1_list;
         }
-
+#if REDUCE_NSQ_COMP
+        //printf("%d\t%d\t%d\n", total_me_candidate_index, adjusted_total_me_candidate_index,total_me_candidate_index - adjusted_total_me_candidate_index);
+        mePuResult->total_me_candidate_index[pu_index] =
+        MIN(adjusted_total_me_candidate_index, ME_RES_CAND_MRP_MODE_0);
+#endif
         for (listIndex = REF_LIST_0; listIndex <= numOfListToSearch;
              ++listIndex) {
             num_of_ref_pic_to_search =
