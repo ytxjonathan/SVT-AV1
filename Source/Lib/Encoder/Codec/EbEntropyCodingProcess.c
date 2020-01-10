@@ -400,7 +400,7 @@ void *entropy_coding_kernel(void *input_ptr) {
 
         sb_size_log2       = (uint8_t)Log2f(sb_sz);
         context_ptr->sb_sz = sb_sz;
-        pic_width_in_sb    = (scs_ptr->seq_header.max_frame_width + sb_sz - 1) >> sb_size_log2;
+        pic_width_in_sb    = (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + sb_sz - 1) >> sb_size_log2;
         if (pcs_ptr->parent_pcs_ptr->av1_cm->tiles_info.tile_cols *
                 pcs_ptr->parent_pcs_ptr->av1_cm->tiles_info.tile_rows ==
             1)

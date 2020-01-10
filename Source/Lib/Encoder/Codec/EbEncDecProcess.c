@@ -1190,7 +1190,7 @@ void pad_ref_and_set_flags(PictureControlSet *pcs_ptr, SequenceControlSet *scs_p
 void copy_statistics_to_ref_obj_ect(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) {
     pcs_ptr->intra_coded_area =
         (100 * pcs_ptr->intra_coded_area) /
-        (scs_ptr->seq_header.max_frame_width * scs_ptr->seq_header.max_frame_height);
+        (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width * scs_ptr->seq_header.max_frame_height);
     if (pcs_ptr->slice_type == I_SLICE) pcs_ptr->intra_coded_area = 0;
 
     ((EbReferenceObject *)pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)
@@ -2547,7 +2547,7 @@ void *enc_dec_kernel(void *input_ptr) {
         sb_sz              = (uint8_t)scs_ptr->sb_size_pix;
         sb_size_log2       = (uint8_t)Log2f(sb_sz);
         context_ptr->sb_sz = sb_sz;
-        pic_width_in_sb    = (scs_ptr->seq_header.max_frame_width + sb_sz - 1) >> sb_size_log2;
+        pic_width_in_sb    = (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + sb_sz - 1) >> sb_size_log2;
         end_of_row_flag    = EB_FALSE;
         sb_row_index_start = sb_row_index_count = 0;
         context_ptr->tot_intra_coded_area       = 0;

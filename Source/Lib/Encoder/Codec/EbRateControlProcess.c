@@ -4875,7 +4875,7 @@ static void sb_qp_derivation(PictureControlSet *pcs_ptr) {
         double   q_val, picture_q_val;
         uint32_t me_sb_size = scs_ptr->sb_sz;
         uint32_t me_pic_width_in_sb =
-            (scs_ptr->seq_header.max_frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
+            (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
         uint32_t me_pic_height_in_sb =
             (scs_ptr->seq_header.max_frame_height + me_sb_size - 1) / me_sb_size;
         int max_qp_scaling_avg_comp =

@@ -2112,7 +2112,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
     SbStat *sb_stat_ptr = &(pcs_ptr->parent_pcs_ptr->sb_stat_array[sb_addr]);
     // SB Stats
     uint32_t sb_width =
-        MIN(scs_ptr->sb_size_pix, scs_ptr->seq_header.max_frame_width - sb_origin_x);
+        MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x);
     uint32_t sb_height =
         MIN(scs_ptr->sb_size_pix, scs_ptr->seq_header.max_frame_height - sb_origin_y);
     // MV merge mode
@@ -3625,7 +3625,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                                 (context_ptr->mv_unit.mv[REF_LIST_0].y >> 3));
                                     origin_x =
                                         MIN(origin_x,
-                                            scs_ptr->seq_header.max_frame_width - blk_geom->bwidth);
+                                            pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - blk_geom->bwidth);
                                     origin_y = MIN(
                                         origin_y,
                                         scs_ptr->seq_header.max_frame_height - blk_geom->bheight);
@@ -3634,7 +3634,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                     uint16_t sb_origin_y =
                                         origin_y / context_ptr->sb_sz * context_ptr->sb_sz;
                                     uint32_t pic_width_in_sb =
-                                        (scs_ptr->seq_header.max_frame_width + scs_ptr->sb_sz - 1) /
+                                        (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) /
                                         scs_ptr->sb_sz;
                                     uint16_t sb_index =
                                         sb_origin_x / context_ptr->sb_sz +
@@ -3724,7 +3724,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                             (context_ptr->mv_unit.mv[REF_LIST_1].y >> 3));
                                 origin_x =
                                     MIN(origin_x,
-                                        scs_ptr->seq_header.max_frame_width - blk_geom->bwidth);
+                                        pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - blk_geom->bwidth);
                                 origin_y =
                                     MIN(origin_y,
                                         scs_ptr->seq_header.max_frame_height - blk_geom->bheight);
@@ -3733,7 +3733,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                 uint16_t sb_origin_y =
                                     origin_y / context_ptr->sb_sz * context_ptr->sb_sz;
                                 uint32_t pic_width_in_sb =
-                                    (scs_ptr->seq_header.max_frame_width + scs_ptr->sb_sz - 1) /
+                                    (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) /
                                     scs_ptr->sb_sz;
                                 uint16_t sb_index =
                                     sb_origin_x / context_ptr->sb_sz +
@@ -3886,7 +3886,7 @@ if (dlf_enable_flag && pcs_ptr->parent_pcs_ptr->loop_filter_mode == 1) {
     if (pcs_ptr->parent_pcs_ptr->frm_hdr.loop_filter_params.filter_level[0] ||
         pcs_ptr->parent_pcs_ptr->frm_hdr.loop_filter_params.filter_level[1]) {
         uint8_t last_col =
-            ((sb_origin_x) + sb_width == scs_ptr->seq_header.max_frame_width) ? 1 : 0;
+            ((sb_origin_x) + sb_width == pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width) ? 1 : 0;
         loop_filter_sb(
             recon_buffer, pcs_ptr, NULL, sb_origin_y >> 2, sb_origin_x >> 2, 0, 3, last_col);
     }
