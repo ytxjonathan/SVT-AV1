@@ -377,111 +377,12 @@ EbErrorType copy_recon_enc(SequenceControlSet *scs_ptr,
     return EB_ErrorNone;
 }
 
-// 8 bit downsample with only 2x1, phase-0, filter
-void downsample_width(const uint8_t *input_samples,      // input parameter, input samples Ptr
-                      uint32_t input_stride,       // input parameter, input stride
-                      uint32_t input_area_width,   // input parameter, input area width
-                      uint32_t input_area_height,  // input parameter, input area height
-                      uint8_t *decim_samples,      // output parameter, decimated samples Ptr
-                      uint32_t decim_stride,       // input parameter, output stride
-                      uint32_t decim_step){         // input parameter, decimation amount in pixels
-    uint32_t horizontal_index;
-    uint32_t vertical_index;
-    uint32_t decim_horizontal_index;
-    const uint32_t half_decim_step = decim_step >> 1;
-
-    for (vertical_index = 0; vertical_index < input_area_height; vertical_index++) {
-        for (horizontal_index = half_decim_step, decim_horizontal_index = 0; horizontal_index < input_area_width; horizontal_index += decim_step, decim_horizontal_index++) {
-            uint32_t sum = (uint32_t)input_samples[horizontal_index - 1] + (uint32_t)input_samples[horizontal_index];
-            decim_samples[decim_horizontal_index] = (uint8_t)((sum + 1) >> 1);
-        }
-        input_samples += input_stride;
-        decim_samples += decim_stride;
-    }
-}
-
-void downsample_width_YUV(SequenceControlSet *scs_ptr,
-                          EbPictureBufferDesc *src_ptr,
-                          EbPictureBufferDesc *dst_ptr){
-    uint16_t ss_x = scs_ptr->subsampling_x;
-    uint16_t ss_y = scs_ptr->subsampling_y;
-
-    downsample_width(
-            &src_ptr->buffer_y[src_ptr->origin_x + src_ptr->origin_y * src_ptr->stride_y],
-            src_ptr->stride_y,
-            src_ptr->width,
-            src_ptr->height,
-            &dst_ptr->buffer_y[dst_ptr->origin_x + dst_ptr->origin_y*dst_ptr->stride_y],
-            dst_ptr->stride_y,
-            2);
-
-    downsample_width(
-            &src_ptr->buffer_cb[(src_ptr->origin_x>>ss_x) + (src_ptr->origin_y>>ss_y) * src_ptr->stride_cb],
-            src_ptr->stride_cb,
-            src_ptr->width >> ss_x,
-            src_ptr->height >> ss_y,
-            &dst_ptr->buffer_cb[(dst_ptr->origin_x>>ss_x) + (dst_ptr->origin_y>>ss_y)*dst_ptr->stride_cb],
-            dst_ptr->stride_cb,
-            2);
-
-    downsample_width(
-            &src_ptr->buffer_cr[(src_ptr->origin_x>>ss_x) + (src_ptr->origin_y>>ss_y) * src_ptr->stride_cr],
-            src_ptr->stride_cr,
-            src_ptr->width >> ss_x,
-            src_ptr->height >> ss_y,
-            &dst_ptr->buffer_cr[(dst_ptr->origin_x>>ss_x) + (dst_ptr->origin_y>>ss_y)*dst_ptr->stride_cr],
-            dst_ptr->stride_cr,
-            2);
-}
-
-void replace_recon_pic(EbPictureBufferDesc *recon_ptr,
-                   PictureControlSet *pcs_ptr){
-    if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
-        ((EbReferenceObject*)pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture = recon_ptr;
-    else
-        pcs_ptr->recon_picture_ptr = recon_ptr;
-}
-
 void get_recon_pic(PictureControlSet *pcs_ptr,
                EbPictureBufferDesc **recon_ptr){
     if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
         *recon_ptr = ((EbReferenceObject*)pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture;
     else
         *recon_ptr = pcs_ptr->recon_picture_ptr;
-}
-
-// This function applies the normative upscaling of the recontructed picture if downscaling was used before encoding
-void downscale_recon_for_test(EbPictureBufferDesc *recon_ptr_half,
-                              PictureControlSet *pcs_ptr,
-                              SequenceControlSet *scs_ptr){
-    // Set these parameters for testing since they are not correctly populated yet
-    EbPictureBufferDesc *recon_ptr;
-    const int num_planes = scs_ptr->seq_header.color_config.mono_chrome ? 1 : MAX_MB_PLANE;
-
-    get_recon_pic(pcs_ptr,
-              &recon_ptr);
-
-    EbErrorType return_error = copy_recon_enc(scs_ptr, recon_ptr,
-                                              recon_ptr_half, num_planes, 1);
-    if (return_error != EB_ErrorNone) {
-        recon_ptr_half = NULL;
-        assert(0);
-    }
-
-    downsample_width_YUV(scs_ptr, recon_ptr, recon_ptr_half);
-
-#if DEBUG_UPSCALING
-    save_YUV_to_file("recon_640x720.yuv", recon_ptr_half->buffer_y, recon_ptr_half->buffer_cb, recon_ptr_half->buffer_cr,
-                     recon_ptr_half->width >> 1, recon_ptr_half->height,
-                     recon_ptr_half->stride_y, recon_ptr_half->stride_cb, recon_ptr_half->stride_cr,
-                     recon_ptr_half->origin_y, recon_ptr_half->origin_x,
-                     1, 1);
-#endif
-
-    replace_recon_pic(recon_ptr_half,
-                  pcs_ptr);
-
-
 }
 
 void eb_av1_superres_upscale_frame(struct Av1Common *cm,
@@ -604,83 +505,23 @@ void *rest_kernel(void *input_ptr) {
                     cm->rst_info[2].frame_restoration_type != RESTORE_NONE) {
                     
                     // ------- start: Normative upscaling frame - super-resolution tool
-                    // Right now, since the downscaling and encoding of the donwscaled picture is not yet implemented, a small test was added,
-                    // which will downscale the reconstructed picture by a factor of 2 (denominator 16) and upscale normatively back to the
-                    // original recon dimensions - no change is done to the reconstructed picture for this test
-
-                    // TODO: remove the downscaling and YUV output
                     if(!av1_superres_unscaled(&cm->frm_size)) {
-                        cm->frm_size.superres_upscaled_width = cm->frm_size.frame_width;
-                        cm->frm_size.frame_width = cm->frm_size.frame_width >> 1; // this will be the encoded width (not the source width as it is now)
-                        cm->frm_size.superres_denominator = 16; // denominator
-                        cm->mi_cols = cm->mi_cols >> 1;
-                        cm->mi_stride = cm->mi_stride >> 1;
 
-                        EbPictureBufferDesc recon_ptr_half;
-                        EbPictureBufferDesc *curr_recon_ptr;
-                        EbPictureBufferDesc *recon_save_ptr;
-
-                        get_recon_pic(pcs_ptr,
-                                      &recon_save_ptr);
-
-#if DEBUG_UPSCALING
-                        save_YUV_to_file("recon_before_1280x720.yuv", recon_save_ptr->buffer_y,
-                                         recon_save_ptr->buffer_cb, recon_save_ptr->buffer_cr,
-                                         recon_save_ptr->width, recon_save_ptr->height,
-                                         recon_save_ptr->stride_y, recon_save_ptr->stride_cb, recon_save_ptr->stride_cr,
-                                         recon_save_ptr->origin_y, recon_save_ptr->origin_x,
-                                         1, 1);
-#endif
-
-                        downscale_recon_for_test(&recon_ptr_half,
-                                                 pcs_ptr,
-                                                 scs_ptr);
+                        // adjust parameters: number of SBs, mi
+                        uint16_t picture_sb_width = (uint16_t)(
+                                (cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
+                        cm->mi_stride = picture_sb_width * (BLOCK_SIZE_64 / 4);
+                        cm->mi_cols = cm->frm_size.frame_width >> MI_SIZE_LOG2;
 
                         eb_av1_superres_upscale_frame(cm,
                                                       pcs_ptr,
                                                       scs_ptr);
 
-                        get_recon_pic(pcs_ptr,
-                                      &curr_recon_ptr);
-
-#if DEBUG_UPSCALING
-                        save_YUV_to_file("recon_donscaled_av1upscaled_1280x720.yuv", curr_recon_ptr->buffer_y,
-                                         curr_recon_ptr->buffer_cb, curr_recon_ptr->buffer_cr,
-                                         curr_recon_ptr->width, curr_recon_ptr->height,
-                                         curr_recon_ptr->stride_y, curr_recon_ptr->stride_cb, curr_recon_ptr->stride_cr,
-                                         curr_recon_ptr->origin_y, curr_recon_ptr->origin_x,
-                                         1, 1);
-#endif
-
-                        replace_recon_pic(recon_save_ptr,
-                                          pcs_ptr);
-
-                        get_recon_pic(pcs_ptr,
-                                      &curr_recon_ptr);
-
-#if DEBUG_UPSCALING
-                        // debug only
-                        save_YUV_to_file("recon_after_1280x720.yuv", curr_recon_ptr->buffer_y,
-                                         curr_recon_ptr->buffer_cb, curr_recon_ptr->buffer_cr,
-                                         curr_recon_ptr->width, curr_recon_ptr->height,
-                                         curr_recon_ptr->stride_y, curr_recon_ptr->stride_cb, curr_recon_ptr->stride_cr,
-                                         curr_recon_ptr->origin_y, curr_recon_ptr->origin_x,
-                                         1, 1);
-#endif
-
-                        // free the memory
-                        EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_y);
-                        EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_cb);
-                        EB_FREE_ALIGNED_ARRAY(recon_ptr_half.buffer_cr);
-
-                        // restore back original info in cm for this test
-                        cm->frm_size.frame_width = cm->frm_size.frame_width
-                                << 1; // this will be the encoded width (not the source width as it is now)
-                        cm->frm_size.superres_denominator = 8; // denominator
-                        cm->mi_cols = cm->mi_cols << 1;
-                        cm->mi_stride = cm->mi_stride << 1;
+                        picture_sb_width = (uint16_t)(
+                                (cm->frm_size.superres_upscaled_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
+                        cm->mi_stride = picture_sb_width * (BLOCK_SIZE_64 / 4);
+                        cm->mi_cols = cm->frm_size.superres_upscaled_width >> MI_SIZE_LOG2;
                     }
-
                     // ------- end: Normative upscaling frame - super-resolution tool
 
                     eb_av1_loop_restoration_filter_frame(cm->frame_to_show, cm, 0);
