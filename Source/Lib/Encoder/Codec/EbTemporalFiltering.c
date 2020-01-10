@@ -2146,21 +2146,52 @@ EbErrorType downscaled_source_buffer_desc_ctor(EbPictureBufferDesc **picture_ptr
     EbPictureBufferDescInitData initData;
 
     initData.buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK;
-    initData.max_width = spr_params.encoding_width; // width = width / 2
+    initData.max_width = spr_params.encoding_width;
     initData.max_height = spr_params.encoding_height;
     initData.bit_depth = picture_ptr_for_reference->bit_depth;
     initData.color_format = picture_ptr_for_reference->color_format;
     initData.split_mode = EB_TRUE;
-    initData.left_padding = PAD_VALUE; // or PAD_VALUE_SCALED?
-    initData.right_padding = PAD_VALUE;
-    initData.top_padding = PAD_VALUE;
-    initData.bot_padding = PAD_VALUE;
+    initData.left_padding = picture_ptr_for_reference->origin_x;
+    initData.right_padding = picture_ptr_for_reference->origin_x;
+    initData.top_padding = picture_ptr_for_reference->origin_y;
+    initData.bot_padding = picture_ptr_for_reference->origin_y;
 
     EB_NEW(*picture_ptr,
            eb_picture_buffer_desc_ctor,
            (EbPtr)&initData);
 
     return EB_ErrorNone;
+}
+
+void scale_pcs_params(SequenceControlSet* scs_ptr,
+                      PictureParentControlSet* pcs_ptr,
+                      superres_params_type spr_params,
+                      uint16_t source_width,
+                      uint16_t source_height){
+
+    Av1Common* cm = pcs_ptr->av1_cm;
+
+    // frame sizes
+    cm->frm_size.frame_width = spr_params.encoding_width;
+    cm->frm_size.frame_height = spr_params.encoding_height;
+    cm->frm_size.render_width = source_width;
+    cm->frm_size.render_height = source_height;
+    cm->frm_size.frame_height = spr_params.encoding_height;
+    cm->frm_size.superres_denominator = spr_params.superres_denom;
+
+    // number of SBs
+    const uint16_t picture_sb_width = (uint16_t)(
+            (spr_params.encoding_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
+    const uint16_t picture_sb_height = (uint16_t)(
+            (spr_params.encoding_height + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
+
+    pcs_ptr->sb_total_count = picture_sb_width * picture_sb_height;
+
+    // mi sizes
+    cm->mi_stride = picture_sb_width * (BLOCK_SIZE_64 / 4);
+    cm->mi_cols = spr_params.encoding_width >> MI_SIZE_LOG2;
+    cm->mi_rows = spr_params.encoding_height >> MI_SIZE_LOG2;
+
 }
 
 void scale_frame_if_necessary(SequenceControlSet* scs_ptr,
@@ -2205,6 +2236,9 @@ void scale_frame_if_necessary(SequenceControlSet* scs_ptr,
         pcs_ptr->enhanced_picture_ptr = pcs_ptr->enhanced_downscaled_picture_ptr; // just a test, delete
 
     }
+
+    scale_pcs_params(scs_ptr, pcs_ptr, spr_params, input_picture_ptr->width, input_picture_ptr->height);
+
     // ---- super-resolution ---- end of processing
 }
 
@@ -2238,9 +2272,6 @@ EbErrorType svt_av1_init_temporal_filtering(
     eb_block_on_mutex(picture_control_set_ptr_central->temp_filt_mutex);
     if (picture_control_set_ptr_central->temp_filt_prep_done == 0) {
         picture_control_set_ptr_central->temp_filt_prep_done = 1;
-
-        scale_frame_if_necessary(picture_control_set_ptr_central->scs_ptr,
-                                 picture_control_set_ptr_central);
 
         // allocate 16 bit buffer
         if (is_highbd) {
@@ -2391,6 +2422,9 @@ EbErrorType svt_av1_init_temporal_filtering(
             ((picture_control_set_ptr_central->filtered_sse_uv << 8) /
              (central_picture_ptr->width >> ss_x) / (central_picture_ptr->height >> ss_y)) /
             2;
+
+        scale_frame_if_necessary(picture_control_set_ptr_central->scs_ptr,
+                                 picture_control_set_ptr_central);
 
         // signal that temp filt is done
         eb_post_semaphore(picture_control_set_ptr_central->temp_filt_done_semaphore);
