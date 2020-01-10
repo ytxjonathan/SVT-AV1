@@ -740,7 +740,12 @@ extern "C" {
         uint16_t                              full_sb_count;
         EbBool                                init_pred_struct_position_flag;
         int8_t                                hierarchical_layers_diff;
+#if DIST_BASED_ME_SEARCH_AREA
+        // Distance based ME SR Flag
+        EbBool                                distance_me_flag;
 
+
+#endif
         // HME Flags
         EbBool                                enable_hme_flag;
         EbBool                                enable_hme_level0_flag;

@@ -129,9 +129,13 @@ void* set_me_hme_params_oq(
     me_context_ptr->hme_level2_search_area_in_height_array[1] = hme_level2_search_area_in_height_array_bottom[sc_content_detected][input_resolution][hmeMeLevel];
 
     // ME
+#if DIST_BASED_ME_SEARCH_AREA
+    me_context_ptr->search_area_width  = picture_control_set_ptr->distance_me_flag  ? min_search_area_width[sc_content_detected][input_resolution][hmeMeLevel] : search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->search_area_height = picture_control_set_ptr->distance_me_flag  ? min_search_area_height[sc_content_detected][input_resolution][hmeMeLevel] : search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
+#else
     me_context_ptr->search_area_width = search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
     me_context_ptr->search_area_height = search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
-
+#endif
     assert(me_context_ptr->search_area_width  <= MAX_SEARCH_AREA_WIDTH  && "increase MAX_SEARCH_AREA_WIDTH" );
     assert(me_context_ptr->search_area_height <= MAX_SEARCH_AREA_HEIGHT && "increase MAX_SEARCH_AREA_HEIGHT");
 
@@ -162,6 +166,11 @@ EbErrorType signal_derivation_me_kernel_oq(
 
     if (hmeMeLevel <= ENC_M1)
         hmeMeLevel = ENC_M0;
+
+    picture_control_set_ptr->distance_me_flag = 0;
+    if (hmeMeLevel == 0)
+        picture_control_set_ptr->distance_me_flag = 1;
+
 #endif
     if (sequence_control_set_ptr->static_config.use_default_me_hme)
         set_me_hme_params_oq(
@@ -176,8 +185,10 @@ EbErrorType signal_derivation_me_kernel_oq(
             context_ptr->me_context_ptr);
 
 #if DIST_BASED_ME_SEARCH_AREA // ME
-    context_ptr->me_context_ptr->max_search_area_width  = search_area_width_max[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
-    context_ptr->me_context_ptr->max_search_area_height = search_area_height_max[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+    if (picture_control_set_ptr->distance_me_flag) {
+        context_ptr->me_context_ptr->max_search_area_width = max_search_area_width[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+        context_ptr->me_context_ptr->max_search_area_height = max_search_area_height[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+    }
 #endif
 
     if (picture_control_set_ptr->sc_content_detected)
@@ -488,8 +499,13 @@ void* tf_set_me_hme_params_oq(
     me_context_ptr->hme_level2_search_area_in_height_array[1] = tf_hme_level2_search_area_in_height_array_bottom[sc_content_detected][input_resolution][hmeMeLevel];
 
     // ME
-    me_context_ptr->search_area_width = tf_search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
+#if DIST_BASED_ME_SEARCH_AREA
+    me_context_ptr->search_area_width  = picture_control_set_ptr->distance_me_flag  ? min_tf_search_area_width[sc_content_detected][input_resolution][hmeMeLevel] : tf_search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
+    me_context_ptr->search_area_height = picture_control_set_ptr->distance_me_flag  ? min_tf_search_area_height[sc_content_detected][input_resolution][hmeMeLevel] : tf_search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
+#else
+    me_context_ptr->search_area_width  = tf_search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
     me_context_ptr->search_area_height = tf_search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
+#endif
 
     assert(me_context_ptr->search_area_width <= MAX_SEARCH_AREA_WIDTH && "increase MAX_SEARCH_AREA_WIDTH");
     assert(me_context_ptr->search_area_height <= MAX_SEARCH_AREA_HEIGHT && "increase MAX_SEARCH_AREA_HEIGHT");
@@ -519,6 +535,10 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
 #if DIST_BASED_ME_SEARCH_AREA
     uint8_t  hmeMeLevel = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
 
+    picture_control_set_ptr->distance_me_flag = 0;
+    if (hmeMeLevel == 0)
+        picture_control_set_ptr->distance_me_flag = 1;
+
 #endif
 
     // Set ME/HME search regions
@@ -529,8 +549,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
         sequence_control_set_ptr->input_resolution);
 
 #if DIST_BASED_ME_SEARCH_AREA // TF
-    context_ptr->me_context_ptr->max_search_area_width  = search_area_width_max[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
-    context_ptr->me_context_ptr->max_search_area_height = search_area_height_max[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+
+    if (picture_control_set_ptr->distance_me_flag) {
+        context_ptr->me_context_ptr->max_search_area_width = max_tf_search_area_width[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+        context_ptr->me_context_ptr->max_search_area_height = max_tf_search_area_height[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+    }
 #endif
 
     if (picture_control_set_ptr->sc_content_detected)

@@ -13818,32 +13818,46 @@ void integer_search_sb(
             x_search_center = context_ptr->hme_results[list_index][ref_pic_index].hme_sc_x;
             y_search_center = context_ptr->hme_results[list_index][ref_pic_index].hme_sc_y;
 #if DIST_BASED_ME_SEARCH_AREA
-            search_area_width = context_ptr->search_area_width;
-            search_area_height = context_ptr->search_area_height;
+            if (picture_control_set_ptr->distance_me_flag) {
+                search_area_width = context_ptr->search_area_width;
+                search_area_height = context_ptr->search_area_height;
 
-            uint16_t dist = (context_ptr->me_alt_ref == EB_TRUE) ?
-                ABS((int16_t)(context_ptr->tf_frame_index - context_ptr->tf_index_center)) :
-                ABS((int16_t)(picture_control_set_ptr->picture_number - picture_control_set_ptr->ref_pic_poc_array[list_index][ref_pic_index]));
+                uint16_t dist = (context_ptr->me_alt_ref == EB_TRUE) ?
+                    ABS((int16_t)(context_ptr->tf_frame_index - context_ptr->tf_index_center)) :
+                    ABS((int16_t)(picture_control_set_ptr->picture_number - picture_control_set_ptr->ref_pic_poc_array[list_index][ref_pic_index]));
 
-            search_area_width = MIN((search_area_width  * dist), context_ptr->max_search_area_width);
-            search_area_height = MIN((search_area_height * dist), context_ptr->max_search_area_height);
+                search_area_width = MIN((search_area_width  * dist), context_ptr->max_search_area_width);
+                search_area_height = MIN((search_area_height * dist), context_ptr->max_search_area_height);
 
 #if SKIP_ME_BASED_ON_HME
-            // Constrain x_ME to be a multiple of 8 (round up)
-            // Update ME search reagion size based on hme-data
-            if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
-                search_area_width = ((search_area_width / 8) + 7) & ~0x07;
-                search_area_height = (search_area_height / 8);
-            }
-            else {
+                // Constrain x_ME to be a multiple of 8 (round up)
+                // Update ME search reagion size based on hme-data
+                if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
+                    search_area_width = ((search_area_width / 8) + 7) & ~0x07;
+                    search_area_height = (search_area_height / 8);
+                }
+                else {
+                    search_area_width = (search_area_width + 7) & ~0x07;
+                    search_area_height = search_area_height;
+                }
+#else
+                // Constrain x_ME to be a multiple of 8 (round up)
                 search_area_width = (search_area_width + 7) & ~0x07;
                 search_area_height = search_area_height;
-            }
-#else
-            // Constrain x_ME to be a multiple of 8 (round up)
-            search_area_width = (search_area_width + 7) & ~0x07;
-            search_area_height = search_area_height;
 #endif
+        }
+            else {
+                // Constrain x_ME to be a multiple of 8 (round up)
+                search_area_width = (context_ptr->search_area_width + 7) & ~0x07;
+                search_area_height = context_ptr->search_area_height;
+#if SKIP_ME_BASED_ON_HME
+                // Update ME search reagion size based on hme-data
+                if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
+                    search_area_width = ((context_ptr->search_area_width/8) + 7) & ~0x07;
+                    search_area_height = (context_ptr->search_area_height/8);
+                }
+#endif
+            }
 #else
             // Constrain x_ME to be a multiple of 8 (round up)
             search_area_width = (context_ptr->search_area_width + 7) & ~0x07;
