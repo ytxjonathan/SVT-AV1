@@ -2334,7 +2334,11 @@ EbErrorType Av1FullCost(
 
     rate = lumaRate + chromaRate + coeffRate;
 #if ENHANCE_ATB
+#if 0//ATB_INTRA_2_DEPTH
+    if (candidate_buffer_ptr->candidate_ptr->block_has_coeff || candidate_buffer_ptr->candidate_ptr->type == INTRA_MODE)
+#else
     if (candidate_buffer_ptr->candidate_ptr->block_has_coeff)
+#endif
         rate += tx_size_bits;
 #endif
 

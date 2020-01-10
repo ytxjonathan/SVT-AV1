@@ -2943,7 +2943,169 @@ void ext_eight_sad_calculation_32x32_64x64_c(
         }
     }
 }
+#if OPT_REC_ME
+void generate_nsq_mv(MeContext *context_ptr) {
+    uint32_t *p_sad8x8 = context_ptr->p_best_sad8x8;
+    uint32_t *p_sad16x16 = context_ptr->p_best_sad16x16;
+    uint32_t *p_sad32x32 = context_ptr->p_best_sad32x32;
+    uint32_t *p_best_mv8x8 = context_ptr->p_best_mv8x8;
+    uint32_t *p_best_mv16x16 = context_ptr->p_best_mv16x16;
+    uint32_t *p_best_mv32x32 = context_ptr->p_best_mv32x32;
+    uint32_t *p_best_mv64x64 = context_ptr->p_best_mv64x64;
+    uint32_t *p_best_mv64x32 = context_ptr->p_best_mv64x32;
+    uint32_t *p_best_mv32x16 = context_ptr->p_best_mv32x16;
+    uint32_t *p_best_mv16x8 = context_ptr->p_best_mv16x8;
+    uint32_t *p_best_mv32x64 = context_ptr->p_best_mv32x64;
+    uint32_t *p_best_mv16x32 = context_ptr->p_best_mv16x32;
+    uint32_t *p_best_mv8x16 = context_ptr->p_best_mv8x16;
+    uint32_t *p_best_mv32x8 = context_ptr->p_best_mv32x8;
+    uint32_t *p_best_mv8x32 = context_ptr->p_best_mv8x32;
+    uint32_t *p_best_mv64x16 = context_ptr->p_best_mv64x16;
+    uint32_t *p_best_mv16x64 = context_ptr->p_best_mv16x64;
+    // 64x32
+    p_best_mv64x32[0] = p_sad32x32[0] < p_sad32x32[1] ? p_best_mv32x32[0] : p_best_mv32x32[1];
+    p_best_mv64x32[1] = p_sad32x32[2] < p_sad32x32[3] ? p_best_mv32x32[2] : p_best_mv32x32[3];
+    // 32x16
+    p_best_mv32x16[0] =p_sad16x16[0] < p_sad16x16[1] ? p_best_mv16x16[0] : p_best_mv16x16[1];
+    p_best_mv32x16[1] =p_sad16x16[2] < p_sad16x16[3] ? p_best_mv16x16[2] : p_best_mv16x16[3];
+    p_best_mv32x16[2] =p_sad16x16[4] < p_sad16x16[5] ? p_best_mv16x16[4] : p_best_mv16x16[5];
+    p_best_mv32x16[3] =p_sad16x16[6] < p_sad16x16[7] ? p_best_mv16x16[6] : p_best_mv16x16[7];
+    p_best_mv32x16[4] =p_sad16x16[8] < p_sad16x16[9] ? p_best_mv16x16[8] : p_best_mv16x16[9];
+    p_best_mv32x16[5] =p_sad16x16[10] < p_sad16x16[11] ? p_best_mv16x16[10] : p_best_mv16x16[11];
+    p_best_mv32x16[6] =p_sad16x16[12] < p_sad16x16[13] ? p_best_mv16x16[12] : p_best_mv16x16[13];
+    p_best_mv32x16[7] =p_sad16x16[14] < p_sad16x16[15] ? p_best_mv16x16[14] : p_best_mv16x16[15];
+    // 64x16
+    p_best_mv64x16[0] =(p_sad16x16[0] + p_sad16x16[1]) < (p_sad16x16[4] + p_sad16x16[5])  ? p_best_mv32x16[0] : p_best_mv32x16[2];
+    p_best_mv64x16[1] =(p_sad16x16[2] + p_sad16x16[3]) < (p_sad16x16[6] + p_sad16x16[7])  ? p_best_mv32x16[1] : p_best_mv32x16[3];
+    p_best_mv64x16[2] =(p_sad16x16[8] + p_sad16x16[9]) < (p_sad16x16[12] + p_sad16x16[13])  ? p_best_mv32x16[4] : p_best_mv32x16[6];
+    p_best_mv64x16[3] =(p_sad16x16[10] + p_sad16x16[11]) < (p_sad16x16[14] + p_sad16x16[15])  ? p_best_mv32x16[5] : p_best_mv32x16[7];
+    // 16x8
+    p_best_mv16x8[0] =p_sad8x8[0] < p_sad8x8[1]  ? p_best_mv8x8[0] : p_best_mv8x8[1];
+    p_best_mv16x8[1] =p_sad8x8[2] < p_sad8x8[3]  ? p_best_mv8x8[2] : p_best_mv8x8[3];
+    p_best_mv16x8[2] =p_sad8x8[4] < p_sad8x8[5]  ? p_best_mv8x8[4] : p_best_mv8x8[5];
+    p_best_mv16x8[3] =p_sad8x8[6] < p_sad8x8[7]  ? p_best_mv8x8[6] : p_best_mv8x8[7];
+    p_best_mv16x8[4] =p_sad8x8[8] < p_sad8x8[9]  ? p_best_mv8x8[8] : p_best_mv8x8[9];
+    p_best_mv16x8[5] =p_sad8x8[10] < p_sad8x8[11] ? p_best_mv8x8[10] : p_best_mv8x8[11];
+    p_best_mv16x8[6] =p_sad8x8[12] < p_sad8x8[13] ? p_best_mv8x8[12] : p_best_mv8x8[13];
+    p_best_mv16x8[7] =p_sad8x8[14] < p_sad8x8[15] ? p_best_mv8x8[14] : p_best_mv8x8[15];
+    p_best_mv16x8[8] =p_sad8x8[16] < p_sad8x8[16] ? p_best_mv8x8[16] : p_best_mv8x8[16];
+    p_best_mv16x8[9] =p_sad8x8[18] < p_sad8x8[19] ? p_best_mv8x8[18] : p_best_mv8x8[19];
+    p_best_mv16x8[10] =p_sad8x8[20] < p_sad8x8[21] ? p_best_mv8x8[20] : p_best_mv8x8[21];
+    p_best_mv16x8[11] =p_sad8x8[22] < p_sad8x8[23] ? p_best_mv8x8[22] : p_best_mv8x8[23];
+    p_best_mv16x8[12] =p_sad8x8[24] < p_sad8x8[25] ? p_best_mv8x8[24] : p_best_mv8x8[25];
+    p_best_mv16x8[13] =p_sad8x8[26] < p_sad8x8[27] ? p_best_mv8x8[26] : p_best_mv8x8[27];
+    p_best_mv16x8[14] =p_sad8x8[28] < p_sad8x8[29] ? p_best_mv8x8[28] : p_best_mv8x8[29];
+    p_best_mv16x8[15] =p_sad8x8[30] < p_sad8x8[31] ? p_best_mv8x8[30] : p_best_mv8x8[31];
+    p_best_mv16x8[16] =p_sad8x8[32] < p_sad8x8[33] ? p_best_mv8x8[32] : p_best_mv8x8[33];
+    p_best_mv16x8[17] =p_sad8x8[34] < p_sad8x8[35] ? p_best_mv8x8[34] : p_best_mv8x8[35];
+    p_best_mv16x8[18] =p_sad8x8[36] < p_sad8x8[37] ? p_best_mv8x8[36] : p_best_mv8x8[37];
+    p_best_mv16x8[19] =p_sad8x8[38] < p_sad8x8[39] ? p_best_mv8x8[38] : p_best_mv8x8[39];
+    p_best_mv16x8[20] =p_sad8x8[40] < p_sad8x8[41] ? p_best_mv8x8[40] : p_best_mv8x8[41];
+    p_best_mv16x8[21] =p_sad8x8[42] < p_sad8x8[43] ? p_best_mv8x8[42] : p_best_mv8x8[43];
+    p_best_mv16x8[22] =p_sad8x8[44] < p_sad8x8[45] ? p_best_mv8x8[44] : p_best_mv8x8[45];
+    p_best_mv16x8[23] =p_sad8x8[46] < p_sad8x8[47] ? p_best_mv8x8[46] : p_best_mv8x8[47];
+    p_best_mv16x8[24] =p_sad8x8[48] < p_sad8x8[49] ? p_best_mv8x8[48] : p_best_mv8x8[49];
+    p_best_mv16x8[25] =p_sad8x8[50] < p_sad8x8[51] ? p_best_mv8x8[50] : p_best_mv8x8[51];
+    p_best_mv16x8[26] =p_sad8x8[52] < p_sad8x8[53] ? p_best_mv8x8[52] : p_best_mv8x8[53];
+    p_best_mv16x8[27] =p_sad8x8[54] < p_sad8x8[55] ? p_best_mv8x8[54] : p_best_mv8x8[55];
+    p_best_mv16x8[28] =p_sad8x8[56] < p_sad8x8[57] ? p_best_mv8x8[56] : p_best_mv8x8[57];
+    p_best_mv16x8[29] =p_sad8x8[58] < p_sad8x8[59] ? p_best_mv8x8[58] : p_best_mv8x8[59];
+    p_best_mv16x8[30] =p_sad8x8[60] < p_sad8x8[61] ? p_best_mv8x8[60] : p_best_mv8x8[61];
+    p_best_mv16x8[31] =p_sad8x8[62] < p_sad8x8[63] ? p_best_mv8x8[62] : p_best_mv8x8[63];
+    
+    // 32x64
+    p_best_mv32x64[0] = p_sad32x32[0] < p_sad32x32[2] ? p_best_mv32x32[0] : p_best_mv32x32[2];
+    p_best_mv32x64[1] = p_sad32x32[1] < p_sad32x32[3] ? p_best_mv32x32[1] : p_best_mv32x32[3];
+    
 
+    // 16x32
+    p_best_mv16x32[0] =p_sad16x16[0] < p_sad16x16[2] ? p_best_mv16x16[0] : p_best_mv16x16[2];
+    p_best_mv16x32[1] =p_sad16x16[1] < p_sad16x16[3] ? p_best_mv16x16[1] : p_best_mv16x16[3];
+    p_best_mv16x32[2] =p_sad16x16[4] < p_sad16x16[6] ? p_best_mv16x16[4] : p_best_mv16x16[6];
+    p_best_mv16x32[3] =p_sad16x16[5] < p_sad16x16[7] ? p_best_mv16x16[5] : p_best_mv16x16[7];
+    p_best_mv16x32[4] =p_sad16x16[8] < p_sad16x16[10] ? p_best_mv16x16[8] : p_best_mv16x16[10];
+    p_best_mv16x32[5] =p_sad16x16[9] < p_sad16x16[11] ? p_best_mv16x16[9] : p_best_mv16x16[11];
+    p_best_mv16x32[6] =p_sad16x16[12] < p_sad16x16[14] ? p_best_mv16x16[12] : p_best_mv16x16[14];
+    p_best_mv16x32[7] =p_sad16x16[13] < p_sad16x16[15] ? p_best_mv16x16[13] : p_best_mv16x16[15];
+    
+    // 16x64
+    p_best_mv16x64[0] =(p_sad16x16[0] + p_sad16x16[2]) < (p_sad16x16[8] + p_sad16x16[10])  ? p_best_mv32x16[0] : p_best_mv32x16[4];
+    p_best_mv16x64[1] =(p_sad16x16[1] + p_sad16x16[3]) < (p_sad16x16[9] + p_sad16x16[11])  ? p_best_mv32x16[1] : p_best_mv32x16[5];
+    p_best_mv16x64[2] =(p_sad16x16[4] + p_sad16x16[6]) < (p_sad16x16[12] + p_sad16x16[14])  ? p_best_mv32x16[2] : p_best_mv32x16[6];
+    p_best_mv16x64[3] =(p_sad16x16[5] + p_sad16x16[7]) < (p_sad16x16[13] + p_sad16x16[15])  ? p_best_mv32x16[3] : p_best_mv32x16[7];
+
+    // 8x16
+    p_best_mv8x16[0] =p_sad8x8[0] < p_sad8x8[2]  ? p_best_mv8x8[0] : p_best_mv8x8[2];
+    p_best_mv8x16[1] =p_sad8x8[1] < p_sad8x8[3]  ? p_best_mv8x8[1] : p_best_mv8x8[3];
+    p_best_mv8x16[2] =p_sad8x8[4] < p_sad8x8[6]  ? p_best_mv8x8[4] : p_best_mv8x8[6];
+    p_best_mv8x16[3] =p_sad8x8[5] < p_sad8x8[7]  ? p_best_mv8x8[5] : p_best_mv8x8[7];
+    p_best_mv8x16[4] =p_sad8x8[8] < p_sad8x8[10]  ? p_best_mv8x8[8] : p_best_mv8x8[10];
+    p_best_mv8x16[5] =p_sad8x8[9] < p_sad8x8[11]  ? p_best_mv8x8[9] : p_best_mv8x8[11];
+    p_best_mv8x16[6] =p_sad8x8[12] < p_sad8x8[14]  ? p_best_mv8x8[12] : p_best_mv8x8[14];
+    p_best_mv8x16[7] =p_sad8x8[13] < p_sad8x8[15]  ? p_best_mv8x8[13] : p_best_mv8x8[15];
+    p_best_mv8x16[8] =p_sad8x8[16] < p_sad8x8[18]  ? p_best_mv8x8[16] : p_best_mv8x8[18];
+    p_best_mv8x16[9] =p_sad8x8[17] < p_sad8x8[19]  ? p_best_mv8x8[17] : p_best_mv8x8[19];
+    p_best_mv8x16[10] =p_sad8x8[20] < p_sad8x8[22]  ? p_best_mv8x8[20] : p_best_mv8x8[22];
+    p_best_mv8x16[11] =p_sad8x8[21] < p_sad8x8[23]  ? p_best_mv8x8[21] : p_best_mv8x8[23];
+    p_best_mv8x16[12] =p_sad8x8[24] < p_sad8x8[26]  ? p_best_mv8x8[24] : p_best_mv8x8[26];
+    p_best_mv8x16[13] =p_sad8x8[25] < p_sad8x8[27]  ? p_best_mv8x8[25] : p_best_mv8x8[27];
+    p_best_mv8x16[14] =p_sad8x8[28] < p_sad8x8[30]  ? p_best_mv8x8[28] : p_best_mv8x8[30];
+    p_best_mv8x16[15] =p_sad8x8[29] < p_sad8x8[31]  ? p_best_mv8x8[29] : p_best_mv8x8[31];
+    p_best_mv8x16[16] =p_sad8x8[32] < p_sad8x8[34]  ? p_best_mv8x8[32] : p_best_mv8x8[34];
+    p_best_mv8x16[17] =p_sad8x8[33] < p_sad8x8[35]  ? p_best_mv8x8[33] : p_best_mv8x8[35];
+    p_best_mv8x16[18] =p_sad8x8[36] < p_sad8x8[38]  ? p_best_mv8x8[36] : p_best_mv8x8[38];
+    p_best_mv8x16[19] =p_sad8x8[37] < p_sad8x8[39]  ? p_best_mv8x8[37] : p_best_mv8x8[39];
+    p_best_mv8x16[20] =p_sad8x8[40] < p_sad8x8[42]  ? p_best_mv8x8[40] : p_best_mv8x8[42];
+    p_best_mv8x16[21] =p_sad8x8[41] < p_sad8x8[43]  ? p_best_mv8x8[41] : p_best_mv8x8[43];
+    p_best_mv8x16[22] =p_sad8x8[44] < p_sad8x8[46]  ? p_best_mv8x8[44] : p_best_mv8x8[46];
+    p_best_mv8x16[23] =p_sad8x8[45] < p_sad8x8[47]  ? p_best_mv8x8[45] : p_best_mv8x8[47];
+    p_best_mv8x16[24] =p_sad8x8[48] < p_sad8x8[50]  ? p_best_mv8x8[48] : p_best_mv8x8[50];
+    p_best_mv8x16[25] =p_sad8x8[49] < p_sad8x8[51]  ? p_best_mv8x8[49] : p_best_mv8x8[51];
+    p_best_mv8x16[26] =p_sad8x8[52] < p_sad8x8[54]  ? p_best_mv8x8[52] : p_best_mv8x8[54];
+    p_best_mv8x16[27] =p_sad8x8[53] < p_sad8x8[55]  ? p_best_mv8x8[53] : p_best_mv8x8[55];
+    p_best_mv8x16[28] =p_sad8x8[56] < p_sad8x8[58]  ? p_best_mv8x8[56] : p_best_mv8x8[58];
+    p_best_mv8x16[29] =p_sad8x8[57] < p_sad8x8[59]  ? p_best_mv8x8[57] : p_best_mv8x8[59];
+    p_best_mv8x16[30] =p_sad8x8[60] < p_sad8x8[62]  ? p_best_mv8x8[60] : p_best_mv8x8[62];
+    p_best_mv8x16[31] =p_sad8x8[61] < p_sad8x8[63]  ? p_best_mv8x8[61] : p_best_mv8x8[63];
+    
+    // 32x8
+    p_best_mv32x8[0] =(p_sad8x8[0] + p_sad8x8[1]) < (p_sad16x16[4] + p_sad8x8[5])  ? p_best_mv16x8[0] : p_best_mv16x8[2];
+    p_best_mv32x8[1] =(p_sad8x8[2] + p_sad8x8[3]) < (p_sad16x16[6] + p_sad8x8[7])  ? p_best_mv16x8[1] : p_best_mv16x8[3];
+    p_best_mv32x8[2] =(p_sad8x8[8] + p_sad8x8[9]) < (p_sad16x16[12] + p_sad8x8[13])  ? p_best_mv16x8[4] : p_best_mv16x8[6];
+    p_best_mv32x8[3] =(p_sad8x8[10] + p_sad8x8[11]) < (p_sad16x16[14] + p_sad8x8[15])  ? p_best_mv16x8[5] : p_best_mv16x8[7];
+    p_best_mv32x8[4] =(p_sad8x8[16] + p_sad8x8[17]) < (p_sad16x16[20] + p_sad8x8[21])  ? p_best_mv16x8[8] : p_best_mv16x8[10];
+    p_best_mv32x8[5] =(p_sad8x8[18] + p_sad8x8[19]) < (p_sad16x16[22] + p_sad8x8[23])  ? p_best_mv16x8[9] : p_best_mv16x8[11];
+    p_best_mv32x8[6] =(p_sad8x8[24] + p_sad8x8[25]) < (p_sad16x16[28] + p_sad8x8[29])  ? p_best_mv16x8[12] : p_best_mv16x8[14];
+    p_best_mv32x8[7] =(p_sad8x8[26] + p_sad8x8[27]) < (p_sad16x16[30] + p_sad8x8[31])  ? p_best_mv16x8[13] : p_best_mv16x8[15];
+    p_best_mv32x8[8] =(p_sad8x8[32] + p_sad8x8[33]) < (p_sad16x16[36] + p_sad8x8[37])  ? p_best_mv16x8[16] : p_best_mv16x8[18];
+    p_best_mv32x8[9] =(p_sad8x8[34] + p_sad8x8[36]) < (p_sad16x16[38] + p_sad8x8[39])  ? p_best_mv16x8[17] : p_best_mv16x8[19];
+    p_best_mv32x8[10] =(p_sad8x8[40] + p_sad8x8[42]) < (p_sad16x16[44] + p_sad8x8[45])  ? p_best_mv16x8[20] : p_best_mv16x8[22];
+    p_best_mv32x8[11] =(p_sad8x8[41] + p_sad8x8[43]) < (p_sad16x16[46] + p_sad8x8[47])  ? p_best_mv16x8[21] : p_best_mv16x8[23];
+    p_best_mv32x8[12] =(p_sad8x8[48] + p_sad8x8[49]) < (p_sad16x16[52] + p_sad8x8[53])  ? p_best_mv16x8[24] : p_best_mv16x8[26];
+    p_best_mv32x8[13] =(p_sad8x8[50] + p_sad8x8[51]) < (p_sad16x16[54] + p_sad8x8[55])  ? p_best_mv16x8[25] : p_best_mv16x8[27];
+    p_best_mv32x8[14] =(p_sad8x8[56] + p_sad8x8[57]) < (p_sad16x16[60] + p_sad8x8[61])  ? p_best_mv16x8[28] : p_best_mv16x8[30];
+    p_best_mv32x8[15] =(p_sad8x8[58] + p_sad8x8[59]) < (p_sad16x16[66] + p_sad8x8[63])  ? p_best_mv16x8[29] : p_best_mv16x8[31];
+
+    // 8x32
+    p_best_mv8x32[0] =(p_sad8x8[0] + p_sad8x8[2]) < (p_sad16x16[8] + p_sad8x8[10])  ? p_best_mv16x8[0] : p_best_mv16x8[4];
+    p_best_mv8x32[1] =(p_sad8x8[1] + p_sad8x8[3]) < (p_sad16x16[9] + p_sad8x8[11])  ? p_best_mv16x8[1] : p_best_mv16x8[5];
+    p_best_mv8x32[2] =(p_sad8x8[4] + p_sad8x8[6]) < (p_sad16x16[12] + p_sad8x8[14])  ? p_best_mv16x8[2] : p_best_mv16x8[6];
+    p_best_mv8x32[3] =(p_sad8x8[5] + p_sad8x8[7]) < (p_sad16x16[13] + p_sad8x8[15])  ? p_best_mv16x8[3] : p_best_mv16x8[7];
+    p_best_mv8x32[4] =(p_sad8x8[16] + p_sad8x8[18]) < (p_sad16x16[24] + p_sad8x8[26])  ? p_best_mv16x8[8] : p_best_mv16x8[12];
+    p_best_mv8x32[5] =(p_sad8x8[17] + p_sad8x8[19]) < (p_sad16x16[25] + p_sad8x8[27])  ? p_best_mv16x8[9] : p_best_mv16x8[13];
+    p_best_mv8x32[6] =(p_sad8x8[20] + p_sad8x8[22]) < (p_sad16x16[28] + p_sad8x8[30])  ? p_best_mv16x8[10] : p_best_mv16x8[14];
+    p_best_mv8x32[7] =(p_sad8x8[21] + p_sad8x8[23]) < (p_sad16x16[29] + p_sad8x8[31])  ? p_best_mv16x8[11] : p_best_mv16x8[15];
+    p_best_mv8x32[8] =(p_sad8x8[32] + p_sad8x8[34]) < (p_sad16x16[40] + p_sad8x8[42])  ? p_best_mv16x8[16] : p_best_mv16x8[20];
+    p_best_mv8x32[9] =(p_sad8x8[33] + p_sad8x8[35]) < (p_sad16x16[41] + p_sad8x8[43])  ? p_best_mv16x8[17] : p_best_mv16x8[21];
+    p_best_mv8x32[10] =(p_sad8x8[36] + p_sad8x8[38]) < (p_sad16x16[44] + p_sad8x8[46])  ? p_best_mv16x8[18] : p_best_mv16x8[22];
+    p_best_mv8x32[11] =(p_sad8x8[37] + p_sad8x8[39]) < (p_sad16x16[45] + p_sad8x8[47])  ? p_best_mv16x8[19] : p_best_mv16x8[23];
+    p_best_mv8x32[12] =(p_sad8x8[48] + p_sad8x8[50]) < (p_sad16x16[56] + p_sad8x8[58])  ? p_best_mv16x8[24] : p_best_mv16x8[28];
+    p_best_mv8x32[13] =(p_sad8x8[49] + p_sad8x8[51]) < (p_sad16x16[57] + p_sad8x8[59])  ? p_best_mv16x8[25] : p_best_mv16x8[29];
+    p_best_mv8x32[14] =(p_sad8x8[52] + p_sad8x8[54]) < (p_sad16x16[60] + p_sad8x8[62])  ? p_best_mv16x8[26] : p_best_mv16x8[30];
+    p_best_mv8x32[15] =(p_sad8x8[53] + p_sad8x8[55]) < (p_sad16x16[61] + p_sad8x8[63])  ? p_best_mv16x8[27] : p_best_mv16x8[31];
+
+}
+#endif
 /*******************************************
  * open_loop_me_get_search_point_results_block
  *******************************************/
@@ -2994,7 +3156,9 @@ static void open_loop_me_get_eight_search_point_results_block(
         context_ptr->p_best_mv64x64,
         currMV,
         context_ptr->p_eight_sad32x32);
-
+#if OPT_REC_ME
+    if(!ref_pic_index || !context_ptr->use_best_sq_mv)
+#endif
     ext_eigth_sad_calculation_nsq(
         context_ptr->p_eight_sad8x8,
         context_ptr->p_eight_sad16x16,
@@ -5705,6 +5869,11 @@ static void open_loop_me_fullpel_search_sblock(
                 (int32_t)ySearchIndex + y_search_area_origin);
         }
     }
+#if OPT_REC_ME
+    if(ref_pic_index && context_ptr->use_best_sq_mv)
+     generate_nsq_mv(
+        context_ptr);
+#endif
 }
 
 #ifndef AVCCODEL
@@ -13564,7 +13733,11 @@ void integer_search_sb(
         : EB_FALSE;
 
 #if MULTI_PASS_PD
+#if M1_OPT
+    is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M1 ||
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
+#endif
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
@@ -13628,6 +13801,34 @@ void integer_search_sb(
             //we can also make the ME small and shut subpel
             x_search_center = context_ptr->hme_results[list_index][ref_pic_index].hme_sc_x;
             y_search_center = context_ptr->hme_results[list_index][ref_pic_index].hme_sc_y;
+#if DIST_BASED_ME_SEARCH_AREA
+            search_area_width = context_ptr->search_area_width;
+            search_area_height = context_ptr->search_area_height;
+
+            uint16_t dist = (context_ptr->me_alt_ref == EB_TRUE) ?
+                ABS((int16_t)(context_ptr->tf_frame_index - context_ptr->tf_index_center)) :
+                ABS((int16_t)(picture_control_set_ptr->picture_number - picture_control_set_ptr->ref_pic_poc_array[list_index][ref_pic_index]));
+
+            search_area_width = MIN((search_area_width  * dist), context_ptr->max_search_area_width);
+            search_area_height = MIN((search_area_height * dist), context_ptr->max_search_area_height);
+
+#if SKIP_ME_BASED_ON_HME
+            // Constrain x_ME to be a multiple of 8 (round up)
+            // Update ME search reagion size based on hme-data
+            if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
+                search_area_width = ((search_area_width / 8) + 7) & ~0x07;
+                search_area_height = (search_area_height / 8);
+            }
+            else {
+                search_area_width = (search_area_width + 7) & ~0x07;
+                search_area_height = search_area_height;
+            }
+#else
+            // Constrain x_ME to be a multiple of 8 (round up)
+            search_area_width = (search_area_width + 7) & ~0x07;
+            search_area_height = search_area_height;
+#endif
+#else
             // Constrain x_ME to be a multiple of 8 (round up)
             search_area_width = (context_ptr->search_area_width + 7) & ~0x07;
             search_area_height = context_ptr->search_area_height;
@@ -13637,6 +13838,7 @@ void integer_search_sb(
                 search_area_width = ((context_ptr->search_area_width/8) + 7) & ~0x07;
                 search_area_height = (context_ptr->search_area_height/8);
             }
+#endif
 #endif
             if ((x_search_center != 0 || y_search_center != 0) &&
                 (picture_control_set_ptr->is_used_as_reference_flag ==
@@ -14075,7 +14277,7 @@ void prune_references_fp(
                 continue;
             }
             context_ptr->p_best_sad8x8 = &(context_ptr->p_sb_best_sad[list_index][ref_pic_index][ME_TIER_ZERO_PU_8x8_0]);
-            // 8x8   [64 partitions]          
+            // 8x8   [64 partitions]
             for (pu_index = 0; pu_index < 64; ++pu_index) {
                 idx = tab8x8[pu_index];
                 context_ptr->hme_results[list_index][ref_pic_index].hme_sad += context_ptr->p_best_sad8x8[idx];
@@ -14114,7 +14316,7 @@ void prune_references_fp(
             if ((context_ptr->hme_results[li][ri].hme_sad - best) * 100  > BIGGER_THAN_TH*best)
                 context_ptr->hme_results[li][ri].do_ref = 0;
 #if SWITCHED_HALF_PEL_MODE
-            if (context_ptr->hme_results[li][ri].hme_sad > sorted[0][1].hme_sad) 
+            if (context_ptr->hme_results[li][ri].hme_sad > sorted[0][1].hme_sad)
                 context_ptr->local_hp_mode[li][ri] = REFINMENT_HP_MODE;
 #endif
         }
@@ -14284,7 +14486,11 @@ void hme_sb(
         : EB_FALSE;
 
 #if MULTI_PASS_PD
+#if M1_OPT
+    is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M1 ||
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
+#endif
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
@@ -14844,6 +15050,10 @@ void prune_references(
             if (context_ptr->hme_results[li][ri].hme_sad < REDUCE_SR_TH)
                 context_ptr->reduce_me_sr_flag[li][ri] = 1;
 #endif
+#if REDUCE_ME_FOR_LOW_M_SB
+            if (context_ptr->hme_results[li][ri].hme_sc_x <= 4 && context_ptr->hme_results[li][ri].hme_sc_y <= 4 && context_ptr->hme_results[li][ri].hme_sad < (2*REDUCE_SR_TH))
+                context_ptr->reduce_me_sr_flag[li][ri] = 1;
+#endif
         }
     }
 #endif
@@ -15018,7 +15228,11 @@ EbErrorType motion_estimate_lcu(
         : EB_FALSE;
 
 #if MULTI_PASS_PD
+#if M1_OPT
+    is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M1 ||
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
+#endif
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
         picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
@@ -15067,7 +15281,7 @@ EbErrorType motion_estimate_lcu(
             sb_origin_y,
             context_ptr,
             input_ptr);
-    
+
 #if MUS_ME_FP
     integer_search_sb(
         picture_control_set_ptr,

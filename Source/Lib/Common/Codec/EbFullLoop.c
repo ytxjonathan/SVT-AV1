@@ -1695,7 +1695,11 @@ int32_t av1_quantize_inv_quantize(
         perform_rdoq = (EbBool)sequence_control_set_ptr->static_config.enable_rdoq;
 
 #if MULTI_PASS_PD
+#if FP_QUANT_BOTH_INTRA_INTER
+    if (perform_rdoq && md_context->rdoq_quantize_fp) {
+#else
     if (perform_rdoq && md_context->rdoq_quantize_fp && !is_inter) {
+#endif
 #else
     // Hsan: set to FALSE until adding x86 quantize_fp
     EbBool perform_quantize_fp = picture_control_set_ptr->enc_mode == ENC_M0 ? EB_TRUE: EB_FALSE;

@@ -1525,7 +1525,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
 #endif
 #if FIX_NEAREST_NEW
+#if NEW_NN_TL
+            if (picture_control_set_ptr->enc_mode <= ENC_M0)
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
+#endif
 #else
             if (picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
@@ -2129,7 +2133,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if M0_OPT
+#if M1_OPT
+    if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#else
     if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#endif
 #else
     if (MR_MODE || picture_control_set_ptr->enc_mode == ENC_M0 || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
@@ -2163,7 +2171,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #if M0_OPT
 #if SC_PRESETS_OPT
+#if M1_OPT
+        if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#else
         if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#endif
 #else
     if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
@@ -2186,7 +2198,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if M0_OPT || PRESETS_TUNE
-#if PRESETS_TUNE && !PRESETS_OPT
+#if (PRESETS_TUNE && !PRESETS_OPT) || M1_OPT
         if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M1)
 #else
         if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M0)
@@ -2294,8 +2306,13 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
     }
     else {
+#if M1_OPT
+        context_ptr->full_pel_ref_window_width_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode <= ENC_M1) ? FULL_PEL_REF_WINDOW_WIDTH_EXTENDED : FULL_PEL_REF_WINDOW_WIDTH;
+        context_ptr->full_pel_ref_window_height_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode <= ENC_M1) ? FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED : FULL_PEL_REF_WINDOW_HEIGHT;
+#else
         context_ptr->full_pel_ref_window_width_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode == ENC_M0) ? FULL_PEL_REF_WINDOW_WIDTH_EXTENDED : FULL_PEL_REF_WINDOW_WIDTH;
         context_ptr->full_pel_ref_window_height_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode == ENC_M0) ? FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED : FULL_PEL_REF_WINDOW_HEIGHT;
+#endif
     }
 
     // set compound_types_to_try
@@ -2428,7 +2445,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else if (context_ptr->pd_pass == PD_PASS_1)
         context_ptr->enable_auto_max_partition = 0;
 #if ENHANCED_M0_SETTINGS
+#if TUNE_AUTO_MAX_PARTITION
+    else if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
+#else
     else if (picture_control_set_ptr->enc_mode <= ENC_M0 || picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
+#endif
 #else
     else if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
 #endif
@@ -3230,11 +3251,33 @@ void* enc_dec_kernel(void *input_ptr)
 
                     if (picture_control_set_ptr->update_cdf) {
                         picture_control_set_ptr->rate_est_array[sb_index] = *picture_control_set_ptr->md_rate_estimation_array;
-#if CABAC_SERIAL
-                        if (sb_index == 0)
-                            picture_control_set_ptr->ec_ctx_array[sb_index] = *picture_control_set_ptr->coeff_est_entropy_coder_ptr->fc;
-                        else
-                            picture_control_set_ptr->ec_ctx_array[sb_index] = picture_control_set_ptr->ec_ctx_array[sb_index - 1];
+#if ENCDEC_SERIAL
+                        if (sequence_control_set_ptr->enc_dec_segment_row_count_array[0] == 1 && sequence_control_set_ptr->enc_dec_segment_col_count_array[0] == 1) {
+                            if (sb_index == 0)
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = *picture_control_set_ptr->coeff_est_entropy_coder_ptr->fc;
+                            else
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = picture_control_set_ptr->ec_ctx_array[sb_index - 1];
+                        }
+                        else {
+                            // Use the latest available CDF for the current SB
+                            // Use the weighted average of left (3x) and top (1x) if available.
+                            int8_t up_available = ((int32_t)(sb_origin_y >> MI_SIZE_LOG2) > sb_ptr->tile_info.mi_row_start);
+                            int8_t left_available = ((int32_t)(sb_origin_x >> MI_SIZE_LOG2) > sb_ptr->tile_info.mi_col_start);
+                            if (!left_available && !up_available)
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = *picture_control_set_ptr->coeff_est_entropy_coder_ptr->fc;
+                            else if (!left_available)
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = picture_control_set_ptr->ec_ctx_array[sb_index - picture_width_in_sb];
+                            else if (!up_available)
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = picture_control_set_ptr->ec_ctx_array[sb_index - 1];
+                            else {
+                                picture_control_set_ptr->ec_ctx_array[sb_index] = picture_control_set_ptr->ec_ctx_array[sb_index - 1];
+                                avg_cdf_symbols(
+                                    &picture_control_set_ptr->ec_ctx_array[sb_index],
+                                    &picture_control_set_ptr->ec_ctx_array[sb_index - picture_width_in_sb],
+                                    AVG_CDF_WEIGHT_LEFT,
+                                    AVG_CDF_WEIGHT_TOP);
+                            }
+                        }
 #else
 #if RATE_ESTIMATION_UPDATE
                         // Use the latest available CDF for the current SB

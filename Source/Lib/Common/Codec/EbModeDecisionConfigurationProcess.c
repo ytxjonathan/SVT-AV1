@@ -2608,7 +2608,11 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #if FILTER_INTRA_FLAG
     //Filter Intra Mode : 0: OFF  1: ON
     if (sequence_control_set_ptr->seq_header.enable_filter_intra)
+        #if F_INTRA_TL
+        picture_control_set_ptr->pic_filter_intra_mode = picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0  ? 1 : 0;
+#else
         picture_control_set_ptr->pic_filter_intra_mode = picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->temporal_layer_index == 0 ? 1 : 0;
+#endif
     else
         picture_control_set_ptr->pic_filter_intra_mode = 0;
 #endif
@@ -2633,7 +2637,11 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
     else
 #if WARP_UPDATE
 #if ENHANCED_M0_SETTINGS
+#if M1_OPT
+        enable_wm = (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M1 ||
+#else
         enable_wm = (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0 ||
+#endif
 #else
         enable_wm = (MR_MODE ||
         (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ||

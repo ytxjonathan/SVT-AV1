@@ -442,7 +442,9 @@ extern "C" {
         uint8_t                       fractional_search_model;
         uint8_t                       hme_search_method;
         uint8_t                       me_search_method;
-
+#if OPT_REC_ME
+        uint8_t                       use_best_sq_mv;
+#endif
         EbBool                        enable_hme_flag;
         EbBool                        enable_hme_level0_flag;
         EbBool                        enable_hme_level1_flag;
@@ -457,6 +459,10 @@ extern "C" {
         // ME
         uint16_t                      search_area_width;
         uint16_t                      search_area_height;
+#if DIST_BASED_ME_SEARCH_AREA
+        uint16_t                      max_search_area_width;
+        uint16_t                      max_search_area_height;
+#endif
         // HME
         uint16_t                      number_hme_search_region_in_width;
         uint16_t                      number_hme_search_region_in_height;
@@ -485,6 +491,12 @@ extern "C" {
 #if SWITCHED_HALF_PEL_MODE
         EbBool                       local_hp_mode[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
 #endif
+#if DIST_BASED_ME_SEARCH_AREA
+        // tf
+        int tf_frame_index;
+        int tf_index_center;
+#endif
+
     } MeContext;
 
     typedef uint64_t(*EB_ME_DISTORTION_FUNC)(
