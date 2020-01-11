@@ -16851,10 +16851,12 @@ if (context_ptr->me_alt_ref == EB_FALSE) {
                 ->me_candidate[pu_index][candidateIndex]
                 .distortion = me_candidate->distortion;
 #if REDUCE_NSQ_COMP
-            uint8_t  BIGGER_THAN_TH = 10;
+            uint8_t  BIGGER_THAN_TH = 70;
             best = candidateIndex == 0 ? me_candidate->distortion : best;
-            if ((me_candidate->distortion - best) * 100  > BIGGER_THAN_TH*best)
-                adjusted_total_me_candidate_index--;
+             if ((me_candidate->distortion - best) * 100 > BIGGER_THAN_TH*best) {
+                 adjusted_total_me_candidate_index--;
+                 continue;
+             }
 #endif
             picture_control_set_ptr->me_results[sb_index]
                 ->me_candidate[pu_index][candidateIndex]

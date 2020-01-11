@@ -2392,7 +2392,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->md_max_ref_count = 4;
     else if (context_ptr->pd_pass == PD_PASS_1)
+#if REDUCE_NSQ_COMP
         context_ptr->md_max_ref_count = 1;
+#else
+        context_ptr->md_max_ref_count = 1;
+#endif
     else
         context_ptr->md_max_ref_count = 4;
 
