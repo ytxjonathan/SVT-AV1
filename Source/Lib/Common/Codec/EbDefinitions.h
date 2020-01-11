@@ -113,6 +113,8 @@ extern "C" {
 #define CHROMA_OPT_0                 1
 #define CHROMA_OPT_1                 0
 
+#define TX_ORG_INTERINTRA            0
+
 #define DIST_BASED_ME_SEARCH_AREA    1
 
 #define ENABLE_HME_360P              1

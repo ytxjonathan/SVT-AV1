@@ -471,6 +471,10 @@ static void Av1EncodeLoop(
     uint32_t                 qp = cu_ptr->qp;
     EbPictureBufferDesc  *input_samples = context_ptr->input_samples;
 
+//#if TX_ORG_INTERINTRA
+//    int32_t is_inter = (cu_ptr->prediction_mode_flag == INTER_MODE || cu_ptr->av1xd->use_intrabc) ? EB_TRUE : EB_FALSE;
+//#endif
+
     uint32_t                 round_origin_x = (origin_x >> 3) << 3;// for Chroma blocks with size of 4
     uint32_t                 round_origin_y = (origin_y >> 3) << 3;// for Chroma blocks with size of 4
 
@@ -480,11 +484,15 @@ static void Av1EncodeLoop(
     const uint32_t pred_luma_offset = ((predSamples->origin_y + origin_y)        * predSamples->stride_y) + (predSamples->origin_x + origin_x);
     const uint32_t pred_cb_offset = (((predSamples->origin_y + round_origin_y) >> 1)  * predSamples->stride_cb) + ((predSamples->origin_x + round_origin_x) >> 1);
     const uint32_t pred_cr_offset = (((predSamples->origin_y + round_origin_y) >> 1)  * predSamples->stride_cr) + ((predSamples->origin_x + round_origin_x) >> 1);
-
+#if TX_ORG_INTERINTRA
+    const uint32_t scratch_luma_offset = context_ptr->blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr] + context_ptr->blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr] * SB_STRIDE_Y;
+    const uint32_t scratch_cb_offset = ROUND_UV(context_ptr->blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 + ROUND_UV(context_ptr->blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 * SB_STRIDE_UV;
+    const uint32_t scratch_cr_offset = ROUND_UV(context_ptr->blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 + ROUND_UV(context_ptr->blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 * SB_STRIDE_UV;
+#else
     const uint32_t scratch_luma_offset = context_ptr->blk_geom->tx_org_x[cu_ptr->tx_depth][context_ptr->txb_itr] + context_ptr->blk_geom->tx_org_y[cu_ptr->tx_depth][context_ptr->txb_itr] * SB_STRIDE_Y;
     const uint32_t scratch_cb_offset = ROUND_UV(context_ptr->blk_geom->tx_org_x[cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 + ROUND_UV(context_ptr->blk_geom->tx_org_y[cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 * SB_STRIDE_UV;
     const uint32_t scratch_cr_offset = ROUND_UV(context_ptr->blk_geom->tx_org_x[cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 + ROUND_UV(context_ptr->blk_geom->tx_org_y[cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 * SB_STRIDE_UV;
-
+#endif
     const uint32_t coeff1dOffset = context_ptr->coded_area_sb;
 
     const uint32_t coeff1dOffsetChroma = context_ptr->coded_area_sb_uv;
@@ -898,9 +906,15 @@ static void Av1EncodeLoop16bit(
     EbPictureBufferDesc *predSamples16bit = predSamples;
     uint32_t round_origin_x = (origin_x >> 3) << 3;// for Chroma blocks with size of 4
     uint32_t round_origin_y = (origin_y >> 3) << 3;// for Chroma blocks with size of 4
+#if TX_ORG_INTERINTRA
+    const uint32_t input_luma_offset = context_ptr->blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr] + context_ptr->blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr] * SB_STRIDE_Y;
+    const uint32_t input_cb_offset = ROUND_UV(context_ptr->blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 + ROUND_UV(context_ptr->blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 * SB_STRIDE_UV;
+    const uint32_t input_cr_offset = ROUND_UV(context_ptr->blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 + ROUND_UV(context_ptr->blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 * SB_STRIDE_UV;
+#else
     const uint32_t input_luma_offset = context_ptr->blk_geom->tx_org_x[cu_ptr->tx_depth][context_ptr->txb_itr] + context_ptr->blk_geom->tx_org_y[cu_ptr->tx_depth][context_ptr->txb_itr] * SB_STRIDE_Y;
     const uint32_t input_cb_offset = ROUND_UV(context_ptr->blk_geom->tx_org_x[cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 + ROUND_UV(context_ptr->blk_geom->tx_org_y[cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 * SB_STRIDE_UV;
     const uint32_t input_cr_offset = ROUND_UV(context_ptr->blk_geom->tx_org_x[cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 + ROUND_UV(context_ptr->blk_geom->tx_org_y[cu_ptr->tx_depth][context_ptr->txb_itr]) / 2 * SB_STRIDE_UV;
+#endif
     const uint32_t pred_luma_offset = ((predSamples16bit->origin_y + origin_y)        * predSamples16bit->stride_y) + (predSamples16bit->origin_x + origin_x);
     const uint32_t pred_cb_offset = (((predSamples16bit->origin_y + round_origin_y) >> 1)  * predSamples16bit->stride_cb) + ((predSamples16bit->origin_x + round_origin_x) >> 1);
     const uint32_t pred_cr_offset = (((predSamples16bit->origin_y + round_origin_y) >> 1)  * predSamples16bit->stride_cr) + ((predSamples16bit->origin_x + round_origin_x) >> 1);

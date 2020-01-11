@@ -179,8 +179,13 @@ void mode_decision_update_neighbor_arrays(
             neighbor_array_unit_mode_write(
                 context_ptr->luma_dc_sign_level_coeff_neighbor_array,
                 (uint8_t*)&dc_sign_level_coeff,
+#if TX_ORG_INTERINTRA
+                context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
+                context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
+#else
                 context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->tx_depth][txb_itr],
                 context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->tx_depth][txb_itr],
+#endif
                 context_ptr->blk_geom->tx_width[context_ptr->cu_ptr->tx_depth][txb_itr],
                 context_ptr->blk_geom->tx_height[context_ptr->cu_ptr->tx_depth][txb_itr],
                 NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
@@ -188,8 +193,13 @@ void mode_decision_update_neighbor_arrays(
             neighbor_array_unit_mode_write(
                 picture_control_set_ptr->md_tx_depth_1_luma_dc_sign_level_coeff_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
                 (uint8_t*)&dc_sign_level_coeff,
+#if TX_ORG_INTERINTRA
+                context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
+                context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
+#else
                 context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->tx_depth][txb_itr],
                 context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->tx_depth][txb_itr],
+#endif
                 context_ptr->blk_geom->tx_width[context_ptr->cu_ptr->tx_depth][txb_itr],
                 context_ptr->blk_geom->tx_height[context_ptr->cu_ptr->tx_depth][txb_itr],
                 NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
@@ -1197,8 +1207,13 @@ void AV1PerformInverseTransformReconLuma(
         txb_itr = 0;
         uint32_t txb_1d_offset = 0;
         do {
+#if TX_ORG_INTERINTRA
+            txb_origin_x = context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
+            txb_origin_y = context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
+#else
             txb_origin_x = context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr];
             txb_origin_y = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
+#endif
             tu_width = context_ptr->blk_geom->tx_width[tx_depth][txb_itr];
             tu_height = context_ptr->blk_geom->tx_height[tx_depth][txb_itr];
             tu_origin_index = txb_origin_x + txb_origin_y * candidate_buffer->prediction_ptr->stride_y;
@@ -1272,14 +1287,25 @@ void AV1PerformInverseTransformRecon(
         uint32_t recLumaOffset, recCbOffset, recCrOffset;
 
         do {
+#if TX_ORG_INTERINTRA
+            txb_origin_x = context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
+            txb_origin_y = context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
+#else
             txb_origin_x = context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr];
             txb_origin_y = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
+#endif
             tu_width = context_ptr->blk_geom->tx_width[tx_depth][txb_itr];
             tu_height = context_ptr->blk_geom->tx_height[tx_depth][txb_itr];
             txb_ptr = &cu_ptr->transform_unit_array[tu_index];
+#if TX_ORG_INTERINTRA
+            recLumaOffset = txb_origin_x + txb_origin_y * candidate_buffer->recon_ptr->stride_y;
+            recCbOffset = ((((txb_origin_x >> 3) << 3) + ((txb_origin_y >> 3) << 3) * candidate_buffer->recon_ptr->stride_cb) >> 1);
+            recCrOffset = ((((txb_origin_x >> 3) << 3) + ((txb_origin_y >> 3) << 3) * candidate_buffer->recon_ptr->stride_cr) >> 1);
+#else
             recLumaOffset = context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr] + context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr] * candidate_buffer->recon_ptr->stride_y;
             recCbOffset = ((((context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr] >> 3) << 3) + ((context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr] >> 3) << 3) * candidate_buffer->recon_ptr->stride_cb) >> 1);
             recCrOffset = ((((context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr] >> 3) << 3) + ((context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr] >> 3) << 3) * candidate_buffer->recon_ptr->stride_cr) >> 1);
+#endif
             tu_origin_index = txb_origin_x + txb_origin_y * candidate_buffer->prediction_ptr->stride_y;
             if (txb_ptr->y_has_coeff)
                 inv_transform_recon_wrapper(
@@ -4283,8 +4309,13 @@ EbErrorType av1_intra_luma_prediction(
             md_context_ptr->cu_origin_y,
             md_context_ptr->cu_origin_x,
             md_context_ptr->cu_origin_y,
+#if TX_ORG_INTERINTRA
+            md_context_ptr->blk_geom->tx_org_x[md_context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][md_context_ptr->tx_depth][md_context_ptr->txb_itr],  //uint32_t cuOrgX used only for prediction Ptr
+            md_context_ptr->blk_geom->tx_org_y[md_context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][md_context_ptr->tx_depth][md_context_ptr->txb_itr]   //uint32_t cuOrgY used only for prediction Ptr
+#else
             md_context_ptr->blk_geom->tx_org_x[md_context_ptr->tx_depth][md_context_ptr->txb_itr],  //uint32_t cuOrgX used only for prediction Ptr
             md_context_ptr->blk_geom->tx_org_y[md_context_ptr->tx_depth][md_context_ptr->txb_itr]   //uint32_t cuOrgY used only for prediction Ptr
+#endif
         );
     } else {
         uint16_t topNeighArray[64 * 2 + 1];
@@ -4330,8 +4361,13 @@ EbErrorType av1_intra_luma_prediction(
             md_context_ptr->cu_origin_y,
             md_context_ptr->cu_origin_x,
             md_context_ptr->cu_origin_y,
+#if TX_ORG_INTERINTRA
+            md_context_ptr->blk_geom->tx_org_x[md_context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][md_context_ptr->tx_depth][md_context_ptr->txb_itr],  //uint32_t cuOrgX used only for prediction Ptr
+            md_context_ptr->blk_geom->tx_org_y[md_context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][md_context_ptr->tx_depth][md_context_ptr->txb_itr]   //uint32_t cuOrgY used only for prediction Ptr
+#else
             md_context_ptr->blk_geom->tx_org_x[md_context_ptr->tx_depth][md_context_ptr->txb_itr],  //uint32_t cuOrgX used only for prediction Ptr
             md_context_ptr->blk_geom->tx_org_y[md_context_ptr->tx_depth][md_context_ptr->txb_itr]   //uint32_t cuOrgY used only for prediction Ptr
+#endif
         );
     }
 
@@ -4448,10 +4484,17 @@ void tx_update_neighbor_arrays(
                 context_ptr->tx_search_luma_recon_neighbor_array,
 #endif
                 candidate_buffer->recon_ptr,
+#if TX_ORG_INTERINTRA
+                context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->tx_depth][context_ptr->txb_itr],
+                context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->tx_depth][context_ptr->txb_itr],
+                context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->tx_depth][context_ptr->txb_itr],
+                context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->tx_depth][context_ptr->txb_itr],
+#else
                 context_ptr->blk_geom->tx_org_x[context_ptr->tx_depth][context_ptr->txb_itr],
                 context_ptr->blk_geom->tx_org_y[context_ptr->tx_depth][context_ptr->txb_itr],
                 context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->tx_depth][context_ptr->txb_itr],
                 context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->tx_depth][context_ptr->txb_itr],
+#endif
                 context_ptr->blk_geom->tx_width[context_ptr->tx_depth][context_ptr->txb_itr],
                 context_ptr->blk_geom->tx_height[context_ptr->tx_depth][context_ptr->txb_itr],
                 context_ptr->hbd_mode_decision);
@@ -4460,8 +4503,13 @@ void tx_update_neighbor_arrays(
         neighbor_array_unit_mode_write(
             picture_control_set_ptr->md_tx_depth_1_luma_dc_sign_level_coeff_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
             (uint8_t*)&dc_sign_level_coeff,
+#if TX_ORG_INTERINTRA
+            context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->tx_depth][context_ptr->txb_itr],
+            context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->tx_depth][context_ptr->txb_itr],
+#else
             context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->tx_depth][context_ptr->txb_itr],
             context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->tx_depth][context_ptr->txb_itr],
+#endif
             context_ptr->blk_geom->tx_width[context_ptr->tx_depth][context_ptr->txb_itr],
             context_ptr->blk_geom->tx_height[context_ptr->tx_depth][context_ptr->txb_itr],
             NEIGHBOR_ARRAY_UNIT_TOP_AND_LEFT_ONLY_MASK);
@@ -4583,8 +4631,13 @@ void tx_type_search(
 #else
     const TxSetType tx_set_type = get_ext_tx_set_type(txSize, is_inter, picture_control_set_ptr->parent_pcs_ptr->tx_search_reduced_set);
 #endif
+#if TX_ORG_INTERINTRA
+    uint8_t txb_origin_x = (uint8_t)context_ptr->blk_geom->tx_org_x[is_inter][context_ptr->tx_depth][context_ptr->txb_itr];
+    uint8_t txb_origin_y = (uint8_t)context_ptr->blk_geom->tx_org_y[is_inter][context_ptr->tx_depth][context_ptr->txb_itr];
+#else
     uint8_t txb_origin_x = (uint8_t)context_ptr->blk_geom->tx_org_x[context_ptr->tx_depth][context_ptr->txb_itr];
     uint8_t txb_origin_y = (uint8_t)context_ptr->blk_geom->tx_org_y[context_ptr->tx_depth][context_ptr->txb_itr];
+#endif
     uint32_t tu_origin_index = txb_origin_x + (txb_origin_y * candidate_buffer->residual_ptr->stride_y);
     uint32_t input_tu_origin_index = (context_ptr->sb_origin_x + txb_origin_x + input_picture_ptr->origin_x) + ((context_ptr->sb_origin_y + txb_origin_y + input_picture_ptr->origin_y) * input_picture_ptr->stride_y);
 
@@ -5327,8 +5380,13 @@ void tx_partitioning_path(
 
         uint32_t block_has_coeff = EB_FALSE;
         for (context_ptr->txb_itr = 0; context_ptr->txb_itr < txb_count; context_ptr->txb_itr++) {
+#if TX_ORG_INTERINTRA
+            uint16_t tx_org_x = context_ptr->blk_geom->tx_org_x[is_inter][context_ptr->tx_depth][context_ptr->txb_itr];
+            uint16_t tx_org_y = context_ptr->blk_geom->tx_org_y[is_inter][context_ptr->tx_depth][context_ptr->txb_itr];
+#else
             uint16_t tx_org_x = context_ptr->blk_geom->tx_org_x[context_ptr->tx_depth][context_ptr->txb_itr];
             uint16_t tx_org_y = context_ptr->blk_geom->tx_org_y[context_ptr->tx_depth][context_ptr->txb_itr];
+#endif
             uint32_t tu_origin_index = tx_org_x + (tx_org_y * tx_candidate_buffer->residual_ptr->stride_y);
             uint32_t input_tu_origin_index = (context_ptr->sb_origin_x + tx_org_x + input_picture_ptr->origin_x) + ((context_ptr->sb_origin_y + tx_org_y + input_picture_ptr->origin_y) * input_picture_ptr->stride_y);
 
