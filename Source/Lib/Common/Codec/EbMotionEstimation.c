@@ -14368,6 +14368,23 @@ void prune_references_fp(
 }
 
 #endif
+#if 0
+uint64_t get_standard_dev(uint32_t*data, uint32_t size) 
+{
+    uint32_t it;
+    uint32_t mean = 0;
+    uint64_t sdev = 0;
+    for (it = 0; it < 4; it++)
+        mean+= data[it];
+    mean = mean / 4;
+               
+    for (it = 0; it < 4; it++)
+        sdev += (data[it] - mean)* (data[it] - mean);
+    sdev = (uint64_t)sqrt(sdev / 4);
+               
+    return sdev;
+}
+#endif
 /*******************************************
  *   performs hierarchical ME
  *******************************************/
@@ -14435,6 +14452,12 @@ void hme_sb(
         [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
     uint64_t hmeLevel2Sad[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT]
         [EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
+
+#if ME_SR_TUNE
+    for (uint32_t q_h = 0; q_h < 2; q_h++) 
+        for (uint32_t q_w = 0; q_w < 2; q_w++) 
+            hmeLevel2Sad[q_w][q_h] = 64 * 64 * 255;
+#endif
 
     // Hierarchical ME Search Center
     int16_t xHmeSearchCenter = 0;
@@ -15017,6 +15040,91 @@ void hme_sb(
             context_ptr->hme_results[listIndex][ref_pic_index].hme_sad = hmeMvSad;//this is not valid in all cases. only when HME is done, and when HMELevel2 is done
             //also for base layer some references are redundant!!
             context_ptr->hme_results[listIndex][ref_pic_index].do_ref = 1;
+
+#if ME_SR_TUNE
+            uint8_t prune_ref = (context_ptr->enable_hme_flag && context_ptr->enable_hme_level2_flag &&
+                context_ptr->me_alt_ref == EB_FALSE && sb_height == BLOCK_SIZE_64 &&
+                picture_control_set_ptr->temporal_layer_index > 0) ? 1 : 0;
+            if(prune_ref)
+            {
+                //we might increase the HME L2 to see if it helps making better decision
+                SearchPointData hme_data[5];
+                hme_data[4].vx = hme_data[4].vy = 0;   hme_data[4].is_zz = 1;
+                uint32_t search_region_index = (int16_t)refPicPtr->origin_x + origin_x +
+                    ((int16_t)refPicPtr->origin_y + origin_y) * refPicPtr->stride_y;
+                hme_data[4].sad = nxm_sad_kernel(
+                    context_ptr->sb_src_ptr,
+                    context_ptr->sb_src_stride,
+                    &(refPicPtr->buffer_y[search_region_index]),
+                    refPicPtr->stride_y,
+                    sb_height,
+                    sb_width);
+
+                for (uint32_t q_h = 0; q_h < 2; q_h++) {
+                    for (uint32_t q_w = 0; q_w < 2; q_w++) {
+                        hme_data[q_h * 2 + q_w].sad = hmeLevel2Sad[q_w][q_h];
+                        hme_data[q_h * 2 + q_w].vx = xHmeLevel2SearchCenter[q_w][q_h];
+                        hme_data[q_h * 2 + q_w].vy = yHmeLevel2SearchCenter[q_w][q_h];  //make sure this is correct
+                        hme_data[q_h * 2 + q_w].is_zz = 0;
+                    }
+                }
+               
+
+#if 0
+                uint32_t it;
+                uint32_t data_sad[4];
+                for (it = 0; it < 5; it++)
+                    data_sad[it]= hme_data[it].sad;
+
+                uint64_t sdev_sad = get_standard_dev(data_sad, 4);
+#endif
+
+#if 0      
+                printf("\n\n    before  ");
+                for (uint32_t ri = 0; ri < 5; ri++)
+                    printf("%i  ", hme_data[ri].sad);
+#endif
+
+                //sorting
+                uint32_t i, j;
+                uint32_t num_of_cand_to_sort = 5;
+                for (i = 0; i < num_of_cand_to_sort - 1; ++i) {
+                    for (j = i + 1; j < num_of_cand_to_sort; ++j) {
+                        if (hme_data[j].sad < hme_data[i].sad) {
+                            SearchPointData temp = hme_data[i];
+                            hme_data[i] = hme_data[j];
+                            hme_data[j] = temp;
+                        }
+                    }
+                }
+
+#if 0
+                printf("\n sdev:%i after  ", sdev_sad);
+                for (uint32_t ri = 0; ri < 5; ri++)
+                    printf("%i(%i,%i)  ", hme_data[ri].sad, hme_data[ri].vx, hme_data[ri].vy);
+#endif
+
+                SearchPointData best = hme_data[0];
+                if (best.is_zz) {
+                    //1 case: hme is still close to zz
+
+                    
+                    //2 case: hme missed it
+                    if ((hme_data[1].sad - best.sad) * 100 > 30 * best.sad)
+                        context_ptr->reduce_me_sr_flag[listIndex][ref_pic_index] = 1;
+                }
+                else {
+
+                    if ((hme_data[1].sad - best.sad) * 100 > 30 * best.sad)
+                        context_ptr->reduce_me_sr_flag[listIndex][ref_pic_index] = 1;
+                    /* else if(variance>){
+                         context_ptr->reduce_me_sr_flag[listIndex][ref_pic_index] = 1;
+                     }*/
+                }
+            }
+#endif
+
+
 
 
         }

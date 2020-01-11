@@ -304,6 +304,16 @@ extern "C" {
         uint8_t  do_ref;   // to process this ref in ME or not
     } HmeResults;
 #endif
+
+#if ME_SR_TUNE
+    typedef struct SearchPointData
+    {        
+        uint8_t is_zz;
+        int16_t  vx; // search centre x
+        int16_t  vy; // search centre y
+        uint64_t sad;// sad       
+    } SearchPointData;
+#endif
     typedef struct MeContext
     {
         EbDctor                       dctor;
