@@ -129,6 +129,11 @@ extern "C" {
 #define TUNE_AUTO_MAX_PARTITION      1
 #define FASTER_SQ_WEIGHT             0
 #define ENHANCED_SQ_WEIGHT           1
+
+#define ATB_INTRA_2_DEPTH            0 // ATB INTRA Depth 2
+#define ATB_INTER_2_DEPTH            0 // ATB INTRA Depth 2
+#define ENABLE_BC                    0 // ATB for BC
+
 #define IMPROVED_MULTI_PASS_PD       0
 #if IMPROVED_MULTI_PASS_PD
 #define ADD_SUPPORT_TO_SKIP_PART_N   1
@@ -340,7 +345,11 @@ enum {
 #define ADD_DELTA_QP_SUPPORT                      1  // Add delta QP support
 #define BLOCK_MAX_COUNT_SB_128                    4421  // TODO: reduce alloction for 64x64
 #define BLOCK_MAX_COUNT_SB_64                     1101  // TODO: reduce alloction for 64x64
+#if ATB_INTRA_2_DEPTH
+#define MAX_TXB_COUNT                             16 // Maximum number of transform blocks per depth
+#else
 #define MAX_TXB_COUNT                             4 // Maximum number of transform blocks.
+#endif
 #if II_COMP_FLAG
 #if OBMC_FLAG
 #if FILTER_INTRA_FLAG

@@ -2456,7 +2456,11 @@ EB_EXTERN void av1_encode_pass(
                     context_ptr->txb_itr = 0;
                     // Transform partitioning path (INTRA Luma/Chroma)
 #if ATB_10_BIT
+#if ENABLE_BC
+                    if(1) {
+#else
                     if ( cu_ptr->av1xd->use_intrabc == 0) {
+#endif
 #else
                     if (sequence_control_set_ptr->static_config.encoder_bit_depth == EB_8BIT && cu_ptr->av1xd->use_intrabc == 0) {
 #endif

@@ -179,6 +179,9 @@ void picture_control_set_dctor(EbPtr p)
 #endif
             EB_DELETE(obj->md_luma_recon_neighbor_array16bit[depth]);
             EB_DELETE(obj->md_tx_depth_1_luma_recon_neighbor_array16bit[depth]);
+#if ATB_INTRA_2_DEPTH
+            EB_DELETE(obj->md_tx_depth_2_luma_recon_neighbor_array16bit[depth]);
+#endif
             EB_DELETE(obj->md_cb_recon_neighbor_array16bit[depth]);
             EB_DELETE(obj->md_cr_recon_neighbor_array16bit[depth]);
         }
@@ -189,6 +192,9 @@ void picture_control_set_dctor(EbPtr p)
 #endif
             EB_DELETE(obj->md_luma_recon_neighbor_array[depth]);
             EB_DELETE(obj->md_tx_depth_1_luma_recon_neighbor_array[depth]);
+#if ATB_INTRA_2_DEPTH
+            EB_DELETE(obj->md_tx_depth_2_luma_recon_neighbor_array[depth]);
+#endif
             EB_DELETE(obj->md_cb_recon_neighbor_array[depth]);
             EB_DELETE(obj->md_cr_recon_neighbor_array[depth]);
         }
@@ -644,6 +650,17 @@ EbErrorType picture_control_set_ctor(
                     SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
                     NEIGHBOR_ARRAY_UNIT_FULL_MASK,
                 },
+#if ATB_INTRA_2_DEPTH
+                 {
+                    &object_ptr->md_tx_depth_2_luma_recon_neighbor_array[depth],
+                    MAX_PICTURE_WIDTH_SIZE,
+                    MAX_PICTURE_HEIGHT_SIZE,
+                    sizeof(uint8_t),
+                    SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
+                    SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
+                    NEIGHBOR_ARRAY_UNIT_FULL_MASK,
+                },
+#endif
                 {
                     &object_ptr->md_cb_recon_neighbor_array[depth],
                     MAX_PICTURE_WIDTH_SIZE >> subsampling_x,
@@ -693,6 +710,17 @@ EbErrorType picture_control_set_ctor(
                     SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
                     NEIGHBOR_ARRAY_UNIT_FULL_MASK,
                 },
+#if ATB_INTRA_2_DEPTH
+                {
+                    &object_ptr->md_tx_depth_2_luma_recon_neighbor_array16bit[depth],
+                    MAX_PICTURE_WIDTH_SIZE,
+                    MAX_PICTURE_HEIGHT_SIZE,
+                    sizeof(uint16_t),
+                    SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
+                    SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
+                    NEIGHBOR_ARRAY_UNIT_FULL_MASK,
+                },
+#endif
                 {
                     &object_ptr->md_cb_recon_neighbor_array16bit[depth],
                     MAX_PICTURE_WIDTH_SIZE >> subsampling_x,

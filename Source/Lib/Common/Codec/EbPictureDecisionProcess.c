@@ -1474,7 +1474,11 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if SPEED_OPT
 #if SC_PRESETS_OPT
 #if ATB_TL
+#if ENABLE_BC
+            picture_control_set_ptr->atb_mode = 1;
+#else
             picture_control_set_ptr->atb_mode = (picture_control_set_ptr->temporal_layer_index == 0 || !picture_control_set_ptr->sc_content_detected ) ? 1 : 0;
+#endif
 #else
             picture_control_set_ptr->atb_mode = ((MR_MODE && !picture_control_set_ptr->sc_content_detected) || picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 0;
 #endif
