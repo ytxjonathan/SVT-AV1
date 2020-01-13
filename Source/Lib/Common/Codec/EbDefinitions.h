@@ -132,8 +132,10 @@ extern "C" {
 
 #define ATB_INTRA_2_DEPTH            0 // ATB INTRA Depth 2
 #define ATB_INTER_2_DEPTH            0 // ATB INTRA Depth 2
-#define TX_ORG_INTERINTRA            0
+#define TX_ORG_INTERINTRA            1
 #define ENABLE_BC                    0 // ATB for BC
+
+#define TX_TYPE_TX_SIZE_STAGES       1
 
 #define IMPROVED_MULTI_PASS_PD       0
 #if IMPROVED_MULTI_PASS_PD
