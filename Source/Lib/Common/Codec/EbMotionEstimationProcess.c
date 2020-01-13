@@ -104,6 +104,9 @@ void* set_me_hme_params_oq(
     if (hmeMeLevel <= ENC_M1)
         hmeMeLevel = ENC_M0;
 #endif
+#if ENABLE_FRAME_RATE_ME
+    uint8_t  low_frame_rate_flag = (sequence_control_set_ptr->static_config.frame_rate >> 16) < 50 ? 1 : 0;
+#endif
     // HME/ME default settings
     me_context_ptr->number_hme_search_region_in_width = 2;
     me_context_ptr->number_hme_search_region_in_height = 2;
@@ -130,8 +133,19 @@ void* set_me_hme_params_oq(
 
     // ME
 #if DIST_BASED_ME_SEARCH_AREA
+#if ENABLE_FRAME_RATE_ME
+    if (low_frame_rate_flag) {
+        me_context_ptr->search_area_width  = picture_control_set_ptr->distance_me_flag  ? (min_search_area_width[sc_content_detected][input_resolution][hmeMeLevel] *3)/2: search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
+        me_context_ptr->search_area_height = picture_control_set_ptr->distance_me_flag  ? (min_search_area_height[sc_content_detected][input_resolution][hmeMeLevel]*3)/2 : search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
+    }
+    else {
+        me_context_ptr->search_area_width = picture_control_set_ptr->distance_me_flag ? min_search_area_width[sc_content_detected][input_resolution][hmeMeLevel] : search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
+        me_context_ptr->search_area_height = picture_control_set_ptr->distance_me_flag ? min_search_area_height[sc_content_detected][input_resolution][hmeMeLevel] : search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
+    }
+#else
     me_context_ptr->search_area_width  = picture_control_set_ptr->distance_me_flag  ? min_search_area_width[sc_content_detected][input_resolution][hmeMeLevel] : search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
     me_context_ptr->search_area_height = picture_control_set_ptr->distance_me_flag  ? min_search_area_height[sc_content_detected][input_resolution][hmeMeLevel] : search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
+#endif
 #else
     me_context_ptr->search_area_width = search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
     me_context_ptr->search_area_height = search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
@@ -247,11 +261,17 @@ EbErrorType signal_derivation_me_kernel_oq(
 #else
     else if (enc_mode == ENC_M0) {
 #endif
+#if DISABLE_SUBPEL_SEARCH
+        context_ptr->me_context_ptr->half_pel_mode =
+             REFINMENT_HP_MODE ;
+
+#else
         context_ptr->me_context_ptr->half_pel_mode =
 #if M0_OPT
             picture_control_set_ptr->sc_content_detected ? REFINMENT_HP_MODE : EX_HP_MODE;
 #else
             EX_HP_MODE;
+#endif
 #endif
         context_ptr->me_context_ptr->quarter_pel_mode =
             REFINMENT_QP_MODE;

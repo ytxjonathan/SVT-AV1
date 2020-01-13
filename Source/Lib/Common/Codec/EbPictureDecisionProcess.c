@@ -1616,7 +1616,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         // GM_DOWN                                    Downsampled resolution with a downsampling factor of 2 in each dimension
         // GM_TRAN_ONLY                               Translation only using ME MV.
 #if GM_DOWNSAMPLED
+#if ENABLE_GM_TRANS
+        picture_control_set_ptr->gm_level = GM_TRAN_ONLY;
+#else
         picture_control_set_ptr->gm_level = GM_DOWN;
+#endif
 #if MR_MODE
         picture_control_set_ptr->gm_level = GM_FULL;
 #endif
