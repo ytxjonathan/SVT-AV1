@@ -603,6 +603,8 @@ void recon_output(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) {
     eb_release_mutex(encode_context_ptr->total_number_of_recon_frame_mutex);
 }
 
+// TODO: mariana, fix psnr calculations when super-res is used, the width and height of the source pictures are wrong
+// and is not the same as the recon, padding is different
 void psnr_calculations(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) {
     EbBool is_16bit = (scs_ptr->static_config.encoder_bit_depth > EB_8BIT);
 
