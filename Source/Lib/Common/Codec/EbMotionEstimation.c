@@ -16240,6 +16240,11 @@ EbErrorType motion_estimate_lcu(
                                                            search_area_height);
 #endif
                         context_ptr->full_quarter_pel_refinement = 0;
+
+#if DISABLE_SUBPEL_SEARCH
+                        if (context_ptr->me_alt_ref == 1)
+                            context_ptr->half_pel_mode = REFINMENT_HP_MODE;
+#endif
 #if SWITCHED_HALF_PEL_MODE
                         if (context_ptr->half_pel_mode ==
                             EX_HP_MODE && context_ptr->local_hp_mode[listIndex][ref_pic_index] == EX_HP_MODE) {

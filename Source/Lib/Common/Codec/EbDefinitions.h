@@ -252,7 +252,11 @@ extern "C" {
   (AOM_LEFT_TOP_MARGIN_PX(subsampling) << SCALE_SUBPEL_BITS)
 
 #if OPTIMISED_EX_SUBPEL
+#if DISABLE_SUBPEL_SEARCH
+#define H_PEL_SEARCH_WIND 1  // 1/2-pel serach window
+#else
 #define H_PEL_SEARCH_WIND 3  // 1/2-pel serach window
+#endif
 #else
 #define H_PEL_SEARCH_WIND 4  // 1/2-pel serach window
 #endif

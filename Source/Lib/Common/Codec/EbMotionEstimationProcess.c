@@ -261,18 +261,13 @@ EbErrorType signal_derivation_me_kernel_oq(
 #else
     else if (enc_mode == ENC_M0) {
 #endif
-#if DISABLE_SUBPEL_SEARCH
-        context_ptr->me_context_ptr->half_pel_mode =
-             REFINMENT_HP_MODE ;
-
-#else
         context_ptr->me_context_ptr->half_pel_mode =
 #if M0_OPT
             picture_control_set_ptr->sc_content_detected ? REFINMENT_HP_MODE : EX_HP_MODE;
 #else
             EX_HP_MODE;
 #endif
-#endif
+
         context_ptr->me_context_ptr->quarter_pel_mode =
             REFINMENT_QP_MODE;
     }
