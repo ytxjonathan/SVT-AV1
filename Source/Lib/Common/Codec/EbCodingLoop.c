@@ -1552,9 +1552,13 @@ void perform_intra_coding_loop(
 
     // Luma path
     for (context_ptr->txb_itr = 0; context_ptr->txb_itr < totTu; context_ptr->txb_itr++) {
+#if TX_ORG_INTERINTRA
+        uint16_t txb_origin_x = context_ptr->cu_origin_x + context_ptr->blk_geom->tx_org_x[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_x;
+        uint16_t txb_origin_y = context_ptr->cu_origin_y + context_ptr->blk_geom->tx_org_y[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_y;
+#else
         uint16_t txb_origin_x = context_ptr->cu_origin_x + context_ptr->blk_geom->tx_boff_x[cu_ptr->tx_depth][context_ptr->txb_itr];
         uint16_t txb_origin_y = context_ptr->cu_origin_y + context_ptr->blk_geom->tx_boff_y[cu_ptr->tx_depth][context_ptr->txb_itr];
-
+#endif
         context_ptr->md_context->luma_txb_skip_context = 0;
         context_ptr->md_context->luma_dc_sign_context = 0;
         get_txb_ctx(
@@ -1613,8 +1617,13 @@ void perform_intra_coding_loop(
                 leftNeighArray + 1,
                 recon_buffer,
 #if ATB_10_BIT
+#if TX_ORG_INTERINTRA
+               (context_ptr->blk_geom->tx_org_x[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_x) >> 2,
+               (context_ptr->blk_geom->tx_org_y[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_y) >> 2,
+#else
                 context_ptr->blk_geom->tx_boff_x[cu_ptr->tx_depth][context_ptr->txb_itr] >> 2,
                 context_ptr->blk_geom->tx_boff_y[cu_ptr->tx_depth][context_ptr->txb_itr] >> 2,
+#endif
 #else
                 0,
                 0,
@@ -1672,8 +1681,13 @@ void perform_intra_coding_loop(
                 topNeighArray + 1,
                 leftNeighArray + 1,
                 recon_buffer,
+#if TX_ORG_INTERINTRA
+                (context_ptr->blk_geom->tx_org_x[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_x) >> 2,
+                (context_ptr->blk_geom->tx_org_y[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_y) >> 2,
+#else
                 context_ptr->blk_geom->tx_boff_x[cu_ptr->tx_depth][context_ptr->txb_itr] >> 2,
                 context_ptr->blk_geom->tx_boff_y[cu_ptr->tx_depth][context_ptr->txb_itr] >> 2,
+#endif
                 0,
                 context_ptr->blk_geom->bsize,
                 txb_origin_x,
@@ -1795,9 +1809,13 @@ void perform_intra_coding_loop(
     if(context_ptr->blk_geom->has_uv)
     {
         context_ptr->txb_itr = 0;
+#if TX_ORG_INTERINTRA
+        uint16_t txb_origin_x = context_ptr->cu_origin_x + context_ptr->blk_geom->tx_org_x[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_x;
+        uint16_t txb_origin_y = context_ptr->cu_origin_y + context_ptr->blk_geom->tx_org_y[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_y;
+#else
         uint16_t txb_origin_x = context_ptr->cu_origin_x + context_ptr->blk_geom->tx_boff_x[cu_ptr->tx_depth][context_ptr->txb_itr];
         uint16_t txb_origin_y = context_ptr->cu_origin_y + context_ptr->blk_geom->tx_boff_y[cu_ptr->tx_depth][context_ptr->txb_itr];
-
+#endif
         uint32_t cu_originx_uv = (context_ptr->cu_origin_x >> 3 << 3) >> 1;
         uint32_t cu_originy_uv = (context_ptr->cu_origin_y >> 3 << 3) >> 1;
 
@@ -1882,8 +1900,13 @@ void perform_intra_coding_loop(
                     leftNeighArray + 1,
                     recon_buffer,
 #if ATB_10_BIT
+#if TX_ORG_INTERINTRA
+                    plane ? 0 : (context_ptr->blk_geom->tx_org_x[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_x) >> 2,
+                    plane ? 0 : (context_ptr->blk_geom->tx_org_y[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_y) >> 2,
+#else
                     plane ? 0 : context_ptr->blk_geom->tx_boff_x[cu_ptr->tx_depth][context_ptr->txb_itr] >> 2,
                     plane ? 0 : context_ptr->blk_geom->tx_boff_y[cu_ptr->tx_depth][context_ptr->txb_itr] >> 2,
+#endif
 #else
                     //int32_t dst_stride,
                     0,
@@ -1955,8 +1978,13 @@ void perform_intra_coding_loop(
                     topNeighArray + 1,
                     leftNeighArray + 1,
                     recon_buffer,
+#if TX_ORG_INTERINTRA
+                    plane ? 0 : (context_ptr->blk_geom->tx_org_x[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_x) >> 2,
+                    plane ? 0 : (context_ptr->blk_geom->tx_org_y[0][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_y) >> 2,
+#else
                     plane ? 0 : context_ptr->blk_geom->tx_boff_x[cu_ptr->tx_depth][context_ptr->txb_itr] >> 2,
                     plane ? 0 : context_ptr->blk_geom->tx_boff_y[cu_ptr->tx_depth][context_ptr->txb_itr] >> 2,
+#endif
                     plane,
                     context_ptr->blk_geom->bsize,
                     txb_origin_x,
@@ -2456,11 +2484,7 @@ EB_EXTERN void av1_encode_pass(
                     context_ptr->txb_itr = 0;
                     // Transform partitioning path (INTRA Luma/Chroma)
 #if ATB_10_BIT
-#if ENABLE_BC
-                    if(1) {
-#else
                     if ( cu_ptr->av1xd->use_intrabc == 0) {
-#endif
 #else
                     if (sequence_control_set_ptr->static_config.encoder_bit_depth == EB_8BIT && cu_ptr->av1xd->use_intrabc == 0) {
 #endif
@@ -3185,9 +3209,13 @@ EB_EXTERN void av1_encode_pass(
                         for (uint8_t tuIt = 0; tuIt < totTu; tuIt++) {
                             context_ptr->txb_itr = tuIt;
                             uint8_t uv_pass = cu_ptr->tx_depth && tuIt ? 0 : 1; //NM: 128x128 exeption
+#if TX_ORG_INTERINTRA
+                            txb_origin_x = context_ptr->cu_origin_x + context_ptr->blk_geom->tx_org_x[1][cu_ptr->tx_depth][tuIt] - context_ptr->blk_geom->origin_x;
+                            txb_origin_y = context_ptr->cu_origin_y + context_ptr->blk_geom->tx_org_y[1][cu_ptr->tx_depth][tuIt] - context_ptr->blk_geom->origin_y;
+#else
                             txb_origin_x = context_ptr->cu_origin_x + context_ptr->blk_geom->tx_boff_x[cu_ptr->tx_depth][tuIt];
                             txb_origin_y = context_ptr->cu_origin_y + context_ptr->blk_geom->tx_boff_y[cu_ptr->tx_depth][tuIt];
-
+#endif
                             context_ptr->md_context->luma_txb_skip_context = 0;
                             context_ptr->md_context->luma_dc_sign_context = 0;
                             get_txb_ctx(
@@ -3478,11 +3506,13 @@ EB_EXTERN void av1_encode_pass(
                     {
                         uint8_t uv_pass = cu_ptr->tx_depth && tuIt ? 0 : 1; //NM: 128x128 exeption
                         context_ptr->txb_itr = tuIt;
+#if TX_ORG_INTERINTRA
+                        txb_origin_x = context_ptr->cu_origin_x + (context_ptr->blk_geom->tx_org_x[1][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_x);
+                        txb_origin_y = context_ptr->cu_origin_y + (context_ptr->blk_geom->tx_org_y[1][cu_ptr->tx_depth][context_ptr->txb_itr] - context_ptr->blk_geom->origin_y);
+#else
                         txb_origin_x = context_ptr->cu_origin_x + context_ptr->blk_geom->tx_boff_x[cu_ptr->tx_depth][tuIt];
                         txb_origin_y = context_ptr->cu_origin_y + context_ptr->blk_geom->tx_boff_y[cu_ptr->tx_depth][tuIt];
-
-
-
+#endif
                             context_ptr->md_context->luma_txb_skip_context = 0;
                             context_ptr->md_context->luma_dc_sign_context = 0;
                             get_txb_ctx(

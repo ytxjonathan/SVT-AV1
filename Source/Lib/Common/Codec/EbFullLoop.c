@@ -1838,8 +1838,9 @@ void product_full_loop(
     {
 #endif
 #if TX_ORG_INTERINTRA
-        uint16_t tx_org_x = context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
-        uint16_t tx_org_y = context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
+        int32_t is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE || candidate_buffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
+        uint16_t tx_org_x = context_ptr->blk_geom->tx_org_x[is_inter][tx_depth][txb_itr];
+        uint16_t tx_org_y = context_ptr->blk_geom->tx_org_y[is_inter][tx_depth][txb_itr];
 #else
         uint16_t tx_org_x = context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr];
         uint16_t tx_org_y = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
@@ -2180,8 +2181,8 @@ void product_full_loop_tx_search(
         for (txb_itr = 0; txb_itr < txb_count; txb_itr++)
         {
 #if TX_ORG_INTERINTRA
-            uint8_t txb_origin_x = (uint8_t)context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
-            uint8_t txb_origin_y = (uint8_t)context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
+            uint8_t txb_origin_x = (uint8_t)context_ptr->blk_geom->tx_org_x[is_inter][tx_depth][txb_itr];
+            uint8_t txb_origin_y = (uint8_t)context_ptr->blk_geom->tx_org_y[is_inter][tx_depth][txb_itr];
 #else
             uint8_t txb_origin_x = (uint8_t)context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr];
             uint8_t txb_origin_y = (uint8_t)context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
@@ -2903,11 +2904,15 @@ void full_loop_r(
     uint32_t  txb_1d_offset = 0;
     tuCount = tx_depth ? 1 : tuCount; //NM: 128x128 exeption
 
+#if TX_ORG_INTERINTRA
+    int32_t is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE || candidate_buffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
+#endif
+
     txb_itr = 0;
     do {
 #if TX_ORG_INTERINTRA
-        txb_origin_x = context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
-        txb_origin_y = context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
+        txb_origin_x = context_ptr->blk_geom->tx_org_x[is_inter][tx_depth][txb_itr];
+        txb_origin_y = context_ptr->blk_geom->tx_org_y[is_inter][tx_depth][txb_itr];
 #else
         txb_origin_x = context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr];
         txb_origin_y = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
@@ -3189,10 +3194,15 @@ void cu_full_distortion_fast_tu_mode_r(
     candidate_ptr->u_has_coeff = 0;
     candidate_ptr->v_has_coeff = 0;
     tuTotalCount = tx_depth ? 1 : tuTotalCount; //NM: 128x128 exeption
+
+#if TX_ORG_INTERINTRA
+    int32_t is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE || candidate_buffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
+#endif
+
     do {
 #if TX_ORG_INTERINTRA
-        txb_origin_x = context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
-        txb_origin_y = context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr];
+        txb_origin_x = context_ptr->blk_geom->tx_org_x[is_inter][tx_depth][txb_itr];
+        txb_origin_y = context_ptr->blk_geom->tx_org_y[is_inter][tx_depth][txb_itr];
 #else
         txb_origin_x = context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr];
         txb_origin_y = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];

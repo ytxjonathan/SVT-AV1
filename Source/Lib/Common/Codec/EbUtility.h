@@ -55,9 +55,10 @@ extern "C" {
 #else
         uint16_t   tx_org_x[MAX_VARTX_DEPTH + 1][MAX_TXB_COUNT];     //orgin is SB
         uint16_t   tx_org_y[MAX_VARTX_DEPTH + 1][MAX_TXB_COUNT];     //origin is SB
-#endif
+
         uint16_t   tx_boff_x[MAX_VARTX_DEPTH + 1][MAX_TXB_COUNT];    //block offset , origin is block
         uint16_t   tx_boff_y[MAX_VARTX_DEPTH + 1][MAX_TXB_COUNT];    //block offset , origin is block
+#endif
         uint8_t    tx_width[MAX_VARTX_DEPTH + 1][MAX_TXB_COUNT];     //tx_size_wide
         uint8_t    tx_height[MAX_VARTX_DEPTH + 1][MAX_TXB_COUNT];    //tx_size_wide
         uint8_t    tx_width_uv[MAX_VARTX_DEPTH + 1][MAX_TXB_COUNT];  //tx_size_wide

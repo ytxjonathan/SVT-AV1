@@ -113,7 +113,7 @@ extern "C" {
 #define CHROMA_OPT_0                 1
 #define CHROMA_OPT_1                 0
 
-#define TX_ORG_INTERINTRA            0
+
 
 #define DIST_BASED_ME_SEARCH_AREA    1
 
@@ -132,6 +132,7 @@ extern "C" {
 
 #define ATB_INTRA_2_DEPTH            0 // ATB INTRA Depth 2
 #define ATB_INTER_2_DEPTH            0 // ATB INTRA Depth 2
+#define TX_ORG_INTERINTRA            0
 #define ENABLE_BC                    0 // ATB for BC
 
 #define IMPROVED_MULTI_PASS_PD       0
