@@ -2163,7 +2163,14 @@ EbErrorType downscaled_source_buffer_desc_ctor(EbPictureBufferDesc **picture_ptr
     return EB_ErrorNone;
 }
 
-void scale_pcs_params(SequenceControlSet* scs_ptr,
+EbErrorType derive_input_resolution_pcs(PictureParentControlSet *pcs_ptr, uint32_t inputSize);
+
+EbErrorType sb_geom_init_pcs(SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr);
+
+EbErrorType sb_params_init_pcs(SequenceControlSet *scs_ptr,
+                               PictureParentControlSet *pcs_ptr);
+
+EbErrorType scale_pcs_params(SequenceControlSet* scs_ptr,
                       PictureParentControlSet* pcs_ptr,
                       superres_params_type spr_params,
                       uint16_t source_width,
@@ -2192,6 +2199,19 @@ void scale_pcs_params(SequenceControlSet* scs_ptr,
     cm->mi_cols = spr_params.encoding_width >> MI_SIZE_LOG2;
     cm->mi_rows = spr_params.encoding_height >> MI_SIZE_LOG2;
 
+    pcs_ptr->picture_sb_width = picture_sb_width;
+    pcs_ptr->picture_sb_height = picture_sb_height;
+
+    if(cm->frm_size.superres_denominator != SCALE_NUMERATOR){
+        derive_input_resolution_pcs(pcs_ptr, spr_params.encoding_width * spr_params.encoding_height);
+
+        // create new picture level sb_params and sb_geom
+        sb_params_init_pcs(scs_ptr, pcs_ptr);
+
+        sb_geom_init_pcs(scs_ptr, pcs_ptr);
+    }
+
+    return EB_ErrorNone;
 }
 
 void scale_frame_if_necessary(SequenceControlSet* scs_ptr,

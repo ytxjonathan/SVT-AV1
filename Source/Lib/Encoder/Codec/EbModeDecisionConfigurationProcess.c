@@ -721,7 +721,7 @@ void forward_all_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *pc
 
     UNUSED(split_flag);
 
-    for (sb_index = 0; sb_index < scs_ptr->sb_tot_cnt; ++sb_index) {
+    for (sb_index = 0; sb_index < pcs_ptr->parent_pcs_ptr->sb_total_count; ++sb_index) {
         MdcSbData *results_ptr = &pcs_ptr->mdc_sb_array[sb_index];
 
         results_ptr->leaf_count = 0;
@@ -737,7 +737,7 @@ void forward_all_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *pc
             uint8_t is_blk_allowed =
                 pcs_ptr->slice_type != I_SLICE ? 1 : (blk_geom->sq_size < 128) ? 1 : 0;
 
-            if (scs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed)
+            if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed)
 
             {
                 results_ptr->leaf_data_array[results_ptr->leaf_count].tot_d1_blocks =
@@ -769,7 +769,7 @@ void forward_sq_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *pcs
     uint32_t sb_index;
     EbBool   split_flag;
 
-    for (sb_index = 0; sb_index < scs_ptr->sb_tot_cnt; ++sb_index) {
+    for (sb_index = 0; sb_index < pcs_ptr->parent_pcs_ptr->sb_total_count; ++sb_index) {
         MdcSbData *results_ptr = &pcs_ptr->mdc_sb_array[sb_index];
 
         results_ptr->leaf_count = 0;
@@ -783,7 +783,7 @@ void forward_sq_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *pcs
             const BlockGeom *blk_geom = get_blk_geom_mds(blk_index);
 
             //if the parentSq is inside inject this block
-            if (scs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index])
+            if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index])
 
             {
                 //int32_t offset_d1 = ns_blk_offset[(int32_t)from_shape_to_part[blk_geom->shape]]; //blk_ptr->best_d1_blk; // TOCKECK
@@ -829,7 +829,7 @@ void sb_forward_sq_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *
 
         const BlockGeom *blk_geom = get_blk_geom_mds(blk_index);
 
-        if (scs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index]) {
+        if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index]) {
             results_ptr->leaf_data_array[results_ptr->leaf_count].tot_d1_blocks = 1;
             results_ptr->leaf_data_array[results_ptr->leaf_count].leaf_index =
                 0; //valid only for square 85 world. will be removed.
@@ -903,7 +903,7 @@ void derive_search_method(PictureControlSet *               pcs_ptr,
                           ModeDecisionConfigurationContext *context_ptr) {
     uint32_t sb_index;
 
-    for (sb_index = 0; sb_index < pcs_ptr->parent_pcs_ptr->scs_ptr->sb_tot_cnt; sb_index++) {
+    for (sb_index = 0; sb_index < pcs_ptr->parent_pcs_ptr->sb_total_count; sb_index++) {
         if (context_ptr->sb_cost_array[sb_index] ==
             context_ptr->cost_depth_mode[SB_PRED_OPEN_LOOP_DEPTH_MODE - 1])
             pcs_ptr->parent_pcs_ptr->sb_depth_mode_array[sb_index] = SB_PRED_OPEN_LOOP_DEPTH_MODE;
@@ -1006,7 +1006,7 @@ void derive_optimal_budget_per_sb(SequenceControlSet *scs_ptr, PictureControlSet
         // reset running cost
         context_ptr->predicted_cost = 0;
 
-        for (sb_index = 0; sb_index < pcs_ptr->parent_pcs_ptr->scs_ptr->sb_tot_cnt; sb_index++) {
+        for (sb_index = 0; sb_index < pcs_ptr->parent_pcs_ptr->sb_total_count; sb_index++) {
             SuperBlock *sb_ptr = pcs_ptr->sb_ptr_array[sb_index];
 
             set_sb_budget(scs_ptr, pcs_ptr, sb_ptr, context_ptr);
@@ -1108,8 +1108,8 @@ void derive_sb_score(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
     context_ptr->sb_min_score = ~0u;
     context_ptr->sb_max_score = 0u;
 
-    for (sb_index = 0; sb_index < scs_ptr->sb_tot_cnt; sb_index++) {
-        SbParams *sb_params = &scs_ptr->sb_params_array[sb_index];
+    for (sb_index = 0; sb_index < pcs_ptr->parent_pcs_ptr->sb_total_count; sb_index++) {
+        SbParams *sb_params = &pcs_ptr->parent_pcs_ptr->sb_params_array[sb_index];
         if (pcs_ptr->slice_type == I_SLICE)
             assert(0);
         else {
@@ -1145,7 +1145,7 @@ void derive_sb_score(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
         context_ptr->sb_max_score = MAX(sb_score, context_ptr->sb_max_score);
         sb_tot_score += sb_score;
     }
-    context_ptr->sb_average_score = (uint32_t)(sb_tot_score / scs_ptr->sb_tot_cnt);
+    context_ptr->sb_average_score = (uint32_t)(sb_tot_score / pcs_ptr->parent_pcs_ptr->sb_total_count);
 }
 
 /******************************************************
@@ -1200,7 +1200,7 @@ void set_target_budget_oq(SequenceControlSet *scs_ptr, PictureControlSet *pcs_pt
         budget_per_sb + budget_per_sb_boost[context_ptr->adp_level] + luminosity_change_boost);
 
     //SVT_LOG("picture_number = %d\tsb_average_score = %d\n", pcs_ptr->picture_number, budget_per_sb);
-    budget = scs_ptr->sb_tot_cnt * budget_per_sb;
+    budget = pcs_ptr->parent_pcs_ptr->sb_total_count * budget_per_sb;
 
     context_ptr->budget = budget;
 }
@@ -1315,7 +1315,7 @@ void forward_sq_non4_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet
     uint32_t sb_index;
     EbBool   split_flag;
 
-    for (sb_index = 0; sb_index < scs_ptr->sb_tot_cnt; ++sb_index) {
+    for (sb_index = 0; sb_index < pcs_ptr->parent_pcs_ptr->sb_total_count; ++sb_index) {
         MdcSbData *results_ptr = &pcs_ptr->mdc_sb_array[sb_index];
 
         results_ptr->leaf_count = 0;
@@ -1329,7 +1329,7 @@ void forward_sq_non4_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet
             const BlockGeom *blk_geom = get_blk_geom_mds(blk_index);
 
             //if the parentSq is inside inject this block
-            if (scs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index])
+            if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index])
 
             {
                 //int32_t offset_d1 = ns_blk_offset[(int32_t)from_shape_to_part[blk_geom->shape]]; //blk_ptr->best_d1_blk; // TOCKECK
@@ -1374,7 +1374,7 @@ void sb_forward_sq_non4_blocks_to_md(SequenceControlSet *scs_ptr, PictureControl
     while (blk_index < scs_ptr->max_block_cnt) {
         split_flag                = EB_TRUE;
         const BlockGeom *blk_geom = get_blk_geom_mds(blk_index);
-        if (scs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index]) {
+        if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index]) {
             results_ptr->leaf_data_array[results_ptr->leaf_count].tot_d1_blocks = 1;
 
             results_ptr->leaf_data_array[results_ptr->leaf_count].leaf_index =
@@ -1399,7 +1399,7 @@ void sb_forward_sq_non4_blocks_to_md(SequenceControlSet *scs_ptr, PictureControl
 
 void forward_all_c_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr) {
     uint32_t sb_index;
-    for (sb_index = 0; sb_index < scs_ptr->sb_tot_cnt; ++sb_index) {
+    for (sb_index = 0; sb_index < pcs_ptr->parent_pcs_ptr->sb_total_count; ++sb_index) {
         MdcSbData *results_ptr  = &pcs_ptr->mdc_sb_array[sb_index];
         results_ptr->leaf_count = 0;
         uint32_t blk_index      = 0;
@@ -1413,7 +1413,7 @@ void forward_all_c_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *
             uint8_t is_blk_allowed =
                 pcs_ptr->slice_type != I_SLICE ? 1 : (blk_geom->sq_size < 128) ? 1 : 0;
 
-            if (scs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
+            if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
                 tot_d1_blocks =
                     results_ptr->leaf_data_array[results_ptr->leaf_count].tot_d1_blocks =
 
@@ -1427,7 +1427,7 @@ void forward_all_c_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *
                     blk_geom = get_blk_geom_mds(blk_index);
 
                     //if the parentSq is inside inject this block
-                    if (scs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index]) {
+                    if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index]) {
                         results_ptr->leaf_data_array[results_ptr->leaf_count].leaf_index =
                             0; //valid only for square 85 world. will be removed.
                         results_ptr->leaf_data_array[results_ptr->leaf_count].mds_idx = blk_index;

@@ -524,8 +524,8 @@ EbErrorType compute_decimated_zz_sad(MotionEstimationContext_t *context_ptr,
 
     for (y_sb_index = y_sb_start_index; y_sb_index < y_sb_end_index; ++y_sb_index) {
         for (x_sb_index = x_sb_start_index; x_sb_index < x_sb_end_index; ++x_sb_index) {
-            sb_index            = x_sb_index + y_sb_index * scs_ptr->pic_width_in_sb;
-            SbParams *sb_params = &scs_ptr->sb_params_array[sb_index];
+            sb_index            = x_sb_index + y_sb_index * pcs_ptr->picture_sb_width;
+            SbParams *sb_params = &pcs_ptr->sb_params_array[sb_index];
 
             sb_width  = sb_params->width;
             sb_height = sb_params->height;
@@ -710,7 +710,7 @@ void *motion_estimation_kernel(void *input_ptr) {
             // Segments
             segment_index = in_results_ptr->segment_index;
             pic_width_in_sb =
-                (scs_ptr->seq_header.max_frame_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz;
+                (pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz;
             picture_height_in_sb =
                 (scs_ptr->seq_header.max_frame_height + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz;
             SEGMENT_CONVERT_IDX_TO_XY(
@@ -733,8 +733,8 @@ void *motion_estimation_kernel(void *input_ptr) {
                         sb_origin_y = y_sb_index * scs_ptr->sb_sz;
 
                         sb_width =
-                            (scs_ptr->seq_header.max_frame_width - sb_origin_x) < BLOCK_SIZE_64
-                                ? scs_ptr->seq_header.max_frame_width - sb_origin_x
+                            (pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x) < BLOCK_SIZE_64
+                                ? pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x
                                 : BLOCK_SIZE_64;
                         sb_height =
                             (scs_ptr->seq_header.max_frame_height - sb_origin_y) < BLOCK_SIZE_64
@@ -885,8 +885,8 @@ void *motion_estimation_kernel(void *input_ptr) {
                             sb_origin_x = x_sb_index * scs_ptr->sb_sz;
                             sb_origin_y = y_sb_index * scs_ptr->sb_sz;
                             sb_width =
-                                (scs_ptr->seq_header.max_frame_width - sb_origin_x) < BLOCK_SIZE_64
-                                    ? scs_ptr->seq_header.max_frame_width - sb_origin_x
+                                (pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x) < BLOCK_SIZE_64
+                                    ? pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x
                                     : BLOCK_SIZE_64;
                             sb_height =
                                 (scs_ptr->seq_header.max_frame_height - sb_origin_y) < BLOCK_SIZE_64
@@ -951,8 +951,8 @@ void *motion_estimation_kernel(void *input_ptr) {
                             sb_origin_x = x_sb_index * scs_ptr->sb_sz;
                             sb_origin_y = y_sb_index * scs_ptr->sb_sz;
                             sb_width =
-                                (scs_ptr->seq_header.max_frame_width - sb_origin_x) < BLOCK_SIZE_64
-                                    ? scs_ptr->seq_header.max_frame_width - sb_origin_x
+                                (pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x) < BLOCK_SIZE_64
+                                    ? pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x
                                     : BLOCK_SIZE_64;
                             sb_height =
                                 (scs_ptr->seq_header.max_frame_height - sb_origin_y) < BLOCK_SIZE_64

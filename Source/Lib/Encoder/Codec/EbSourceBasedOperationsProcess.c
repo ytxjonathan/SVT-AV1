@@ -68,7 +68,7 @@ void derive_picture_activity_statistics(SequenceControlSet *     scs_ptr,
 
     uint32_t sb_index;
     for (sb_index = 0; sb_index < sb_total_count; ++sb_index) {
-        SbParams *sb_params = &scs_ptr->sb_params_array[sb_index];
+        SbParams *sb_params = &pcs_ptr->sb_params_array[sb_index];
         if (sb_params->is_complete_sb) {
             non_moving_index_min = pcs_ptr->non_moving_index_array[sb_index] < non_moving_index_min
                                        ? pcs_ptr->non_moving_index_array[sb_index]
@@ -127,7 +127,7 @@ void *source_based_operations_kernel(void *input_ptr) {
 
         /***********************************************SB-based operations************************************************************/
         for (sb_index = 0; sb_index < sb_total_count; ++sb_index) {
-            SbParams *sb_params      = &scs_ptr->sb_params_array[sb_index];
+            SbParams *sb_params      = &pcs_ptr->sb_params_array[sb_index];
             EbBool    is_complete_sb = sb_params->is_complete_sb;
             uint8_t * y_mean_ptr     = pcs_ptr->y_mean[sb_index];
 

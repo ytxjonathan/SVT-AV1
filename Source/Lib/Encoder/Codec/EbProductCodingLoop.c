@@ -5689,7 +5689,7 @@ void md_encode_block(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
         }
     }
 
-    uint8_t is_complete_sb = scs_ptr->sb_geom[sb_addr].is_complete_sb;
+    uint8_t is_complete_sb = pcs_ptr->parent_pcs_ptr->sb_geom[sb_addr].is_complete_sb;
 
     if (allowed_ns_cu(is_nsq_table_used,
                       pcs_ptr->parent_pcs_ptr->nsq_max_shapes_md,
@@ -6480,6 +6480,8 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
                                        ModeDecisionContext *context_ptr) {
     EbErrorType return_error = EB_ErrorNone;
 
+    //printf("sb_origin_x = %d, sb_origin_y = %d\n", sb_origin_x, sb_origin_y);
+
     uint32_t                     cu_idx;
     ModeDecisionCandidateBuffer *bestcandidate_buffers[5];
     // Pre Intra Search
@@ -6787,13 +6789,14 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
                     compute_depth_costs_md_skip(
                         context_ptr,
                         scs_ptr,
+                        pcs_ptr->parent_pcs_ptr,
                         parent_depth_idx_mds,
                         ns_depth_offset[scs_ptr->seq_header.sb_size == BLOCK_128X128]
                                        [context_ptr->blk_geom->depth],
                         &parent_depth_cost,
                         &current_depth_cost);
 
-                if (!scs_ptr->sb_geom[sb_addr].block_is_allowed[parent_depth_idx_mds])
+                if (!pcs_ptr->parent_pcs_ptr->sb_geom[sb_addr].block_is_allowed[parent_depth_idx_mds])
                     parent_depth_cost = MAX_MODE_COST;
 
                 // compare the cost of the parent to the cost of the already encoded child + an estimated cost for the remaining child @ the current depth
@@ -6820,7 +6823,7 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
                  context_ptr->blk_geom->bheight > block_size_high[max_bsize]) &&
                 (mdcResultTbPtr->leaf_data_array[cu_idx].split_flag == EB_TRUE);
 
-            if (pcs_ptr->parent_pcs_ptr->scs_ptr->sb_geom[sb_addr]
+            if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_addr]
                     .block_is_allowed[blk_ptr->mds_idx] &&
                 !skip_next_nsq && !skip_next_sq && !auto_max_partition_block_skip) {
                 md_encode_block(scs_ptr,

@@ -516,7 +516,7 @@ void stationary_edge_count_sb(SequenceControlSet *scs_ptr, PictureParentControlS
                               uint32_t                 total_sb_count) {
     uint32_t sb_index;
     for (sb_index = 0; sb_index < total_sb_count; sb_index++) {
-        SbParams sb_params   = scs_ptr->sb_params_array[sb_index];
+        SbParams sb_params   = pcs_ptr->sb_params_array[sb_index];
         SbStat * sb_stat_ptr = &pcs_ptr->sb_stat_array[sb_index];
         if (sb_params.potential_logo_sb && sb_params.is_complete_sb &&
             sb_stat_ptr->check1_for_logo_stationary_edge_over_time_flag &&
@@ -542,7 +542,7 @@ void stationary_edge_over_update_over_time_sb_part1(SequenceControlSet *     scs
     int32_t  y_current_mv = 0;
 
     for (sb_index = 0; sb_index < pcs_ptr->sb_total_count; sb_index++) {
-        SbParams sb_params   = scs_ptr->sb_params_array[sb_index];
+        SbParams sb_params   = pcs_ptr->sb_params_array[sb_index];
         SbStat * sb_stat_ptr = &pcs_ptr->sb_stat_array[sb_index];
 
         if (sb_params.potential_logo_sb && sb_params.is_complete_sb) {
@@ -591,7 +591,7 @@ void stationary_edge_over_update_over_time_sb_part2(SequenceControlSet *     scs
     uint32_t low_sad_th = (scs_ptr->input_resolution < INPUT_SIZE_1080p_RANGE) ? 5 : 2;
 
     for (sb_index = 0; sb_index < pcs_ptr->sb_total_count; sb_index++) {
-        SbParams sb_params   = scs_ptr->sb_params_array[sb_index];
+        SbParams sb_params   = pcs_ptr->sb_params_array[sb_index];
         SbStat * sb_stat_ptr = &pcs_ptr->sb_stat_array[sb_index];
 
         if (sb_params.potential_logo_sb && sb_params.is_complete_sb) {
@@ -631,7 +631,7 @@ void stationary_edge_over_update_over_time_sb(SequenceControlSet *     scs_ptr,
     const uint32_t slide_window_th = ((total_checked_pictures / 4) - 1);
 
     for (sb_index = 0; sb_index < total_sb_count; sb_index++) {
-        SbParams sb_params = scs_ptr->sb_params_array[sb_index];
+        SbParams sb_params = pcs_ptr->sb_params_array[sb_index];
 
         SbStat *sb_stat_ptr                         = &pcs_ptr->sb_stat_array[sb_index];
         sb_stat_ptr->stationary_edge_over_time_flag = EB_FALSE;
@@ -660,11 +660,11 @@ void stationary_edge_over_update_over_time_sb(SequenceControlSet *     scs_ptr,
         uint32_t count_of_neighbors = 0;
         int32_t  sb_hor, sb_ver, sb_ver_offset;
         int32_t  sb_hor_s, sb_ver_s, sb_hor_e, sb_ver_e;
-        uint32_t pic_width_in_sb      = scs_ptr->pic_width_in_sb;
-        uint32_t picture_height_in_sb = scs_ptr->picture_height_in_sb;
+        uint32_t pic_width_in_sb      = pcs_ptr->picture_sb_width;
+        uint32_t picture_height_in_sb = pcs_ptr->picture_sb_height;
 
         for (sb_index = 0; sb_index < pcs_ptr->sb_total_count; ++sb_index) {
-            SbParams sb_params   = scs_ptr->sb_params_array[sb_index];
+            SbParams sb_params   = pcs_ptr->sb_params_array[sb_index];
             SbStat * sb_stat_ptr = &pcs_ptr->sb_stat_array[sb_index];
 
             sb_x = sb_params.horizontal_index;
@@ -693,7 +693,7 @@ void stationary_edge_over_update_over_time_sb(SequenceControlSet *     scs_ptr,
         }
 
         for (sb_index = 0; sb_index < pcs_ptr->sb_total_count; ++sb_index) {
-            SbParams sb_params   = scs_ptr->sb_params_array[sb_index];
+            SbParams sb_params   = pcs_ptr->sb_params_array[sb_index];
             SbStat * sb_stat_ptr = &pcs_ptr->sb_stat_array[sb_index];
 
             sb_x = sb_params.horizontal_index;

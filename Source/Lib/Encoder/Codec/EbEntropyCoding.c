@@ -6175,7 +6175,7 @@ EB_EXTERN EbErrorType write_sb(EntropyCodingContext *context_ptr, SuperBlock *tb
     context_ptr->coded_area_sb_uv = 0;
     EbBool check_blk_out_of_bound = EB_FALSE;
 
-    SbGeom *sb_geom = &scs_ptr->sb_geom[tb_ptr->index]; // .block_is_inside_md_scan[blk_index])
+    SbGeom *sb_geom = &pcs_ptr->parent_pcs_ptr->sb_geom[tb_ptr->index]; // .block_is_inside_md_scan[blk_index])
 
     if (!(sb_geom->is_complete_sb)) check_blk_out_of_bound = EB_TRUE;
     do {

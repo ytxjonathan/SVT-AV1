@@ -2343,7 +2343,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                               (sb_origin_y + blk_geom->origin_y) >> MI_SIZE_LOG2,
                               (sb_origin_x + blk_geom->origin_x) >> MI_SIZE_LOG2);
         }
-        if (part != PARTITION_SPLIT && scs_ptr->sb_geom[sb_addr].block_is_allowed[blk_it]) {
+        if (part != PARTITION_SPLIT && pcs_ptr->parent_pcs_ptr->sb_geom[sb_addr].block_is_allowed[blk_it]) {
             int32_t offset_d1 = ns_blk_offset[(int32_t)part]; //blk_ptr->best_d1_blk; // TOCKECK
             int32_t num_d1_block =
                 ns_blk_num[(int32_t)part]; // context_ptr->blk_geom->totns; // TOCKECK

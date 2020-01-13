@@ -5606,7 +5606,7 @@ void edge_detection_mean_luma_chroma_16x16(SequenceControlSet *     scs_ptr,
             SbStat *sb_stat_ptr = &pcs_ptr->sb_stat_array[sb_index];
 
             EB_MEMSET(sb_stat_ptr, 0, sizeof(SbStat));
-            SbParams *sb_params = &scs_ptr->sb_params_array[sb_index];
+            SbParams *sb_params = &pcs_ptr->sb_params_array[sb_index];
             if (sb_params->potential_logo_sb && sb_params->is_complete_sb)
 
             {
@@ -5676,7 +5676,7 @@ void edge_detection_mean_luma_chroma_16x16(SequenceControlSet *     scs_ptr,
         }
 
         for (sb_index = 0; sb_index < total_sb_count; sb_index++) {
-            SbParams *sb_params = &scs_ptr->sb_params_array[sb_index];
+            SbParams *sb_params = &pcs_ptr->sb_params_array[sb_index];
             if (sb_params->potential_logo_sb && sb_params->is_complete_sb) {
                 SbStat *sb_stat_ptr = &pcs_ptr->sb_stat_array[sb_index];
 
@@ -5715,7 +5715,7 @@ void determine_homogeneous_region_in_picture(SequenceControlSet *     scs_ptr,
     uint32_t  sb_total_count   = pcs_ptr->sb_total_count;
 
     for (sb_index = 0; sb_index < sb_total_count; ++sb_index) {
-        SbParams sb_params = scs_ptr->sb_params_array[sb_index];
+        SbParams sb_params = pcs_ptr->sb_params_array[sb_index];
         variance_ptr       = pcs_ptr->variance[sb_index];
 
         if (sb_params.is_complete_sb) {
@@ -5757,7 +5757,7 @@ void compute_picture_spatial_statistics(SequenceControlSet *     scs_ptr,
     pic_tot_variance = 0;
 
     for (sb_index = 0; sb_index < pcs_ptr->sb_total_count; ++sb_index) {
-        SbParams *sb_params = &scs_ptr->sb_params_array[sb_index];
+        SbParams *sb_params = &pcs_ptr->sb_params_array[sb_index];
 
         sb_origin_x             = sb_params->origin_x;
         sb_origin_y             = sb_params->origin_y;

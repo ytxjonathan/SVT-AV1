@@ -2079,7 +2079,7 @@ static void build_cand_block_array(SequenceControlSet *scs_ptr, PictureControlSe
         uint8_t is_blk_allowed =
             pcs_ptr->slice_type != I_SLICE ? 1 : (blk_geom->sq_size < 128) ? 1 : 0;
         //init consider block flag
-        if (scs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
+        if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
             tot_d1_blocks = blk_geom->sq_size == 128
                                 ? 17
                                 : blk_geom->sq_size > 8 ? 25 : blk_geom->sq_size == 8 ? 5 : 1;
@@ -2277,7 +2277,7 @@ static void perform_pred_depth_refinement(SequenceControlSet *scs_ptr, PictureCo
         // derive split_flag
         split_flag = context_ptr->md_blk_arr_nsq[blk_index].split_flag;
 
-        if (scs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
+        if (pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].block_is_inside_md_scan[blk_index] && is_blk_allowed) {
             if (blk_geom->shape == PART_N) {
                 if (context_ptr->md_blk_arr_nsq[blk_index].split_flag == EB_FALSE) {
                     int8_t s_depth = 0;
@@ -2597,7 +2597,7 @@ void *enc_dec_kernel(void *input_ptr) {
                     sb_ptr          = pcs_ptr->sb_ptr_array[sb_index];
                     sb_origin_x     = x_sb_index << sb_size_log2;
                     sb_origin_y     = y_sb_index << sb_size_log2;
-                    last_sb_flag    = (sb_index == scs_ptr->sb_tot_cnt - 1) ? EB_TRUE : EB_FALSE;
+                    last_sb_flag    = (sb_index == pcs_ptr->parent_pcs_ptr->sb_total_count - 1) ? EB_TRUE : EB_FALSE;
                     end_of_row_flag = (x_sb_index == pic_width_in_sb - 1) ? EB_TRUE : EB_FALSE;
                     sb_row_index_start =
                         (x_sb_index == pic_width_in_sb - 1 && sb_row_index_count == 0)
@@ -2668,7 +2668,7 @@ void *enc_dec_kernel(void *input_ptr) {
                          pcs_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
                          pcs_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
                          pcs_ptr->parent_pcs_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_3) &&
-                        scs_ptr->sb_geom[sb_index].is_complete_sb) {
+                        pcs_ptr->parent_pcs_ptr->sb_geom[sb_index].is_complete_sb) {
                         // Save a clean copy of the neighbor arrays
                         copy_neighbour_arrays(pcs_ptr,
                                               context_ptr->md_context,
