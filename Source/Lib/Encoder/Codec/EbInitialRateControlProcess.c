@@ -53,31 +53,6 @@ void GetMeDist(
     *distortion = (uint32_t)picture_control_set_ptr->me_results[sb_index]->me_candidate[0][0].distortion;
 }
 
-#if CUTREE_LA
-MeCandidate* GetMbMv(
-    PictureParentControlSet    *picture_control_set_ptr,
-    uint32_t                    sb_index,
-    uint32_t                    rf_idx,
-    uint32_t                    me_mb_offset,
-    int32_t                    *xCurrentMv,
-    int32_t                    *yCurrentMv)
-{
-    uint32_t             meCandidateIndex;
-
-    const MeLcuResults *me_results = picture_control_set_ptr->me_results[sb_index];
-    uint8_t total_me_cnt = me_results->total_me_candidate_index[me_mb_offset];
-    MeCandidate *me_block_results = me_results->me_candidate[me_mb_offset];
-    for (meCandidateIndex = 0; meCandidateIndex < total_me_cnt; meCandidateIndex++) {
-        if (me_block_results->direction == UNI_PRED_LIST_0) {
-            *xCurrentMv = me_results->me_mv_array[me_mb_offset][rf_idx].x_mv;
-            *yCurrentMv = me_results->me_mv_array[me_mb_offset][rf_idx].y_mv;
-            break;
-        }
-    }
-    return me_block_results;
-}
-#endif
-
 EbBool CheckMvForPanHighAmp(
     uint32_t   hierarchical_levels,
     uint32_t     temporal_layer_index,
@@ -1313,11 +1288,10 @@ void cutree_mc_flow_dispenser(
     uint32_t    picture_height_in_sb = (picture_control_set_ptr->enhanced_picture_ptr->height + BLOCK_SIZE_64 - 1) / BLOCK_SIZE_64;
     uint32_t    sb_origin_x;
     uint32_t    sb_origin_y;
-    int32_t     x_curr_mv = 0;
-    int32_t     y_curr_mv = 0;
+    int16_t     x_curr_mv = 0;
+    int16_t     y_curr_mv = 0;
     uint32_t    me_mb_offset = 0;
     TxSize      tx_size = TX_16X16;
-    MeCandidate *me_block_result;
     EbPictureBufferDesc  *ref_pic_ptr;
     EbReferenceObject    *referenceObject;
     struct      ScaleFactors sf;
@@ -1372,6 +1346,7 @@ void cutree_mc_flow_dispenser(
     mb_plane.zbin_QTX        = picture_control_set_ptr->quantsMd.y_zbin[qIndex];
     mb_plane.round_QTX       = picture_control_set_ptr->quantsMd.y_round[qIndex];
     mb_plane.dequant_QTX     = picture_control_set_ptr->deqMd.y_dequant_QTX[qIndex];
+//printf("kelvin cutree_mc_flow_dispenser picture_number=%d qIndex=%d mb_plane.zbin_QTX[0~3]=%d %d %d %d\n", picture_control_set_ptr->picture_number, qIndex, mb_plane.zbin_QTX[0], mb_plane.zbin_QTX[1], mb_plane.zbin_QTX[2], mb_plane.zbin_QTX[3]);
 
     // Walk the first N entries in the sliding window
     inputQueueIndex = encode_context_ptr->initial_rate_control_reorder_queue_head_index;
@@ -1403,12 +1378,16 @@ void cutree_mc_flow_dispenser(
                     OisMbResults *ois_mb_results_ptr = picture_control_set_ptr->ois_mb_results[(mb_origin_y >> 4) * picture_width_in_mb + (mb_origin_x >> 4)];
                     int64_t best_intra_cost = ois_mb_results_ptr->intra_cost;
                     uint8_t best_mode = DC_PRED;
-                    //uint8_t *src_mb = input_picture_ptr->buffer_y + mb_origin_y * input_picture_ptr->stride_y + mb_origin_x;
                     uint8_t *src_mb = input_picture_ptr->buffer_y + input_picture_ptr->origin_x + mb_origin_x +
                                      (input_picture_ptr->origin_y + mb_origin_y) * input_picture_ptr->stride_y;
+#if USE_ORIGIN_YUV
+                    if(picture_control_set_ptr->temporal_layer_index == 0) {
+                        src_mb = picture_control_set_ptr->save_enhanced_picture_ptr[0] + picture_control_set_ptr->enhanced_picture_ptr->origin_x + mb_origin_x +
+                            (picture_control_set_ptr->enhanced_picture_ptr->origin_y + mb_origin_y) * input_picture_ptr->stride_y;
+                    }
+#endif
                     for(uint32_t rf_idx = 0; rf_idx < max_inter_ref; rf_idx++) {
                         me_mb_offset = get_me_info_index(picture_control_set_ptr->max_number_of_pus_per_sb, &blk_geom, 0, 0);
-                        me_block_result = GetMbMv(picture_control_set_ptr, rf_idx, sb_index, me_mb_offset, &x_curr_mv, &y_curr_mv);
 
                         uint32_t list_index = (sequence_control_set_ptr->mrp_mode == 0) ? (rf_idx < 4 ? 0 : 1)
                                                                                         : (rf_idx < 2 ? 0 : 1);
@@ -1425,6 +1404,12 @@ void cutree_mc_flow_dispenser(
                         struct buf_2d ref_buf = { NULL, ref_pic_ptr->buffer_y + ref_basic_offset,
                                                   ref_pic_ptr->width, ref_pic_ptr->height,
                                                   ref_pic_ptr->stride_y };
+                        const MeLcuResults *me_results = picture_control_set_ptr->me_results[sb_index];
+                        x_curr_mv = me_results->me_mv_array[me_mb_offset][(list_index ? ((sequence_control_set_ptr->mrp_mode == 0) ? 4 : 2) : 0) + ref_pic_index].x_mv << 1;
+                        y_curr_mv = me_results->me_mv_array[me_mb_offset][(list_index ? ((sequence_control_set_ptr->mrp_mode == 0) ? 4 : 2) : 0) + ref_pic_index].y_mv << 1;
+if(picture_control_set_ptr->picture_number == 16 && mb_origin_x == 0 && mb_origin_y == 0) {
+    printf("kelvin ---> inter search poc%d, mb_origin_xy=%d %d, rf_idx=%d, src[0~3]=%d %d %d %d, MV=%d %d, ref[0~3]=%d %d %d %d\n", picture_control_set_ptr->picture_number, mb_origin_x, mb_origin_y, rf_idx, src_mb[0], src_mb[1], src_mb[2], src_mb[3], x_curr_mv, y_curr_mv, ref_mb[0], ref_mb[1], ref_mb[2], ref_mb[3]);
+}
                         InterPredParams inter_pred_params;
                         av1_init_inter_params(&inter_pred_params, 16, 16, mb_origin_y,
                                 mb_origin_x, 0, 0, 8/*xd->bd*/, 0/*is_cur_buf_hbd(xd)*/, 0,
@@ -1432,7 +1417,7 @@ void cutree_mc_flow_dispenser(
 
                         inter_pred_params.conv_params = get_conv_params(0, 0, 0, 8/*xd->bd*/);
 
-                        MV best_mv = {x_curr_mv, y_curr_mv};
+                        MV best_mv = {y_curr_mv, x_curr_mv};
                         av1_build_inter_predictor(ref_mb, input_picture_ptr->stride_y, predictor, 16,
                                 &best_mv, mb_origin_x, mb_origin_y, &inter_pred_params);
                         aom_subtract_block(16, 16, src_diff, 16, src_mb, input_picture_ptr->stride_y, predictor, 16);
@@ -1457,7 +1442,15 @@ void cutree_mc_flow_dispenser(
                     }
                     best_intra_cost = AOMMAX(best_intra_cost, 1);
 //printf("kelvincost1 poc%d sb_index=%d, mb_origin_xy=%d %d, best_mode=%d, best_intra_cost=%d, offset=%d\n", picture_control_set_ptr->picture_number, sb_index, mb_origin_x, mb_origin_y, ois_mb_results_ptr->intra_mode, best_intra_cost, (mb_origin_y >> 4) * picture_width_in_mb + (mb_origin_x >> 4));
-                    if (0)//(frame_idx == 0)
+//if(picture_control_set_ptr->picture_number == 16 && mb_origin_y == 544)
+if(picture_control_set_ptr->picture_number == 16 && mb_origin_y == 0)
+{
+    if(mb_origin_x==0)
+        printf("mbline%d poc%d\n", mb_origin_y>>4, picture_control_set_ptr->picture_number);
+    printf("%d %d \n", best_intra_cost, best_inter_cost);
+}
+                    //if (0)
+                    if (picture_control_set_ptr->picture_number == 0)//(frame_idx == 0)
                         best_inter_cost = 0;
                     else
                         best_inter_cost = AOMMIN(best_intra_cost, best_inter_cost);
@@ -1485,9 +1478,8 @@ void cutree_mc_flow_dispenser(
                         ref_pic_ptr = /*is16bit ? (EbPictureBufferDesc*)referenceObject->reference_picture16bit : */(EbPictureBufferDesc*)referenceObject->reference_picture;
                         uint8_t *ref_mb = ref_pic_ptr->buffer_y + ref_mb_offset;
                         uint8_t *src_mb = input_picture_ptr->buffer_y + mb_origin_y * input_picture_ptr->stride_y + mb_origin_x;
-                        MV best_mv = {x_curr_mv, y_curr_mv};
                         av1_build_inter_predictor(ref_mb, input_picture_ptr->stride_y, predictor, 16,
-                                &best_mv, mb_origin_x, mb_origin_y, &inter_pred_params);
+                                &final_best_mv, mb_origin_x, mb_origin_y, &inter_pred_params);
 //printf("kelvin inter pred sb_index=%d, mb_origin_x=%d, mb_origin_y=%d\n", sb_index, mb_origin_x, mb_origin_y);
                     } else {
                         // intra recon
@@ -1503,11 +1495,7 @@ void cutree_mc_flow_dispenser(
                         TxSize tx_size = TX_16X16;
                         uint8_t *src = input_picture_ptr->buffer_y + picture_control_set_ptr->enhanced_picture_ptr->origin_x + mb_origin_x +
                             (picture_control_set_ptr->enhanced_picture_ptr->origin_y + mb_origin_y) * input_picture_ptr->stride_y;
-#if USE_ORIGIN_YUV
                         update_neighbor_samples_array_open_loop(above_row - 1, left_col - 1, input_picture_ptr, input_picture_ptr->stride_y, mb_origin_x, mb_origin_y, 16, 16, picture_control_set_ptr);
-#else
-                        update_neighbor_samples_array_open_loop(above_row - 1, left_col - 1, input_picture_ptr, input_picture_ptr->stride_y, mb_origin_x, mb_origin_y, 16, 16);
-#endif
                         uint8_t ois_intra_mode = ois_mb_results_ptr->intra_mode;
                         int32_t p_angle = av1_is_directional_mode((PredictionMode)ois_intra_mode) ? mode_to_angle_map[(PredictionMode)ois_intra_mode] : 0;
                         // Edge filter
@@ -1548,7 +1536,29 @@ void cutree_mc_flow_dispenser(
                         ois_mb_results_ptr->mv = final_best_mv;
                         ois_mb_results_ptr->ref_frame_poc = picture_control_set_ptr->ref_order_hint[best_rf_idx];
                     }
-
+// printf one line MB data
+//if(picture_control_set_ptr->picture_number == 16 && mb_origin_y == 544)
+if(picture_control_set_ptr->picture_number == 16 && mb_origin_y == 0)
+{
+#if 1
+//    if(mb_origin_x==0)
+//        printf("mbline%d poc%d\n", mb_origin_y>>4, picture_control_set_ptr->picture_number);
+//    printf("%d %d \n", best_intra_cost, best_inter_cost);
+//if(mb_origin_x==16)
+//    printf("mbx=%d %d %d \n", mb_origin_x>>4, ois_mb_results_ptr->intra_cost, ois_mb_results_ptr->inter_cost);
+    //printf("mbx=%d %d %d \n", mb_origin_x>>4, best_intra_cost, best_inter_cost);
+    //printf("mbx%d %d %d isinterwinner%d\n", mb_origin_x >> 4, ois_mb_results_ptr->intra_cost, ois_mb_results_ptr->inter_cost, best_mode == NEWMV);
+    //printf("%d ", ois_mb_results_ptr->intra_cost);
+    //printf("%d ", ois_mb_results_ptr->inter_cost);
+    //printf("\n");
+#else
+    if(mb_origin_x==0)
+        printf("kelvinmbline%d poc%d", mb_origin_y, picture_control_set_ptr->picture_number);
+    printf("mbx=%d %d %d,", mb_origin_x >> 4, ois_mb_results_ptr->intra_cost, ois_mb_results_ptr->inter_cost);
+    if((mb_origin_x % 160)==0 || (mb_origin_x + 1 == picture_width_in_mb))
+        printf("\n");
+#endif
+}
                     // Motion flow dependency dispenser.
                     result_model_store(picture_control_set_ptr, ois_mb_results_ptr, mb_origin_x, mb_origin_y, picture_width_in_mb);
                 }
