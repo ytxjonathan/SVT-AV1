@@ -1124,6 +1124,8 @@ EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
     object_ptr->input_picture_wrapper_ptr     = (EbObjectWrapper *)EB_NULL;
     object_ptr->reference_picture_wrapper_ptr = (EbObjectWrapper *)EB_NULL;
     object_ptr->enhanced_picture_ptr          = (EbPictureBufferDesc *)EB_NULL;
+    object_ptr->enhanced_downscaled_picture_ptr = (EbPictureBufferDesc *)EB_NULL;
+    object_ptr->enhanced_unscaled_picture_ptr   = (EbPictureBufferDesc *)EB_NULL;
 
     if (init_data_ptr->color_format >= EB_YUV422) {
         EbPictureBufferDescInitData input_pic_buf_desc_init_data;

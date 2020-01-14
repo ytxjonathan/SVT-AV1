@@ -663,7 +663,7 @@ void *motion_estimation_kernel(void *input_ptr) {
                 : (EbPictureBufferDesc *)pa_ref_obj_->sixteenth_decimated_picture_ptr;
         input_padded_picture_ptr = (EbPictureBufferDesc *)pa_ref_obj_->input_padded_picture_ptr;
 
-        input_picture_ptr = pcs_ptr->enhanced_picture_ptr;
+        input_picture_ptr = pcs_ptr->enhanced_unscaled_picture_ptr;
 
         context_ptr->me_context_ptr->me_alt_ref =
             in_results_ptr->task_type == 1 ? EB_TRUE : EB_FALSE;
