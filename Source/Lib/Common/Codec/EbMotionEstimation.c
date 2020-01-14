@@ -23,7 +23,12 @@
 #include "EbLambdaRateTables.h"
 
 #define OIS_TH_COUNT 4
-
+#if SC_HME_PRUNING
+#define SC_HME_TH_STILL 1000
+#define SC_HME_TH_EASY  100
+#define SC_SR_DENOM_STILL 4
+#define SC_SR_DENOM_EASY 2
+#endif
 int32_t OisPointTh[3][MAX_TEMPORAL_LAYERS][OIS_TH_COUNT] = {
     {// Light OIS
      {-20, 50, 150, 200},
@@ -13833,13 +13838,13 @@ void integer_search_sb(
                 // Constrain x_ME to be a multiple of 8 (round up)
                 // Update ME search reagion size based on hme-data
 #if SC_HME_PRUNING
-                if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == 1000) {
-                    search_area_width = (1 + 7) & ~0x07;
-                    search_area_height = 1;
+                if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == SC_HME_TH_STILL) {
+                    search_area_width = ((search_area_width / SC_SR_DENOM_STILL) + 7) & ~0x07;
+                    search_area_height = (search_area_height / SC_SR_DENOM_STILL);
                 }
-                else if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == 100) {
-                    search_area_width = (4 + 7) & ~0x07;
-                    search_area_height = 4;
+                else if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == SC_HME_TH_EASY) {
+                    search_area_width = ((search_area_width / SC_SR_DENOM_EASY) + 7) & ~0x07;
+                    search_area_height = (search_area_height / SC_SR_DENOM_EASY);
                 }else if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
                     search_area_width = ((search_area_width / 8) + 7) & ~0x07;
                     search_area_height = (search_area_height / 8);
@@ -13869,11 +13874,29 @@ void integer_search_sb(
                 search_area_width = (context_ptr->search_area_width + 7) & ~0x07;
                 search_area_height = context_ptr->search_area_height;
 #if SKIP_ME_BASED_ON_HME
+#if SC_HME_PRUNING
+                if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == SC_HME_TH_STILL) {
+                    search_area_width = ((search_area_width / SC_SR_DENOM_STILL) + 7) & ~0x07;
+                    search_area_height = (search_area_height / SC_SR_DENOM_STILL);
+                }
+                else if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == SC_HME_TH_EASY) {
+                    search_area_width = ((search_area_width / SC_SR_DENOM_EASY) + 7) & ~0x07;
+                    search_area_height = (search_area_height / SC_SR_DENOM_EASY);
+                }else if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
+                    search_area_width = ((search_area_width / 8) + 7) & ~0x07;
+                    search_area_height = (search_area_height / 8);
+                }
+                else {
+                    search_area_width = (search_area_width + 7) & ~0x07;
+                    search_area_height = search_area_height;
+                }
+#else
                 // Update ME search reagion size based on hme-data
                 if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
                     search_area_width = ((context_ptr->search_area_width/8) + 7) & ~0x07;
                     search_area_height = (context_ptr->search_area_height/8);
                 }
+#endif
 #endif
             }
 #else
@@ -15051,26 +15074,12 @@ void prune_references_sc(
     EbPictureBufferDesc       *input_ptr
 )
 {
-    HmeResults    sorted[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
-    uint32_t      num_of_cand_to_sort = MAX_NUM_OF_REF_PIC_LIST * REF_LIST_MAX_DEPTH;
-    memcpy(sorted, context_ptr->hme_results, sizeof(HmeResults)*MAX_NUM_OF_REF_PIC_LIST*REF_LIST_MAX_DEPTH);
-    HmeResults     * res_p = sorted[0];
-    uint32_t i, j;
-    for (i = 0; i < num_of_cand_to_sort - 1; ++i) {
-        for (j = i + 1; j < num_of_cand_to_sort; ++j) {
-            if (res_p[j].hme_sad < res_p[i].hme_sad) {
-                HmeResults temp = res_p[i];
-                res_p[i] = res_p[j];
-                res_p[j]= temp;
-            }
-        }
-    }
     for (uint32_t li = 0; li < MAX_NUM_OF_REF_PIC_LIST; li++) {
         for (uint32_t ri = 0; ri < REF_LIST_MAX_DEPTH; ri++){
-            if (context_ptr->hme_results[li][ri].hme_sc_x == 0 && context_ptr->hme_results[li][ri].hme_sc_y == 0 && context_ptr->hme_results[li][ri].hme_sad < 100)
-                context_ptr->reduce_me_sr_flag[li][ri] = 1000;
-            else if (context_ptr->hme_results[li][ri].hme_sad < 100)
-                context_ptr->reduce_me_sr_flag[li][ri] = 100;
+            if (context_ptr->hme_results[li][ri].hme_sc_x == 0 && context_ptr->hme_results[li][ri].hme_sc_y == 0 && context_ptr->hme_results[li][ri].hme_sad < SC_HME_TH_EASY)
+                context_ptr->reduce_me_sr_flag[li][ri] = SC_HME_TH_STILL;
+            else if (context_ptr->hme_results[li][ri].hme_sad < SC_HME_TH_EASY)
+                context_ptr->reduce_me_sr_flag[li][ri] = SC_HME_TH_EASY;
         }
     }
 }
