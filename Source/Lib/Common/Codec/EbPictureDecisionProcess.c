@@ -4251,7 +4251,11 @@ void* picture_decision_kernel(void *input_ptr)
 #endif
                                   (picture_control_set_ptr->slice_type != I_SLICE && picture_control_set_ptr->temporal_layer_index == 0)
 #if TWO_PASS
+#if ALTREF_TL1
+                                    || (picture_control_set_ptr->temporal_layer_index == 1 && picture_control_set_ptr->sc_content_detected == 0)
+#else
                                     || (sequence_control_set_ptr->use_input_stat_file && picture_control_set_ptr->temporal_layer_index == 1 && picture_control_set_ptr->sc_content_detected == 0)
+#endif
 #endif
                                     ) ) {
                                 int altref_nframes = picture_control_set_ptr->sequence_control_set_ptr->static_config.altref_nframes;
@@ -4306,8 +4310,10 @@ void* picture_decision_kernel(void *input_ptr)
                                     picture_control_set_ptr->temp_filt_pcs_list[pic_itr] = NULL;
 #if NON_KF_INTRA_TF_FIX
                                 // Jing: Intra CRA case
-                                num_past_pics = MIN(num_past_pics, (int)encode_context_ptr->pre_assignment_buffer_count -1);
-
+                                num_past_pics = MIN(num_past_pics, (int)encode_context_ptr->pre_assignment_buffer_count - 1);
+#if ALTREF_TL1
+                                num_past_pics = MIN(num_past_pics, (int)pictureIndex);
+#endif
                                 //get previous+current pictures from the the pre-assign buffer
                                 for (int pic_itr = 0; pic_itr <= num_past_pics; pic_itr++) {
                                     PictureParentControlSet* pcs_itr = (PictureParentControlSet*)encode_context_ptr->pre_assignment_buffer[pictureIndex - num_past_pics + pic_itr]->object_ptr;

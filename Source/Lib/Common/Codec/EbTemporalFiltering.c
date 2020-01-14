@@ -1249,8 +1249,7 @@ static void tf_inter_prediction(PictureParentControlSet *picture_control_set_ptr
                                 int encoder_bit_depth)
 {
     const InterpFilters interp_filters =
-        av1_make_interp_filters(MULTITAP_SHARP, MULTITAP_SHARP);
-
+    av1_make_interp_filters(MULTITAP_SHARP, MULTITAP_SHARP);
     EbBool is_highbd = (encoder_bit_depth == 8) ? (uint8_t)EB_FALSE : (uint8_t)EB_TRUE;
 
     CodingUnit       cu_ptr;
@@ -1368,10 +1367,8 @@ static void tf_inter_prediction(PictureParentControlSet *picture_control_set_ptr
                 signed short best_mv_y = 0;
                 signed short mv_x = (_MVXT(context_ptr->p_best_mv16x16[mv_index])) << 1;
                 signed short mv_y = (_MVYT(context_ptr->p_best_mv16x16[mv_index])) << 1;
-
                 for (signed short i = -1; i <= 1; i++) {
                     for (signed short j = -1; j <= 1; j++) {
-
                         mv_unit.mv->x = mv_x + i;
                         mv_unit.mv->y = mv_y + j;
 
@@ -1949,9 +1946,13 @@ static void adjust_filter_strength(
     // unsuccessful and therefore keep the strength as it was set
     if (noise_level > 0) {
         int noiselevel_adj;
+#if ALTREF_STR_UPDATE
+        if (noise_level < 1.2)
+#else
         if (noise_level < 0.75)
             noiselevel_adj = -2;
         else if (noise_level < 1.75)
+#endif
             noiselevel_adj = -1;
         else if (noise_level < 4.0)
             noiselevel_adj = 0;
@@ -1985,9 +1986,12 @@ static void adjust_filter_strength(
 #if DEBUG_TF
     printf("[DEBUG] noise level: %g, strength = %d, adj_strength = %d\n", noise_level, *altref_strength, strength);
 #endif
-
+#if ALTREF_STR_UPDATE
+    if (picture_control_set_ptr_central->sequence_control_set_ptr->static_config.qp <= 20) {
+        strength = strength - 1;
+    }
+#endif
     *altref_strength = (uint8_t)strength;
-
     // TODO: apply further refinements to the filter parameters according to 1st pass statistics
 
 }

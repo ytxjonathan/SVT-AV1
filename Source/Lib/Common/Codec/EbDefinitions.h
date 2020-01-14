@@ -32,7 +32,11 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define ENCDEC_SERIAL           1 // No ENCDec Segment. To improme MD rate estimation. Active for M0-M3
+
+#define ALTREF_TL1 0
+#define ALTREF_STR_UPDATE 0
+
+#define ENCDEC_SERIAL          1 // No ENCDec Segment. To improme MD rate estimation. Active for M0-M3
 #define SHUT_HME_L1_CHECK      1//Remove usage of ME results for list=0 refIndex=0 to be decide HME centre. Feauture assumes no MRP. and list1 distance = list0 distance.
 #define MUS_ME                 1 //MUlti-Stage ME - HME pruning
 #if MUS_ME
@@ -136,7 +140,7 @@ extern "C" {
 #define ENHANCED_SQ_WEIGHT           1
 
 #define ATB_INTRA_2_DEPTH            1 // ATB INTRA Depth 2
-#define SHUT_TX_WEIGHT               0 
+#define SHUT_TX_WEIGHT               0
 #define ATB_INTER_2_DEPTH            0 // ATB INTRA Depth 2
 #define TX_ORG_INTERINTRA            1
 #define ENABLE_BC                    0 // ATB for BC
