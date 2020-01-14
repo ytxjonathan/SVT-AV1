@@ -1617,7 +1617,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         // GM_TRAN_ONLY                               Translation only using ME MV.
 #if GM_DOWNSAMPLED
 #if ENABLE_GM_TRANS
-        picture_control_set_ptr->gm_level = picture_control_set_ptr->sc_content_detected ? GM_TRAN_ONLY : GM_FULL;
+        picture_control_set_ptr->gm_level = picture_control_set_ptr->sc_content_detected ? GM_TRAN_ONLY : GM_DOWN;
 #else
         picture_control_set_ptr->gm_level = GM_DOWN;
 #endif
