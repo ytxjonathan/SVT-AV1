@@ -135,7 +135,8 @@ extern "C" {
 #define FASTER_SQ_WEIGHT             0
 #define ENHANCED_SQ_WEIGHT           1
 
-#define ATB_INTRA_2_DEPTH            0 // ATB INTRA Depth 2
+#define ATB_INTRA_2_DEPTH            1 // ATB INTRA Depth 2
+#define SHUT_TX_WEIGHT               0 
 #define ATB_INTER_2_DEPTH            0 // ATB INTRA Depth 2
 #define TX_ORG_INTERINTRA            1
 #define ENABLE_BC                    0 // ATB for BC

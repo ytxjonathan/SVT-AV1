@@ -1250,6 +1250,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         }
 #endif
 
+#if SHUT_TX_WEIGHT
+    context_ptr->tx_weight = MAX_MODE_COST;
+#endif
     // Set tx search reduced set falg (0: full tx set; 1: reduced tx set; 1: two tx))
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->tx_search_reduced_set = 0;
