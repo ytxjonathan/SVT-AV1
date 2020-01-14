@@ -613,7 +613,6 @@ ConfigEntry config_entry_options[] = {
     {SINGLE_INPUT, OUTPUT_BITSTREAM_TOKEN, "Output filename", set_cfg_stream_file},
     {SINGLE_INPUT, ERROR_FILE_TOKEN, "Error filename", set_cfg_error_file},
     {SINGLE_INPUT, OUTPUT_RECON_TOKEN, "Recon filename", set_cfg_recon_file},
-    {SINGLE_INPUT, QP_FILE_TOKEN, "Qp filename", set_cfg_qp_file},
     {SINGLE_INPUT, STAT_FILE_TOKEN, "Stat filename", set_cfg_stat_file},
     {SINGLE_INPUT, NULL, NULL, NULL}};
 
@@ -641,7 +640,7 @@ ConfigEntry config_entry_global_options[] = {
     {SINGLE_INPUT, PRED_STRUCT_TOKEN, "Prediction structure", set_cfg_pred_structure},
     {SINGLE_INPUT, LATENCY_MODE, "Latency mode", set_latency_mode},
     // Asm Type
-    {SINGLE_INPUT, ASM_TYPE_TOKEN, "Use asm type", set_asm_type},
+    {SINGLE_INPUT, ASM_TYPE_TOKEN, "Assembly instruction set (0: Automatically select lowest assembly instruction set supported, 1: Automatically select highest assembly instruction set supported)", set_asm_type},
     {SINGLE_INPUT, THREAD_MGMNT, "number of logical processors to be used", set_logical_processors},
     {SINGLE_INPUT, UNPIN_LP1_TOKEN, "allows the execution of multiple encodes on the CPU without having to pin them to a specific mask", set_unpin_single_core_execution},
     {SINGLE_INPUT, TARGET_SOCKET, "Specify  which socket the encoder runs on", set_target_socket},
@@ -668,11 +667,192 @@ ConfigEntry config_entry_intra_refresh[] = {
     // File I/O
     {SINGLE_INPUT, INTRA_PERIOD_TOKEN, "Intra period interval(frames)", set_cfg_intra_period},
     {SINGLE_INPUT, INTRA_REFRESH_TYPE_TOKEN, "intra refresh type (1: CRA (Open GOP)2: IDR (Closed GOP))", set_tile_row},
+    // Termination
+    {SINGLE_INPUT, NULL, NULL, NULL}};
+ConfigEntry config_entry_specific[] = {
+    // Prediction Structure
+    {SINGLE_INPUT, BASE_LAYER_SWITCH_MODE_TOKEN, "BaseLayerSwitchMode", set_base_layer_switch_mode},
+    {SINGLE_INPUT, ENCMODE_TOKEN, "Encoder mode/Preset used", set_enc_mode},
+    {SINGLE_INPUT, ENCODER_BIT_DEPTH, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
+    {SINGLE_INPUT, ENCODER_COLOR_FORMAT, "EncoderColorFormat", set_encoder_color_format},
+    {SINGLE_INPUT, QP_FILE_TOKEN, "Qp filename", set_cfg_qp_file},
+    {SINGLE_INPUT,
+     INPUT_COMPRESSED_TEN_BIT_FORMAT,
+     "Offline packing of the 2bits: requires two bits packed input (0: OFF, 1: ON)",
+     set_compressed_ten_bit_format},
+    {SINGLE_INPUT, TILE_ROW_TOKEN, "Number of tile rows to use, log2", set_tile_row},
+    {SINGLE_INPUT, TILE_COL_TOKEN, "Number of tile columns to use, log2", set_tile_col},
+    {SINGLE_INPUT, QP_TOKEN, "Constant/Constrained Quality level", set_cfg_qp},
+    {SINGLE_INPUT, LOOK_AHEAD_DIST_TOKEN, "LookAheadDistance", set_look_ahead_distance},
+    {SINGLE_INPUT, ADAPTIVE_QP_ENABLE_TOKEN, "(0 = OFF , 1 = variance base using segments , 2 = Deltaq pred efficiency)", set_adaptive_quantization},
+    // DLF
+    {SINGLE_INPUT, LOOP_FILTER_DISABLE_TOKEN, "Disable loop filter", set_disable_dlf_flag},
+    // RESTORATION
+    {SINGLE_INPUT,
+     RESTORATION_ENABLE_TOKEN,
+     "Enable the loop restoration filter",
+     set_enable_restoration_filter_flag},
+    {SINGLE_INPUT, MFMV_ENABLE_TOKEN, "Enable motion field motion vector( 0 = OFF, 1 = ON, -1 = DEFAULT)", set_enable_mfmv_flag},
+    {SINGLE_INPUT, REDUNDANT_BLK_TOKEN, "Enable redundant block(0 = OFF, 1 = ON, -1 = DEFAULT)", set_enable_redundant_blk_flag},
+    {SINGLE_INPUT,
+     TRELLIS_ENABLE_TOKEN,
+     "Disable trellis optimization of quantized coefficients (0: false 1: true  2: true for rd "
+     "search 3: true for estimate yrd serch (default))",
+     set_enable_trellis_flag},
+    {SINGLE_INPUT, SPATIAL_SSE_FL_TOKEN, "Enable spatial sse full loop(0 = OFF, 1 = ON, -1 = DEFAULT)", set_spatial_sse_fl_flag},
+    {SINGLE_INPUT, SUBPEL_TOKEN, "Subpel", set_enable_sub_pel_flag},
+    {SINGLE_INPUT, OVR_BNDRY_BLK_TOKEN, "Enable over boundary block mode (0 = OFF, 1 = ON, -1 = DEFAULT)", set_over_bndry_blk_flag},
+    {SINGLE_INPUT,
+     NEW_NEAREST_COMB_INJECT_TOKEN,
+     "Enable new nearest near comb injection (0 = OFF, 1 = ON, -1 = DEFAULT)",
+     set_new_nearest_comb_inject_flag},
+    {SINGLE_INPUT,
+     NX4_4XN_MV_INJECT_TOKEN,
+     "Enable nx4 4xn parent mv injection (0 = OFF, 1 = ON, -1 = DEFAULT)",
+     set_nx4_4xn_parent_mv_inject_flag},
+    {SINGLE_INPUT, PRUNE_UNIPRED_ME_TOKEN, "Enable prune unipred at me (0 = OFF, 1 = ON, -1 = DEFAULT)", set_prune_unipred_me_flag},
+    {SINGLE_INPUT, PRUNE_REF_REC_PART_TOKEN, "Enable prune ref frame for rec partitions (0 = OFF, 1 = ON, -1 = DEFAULT)", set_prune_ref_rec_part_flag},
+    {SINGLE_INPUT, NSQ_TABLE_TOKEN, "Enable nsq table (0 = OFF, 1 = ON, -1 = DEFAULT)", set_nsq_table_flag},
+    {SINGLE_INPUT, FRAME_END_CDF_UPDATE_TOKEN, "Enable frame end cdf update mode (0 = OFF, 1 = ON, -1 = DEFAULT)", set_frame_end_cdf_update_flag},
 
+    // CHROMA
+    {SINGLE_INPUT, CHROMA_MODE_TOKEN, "Select chroma mode", set_chroma_mode},
+    // LOCAL WARPED MOTION
+    {SINGLE_INPUT,
+     LOCAL_WARPED_ENABLE_TOKEN,
+     "Enable local warped motion (0: false, 1: true (default))",
+     set_enable_local_warped_motion_flag},
+    // GLOBAL MOTION
+    {SINGLE_INPUT,
+     GLOBAL_MOTION_ENABLE_TOKEN,
+     "Enable global motion (0: false, 1: true (default))",
+     set_enable_global_motion_flag},
+
+    // CLASS 12
+    {SINGLE_INPUT, CLASS_12_TOKEN, "Enable combine MD Class1&2 (0 = OFF, 1 = ON, -1 = DEFAULT)", set_class_12_flag},
+    // EDGE SKIP ANGLE INTRA
+    {SINGLE_INPUT,
+     EDGE_SKIP_ANGLE_INTRA_TOKEN,
+     "Enable intra edge filtering (0: false, 1: true (default))",
+     set_edge_skip_angle_intra_flag},
+    // INTER INTRA COMPOUND
+    {SINGLE_INPUT,
+     INTER_INTRA_COMPOUND_TOKEN,
+     "Enable interintra compound (0: false, 1: true (default))",
+     set_interintra_compound_flag},
+    // FRACTIONAL SEARCH 64x64
+    {SINGLE_INPUT, FRAC_SEARCH_64_TOKEN, "Enable fractional search for 64x64 (0 = OFF, 1 = ON, -1 = DEFAULT)", set_fractional_search_64_flag},
+
+    // OBMC
+    {SINGLE_INPUT, OBMC_TOKEN, "Enable OBMC (0: false, 1: true (default))", set_enable_obmc_flag},
+    // RDOQ
+    {SINGLE_INPUT, RDOQ_TOKEN, "Enable RDOQ (0 = OFF, 1 = ON, -1 = DEFAULT)", set_enable_rdoq_flag},
+
+    // Filter Intra
+    {SINGLE_INPUT,
+     FILTER_INTRA_TOKEN,
+     "Enable filter intra prediction mode (0: false, 1: true (default))",
+     set_enable_filter_intra_flag},
+
+    // PREDICTIVE ME
+    {SINGLE_INPUT, PRED_ME_TOKEN, "Set predictive me level", set_predictive_me_flag},
+    // BIPRED 3x3 INJECTION
+    {SINGLE_INPUT, BIPRED_3x3_TOKEN, "Set bipred3x3 injection (0 = OFF, 1 = ON FULL, 2 = Reduced set, -1 = DEFAULT)", set_bipred3x3inject_flag},
+    // COMPOUND MODE
+    {SINGLE_INPUT, COMPOUND_LEVEL_TOKEN, "Set compound mode", set_compound_level_flag},
+
+    // ME Tools
+    {SINGLE_INPUT, USE_DEFAULT_ME_HME_TOKEN, "Use default Me/Hme settings", set_cfg_use_default_me_hme},
+    {SINGLE_INPUT, HME_ENABLE_TOKEN, "Enable HME (0 = OFF, 1 = ON)", set_enable_hme_flag},
+    {SINGLE_INPUT, HME_L0_ENABLE_TOKEN, "Enable HME Level 0 (0 = OFF, 1 = ON)", set_enable_hme_level_0_flag},
+    {SINGLE_INPUT, HME_L1_ENABLE_TOKEN, "Enable HME Level 1 (0 = OFF, 1 = ON)", set_enable_hme_level_1_flag},
+    {SINGLE_INPUT, HME_L2_ENABLE_TOKEN, "Enable HME Level 2 (0 = OFF, 1 = ON)", set_enable_hme_level_2_flag},
+    {SINGLE_INPUT, EXT_BLOCK, "Enable the non-square block (0=OFF, 1= ON)", set_enable_ext_block_flag},
+    // ME Parameters
+    {SINGLE_INPUT, SEARCH_AREA_WIDTH_TOKEN, "Set search area in Width[1-256]", set_cfg_search_area_width},
+    {SINGLE_INPUT, SEARCH_AREA_HEIGHT_TOKEN, "Set search area in height[1-256]", set_cfg_search_area_height},
+    // HME Parameters
+    {SINGLE_INPUT,
+     NUM_HME_SEARCH_WIDTH_TOKEN,
+     "Set Hme search region in Width",
+     set_cfg_number_hme_search_region_in_width},
+    {SINGLE_INPUT,
+     NUM_HME_SEARCH_HEIGHT_TOKEN,
+     "Set Hme search region in height",
+     set_cfg_number_hme_search_region_in_height},
+    {SINGLE_INPUT,
+     HME_SRCH_T_L0_WIDTH_TOKEN,
+     "Set Hme level0 total search area in Width",
+     set_cfg_hme_level_0_total_search_area_width},
+    {SINGLE_INPUT,
+     HME_SRCH_T_L0_HEIGHT_TOKEN,
+     "Set Hme level0 total search area in height",
+     set_cfg_hme_level_0_total_search_area_height},
+    // MD Parameters
+    {SINGLE_INPUT, SCREEN_CONTENT_TOKEN, "ENable screen content detection", set_screen_content_mode},
+    {SINGLE_INPUT, HBD_MD_ENABLE_TOKEN, "Enable high bit depth mode decision", set_enable_hbd_mode_decision},
+    {SINGLE_INPUT,
+     PALETTE_TOKEN,
+     "Enable palette prediction mode (0: false, 1: true (default))",
+     set_enable_palette},
+    {SINGLE_INPUT, OLPD_REFINEMENT_TOKEN, "Enable olpd refinement", set_enable_olpd_refinement},//omran
+    // Optional Features
+    {SINGLE_INPUT,
+     UNRESTRICTED_MOTION_VECTOR,
+     "Enable unrestriced motion vectors",
+     set_unrestricted_motion_vector},
+
+    //    { SINGLE_INPUT, BITRATE_REDUCTION_TOKEN, "bit_rate_reduction", SetBitRateReduction },
+    {SINGLE_INPUT, HDR_INPUT_TOKEN, "Enable high dynamic range", set_high_dynamic_range_input},
+    // Latency
+    {SINGLE_INPUT, INJECTOR_TOKEN, "Enable injector", set_injector},
+    {SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "Set injector frame rate", set_injector_frame_rate},
+    {SINGLE_INPUT, SPEED_CONTROL_TOKEN, "Enable speed control", speed_control_flag},
+    // Annex A parameters
+    {SINGLE_INPUT, PROFILE_TOKEN, "Bitstream profile number to use", set_profile},
+    {SINGLE_INPUT, FILM_GRAIN_TOKEN, "Enable film grain", set_cfg_film_grain},
+    // HME
+    {ARRAY_INPUT,
+     HME_LEVEL0_WIDTH,
+     "Set Hme level0 search area in Width",
+     set_hme_level_0_search_area_in_width_array},
+    {ARRAY_INPUT,
+     HME_LEVEL0_HEIGHT,
+     "Set Hme level0 search area in height",
+     set_hme_level_0_search_area_in_height_array},
+    {ARRAY_INPUT,
+     HME_LEVEL1_WIDTH,
+     "Set Hme level1 search area in Width",
+     set_hme_level_1_search_area_in_width_array},
+    {ARRAY_INPUT,
+     HME_LEVEL1_HEIGHT,
+     "Set Hme level1 search area in height",
+     set_hme_level_1_search_area_in_height_array},
+    {ARRAY_INPUT,
+     HME_LEVEL2_WIDTH,
+     "Set Hme level2 search area in Width",
+     set_hme_level_2_search_area_in_width_array},
+    {ARRAY_INPUT,
+     HME_LEVEL2_HEIGHT,
+     "Set Hme level2 search area in height",
+     set_hme_level_2_search_area_in_height_array},
+    // --- start: ALTREF_FILTERING_SUPPORT
+    {SINGLE_INPUT, ENABLE_ALTREFS, "Enable automatic alt reference frames", set_enable_altrefs},
+    {SINGLE_INPUT, ALTREF_STRENGTH, "AltRef filter strength", set_altref_strength},
+    {SINGLE_INPUT, ALTREF_NFRAMES, "AltRef max frames", set_altref_n_frames},
+    {SINGLE_INPUT, ENABLE_OVERLAYS, "Enable overlays", set_enable_overlays},
+    // --- end: ALTREF_FILTERING_SUPPORT
+
+    {SINGLE_INPUT, SQ_WEIGHT_TOKEN, "Set square weight", set_square_weight},
+    {SINGLE_INPUT, ENABLE_AMP_TOKEN, "Auto max partition", set_enable_auto_max_partition},
+
+    {SINGLE_INPUT, MDS1_PRUNE_C_TH, "Set MD stage1 prune class threshold", set_mds1_prune_c_th},
+    {SINGLE_INPUT, MDS1_PRUNE_S_TH, "Set MD stage1 prune candidate threshold", set_mds1_prune_s_th},
+    {SINGLE_INPUT, MDS2_PRUNE_C_TH, "Set MD stage2 prune class threshold", set_mds2_prune_c_th},
+    {SINGLE_INPUT, MDS2_PRUNE_S_TH, "Set MD stage2 prune candidate thresholdd", set_mds2_prune_s_th},
 
     // Termination
     {SINGLE_INPUT, NULL, NULL, NULL}};
-
 ConfigEntry config_entry[] = {
     // File I/O
     {SINGLE_INPUT, INPUT_FILE_TOKEN, "InputFile", set_cfg_input_file},
@@ -1359,6 +1539,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         int32_t rc_token_index= -1;
         int32_t two_p_token_index = -1;
         int32_t kf_token_index = -1;
+        int32_t sp_token_index = -1;
         //fprintf(stderr, "\n%-25s\t%-25s\n", "TOKEN", "DESCRIPTION");
         //fprintf(stderr, "%-25s\t%-25s\n", "-nch", "NumberOfChannels");
         fprintf(stderr, "\n%-25s\n", "Options:");
@@ -1395,6 +1576,12 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                     config_entry_intra_refresh[kf_token_index].token,
                     config_entry_intra_refresh[kf_token_index].name
             );
+        fprintf(stderr, "\n%-25s\n", "AV1 Specific Options:");
+        while (config_entry_specific[++sp_token_index].token != NULL)
+            fprintf(stderr,
+                    "%-25s\t%-25s\n",
+                    config_entry_specific[sp_token_index].token,
+                    config_entry_specific[sp_token_index].name);
         return 1;
     } else
         return 0;
