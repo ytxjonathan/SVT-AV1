@@ -123,9 +123,9 @@ extern "C" {
 #define ENABLE_MULTI_STAGED_ME_SC    1
 #define ENABLE_FULL_MRP_ME_SC        1
 #define ENABLE_FRAME_RATE_ME         1 // NON_SC
-#define DISABLE_SUBPEL_SEARCH        1 // NON_SC
-#define DISABLE_HME_ALTREF           1 // NON_SC
-#define ENABLE_GM_TRANS              1
+#define DISABLE_SUBPEL_SEARCH        1 // FOR ALTREF ONLY
+#define TUNE_SUBPEL_SEARCH           1 // FOR NON ALTREF
+#define ENABLE_GM_TRANS              1 // SC ONLY
 
 
 #define DIST_BASED_PME_SEARCH_AREA   0
@@ -254,8 +254,9 @@ extern "C" {
   (AOM_LEFT_TOP_MARGIN_PX(subsampling) << SCALE_SUBPEL_BITS)
 
 #if OPTIMISED_EX_SUBPEL
-#if DISABLE_SUBPEL_SEARCH
-#define H_PEL_SEARCH_WIND 1  // 1/2-pel serach window
+#if TUNE_SUBPEL_SEARCH
+#define H_PEL_SEARCH_WIND_1 1  // 1/2-pel serach window 1 makes SR 3x3
+#define H_PEL_SEARCH_WIND_2 2  // 1/2-pel serach window 2 makes SR 5x5
 #else
 #define H_PEL_SEARCH_WIND 3  // 1/2-pel serach window
 #endif
@@ -4075,18 +4076,11 @@ static const uint16_t search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUP
 //     M0    M1    M2    M3    M4    M5    M6    M7    M8    M9    M10    M11    M12
 static const uint8_t tf_enable_hme_flag[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {
-#if DISABLE_HME_ALTREF
-        {   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0 },      // INPUT_SIZE_576p_RANGE_OR_LOWER
-        {   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0 },      // INPUT_SIZE_720P_RANGE/INPUT_SIZE_1080i_RANGE
-        {   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0 },      // INPUT_SIZE_1080p_RANGE
-        {   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0 },      // INPUT_SIZE_4K_RANGE
-#else
         {   1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1 },      // INPUT_SIZE_576p_RANGE_OR_LOWER
         {   1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1 },      // INPUT_SIZE_720P_RANGE/INPUT_SIZE_1080i_RANGE
         {   1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1 },      // INPUT_SIZE_1080p_RANGE
         {   1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1 },      // INPUT_SIZE_4K_RANGE
 
-#endif
     },{
         {   1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1 },      // INPUT_SIZE_576p_RANGE_OR_LOWER
         {   1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1 },      // INPUT_SIZE_720P_RANGE/INPUT_SIZE_1080i_RANGE

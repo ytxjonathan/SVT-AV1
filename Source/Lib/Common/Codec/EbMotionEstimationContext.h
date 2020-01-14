@@ -496,7 +496,9 @@ extern "C" {
         int tf_frame_index;
         int tf_index_center;
 #endif
-
+#if TUNE_SUBPEL_SEARCH
+        uint8_t                     h_pel_search_wind; 
+#endif
     } MeContext;
 
     typedef uint64_t(*EB_ME_DISTORTION_FUNC)(

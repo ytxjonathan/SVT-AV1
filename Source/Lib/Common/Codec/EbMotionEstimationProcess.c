@@ -277,7 +277,11 @@ EbErrorType signal_derivation_me_kernel_oq(
         context_ptr->me_context_ptr->quarter_pel_mode =
             REFINMENT_QP_MODE;
     }
+#if TUNE_SUBPEL_SEARCH
+    context_ptr->me_context_ptr->h_pel_search_wind =  sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 
+                                                    H_PEL_SEARCH_WIND_2 : H_PEL_SEARCH_WIND_1;
 
+#endif
     // Set fractional search model
     // 0: search all blocks
     // 1: selective based on Full-Search SAD & MV.
