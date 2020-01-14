@@ -486,7 +486,7 @@ extern "C" {
         HmeResults                   hme_results[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
 #endif
 #if SKIP_ME_BASED_ON_HME
-        EbBool                       reduce_me_sr_flag[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+        uint32_t                       reduce_me_sr_flag[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
 #endif
 #if SWITCHED_HALF_PEL_MODE
         EbBool                       local_hp_mode[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];

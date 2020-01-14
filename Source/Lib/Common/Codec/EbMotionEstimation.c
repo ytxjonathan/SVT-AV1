@@ -13832,6 +13832,23 @@ void integer_search_sb(
 #if SKIP_ME_BASED_ON_HME
                 // Constrain x_ME to be a multiple of 8 (round up)
                 // Update ME search reagion size based on hme-data
+#if SC_HME_PRUNING
+                if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == 1000) {
+                    search_area_width = (1 + 7) & ~0x07;
+                    search_area_height = 1;
+                }
+                else if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == 100) {
+                    search_area_width = (4 + 7) & ~0x07;
+                    search_area_height = 4;
+                }else if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
+                    search_area_width = ((search_area_width / 8) + 7) & ~0x07;
+                    search_area_height = (search_area_height / 8);
+                }
+                else {
+                    search_area_width = (search_area_width + 7) & ~0x07;
+                    search_area_height = search_area_height;
+                }
+#else
                 if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
                     search_area_width = ((search_area_width / 8) + 7) & ~0x07;
                     search_area_height = (search_area_height / 8);
@@ -13840,6 +13857,7 @@ void integer_search_sb(
                     search_area_width = (search_area_width + 7) & ~0x07;
                     search_area_height = search_area_height;
                 }
+#endif
 #else
                 // Constrain x_ME to be a multiple of 8 (round up)
                 search_area_width = (search_area_width + 7) & ~0x07;
@@ -15023,7 +15041,40 @@ void hme_sb(
     }
 }
 
-
+#if SC_HME_PRUNING
+void prune_references_sc(
+    PictureParentControlSet   *picture_control_set_ptr,
+    uint32_t                   sb_index,
+    uint32_t                   sb_origin_x,
+    uint32_t                   sb_origin_y,
+    MeContext                 *context_ptr,
+    EbPictureBufferDesc       *input_ptr
+)
+{
+    HmeResults    sorted[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+    uint32_t      num_of_cand_to_sort = MAX_NUM_OF_REF_PIC_LIST * REF_LIST_MAX_DEPTH;
+    memcpy(sorted, context_ptr->hme_results, sizeof(HmeResults)*MAX_NUM_OF_REF_PIC_LIST*REF_LIST_MAX_DEPTH);
+    HmeResults     * res_p = sorted[0];
+    uint32_t i, j;
+    for (i = 0; i < num_of_cand_to_sort - 1; ++i) {
+        for (j = i + 1; j < num_of_cand_to_sort; ++j) {
+            if (res_p[j].hme_sad < res_p[i].hme_sad) {
+                HmeResults temp = res_p[i];
+                res_p[i] = res_p[j];
+                res_p[j]= temp;
+            }
+        }
+    }
+    for (uint32_t li = 0; li < MAX_NUM_OF_REF_PIC_LIST; li++) {
+        for (uint32_t ri = 0; ri < REF_LIST_MAX_DEPTH; ri++){
+            if (context_ptr->hme_results[li][ri].hme_sc_x == 0 && context_ptr->hme_results[li][ri].hme_sc_y == 0 && context_ptr->hme_results[li][ri].hme_sad < 100)
+                context_ptr->reduce_me_sr_flag[li][ri] = 1000;
+            else if (context_ptr->hme_results[li][ri].hme_sad < 100)
+                context_ptr->reduce_me_sr_flag[li][ri] = 100;
+        }
+    }
+}
+#endif
 void prune_references(
     PictureParentControlSet   *picture_control_set_ptr,
     uint32_t                   sb_index,
@@ -15311,6 +15362,16 @@ EbErrorType motion_estimate_lcu(
             sb_origin_y,
             context_ptr,
             input_ptr);
+#if SC_HME_PRUNING
+    else
+        prune_references_sc(
+            picture_control_set_ptr,
+            sb_index,
+            sb_origin_x,
+            sb_origin_y,
+            context_ptr,
+            input_ptr);
+#endif
 
 #if MUS_ME_FP
     integer_search_sb(
