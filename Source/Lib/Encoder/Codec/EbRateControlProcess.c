@@ -4746,7 +4746,7 @@ static void sb_qp_derivation_two_pass(PictureControlSet *pcs_ptr) {
                                   2) /
                                      2;
 
-        for (sb_addr = 0; sb_addr < pcs_ptr->parent_pcs_ptr->sb_total_count; ++sb_addr) {
+        for (sb_addr = 0; sb_addr < pcs_ptr->sb_total_count_pix; ++sb_addr) {
             sb_ptr            = pcs_ptr->sb_ptr_array[sb_addr];
             int      delta_qp = 0;
             uint16_t variance_sb;
@@ -4843,7 +4843,7 @@ static void sb_qp_derivation_two_pass(PictureControlSet *pcs_ptr) {
             pcs_ptr->parent_pcs_ptr->average_qp += sb_ptr->qp;
         }
     } else {
-        for (sb_addr = 0; sb_addr < pcs_ptr->parent_pcs_ptr->sb_total_count; ++sb_addr) {
+        for (sb_addr = 0; sb_addr < pcs_ptr->sb_total_count_pix; ++sb_addr) {
             sb_ptr           = pcs_ptr->sb_ptr_array[sb_addr];
             sb_ptr->qp       = (uint8_t)pcs_ptr->picture_qp;
             sb_ptr->delta_qp = 0;
@@ -4892,7 +4892,7 @@ static void sb_qp_derivation(PictureControlSet *pcs_ptr) {
         // Convert the adjustment factor to a qindex delta
         // on active_best_quality.
         picture_q_val = eb_av1_convert_qindex_to_q(active_best_quality, bit_depth);
-        for (sb_addr = 0; sb_addr < pcs_ptr->parent_pcs_ptr->sb_total_count; ++sb_addr) {
+        for (sb_addr = 0; sb_addr < pcs_ptr->sb_total_count_pix; ++sb_addr) {
             sb_ptr              = pcs_ptr->sb_ptr_array[sb_addr];
             int       delta_qp  = 0;
             SbParams *sb_params = &pcs_ptr->parent_pcs_ptr->sb_params_array[sb_addr];
@@ -4961,7 +4961,7 @@ static void sb_qp_derivation(PictureControlSet *pcs_ptr) {
             pcs_ptr->parent_pcs_ptr->average_qp += sb_ptr->qp;
         }
     } else {
-        for (sb_addr = 0; sb_addr < pcs_ptr->parent_pcs_ptr->sb_total_count; ++sb_addr) {
+        for (sb_addr = 0; sb_addr < pcs_ptr->sb_total_count_pix; ++sb_addr) {
             sb_ptr           = pcs_ptr->sb_ptr_array[sb_addr];
             sb_ptr->qp       = (uint8_t)pcs_ptr->picture_qp;
             sb_ptr->delta_qp = 0;
@@ -5226,7 +5226,7 @@ void *rate_control_kernel(void *input_ptr) {
                 pcs_ptr->parent_pcs_ptr->frm_hdr.delta_q_params.delta_q_present = 0;
                 SuperBlock *sb_ptr;
                 pcs_ptr->parent_pcs_ptr->average_qp = 0;
-                for (int sb_addr = 0; sb_addr < pcs_ptr->parent_pcs_ptr->sb_total_count; ++sb_addr) {
+                for (int sb_addr = 0; sb_addr < pcs_ptr->sb_total_count_pix; ++sb_addr) {
                     sb_ptr           = pcs_ptr->sb_ptr_array[sb_addr];
                     sb_ptr->qp       = (uint8_t)pcs_ptr->picture_qp;
                     sb_ptr->delta_qp = 0;

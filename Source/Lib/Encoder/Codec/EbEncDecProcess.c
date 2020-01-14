@@ -2597,7 +2597,7 @@ void *enc_dec_kernel(void *input_ptr) {
                     sb_ptr          = pcs_ptr->sb_ptr_array[sb_index];
                     sb_origin_x     = x_sb_index << sb_size_log2;
                     sb_origin_y     = y_sb_index << sb_size_log2;
-                    last_sb_flag    = (sb_index == pcs_ptr->parent_pcs_ptr->sb_total_count - 1) ? EB_TRUE : EB_FALSE;
+                    last_sb_flag    = (sb_index == pcs_ptr->sb_total_count_pix - 1) ? EB_TRUE : EB_FALSE;
                     end_of_row_flag = (x_sb_index == pic_width_in_sb - 1) ? EB_TRUE : EB_FALSE;
                     sb_row_index_start =
                         (x_sb_index == pic_width_in_sb - 1 && sb_row_index_count == 0)

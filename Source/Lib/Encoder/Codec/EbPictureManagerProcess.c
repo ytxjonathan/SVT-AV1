@@ -816,11 +816,13 @@ void *picture_manager_kernel(void *input_ptr) {
                                        entry_scs_ptr->sb_size_pix - 1) /
                                       entry_scs_ptr->sb_size_pix);
 
+                        child_pcs_ptr->sb_total_count_pix = pic_width_in_sb * picture_height_in_sb;
+
                         // Modify sb_prt_array in child pcs
                         uint16_t    sb_index;
                         uint16_t    sb_origin_x = 0;
                         uint16_t    sb_origin_y = 0;
-                        for (sb_index = 0; sb_index < entry_pcs_ptr->sb_total_count; ++sb_index) {
+                        for (sb_index = 0; sb_index < child_pcs_ptr->sb_total_count_pix; ++sb_index) {
                             largest_coding_unit_dctor(child_pcs_ptr->sb_ptr_array[sb_index]);
                             largest_coding_unit_ctor(child_pcs_ptr->sb_ptr_array[sb_index],
                                                      (uint8_t)scs_ptr->sb_size_pix,

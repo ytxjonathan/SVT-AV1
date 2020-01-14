@@ -365,6 +365,8 @@ void get_txb_ctx(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr, const 
     uint32_t dc_sign_lvl_coeff_top_neighbor_idx =
         get_neighbor_array_unit_top_index(dc_sign_level_coeff_neighbor_array, blk_origin_x);
 
+    //printf("blk_origin_y = %d, blk_origin_x = %d\n", blk_origin_y, blk_origin_x);
+
 #define MAX_TX_SIZE_UNIT 16
     static const int8_t signs[3] = {0, -1, 1};
     int32_t             txb_w_unit;
@@ -6192,9 +6194,9 @@ EB_EXTERN EbErrorType write_sb(EntropyCodingContext *context_ptr, SuperBlock *tb
         if (check_blk_out_of_bound) {
             if (blk_geom->shape != PART_N) blk_geom = get_blk_geom_mds(blk_geom->sqi_mds);
             code_blk_cond = EB_FALSE;
-            if (((blk_origin_x + blk_geom->bwidth / 2 < scs_ptr->seq_header.max_frame_width) ||
+            if (((blk_origin_x + blk_geom->bwidth / 2 < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width) ||
                  (blk_origin_y + blk_geom->bheight / 2 < scs_ptr->seq_header.max_frame_height)) &&
-                blk_origin_x < scs_ptr->seq_header.max_frame_width &&
+                blk_origin_x < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width &&
                 blk_origin_y < scs_ptr->seq_header.max_frame_height)
                 code_blk_cond = EB_TRUE;
         }

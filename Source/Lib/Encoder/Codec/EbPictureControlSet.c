@@ -383,6 +383,8 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
                    init_data_ptr->sb_size_pix);
     const uint16_t all_sb = picture_sb_w * picture_sb_h;
 
+    object_ptr->sb_total_count_pix = all_sb;
+
     for (sb_index = 0; sb_index < all_sb; ++sb_index) {
         EB_NEW(object_ptr->sb_ptr_array[sb_index],
                largest_coding_unit_ctor,

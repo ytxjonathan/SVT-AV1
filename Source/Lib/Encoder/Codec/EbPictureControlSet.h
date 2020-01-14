@@ -456,6 +456,9 @@ typedef struct PictureControlSet {
     TPL_MV_REF *                    tpl_mvs;
     uint8_t                         pic_filter_intra_mode;
     TOKENEXTRA *                    tile_tok[64][64];
+
+    uint16_t sb_total_count_pix;
+
 } PictureControlSet;
 
 // To optimize based on the max input size
