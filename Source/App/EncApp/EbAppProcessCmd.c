@@ -24,6 +24,8 @@
 #define SIZE_OF_ONE_FRAME_IN_BYTES(width, height, csp, is_16bit) \
     ((((width) * (height)) + 2 * (((width) * (height)) >> (3 - csp))) << is_16bit)
 #define YUV4MPEG2_IND_SIZE 9
+//encoder output
+#define FRAME_OUTPUT 0
 extern volatile int32_t keep_running;
 
 /***************************************
@@ -1277,7 +1279,25 @@ AppExitConditionType process_output_stream_buffer(EbConfig *config, EbAppContext
 #else
             //++frame_count;
             if (!(header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF))
+			{
+#if FRAME_OUTPUT
                 fprintf(stderr, "\b\b\b\b\b\b\b\b\b%9d", ++frame_count);
+#else
+                double progress = 0;
+                ++frame_count;
+                progress = ((double)frame_count / config->processed_frame_count) * 100;
+                // if statement used for formatting
+                if (progress < 10) 
+				{ 
+					fprintf(stderr, "\b\b\b\b\b%.2f%%", progress);
+				}
+				else
+				{
+                    fprintf(stderr, "\b\b\b\b\b\b%.2f%%", progress);
+				}
+#endif                
+			}
+				
 #endif
 
             //++frame_count;
