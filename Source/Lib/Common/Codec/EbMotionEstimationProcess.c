@@ -104,15 +104,15 @@ void* set_me_hme_params_oq(
     if (hmeMeLevel <= ENC_M1)
         hmeMeLevel = ENC_M0;
 #endif
-#if ENABLE_FRAME_RATE_ME
-    uint8_t  low_frame_rate_flag = (sequence_control_set_ptr->static_config.frame_rate >> 16) < 50 ? 1 : 0;
-#endif
     // HME/ME default settings
     me_context_ptr->number_hme_search_region_in_width = 2;
     me_context_ptr->number_hme_search_region_in_height = 2;
 
     uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
 
+#if ENABLE_FRAME_RATE_ME
+    uint8_t  low_frame_rate_flag = sc_content_detected ? 0 : (sequence_control_set_ptr->static_config.frame_rate >> 16) < 50 ? 1 : 0;
+#endif
     // HME Level0
     me_context_ptr->hme_level0_total_search_area_width = hme_level0_total_search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
     me_context_ptr->hme_level0_total_search_area_height = hme_level0_total_search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
