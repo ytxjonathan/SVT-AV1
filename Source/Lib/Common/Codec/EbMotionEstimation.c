@@ -15363,7 +15363,7 @@ EbErrorType motion_estimate_lcu(
             context_ptr,
             input_ptr);
 #if SC_HME_PRUNING
-    else
+    else if (picture_control_set_ptr->scene_change_flag)
         prune_references_sc(
             picture_control_set_ptr,
             sb_index,
