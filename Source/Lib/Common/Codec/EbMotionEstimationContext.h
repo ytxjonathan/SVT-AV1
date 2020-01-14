@@ -302,6 +302,8 @@ extern "C" {
         int16_t  hme_sc_y; // hme search centre y
         uint64_t hme_sad;  // hme sad
         uint8_t  do_ref;   // to process this ref in ME or not
+
+        uint8_t valid_ref;
     } HmeResults;
 #endif
 
@@ -485,6 +487,10 @@ extern "C" {
         uint16_t                      hme_level2_search_area_in_width_array[EB_HME_SEARCH_AREA_COLUMN_MAX_COUNT];
         uint16_t                      hme_level2_search_area_in_height_array[EB_HME_SEARCH_AREA_ROW_MAX_COUNT];
         uint8_t                       update_hme_search_center_flag;
+
+#if MSTG_ME
+        uint8_t  me_stage;
+#endif
 
         // ------- Context for Alt-Ref ME ------
         uint16_t                      adj_search_area_width;

@@ -33,6 +33,11 @@
 extern "C" {
 #endif
 
+#define MSTG_ME                 1
+
+#define SPARSE_ME                 0
+
+
 #define ME_SR_TUNE                 0 
 
 #define ENCDEC_SERIAL           1 // No ENCDec Segment. To improme MD rate estimation. Active for M0-M3
