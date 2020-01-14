@@ -21,122 +21,122 @@
 /**********************************
  * Defines
  **********************************/
-#define HELP_TOKEN "-help"
-#define CHANNEL_NUMBER_TOKEN "-nch"
+#define HELP_TOKEN "--help"
+#define CHANNEL_NUMBER_TOKEN "--nch"
 #define COMMAND_LINE_MAX_SIZE 2048
 #define CONFIG_FILE_TOKEN "-c"
 #define INPUT_FILE_TOKEN "-i"
 #define OUTPUT_BITSTREAM_TOKEN "-b"
 #define OUTPUT_RECON_TOKEN "-o"
-#define ERROR_FILE_TOKEN "-errlog"
-#define QP_FILE_TOKEN "-qp-file"
-#define INPUT_STAT_FILE_TOKEN "-input-stat-file"
-#define OUTPUT_STAT_FILE_TOKEN "-output-stat-file"
-#define STAT_FILE_TOKEN "-stat-file"
+#define ERROR_FILE_TOKEN "--errlog"
+#define QP_FILE_TOKEN "--qp-file"
+#define INPUT_STAT_FILE_TOKEN "--input-stat-file"
+#define OUTPUT_STAT_FILE_TOKEN "--output-stat-file"
+#define STAT_FILE_TOKEN "--stat-file"
 #define WIDTH_TOKEN "-w"
 #define HEIGHT_TOKEN "-h"
 #define NUMBER_OF_PICTURES_TOKEN "-n"
-#define BUFFERED_INPUT_TOKEN "-nb"
-#define BASE_LAYER_SWITCH_MODE_TOKEN "-base-layer-switch-mode" // no Eval
+#define BUFFERED_INPUT_TOKEN "--nb"
+#define BASE_LAYER_SWITCH_MODE_TOKEN "--base-layer-switch-mode" // no Eval
 #define QP_TOKEN "-q"
-#define USE_QP_FILE_TOKEN "-use-q-file"
-#define STAT_REPORT_TOKEN "-stat-report"
-#define FRAME_RATE_TOKEN "-fps"
-#define FRAME_RATE_NUMERATOR_TOKEN "-fps-num"
-#define FRAME_RATE_DENOMINATOR_TOKEN "-fps-denom"
-#define ENCODER_BIT_DEPTH "-bit-depth"
-#define ENCODER_COLOR_FORMAT "-color-format"
-#define INPUT_COMPRESSED_TEN_BIT_FORMAT "-compressed-ten-bit-format"
-#define ENCMODE_TOKEN "-enc-mode"
-#define ENCMODE2P_TOKEN "-enc-mode-2p"
-#define HIERARCHICAL_LEVELS_TOKEN "-hierarchical-levels" // no Eval
-#define PRED_STRUCT_TOKEN "-pred-struct"
-#define INTRA_PERIOD_TOKEN "-intra-period"
-#define PROFILE_TOKEN "-profile"
-#define TIER_TOKEN "-tier"
-#define LEVEL_TOKEN "-level"
-#define LATENCY_MODE "-latency-mode" // no Eval
-#define FILM_GRAIN_TOKEN "-film-grain"
-#define INTRA_REFRESH_TYPE_TOKEN "-irefresh-type" // no Eval
-#define LOOP_FILTER_DISABLE_TOKEN "-dlf"
-#define RESTORATION_ENABLE_TOKEN "-restoration-filtering"
-#define CLASS_12_TOKEN "-class-12"
-#define EDGE_SKIP_ANGLE_INTRA_TOKEN "-intra-edge-skp"
-#define INTER_INTRA_COMPOUND_TOKEN "-interintra-comp"
-#define FRAC_SEARCH_64_TOKEN "-frac-search-64"
-#define MFMV_ENABLE_TOKEN "-mfmv"
-#define REDUNDANT_BLK_TOKEN "-redundant-blk"
-#define TRELLIS_ENABLE_TOKEN "-trellis"
-#define SPATIAL_SSE_FL_TOKEN "-spatial-sse-fl"
-#define SUBPEL_TOKEN "-subpel"
-#define OVR_BNDRY_BLK_TOKEN "-over-bndry-blk"
-#define NEW_NEAREST_COMB_INJECT_TOKEN "-new-nrst-near-comb"
-#define NX4_4XN_MV_INJECT_TOKEN "-nx4-4xn-mv-inject"
-#define PRUNE_UNIPRED_ME_TOKEN "-prune-unipred-me"
-#define PRUNE_REF_REC_PART_TOKEN "-prune-ref-rec-part"
-#define NSQ_TABLE_TOKEN "-nsq-table-use"
-#define FRAME_END_CDF_UPDATE_TOKEN "-framend-cdf-upd-mode"
-#define LOCAL_WARPED_ENABLE_TOKEN "-local-warp"
-#define GLOBAL_MOTION_ENABLE_TOKEN "-global-motion"
-#define OBMC_TOKEN "-obmc"
-#define RDOQ_TOKEN "-rdoq"
-#define PRED_ME_TOKEN "-pred-me"
-#define BIPRED_3x3_TOKEN "-bipred-3x3"
-#define COMPOUND_LEVEL_TOKEN "-compound"
-#define FILTER_INTRA_TOKEN "-filter-intra"
-#define USE_DEFAULT_ME_HME_TOKEN "-use-default-me-hme"
-#define HME_ENABLE_TOKEN "-hme"
-#define HME_L0_ENABLE_TOKEN "-hme-l0"
-#define HME_L1_ENABLE_TOKEN "-hme-l1"
-#define HME_L2_ENABLE_TOKEN "-hme-l2"
-#define EXT_BLOCK "-ext-block"
-#define SEARCH_AREA_WIDTH_TOKEN "-search-w"
-#define SEARCH_AREA_HEIGHT_TOKEN "-search-h"
-#define NUM_HME_SEARCH_WIDTH_TOKEN "-num-hme-w"
-#define NUM_HME_SEARCH_HEIGHT_TOKEN "-num-hme-h"
-#define HME_SRCH_T_L0_WIDTH_TOKEN "-hme-tot-l0-w"
-#define HME_SRCH_T_L0_HEIGHT_TOKEN "-hme-tot-l0-h"
-#define HME_LEVEL0_WIDTH "-hme-l0-w"
-#define HME_LEVEL0_HEIGHT "-hme-l0-h"
-#define HME_LEVEL1_WIDTH "-hme-l1-w"
-#define HME_LEVEL1_HEIGHT "-hme-l1-h"
-#define HME_LEVEL2_WIDTH "-hme-l2-w"
-#define HME_LEVEL2_HEIGHT "-hme-l2-h"
-#define SCREEN_CONTENT_TOKEN "-scm"
+#define USE_QP_FILE_TOKEN "--use-q-file"
+#define STAT_REPORT_TOKEN "--stat-report"
+#define FRAME_RATE_TOKEN "--fps"
+#define FRAME_RATE_NUMERATOR_TOKEN "--fps-num"
+#define FRAME_RATE_DENOMINATOR_TOKEN "--fps-denom"
+#define ENCODER_BIT_DEPTH "--bit-depth"
+#define ENCODER_COLOR_FORMAT "--color-format"
+#define INPUT_COMPRESSED_TEN_BIT_FORMAT "--compressed-ten-bit-format"
+#define ENCMODE_TOKEN "--enc-mode"
+#define ENCMODE2P_TOKEN "--enc-mode-2p"
+#define HIERARCHICAL_LEVELS_TOKEN "--hierarchical-levels" // no Eval
+#define PRED_STRUCT_TOKEN "--pred-struct"
+#define INTRA_PERIOD_TOKEN "--intra-period"
+#define PROFILE_TOKEN "--profile"
+#define TIER_TOKEN "--tier"
+#define LEVEL_TOKEN "--level"
+#define LATENCY_MODE "--latency-mode" // no Eval
+#define FILM_GRAIN_TOKEN "--film-grain"
+#define INTRA_REFRESH_TYPE_TOKEN "--irefresh-type" // no Eval
+#define LOOP_FILTER_DISABLE_TOKEN "--dlf"
+#define RESTORATION_ENABLE_TOKEN "--restoration-filtering"
+#define CLASS_12_TOKEN "--class-12"
+#define EDGE_SKIP_ANGLE_INTRA_TOKEN "--intra-edge-skp"
+#define INTER_INTRA_COMPOUND_TOKEN "--interintra-comp"
+#define FRAC_SEARCH_64_TOKEN "--frac-search-64"
+#define MFMV_ENABLE_TOKEN "--mfmv"
+#define REDUNDANT_BLK_TOKEN "--redundant-blk"
+#define TRELLIS_ENABLE_TOKEN "--trellis"
+#define SPATIAL_SSE_FL_TOKEN "--spatial-sse-fl"
+#define SUBPEL_TOKEN "--subpel"
+#define OVR_BNDRY_BLK_TOKEN "--over-bndry-blk"
+#define NEW_NEAREST_COMB_INJECT_TOKEN "--new-nrst-near-comb"
+#define NX4_4XN_MV_INJECT_TOKEN "--nx4-4xn-mv-inject"
+#define PRUNE_UNIPRED_ME_TOKEN "--prune-unipred-me"
+#define PRUNE_REF_REC_PART_TOKEN "--prune-ref-rec-part"
+#define NSQ_TABLE_TOKEN "--nsq-table-use"
+#define FRAME_END_CDF_UPDATE_TOKEN "--framend-cdf-upd-mode"
+#define LOCAL_WARPED_ENABLE_TOKEN "--local-warp"
+#define GLOBAL_MOTION_ENABLE_TOKEN "--global-motion"
+#define OBMC_TOKEN "--obmc"
+#define RDOQ_TOKEN "--rdoq"
+#define PRED_ME_TOKEN "--pred-me"
+#define BIPRED_3x3_TOKEN "--bipred-3x3"
+#define COMPOUND_LEVEL_TOKEN "--compound"
+#define FILTER_INTRA_TOKEN "--filter-intra"
+#define USE_DEFAULT_ME_HME_TOKEN "--use-default-me-hme"
+#define HME_ENABLE_TOKEN "--hme"
+#define HME_L0_ENABLE_TOKEN "--hme-l0"
+#define HME_L1_ENABLE_TOKEN "--hme-l1"
+#define HME_L2_ENABLE_TOKEN "--hme-l2"
+#define EXT_BLOCK "--ext-block"
+#define SEARCH_AREA_WIDTH_TOKEN "--search-w"
+#define SEARCH_AREA_HEIGHT_TOKEN "--search-h"
+#define NUM_HME_SEARCH_WIDTH_TOKEN "--num-hme-w"
+#define NUM_HME_SEARCH_HEIGHT_TOKEN "--num-hme-h"
+#define HME_SRCH_T_L0_WIDTH_TOKEN "--hme-tot-l0-w"
+#define HME_SRCH_T_L0_HEIGHT_TOKEN "--hme-tot-l0-h"
+#define HME_LEVEL0_WIDTH "--hme-l0-w"
+#define HME_LEVEL0_HEIGHT "--hme-l0-h"
+#define HME_LEVEL1_WIDTH "--hme-l1-w"
+#define HME_LEVEL1_HEIGHT "--hme-l1-h"
+#define HME_LEVEL2_WIDTH "--hme-l2-w"
+#define HME_LEVEL2_HEIGHT "--hme-l2-h"
+#define SCREEN_CONTENT_TOKEN "--scm"
 // --- start: ALTREF_FILTERING_SUPPORT
-#define ENABLE_ALTREFS "-enable-altrefs"
-#define ALTREF_STRENGTH "-altref-strength"
-#define ALTREF_NFRAMES "-altref-nframes"
-#define ENABLE_OVERLAYS "-enable-overlays"
+#define ENABLE_ALTREFS "--enable-altrefs"
+#define ALTREF_STRENGTH "--altref-strength"
+#define ALTREF_NFRAMES "--altref-nframes"
+#define ENABLE_OVERLAYS "--enable-overlays"
 // --- end: ALTREF_FILTERING_SUPPORT
-#define HBD_MD_ENABLE_TOKEN "-hbd-md"
-#define PALETTE_TOKEN "-palette"
-#define OLPD_REFINEMENT_TOKEN "-olpd-refinement"
-#define HDR_INPUT_TOKEN "-hdr"
-#define RATE_CONTROL_ENABLE_TOKEN "-rc"
-#define TARGET_BIT_RATE_TOKEN "-tbr"
-#define MAX_QP_TOKEN "-max-qp"
-#define VBV_BUFSIZE_TOKEN "-vbv-bufsize"
-#define MIN_QP_TOKEN "-min-qp"
-#define ADAPTIVE_QP_ENABLE_TOKEN "-adaptive-quantization"
-#define LOOK_AHEAD_DIST_TOKEN "-lad"
-#define SUPER_BLOCK_SIZE_TOKEN "-sb-size"
-#define TILE_ROW_TOKEN "-tile-rows"
-#define TILE_COL_TOKEN "-tile-columns"
+#define HBD_MD_ENABLE_TOKEN "--hbd-md"
+#define PALETTE_TOKEN "--palette"
+#define OLPD_REFINEMENT_TOKEN "--olpd-refinement"
+#define HDR_INPUT_TOKEN "--hdr"
+#define RATE_CONTROL_ENABLE_TOKEN "--rc"
+#define TARGET_BIT_RATE_TOKEN "--tbr"
+#define MAX_QP_TOKEN "--max-qp"
+#define VBV_BUFSIZE_TOKEN "--vbv-bufsize"
+#define MIN_QP_TOKEN "--min-qp"
+#define ADAPTIVE_QP_ENABLE_TOKEN "--adaptive-quantization"
+#define LOOK_AHEAD_DIST_TOKEN "--lad"
+#define SUPER_BLOCK_SIZE_TOKEN "--sb-size"
+#define TILE_ROW_TOKEN "---tile-rows="
+#define TILE_COL_TOKEN "---tile-columns="
 
-#define SQ_WEIGHT_TOKEN "-sqw"
-#define ENABLE_AMP_TOKEN "-enable-amp"
-#define CHROMA_MODE_TOKEN "-chroma-mode"
+#define SQ_WEIGHT_TOKEN "--sqw"
+#define ENABLE_AMP_TOKEN "--enable-amp"
+#define CHROMA_MODE_TOKEN "--chroma-mode"
 
-#define SCENE_CHANGE_DETECTION_TOKEN "-scd"
-#define INJECTOR_TOKEN "-inj" // no Eval
-#define INJECTOR_FRAMERATE_TOKEN "-inj-frm-rt" // no Eval
-#define SPEED_CONTROL_TOKEN "-speed-ctrl"
-#define ASM_TYPE_TOKEN "-asm"
-#define THREAD_MGMNT "-lp"
-#define UNPIN_LP1_TOKEN "-unpin-lp1"
-#define TARGET_SOCKET "-ss"
-#define UNRESTRICTED_MOTION_VECTOR "-umv"
+#define SCENE_CHANGE_DETECTION_TOKEN "--scd"
+#define INJECTOR_TOKEN "--inj" // no Eval
+#define INJECTOR_FRAMERATE_TOKEN "--inj-frm-rt" // no Eval
+#define SPEED_CONTROL_TOKEN "--speed-ctrl"
+#define ASM_TYPE_TOKEN "--asm"
+#define THREAD_MGMNT "--lp"
+#define UNPIN_LP1_TOKEN "--unpin-lp1"
+#define TARGET_SOCKET "--ss"
+#define UNRESTRICTED_MOTION_VECTOR "--umv"
 #define CONFIG_FILE_COMMENT_CHAR '#'
 #define CONFIG_FILE_NEWLINE_CHAR '\n'
 #define CONFIG_FILE_RETURN_CHAR '\r'
@@ -152,10 +152,10 @@
 #define BUFFER_FILE_MAX_ARG_COUNT 320
 #define BUFFER_FILE_MAX_VAR_LEN 128
 
-#define MDS1_PRUNE_C_TH "-mds1p-class-th"
-#define MDS1_PRUNE_S_TH "-mds1p-cand-th"
-#define MDS2_PRUNE_C_TH "-mds2p-class-th"
-#define MDS2_PRUNE_S_TH "-mds2p-cand-th"
+#define MDS1_PRUNE_C_TH "--mds1p-class-th"
+#define MDS1_PRUNE_S_TH "--mds1p-cand-th"
+#define MDS2_PRUNE_C_TH "--mds2p-class-th"
+#define MDS2_PRUNE_S_TH "--mds2p-cand-th"
 
 /**********************************
  * Set Cfg Functions
@@ -606,6 +606,73 @@ typedef struct config_entry_s {
 /**********************************
  * Config Entry Array
  **********************************/
+ConfigEntry config_entry_options[] = {
+    // File I/O
+    {SINGLE_INPUT, HELP_TOKEN, "Show usage options and exit", set_cfg_input_file},
+    {SINGLE_INPUT, INPUT_FILE_TOKEN, "Input filename", set_cfg_input_file},
+    {SINGLE_INPUT, OUTPUT_BITSTREAM_TOKEN, "Output filename", set_cfg_stream_file},
+    {SINGLE_INPUT, ERROR_FILE_TOKEN, "Error filename", set_cfg_error_file},
+    {SINGLE_INPUT, OUTPUT_RECON_TOKEN, "Recon filename", set_cfg_recon_file},
+    {SINGLE_INPUT, QP_FILE_TOKEN, "Qp filename", set_cfg_qp_file},
+    {SINGLE_INPUT, STAT_FILE_TOKEN, "Stat filename", set_cfg_stat_file},
+    {SINGLE_INPUT, NULL, NULL, NULL}};
+
+ConfigEntry config_entry_global_options[] = {
+    // Picture Dimensions
+    {SINGLE_INPUT, WIDTH_TOKEN, "Frame width", set_cfg_source_width},
+    {SINGLE_INPUT, HEIGHT_TOKEN, "Frame height", set_cfg_source_height},
+    {SINGLE_INPUT,
+     NUMBER_OF_PICTURES_TOKEN,
+     "Stop encoding after n input frames",
+     set_cfg_frames_to_be_encoded},
+    {SINGLE_INPUT, BUFFERED_INPUT_TOKEN, "buffer n input frames", set_buffered_input},
+    {SINGLE_INPUT, ENCODER_COLOR_FORMAT, "Encoder color format", set_encoder_color_format},
+    {SINGLE_INPUT, PROFILE_TOKEN, "Bitstream profile number to use", set_profile},
+    {SINGLE_INPUT, FRAME_RATE_TOKEN, "Stream frame rate (rate/scale)", set_frame_rate},
+    {SINGLE_INPUT, FRAME_RATE_NUMERATOR_TOKEN, "Stream frame rate numerator", set_frame_rate_numerator},
+    {SINGLE_INPUT,
+     FRAME_RATE_DENOMINATOR_TOKEN,
+     "Stream frame rate denominator",
+     set_frame_rate_denominator},
+    {SINGLE_INPUT, ENCODER_BIT_DEPTH, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
+    {SINGLE_INPUT, TIER_TOKEN, "Tier", set_tier},
+    {SINGLE_INPUT, LEVEL_TOKEN, "Level", set_level},
+    {SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "Hierarchical levels", set_hierarchical_levels},
+    {SINGLE_INPUT, PRED_STRUCT_TOKEN, "Prediction structure", set_cfg_pred_structure},
+    {SINGLE_INPUT, LATENCY_MODE, "Latency mode", set_latency_mode},
+    // Asm Type
+    {SINGLE_INPUT, ASM_TYPE_TOKEN, "Use asm type", set_asm_type},
+    {SINGLE_INPUT, THREAD_MGMNT, "number of logical processors to be used", set_logical_processors},
+    {SINGLE_INPUT, UNPIN_LP1_TOKEN, "allows the execution of multiple encodes on the CPU without having to pin them to a specific mask", set_unpin_single_core_execution},
+    {SINGLE_INPUT, TARGET_SOCKET, "Specify  which socket the encoder runs on", set_target_socket},
+    // Termination
+    {SINGLE_INPUT, NULL, NULL, NULL}};
+
+ConfigEntry config_entry_rc[] = {
+    // Rate Control
+    {SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "Rate control mode(0 = CQP , 1 = VBR , 2 = CVBR)", set_rate_control_mode},
+    {SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "Target Bitrate (kbps)", set_target_bit_rate},
+    {SINGLE_INPUT, MAX_QP_TOKEN, "Maximum (worst) quantizer", set_max_qp_allowed},
+    {SINGLE_INPUT, MIN_QP_TOKEN, "Minimum (best) quantizer", set_min_qp_allowed},
+    {SINGLE_INPUT, VBV_BUFSIZE_TOKEN, "VBV buffer size", set_vbv_buf_size},
+    // Termination
+    {SINGLE_INPUT, NULL, NULL, NULL}};
+ConfigEntry config_entry_2p[] = {
+    // 2 pass
+    {SINGLE_INPUT, OUTPUT_STAT_FILE_TOKEN, "First pass stat file output", set_output_stat_file},
+    {SINGLE_INPUT, INPUT_STAT_FILE_TOKEN, "Input the first pass output to the second pass", set_input_stat_file},
+    {SINGLE_INPUT, ENCMODE2P_TOKEN, "Use Hme/Me settings of the second pass'encoder mode in the first pass", set_snd_pass_enc_mode},
+    // Termination
+    {SINGLE_INPUT, NULL, NULL, NULL}};
+ConfigEntry config_entry_intra_refresh[] = {
+    // File I/O
+    {SINGLE_INPUT, INTRA_PERIOD_TOKEN, "Intra period interval(frames)", set_cfg_intra_period},
+    {SINGLE_INPUT, INTRA_REFRESH_TYPE_TOKEN, "intra refresh type (1: CRA (Open GOP)2: IDR (Closed GOP))", set_tile_row},
+
+
+    // Termination
+    {SINGLE_INPUT, NULL, NULL, NULL}};
+
 ConfigEntry config_entry[] = {
     // File I/O
     {SINGLE_INPUT, INPUT_FILE_TOKEN, "InputFile", set_cfg_input_file},
@@ -1287,15 +1354,46 @@ int32_t find_token_multiple_inputs(int32_t argc, char *const argv[], const char 
 uint32_t get_help(int32_t argc, char *const argv[]) {
     char config_string[COMMAND_LINE_MAX_SIZE];
     if (find_token(argc, argv, HELP_TOKEN, config_string) == 0) {
-        int32_t token_index = -1;
-
-        fprintf(stderr, "\n%-25s\t%-25s\n", "TOKEN", "DESCRIPTION");
-        fprintf(stderr, "%-25s\t%-25s\n", "-nch", "NumberOfChannels");
-        while (config_entry[++token_index].token != NULL)
+        int32_t options_token_index = -1;
+        int32_t global_options_token_index= -1;
+        int32_t rc_token_index= -1;
+        int32_t two_p_token_index = -1;
+        int32_t kf_token_index = -1;
+        //fprintf(stderr, "\n%-25s\t%-25s\n", "TOKEN", "DESCRIPTION");
+        //fprintf(stderr, "%-25s\t%-25s\n", "-nch", "NumberOfChannels");
+        fprintf(stderr, "\n%-25s\n", "Options:");
+        while (config_entry_options[++ options_token_index].token != NULL)
             fprintf(stderr,
                     "%-25s\t%-25s\n",
-                    config_entry[token_index].token,
-                    config_entry[token_index].name
+                    config_entry_options[options_token_index].token,
+                    config_entry_options[options_token_index].name
+            );
+        fprintf(stderr, "\n%-25s\n", "Encoder Global Options:");
+        while (config_entry_global_options[++global_options_token_index].token != NULL)
+            fprintf(stderr,
+                    "%-25s\t%-25s\n",
+                    config_entry_global_options[global_options_token_index].token,
+                    config_entry_global_options[global_options_token_index].name
+            );
+        fprintf(stderr, "\n%-25s\n", "Rate Control Options:");
+        while (config_entry_rc[++rc_token_index].token != NULL)
+            fprintf(stderr,
+                    "%-25s\t%-25s\n",
+                    config_entry_rc[rc_token_index].token,
+                    config_entry_rc[rc_token_index].name
+            );
+        fprintf(stderr, "\n%-25s\n", "Twopass Options:");
+        while (config_entry_2p[++two_p_token_index].token != NULL)
+            fprintf(stderr,
+                    "%-25s\t%-25s\n",
+                    config_entry_2p[two_p_token_index].token,
+                    config_entry_2p[two_p_token_index].name);
+        fprintf(stderr, "\n%-25s\n", "Keyframe Placement Options:");
+        while (config_entry_intra_refresh[++kf_token_index].token != NULL)
+            fprintf(stderr,
+                    "%-25s\t%-25s\n",
+                    config_entry_intra_refresh[kf_token_index].token,
+                    config_entry_intra_refresh[kf_token_index].name
             );
         return 1;
     } else
