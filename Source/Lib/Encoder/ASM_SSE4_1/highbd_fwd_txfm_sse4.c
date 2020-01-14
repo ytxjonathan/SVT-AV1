@@ -72,15 +72,15 @@ static INLINE void load_buffer_4x4(const int16_t *input, __m128i *in,
 
 static void fidtx4x4_sse4_1(__m128i *in, __m128i *out, int32_t bit, int32_t col_num) {
     (void)bit;
-    __m128i fact = _mm_set1_epi32(NewSqrt2);
-    __m128i offset = _mm_set1_epi32(1 << (NewSqrt2Bits - 1));
+    __m128i fact = _mm_set1_epi32(new_sqrt2);
+    __m128i offset = _mm_set1_epi32(1 << (new_sqrt2_bits - 1));
     __m128i a_low;
     __m128i v[4];
 
     for (int32_t i = 0; i < 4; i++) {
         a_low = _mm_mullo_epi32(in[i * col_num], fact);
         a_low = _mm_add_epi32(a_low, offset);
-        out[i] = _mm_srai_epi32(a_low, NewSqrt2Bits);
+        out[i] = _mm_srai_epi32(a_low, new_sqrt2_bits);
     }
 
     // Transpose for 4x4

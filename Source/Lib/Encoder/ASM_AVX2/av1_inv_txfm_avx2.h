@@ -33,7 +33,7 @@ extern "C" {
 
     static INLINE void round_shift_avx2(const __m256i *input, __m256i *output,
         int32_t size) {
-        const __m256i scale = _mm256_set1_epi16(NewInvSqrt2 * 8);
+        const __m256i scale = _mm256_set1_epi16(new_inv_sqrt2 * 8);
         for (int32_t i = 0; i < size; ++i)
             output[i] = _mm256_mulhrs_epi16(input[i], scale);
 

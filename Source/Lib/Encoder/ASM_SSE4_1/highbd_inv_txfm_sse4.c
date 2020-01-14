@@ -2529,7 +2529,7 @@ static INLINE void av1_round_shift_rect_array_32_sse4_1(__m128i *input,
         for (i = 0; i < size; i++) {
             const __m128i r0 = av1_round_shift_32_sse4_1(input[i], bit);
             const __m128i r1 = _mm_mullo_epi32(sqrt2, r0);
-            output[i] = av1_round_shift_32_sse4_1(r1, NewSqrt2Bits);
+            output[i] = av1_round_shift_32_sse4_1(r1, new_sqrt2_bits);
         }
     }
     else {
@@ -2537,7 +2537,7 @@ static INLINE void av1_round_shift_rect_array_32_sse4_1(__m128i *input,
         for (i = 0; i < size; i++) {
             const __m128i r0 = _mm_slli_epi32(input[i], -bit);
             const __m128i r1 = _mm_mullo_epi32(sqrt2, r0);
-            output[i] = av1_round_shift_32_sse4_1(r1, NewSqrt2Bits);
+            output[i] = av1_round_shift_32_sse4_1(r1, new_sqrt2_bits);
         }
     }
 }
@@ -2547,23 +2547,23 @@ static void iidentity4_sse4_1(__m128i *in, __m128i *out, int32_t bit, int32_t do
     (void)bit;
     (void)out_shift;
     __m128i v[4];
-    __m128i fact = _mm_set1_epi32(NewSqrt2);
-    __m128i offset = _mm_set1_epi32(1 << (NewSqrt2Bits - 1));
+    __m128i fact = _mm_set1_epi32(new_sqrt2);
+    __m128i offset = _mm_set1_epi32(1 << (new_sqrt2_bits - 1));
     __m128i a0, a1;
 
     a0 = _mm_mullo_epi32(in[0], fact);
     a1 = _mm_mullo_epi32(in[1], fact);
     a0 = _mm_add_epi32(a0, offset);
     a1 = _mm_add_epi32(a1, offset);
-    out[0] = _mm_srai_epi32(a0, NewSqrt2Bits);
-    out[1] = _mm_srai_epi32(a1, NewSqrt2Bits);
+    out[0] = _mm_srai_epi32(a0, new_sqrt2_bits);
+    out[1] = _mm_srai_epi32(a1, new_sqrt2_bits);
 
     a0 = _mm_mullo_epi32(in[2], fact);
     a1 = _mm_mullo_epi32(in[3], fact);
     a0 = _mm_add_epi32(a0, offset);
     a1 = _mm_add_epi32(a1, offset);
-    out[2] = _mm_srai_epi32(a0, NewSqrt2Bits);
-    out[3] = _mm_srai_epi32(a1, NewSqrt2Bits);
+    out[2] = _mm_srai_epi32(a0, new_sqrt2_bits);
+    out[3] = _mm_srai_epi32(a1, new_sqrt2_bits);
 
     if (!do_cols) {
         const int32_t log_range = AOMMAX(16, bd + 6);
@@ -2621,8 +2621,8 @@ static void iidentity16_sse4_1(__m128i *in, __m128i *out, int32_t bit, int32_t d
     const __m128i clamp_lo = _mm_set1_epi32(-(1 << (log_range - 1)));
     const __m128i clamp_hi = _mm_set1_epi32((1 << (log_range - 1)) - 1);
     __m128i v[16];
-    __m128i fact = _mm_set1_epi32(2 * NewSqrt2);
-    __m128i offset = _mm_set1_epi32(1 << (NewSqrt2Bits - 1));
+    __m128i fact = _mm_set1_epi32(2 * new_sqrt2);
+    __m128i offset = _mm_set1_epi32(1 << (new_sqrt2_bits - 1));
     __m128i a0, a1, a2, a3;
 
     for (int32_t i = 0; i < 16; i += 8) {
@@ -2630,29 +2630,29 @@ static void iidentity16_sse4_1(__m128i *in, __m128i *out, int32_t bit, int32_t d
         a1 = _mm_mullo_epi32(in[i + 1], fact);
         a0 = _mm_add_epi32(a0, offset);
         a1 = _mm_add_epi32(a1, offset);
-        v[i] = _mm_srai_epi32(a0, NewSqrt2Bits);
-        v[i + 1] = _mm_srai_epi32(a1, NewSqrt2Bits);
+        v[i] = _mm_srai_epi32(a0, new_sqrt2_bits);
+        v[i + 1] = _mm_srai_epi32(a1, new_sqrt2_bits);
 
         a2 = _mm_mullo_epi32(in[i + 2], fact);
         a3 = _mm_mullo_epi32(in[i + 3], fact);
         a2 = _mm_add_epi32(a2, offset);
         a3 = _mm_add_epi32(a3, offset);
-        v[i + 2] = _mm_srai_epi32(a2, NewSqrt2Bits);
-        v[i + 3] = _mm_srai_epi32(a3, NewSqrt2Bits);
+        v[i + 2] = _mm_srai_epi32(a2, new_sqrt2_bits);
+        v[i + 3] = _mm_srai_epi32(a3, new_sqrt2_bits);
 
         a0 = _mm_mullo_epi32(in[i + 4], fact);
         a1 = _mm_mullo_epi32(in[i + 5], fact);
         a0 = _mm_add_epi32(a0, offset);
         a1 = _mm_add_epi32(a1, offset);
-        v[i + 4] = _mm_srai_epi32(a0, NewSqrt2Bits);
-        v[i + 5] = _mm_srai_epi32(a1, NewSqrt2Bits);
+        v[i + 4] = _mm_srai_epi32(a0, new_sqrt2_bits);
+        v[i + 5] = _mm_srai_epi32(a1, new_sqrt2_bits);
 
         a2 = _mm_mullo_epi32(in[i + 6], fact);
         a3 = _mm_mullo_epi32(in[i + 7], fact);
         a2 = _mm_add_epi32(a2, offset);
         a3 = _mm_add_epi32(a3, offset);
-        v[i + 6] = _mm_srai_epi32(a2, NewSqrt2Bits);
-        v[i + 7] = _mm_srai_epi32(a3, NewSqrt2Bits);
+        v[i + 6] = _mm_srai_epi32(a2, new_sqrt2_bits);
+        v[i + 7] = _mm_srai_epi32(a3, new_sqrt2_bits);
     }
 
     if (!do_cols) {
@@ -4468,7 +4468,7 @@ void eb_av1_inv_txfm2d_add_4x8_sse4_1(const int32_t *input,
     __m128i *buf0_cur = buf0;
     load_buffer_32bit_input(input_row, input_stride, buf0_cur, txfm_size_row);
     av1_round_shift_rect_array_32_sse4_1(buf0, buf0, txfm_size_row, 0,
-        NewInvSqrt2);
+        new_inv_sqrt2);
     row_txfm(buf0, buf0, inv_cos_bit_row[txw_idx][txh_idx], 0, bd, -shift[0]);
     row_txfm(buf0 + 4, buf0 + 4, inv_cos_bit_row[txw_idx][txh_idx], 0, bd,
         -shift[0]);
@@ -4559,7 +4559,7 @@ void eb_av1_inv_txfm2d_add_8x4_sse4_1(const int32_t *input,
         buf1[7]);
 
     av1_round_shift_rect_array_32_sse4_1(buf1, buf0, txfm_size_col, 0,
-        NewInvSqrt2);
+        new_inv_sqrt2);
     row_txfm(buf0, buf0, inv_cos_bit_row[txw_idx][txh_idx], 0, bd, -shift[0]);
 
     __m128i *buf1_ptr;

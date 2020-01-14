@@ -260,7 +260,7 @@ static INLINE void av1_round_shift_rect_array_32_avx2(__m256i *input,
     const int32_t bit,
     const int32_t val) {
     const __m256i sqrt2 = _mm256_set1_epi32(val);
-    const __m256i round2 = _mm256_set1_epi32(1 << (NewSqrt2Bits - 1));
+    const __m256i round2 = _mm256_set1_epi32(1 << (new_sqrt2_bits - 1));
     int32_t i;
     if (bit > 0) {
         const __m256i round1 = _mm256_set1_epi32(1 << (bit - 1));
@@ -270,7 +270,7 @@ static INLINE void av1_round_shift_rect_array_32_avx2(__m256i *input,
             r1 = _mm256_srai_epi32(r0, bit);
             r2 = _mm256_mullo_epi32(sqrt2, r1);
             r3 = _mm256_add_epi32(r2, round2);
-            output[i] = _mm256_srai_epi32(r3, NewSqrt2Bits);
+            output[i] = _mm256_srai_epi32(r3, new_sqrt2_bits);
         }
     }
     else {
@@ -279,16 +279,16 @@ static INLINE void av1_round_shift_rect_array_32_avx2(__m256i *input,
             r0 = _mm256_slli_epi32(input[i], -bit);
             r1 = _mm256_mullo_epi32(sqrt2, r0);
             r2 = _mm256_add_epi32(r1, round2);
-            output[i] = _mm256_srai_epi32(r2, NewSqrt2Bits);
+            output[i] = _mm256_srai_epi32(r2, new_sqrt2_bits);
         }
     }
 }
 
 static INLINE __m256i scale_round_avx2(const __m256i a, const int scale) {
   const __m256i scale_rounding =
-      pair_set_w16_epi16(scale, 1 << (NewSqrt2Bits - 1));
+      pair_set_w16_epi16(scale, 1 << (new_sqrt2_bits - 1));
   const __m256i b = _mm256_madd_epi16(a, scale_rounding);
-  return _mm256_srai_epi32(b, NewSqrt2Bits);
+  return _mm256_srai_epi32(b, new_sqrt2_bits);
 }
 
 static INLINE void store_rect_16bit_to_32bit_w8_avx2(const __m256i a,
@@ -296,8 +296,8 @@ static INLINE void store_rect_16bit_to_32bit_w8_avx2(const __m256i a,
   const __m256i one = _mm256_set1_epi16(1);
   const __m256i a_lo = _mm256_unpacklo_epi16(a, one);
   const __m256i a_hi = _mm256_unpackhi_epi16(a, one);
-  const __m256i b_lo = scale_round_avx2(a_lo, NewSqrt2);
-  const __m256i b_hi = scale_round_avx2(a_hi, NewSqrt2);
+  const __m256i b_lo = scale_round_avx2(a_lo, new_sqrt2);
+  const __m256i b_hi = scale_round_avx2(a_hi, new_sqrt2);
   const __m256i temp = _mm256_permute2f128_si256(b_lo, b_hi, 0x31);
   _mm_store_si128((__m128i *)b, _mm256_castsi256_si128(b_lo));
   _mm_store_si128((__m128i *)(b + 4), _mm256_castsi256_si128(b_hi));

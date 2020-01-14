@@ -24,7 +24,7 @@
 void av1_transform_config(
     TxType tx_type,
     TxSize tx_size,
-    Txfm2DFlipCfg *cfg);
+    Txfm2dFlipCfg *cfg);
 
 typedef void(*fwd_transform_1d_avx2)(const __m256i *in, __m256i *out, int8_t bit,
     const int32_t num_cols);
@@ -467,8 +467,8 @@ static void fidtx8x8_avx2(const __m256i *in, __m256i *out, int8_t bit, int32_t c
 
 static INLINE void fidtx16x8_avx2(const __m256i *in, __m256i *out, int8_t bit, int32_t col_num) {
     (void)bit;
-    const int32_t bits = 12;       // NewSqrt2Bits = 12
-    const int32_t sqrt = 2 * 5793; // 2 * NewSqrt2
+    const int32_t bits = 12;       // new_sqrt2_bits = 12
+    const int32_t sqrt = 2 * 5793; // 2 * new_sqrt2
     const __m256i newsqrt = _mm256_set1_epi32(sqrt);
     const __m256i rounding = _mm256_set1_epi32(1 << (bits - 1));
     __m256i temp;
@@ -1001,8 +1001,8 @@ static INLINE void col_txfm_16x16_rounding(__m256i *in, int32_t shift) {
 
 static void fidtx16x16_avx2(const __m256i *in, __m256i *out, int8_t bit, int32_t col_num) {
     (void)bit;
-    const int32_t bits = 12;       // NewSqrt2Bits = 12
-    const int32_t sqrt = 2 * 5793; // 2 * NewSqrt2
+    const int32_t bits = 12;       // new_sqrt2_bits = 12
+    const int32_t sqrt = 2 * 5793; // 2 * new_sqrt2
     const __m256i newsqrt = _mm256_set1_epi32(sqrt);
     const __m256i rounding = _mm256_set1_epi32(1 << (bits - 1));
     __m256i temp;
@@ -3887,8 +3887,8 @@ static INLINE void fidtx4x8_row_avx2(__m256i *input, __m256i *output, int32_t bi
     (void)bit;
     __m256i in[4];
     __m256i out[4];
-    __m256i fact = _mm256_set1_epi32(NewSqrt2);
-    __m256i offset = _mm256_set1_epi32(1 << (NewSqrt2Bits - 1));
+    __m256i fact = _mm256_set1_epi32(new_sqrt2);
+    __m256i offset = _mm256_set1_epi32(1 << (new_sqrt2_bits - 1));
     __m256i a_low;
     __m256i v[4];
 
@@ -3900,7 +3900,7 @@ static INLINE void fidtx4x8_row_avx2(__m256i *input, __m256i *output, int32_t bi
     for (int32_t i = 0; i < 4; i++) {
         a_low = _mm256_mullo_epi32(in[i * col_num], fact);
         a_low = _mm256_add_epi32(a_low, offset);
-        out[i] = _mm256_srai_epi32(a_low, NewSqrt2Bits);
+        out[i] = _mm256_srai_epi32(a_low, new_sqrt2_bits);
     }
 
     // Transpose for 4x4
@@ -3923,15 +3923,15 @@ static INLINE void fidtx4x8_row_avx2(__m256i *input, __m256i *output, int32_t bi
 static INLINE void fidtx4x8_col_avx2(__m256i *in, __m256i *output, int32_t bit, int32_t col_num) {
     (void)bit;
     __m256i out[4];
-    __m256i fact = _mm256_set1_epi32(NewSqrt2);
-    __m256i offset = _mm256_set1_epi32(1 << (NewSqrt2Bits - 1));
+    __m256i fact = _mm256_set1_epi32(new_sqrt2);
+    __m256i offset = _mm256_set1_epi32(1 << (new_sqrt2_bits - 1));
     __m256i a_low;
     __m256i v[4];
 
     for (int32_t i = 0; i < 4; i++) {
         a_low = _mm256_mullo_epi32(in[i * col_num], fact);
         a_low = _mm256_add_epi32(a_low, offset);
-        out[i] = _mm256_srai_epi32(a_low, NewSqrt2Bits);
+        out[i] = _mm256_srai_epi32(a_low, new_sqrt2_bits);
     }
 
     // Transpose for 4x4
@@ -3989,8 +3989,8 @@ static void fidtx32x8_avx2(const __m256i *in, __m256i *out, int8_t bit, int32_t 
 }
 
 static void fidtx64x64_avx2(const __m256i *input, __m256i *output) {
-    const int32_t bits = 12;       // NewSqrt2Bits = 12
-    const int32_t sqrt = 4 * 5793; // 4 * NewSqrt2
+    const int32_t bits = 12;       // new_sqrt2_bits = 12
+    const int32_t sqrt = 4 * 5793; // 4 * new_sqrt2
     const int32_t col_num = 8;
     const __m256i newsqrt = _mm256_set1_epi32(sqrt);
     const __m256i rounding = _mm256_set1_epi32(1 << (bits - 1));
@@ -4035,7 +4035,7 @@ static INLINE void load_buffer_32x32_avx2(const int16_t *input,
 
 static INLINE void fwd_txfm2d_32x32_avx2(const int16_t *input, int32_t *output,
     const int32_t stride,
-    const Txfm2DFlipCfg *cfg,
+    const Txfm2dFlipCfg *cfg,
     int32_t *txfm_buf) {
     assert(cfg->tx_size < TX_SIZES);
     const int32_t txfm_size = tx_size_wide[cfg->tx_size];
@@ -4067,7 +4067,7 @@ void eb_av1_fwd_txfm2d_32x32_avx2(int16_t *input, int32_t *output,
     uint32_t stride, TxType tx_type, uint8_t  bd)
 {
     DECLARE_ALIGNED(32, int32_t, txfm_buf[1024]);
-    Txfm2DFlipCfg cfg;
+    Txfm2dFlipCfg cfg;
     av1_transform_config(tx_type, TX_32X32, &cfg);
     (void)bd;
     fwd_txfm2d_32x32_avx2(input, output, stride, &cfg, txfm_buf);
@@ -4296,7 +4296,7 @@ void eb_av1_fwd_txfm2d_32x64_avx2(int16_t *input, int32_t *output, uint32_t stri
     av1_fdct32_new_avx2(outcoef256, in, bitrow, txfm_size_row, num_row);
     transpose_8nx8n(in, outcoef256, txfm_size_row, txfm_size_col);
     av1_round_shift_rect_array_32_avx2(outcoef256, outcoef256, 256, -shift[2],
-        NewSqrt2);
+        new_sqrt2);
     (void)bd;
 }
 
@@ -4331,7 +4331,7 @@ void eb_av1_fwd_txfm2d_64x32_avx2(int16_t *input, int32_t *output, uint32_t stri
     av1_fdct64_new_avx2(outcoef256, in, bitrow, txfm_size_row, num_row);
     transpose_8nx8n(in, outcoef256, txfm_size_row, txfm_size_col);
     av1_round_shift_rect_array_32_avx2(outcoef256, outcoef256, 256,
-        -shift[2], NewSqrt2);
+        -shift[2], new_sqrt2);
     (void)bd;
 }
 
@@ -4574,7 +4574,7 @@ void eb_av1_fwd_txfm2d_16x32_avx2(int16_t *input, int32_t *output, uint32_t stri
     row_txfm(outcoef256, in, bitrow, num_row);
     transpose_8nx8n(in, outcoef256, txfm_size_row, txfm_size_col);
     av1_round_shift_rect_array_32_avx2(outcoef256, outcoef256, 64, -shift[2],
-        NewSqrt2);
+        new_sqrt2);
     (void)bd;
 }
 
@@ -4607,7 +4607,7 @@ void eb_av1_fwd_txfm2d_32x16_avx2(int16_t *input, int32_t *output, uint32_t stri
         row_txfm((outcoef256 + i), (in + i), bitrow, num_row);
     transpose_8nx8n(in, outcoef256, txfm_size_row, txfm_size_col);
     av1_round_shift_rect_array_32_avx2(outcoef256, outcoef256, 64, -shift[2],
-        NewSqrt2);
+        new_sqrt2);
     (void)bd;
 }
 
@@ -4706,7 +4706,7 @@ void eb_av1_fwd_txfm2d_8x16_avx2(int16_t *input, int32_t *output, uint32_t strid
     for (int32_t i = 0; i < num_row; i++) {
         row_txfm(out + i * 8, out, bitrow, 1);
         transpose_8x8_avx2(out, in);
-        av1_round_shift_rect_array_32_avx2(in, in, 8, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, in, 8, -shift[2], new_sqrt2);
         write_buffer_8x8(in, output + i * 64);
     }
     (void)bd;
@@ -4749,7 +4749,7 @@ void eb_av1_fwd_txfm2d_16x8_avx2(int16_t *input, int32_t *output, uint32_t strid
 
     for (int32_t i = 0; i < num_col; i++) {
         transpose_8x8_avx2(out + i * 8, in);
-        av1_round_shift_rect_array_32_avx2(in, in, 8, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, in, 8, -shift[2], new_sqrt2);
         write_buffer_16x8_avx2(in, output + i * 8, 16);
     }
     (void)bd;
@@ -4774,7 +4774,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fdct4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case ADST_DCT:
@@ -4783,7 +4783,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fdct4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case DCT_ADST:
@@ -4792,7 +4792,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fadst4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case ADST_ADST:
@@ -4801,7 +4801,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fadst4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case FLIPADST_DCT:
@@ -4810,7 +4810,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fdct4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case DCT_FLIPADST:
@@ -4819,7 +4819,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fadst4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case FLIPADST_FLIPADST:
@@ -4828,7 +4828,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fadst4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case ADST_FLIPADST:
@@ -4837,7 +4837,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fadst4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case FLIPADST_ADST:
@@ -4846,7 +4846,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fadst4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case IDTX:
@@ -4855,7 +4855,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fidtx4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case V_DCT:
@@ -4864,7 +4864,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fidtx4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case H_DCT:
@@ -4873,7 +4873,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fdct4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case V_ADST:
@@ -4882,7 +4882,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fidtx4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case H_ADST:
@@ -4891,7 +4891,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fadst4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case V_FLIPADST:
@@ -4900,7 +4900,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fidtx4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     case H_FLIPADST:
@@ -4909,7 +4909,7 @@ void eb_av1_fwd_txfm2d_4x8_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         transpose_4x8_avx2(in, outcoeff256);
         fadst4x8_col_avx2(outcoeff256, in, bitrow, 1);
-        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], NewSqrt2);
+        av1_round_shift_rect_array_32_avx2(in, outcoeff256, 4, -shift[2], new_sqrt2);
         write_buffer_4x8(outcoeff256, output);
         break;
     default: assert(0);
@@ -4935,7 +4935,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fdct4x8_avx2(in, outcoeff256, bitrow);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case ADST_DCT:
@@ -4944,7 +4944,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fdct4x8_avx2(in, outcoeff256, bitrow);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case DCT_ADST:
@@ -4953,7 +4953,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fadst8x4_avx2(in, outcoeff256, bitrow, 1);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case ADST_ADST:
@@ -4962,7 +4962,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fadst8x4_avx2(in, outcoeff256, bitrow, 1);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case FLIPADST_DCT:
@@ -4971,7 +4971,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fdct4x8_avx2(in, outcoeff256, bitrow);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case DCT_FLIPADST:
@@ -4980,7 +4980,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fadst8x4_avx2(in, outcoeff256, bitrow, 1);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case FLIPADST_FLIPADST:
@@ -4989,7 +4989,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fadst8x4_avx2(in, outcoeff256, bitrow, 1);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case ADST_FLIPADST:
@@ -4998,7 +4998,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fadst8x4_avx2(in, outcoeff256, bitrow, 1);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case FLIPADST_ADST:
@@ -5007,7 +5007,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fadst8x4_avx2(in, outcoeff256, bitrow, 1);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case IDTX:
@@ -5016,7 +5016,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fidtx8x4_avx2(in, outcoeff256, bitrow);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case V_DCT:
@@ -5025,7 +5025,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fidtx8x4_avx2(in, outcoeff256, bitrow);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case H_DCT:
@@ -5034,7 +5034,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fdct4x8_avx2(in, outcoeff256, bitrow);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case V_ADST:
@@ -5043,7 +5043,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fidtx8x4_avx2(in, outcoeff256, bitrow);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case H_ADST:
@@ -5052,7 +5052,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fadst8x4_avx2(in, outcoeff256, bitrow, 1);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case V_FLIPADST:
@@ -5061,7 +5061,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fidtx8x4_avx2(in, outcoeff256, bitrow);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     case H_FLIPADST:
@@ -5070,7 +5070,7 @@ void eb_av1_fwd_txfm2d_8x4_avx2(int16_t *input, int32_t *output, uint32_t stride
         col_txfm_8x4_rounding(in, -shift[1]);
         fadst8x4_avx2(in, outcoeff256, bitrow, 1);
         av1_round_shift_rect_array_32_avx2(outcoeff256, in, 4, -shift[2],
-            NewSqrt2);
+            new_sqrt2);
         transpose_4x8_avx2(in, outcoeff256);
         break;
     default: assert(0);

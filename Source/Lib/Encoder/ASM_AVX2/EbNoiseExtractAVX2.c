@@ -604,7 +604,7 @@ void noise_extract_luma_weak_avx2_intrin(
     }
 }
 
-void noise_extract_luma_weak_lcu_avx2_intrin(
+void noise_extract_luma_weak_sb_avx2_intrin(
     EbPictureBufferDesc       *input_picture_ptr,
     EbPictureBufferDesc       *denoised_picture_ptr,
     EbPictureBufferDesc       *noise_picture_ptr,

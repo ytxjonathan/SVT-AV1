@@ -2246,8 +2246,8 @@ static void iadst16_w4_new_sse2(const __m128i *input, __m128i *output,
 static void iidentity4_new_ssse3(const __m128i *input, __m128i *output,
     int8_t cos_bit) {
     (void)cos_bit;
-    const int16_t scale_fractional = (NewSqrt2 - (1 << NewSqrt2Bits));
-    const __m128i scale = _mm_set1_epi16(scale_fractional << (15 - NewSqrt2Bits));
+    const int16_t scale_fractional = (new_sqrt2 - (1 << new_sqrt2_bits));
+    const __m128i scale = _mm_set1_epi16(scale_fractional << (15 - new_sqrt2_bits));
     for (int32_t i = 0; i < 4; ++i) {
         __m128i x = _mm_mulhrs_epi16(input[i], scale);
         output[i] = _mm_adds_epi16(x, input[i]);
@@ -2264,8 +2264,8 @@ static void iidentity8_new_sse2(const __m128i *input, __m128i *output,
 static void iidentity16_new_ssse3(const __m128i *input, __m128i *output,
     int8_t cos_bit) {
     (void)cos_bit;
-    const int16_t scale_fractional = 2 * (NewSqrt2 - (1 << NewSqrt2Bits));
-    const __m128i scale = _mm_set1_epi16(scale_fractional << (15 - NewSqrt2Bits));
+    const int16_t scale_fractional = 2 * (new_sqrt2 - (1 << new_sqrt2_bits));
+    const __m128i scale = _mm_set1_epi16(scale_fractional << (15 - new_sqrt2_bits));
     for (int32_t i = 0; i < 16; ++i) {
         __m128i x = _mm_mulhrs_epi16(input[i], scale);
         __m128i srcx2 = _mm_adds_epi16(input[i], input[i]);
@@ -2366,8 +2366,8 @@ static INLINE void iidentity_row_8xn_ssse3(__m128i *out, const int32_t *input,
     int32_t txw_idx, int32_t rect_type) {
     const int32_t *input_row = input;
     const __m128i scale = _mm_set1_epi16(NewSqrt2list[txw_idx]);
-    const __m128i rounding = _mm_set1_epi16((1 << (NewSqrt2Bits - 1)) +
-        (1 << (NewSqrt2Bits - shift - 1)));
+    const __m128i rounding = _mm_set1_epi16((1 << (new_sqrt2_bits - 1)) +
+        (1 << (new_sqrt2_bits - shift - 1)));
     const __m128i one = _mm_set1_epi16(1);
     const __m128i scale_rounding = _mm_unpacklo_epi16(scale, rounding);
     if (rect_type != 1 && rect_type != -1) {
@@ -2378,14 +2378,14 @@ static INLINE void iidentity_row_8xn_ssse3(__m128i *out, const int32_t *input,
             __m128i hi = _mm_unpackhi_epi16(src, one);
             lo = _mm_madd_epi16(lo, scale_rounding);
             hi = _mm_madd_epi16(hi, scale_rounding);
-            lo = _mm_srai_epi32(lo, NewSqrt2Bits - shift);
-            hi = _mm_srai_epi32(hi, NewSqrt2Bits - shift);
+            lo = _mm_srai_epi32(lo, new_sqrt2_bits - shift);
+            hi = _mm_srai_epi32(hi, new_sqrt2_bits - shift);
             out[i] = _mm_packs_epi32(lo, hi);
         }
     }
     else {
         const __m128i rect_scale =
-            _mm_set1_epi16(NewInvSqrt2 << (15 - NewSqrt2Bits));
+            _mm_set1_epi16(new_inv_sqrt2 << (15 - new_sqrt2_bits));
         for (int32_t i = 0; i < height; ++i) {
             __m128i src = load_32bit_to_16bit(input_row);
             src = _mm_mulhrs_epi16(src, rect_scale);
@@ -2394,8 +2394,8 @@ static INLINE void iidentity_row_8xn_ssse3(__m128i *out, const int32_t *input,
             __m128i hi = _mm_unpackhi_epi16(src, one);
             lo = _mm_madd_epi16(lo, scale_rounding);
             hi = _mm_madd_epi16(hi, scale_rounding);
-            lo = _mm_srai_epi32(lo, NewSqrt2Bits - shift);
-            hi = _mm_srai_epi32(hi, NewSqrt2Bits - shift);
+            lo = _mm_srai_epi32(lo, new_sqrt2_bits - shift);
+            hi = _mm_srai_epi32(hi, new_sqrt2_bits - shift);
             out[i] = _mm_packs_epi32(lo, hi);
         }
     }
@@ -2407,7 +2407,7 @@ static INLINE void iidentity_col_8xn_ssse3(
     __m128i *buf, int32_t shift, int32_t height,
     int32_t txh_idx) {
     const __m128i scale = _mm_set1_epi16(NewSqrt2list[txh_idx]);
-    const __m128i scale_rounding = _mm_set1_epi16(1 << (NewSqrt2Bits - 1));
+    const __m128i scale_rounding = _mm_set1_epi16(1 << (new_sqrt2_bits - 1));
     const __m128i shift_rounding = _mm_set1_epi32(1 << (-shift - 1));
     const __m128i one = _mm_set1_epi16(1);
     const __m128i scale_coeff = _mm_unpacklo_epi16(scale, scale_rounding);
@@ -2417,8 +2417,8 @@ static INLINE void iidentity_col_8xn_ssse3(
         __m128i hi = _mm_unpackhi_epi16(buf[h], one);
         lo = _mm_madd_epi16(lo, scale_coeff);
         hi = _mm_madd_epi16(hi, scale_coeff);
-        lo = _mm_srai_epi32(lo, NewSqrt2Bits);
-        hi = _mm_srai_epi32(hi, NewSqrt2Bits);
+        lo = _mm_srai_epi32(lo, new_sqrt2_bits);
+        hi = _mm_srai_epi32(hi, new_sqrt2_bits);
         lo = _mm_add_epi32(lo, shift_rounding);
         hi = _mm_add_epi32(hi, shift_rounding);
         lo = _mm_srai_epi32(lo, -shift);
@@ -2523,7 +2523,7 @@ static INLINE void lowbd_write_buffer_16xn_sse2(__m128i *in,
 
 static INLINE void round_shift_ssse3(const __m128i *input, __m128i *output,
     int32_t size) {
-    const __m128i scale = _mm_set1_epi16(NewInvSqrt2 * 8);
+    const __m128i scale = _mm_set1_epi16(new_inv_sqrt2 * 8);
     for (int32_t i = 0; i < size; ++i)
         output[i] = _mm_mulhrs_epi16(input[i], scale);
 }

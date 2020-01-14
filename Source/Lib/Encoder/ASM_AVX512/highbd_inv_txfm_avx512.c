@@ -830,14 +830,14 @@ static INLINE void round_shift_16x16_avx512(__m512i *in, const int8_t shift) {
 }
 
 static INLINE void iidentity16_and_round_shift_avx512(__m512i *input, int32_t shift) {
-    const __m512i scalar = _mm512_set1_epi32(NewSqrt2);
-    const __m512i rnding = _mm512_set1_epi32((1 << (NewSqrt2Bits - 2)) +
-        (!!(shift) << (shift + NewSqrt2Bits - 2)));
+    const __m512i scalar = _mm512_set1_epi32(new_sqrt2);
+    const __m512i rnding = _mm512_set1_epi32((1 << (new_sqrt2_bits - 2)) +
+        (!!(shift) << (shift + new_sqrt2_bits - 2)));
 
     for (int32_t i = 0; i < 16; i++) {
         input[i] = _mm512_mullo_epi32(input[i], scalar);
         input[i] = _mm512_add_epi32(input[i], rnding);
-        input[i] = _mm512_srai_epi32(input[i], (uint8_t)(NewSqrt2Bits - 1 + shift));
+        input[i] = _mm512_srai_epi32(input[i], (uint8_t)(new_sqrt2_bits - 1 + shift));
     }
 }
 
@@ -2718,8 +2718,8 @@ static void idct64_avx512(__m512i *in, __m512i *out, const int8_t bit, int32_t d
 
 static void iidtx16_avx512(__m512i *in, __m512i *out, const int8_t bit, int32_t col_num) {
     (void)bit;
-    const uint8_t bits = 12;       // NewSqrt2Bits = 12
-    const int32_t sqrt = 2 * 5793; // 2 * NewSqrt2
+    const uint8_t bits = 12;       // new_sqrt2_bits = 12
+    const int32_t sqrt = 2 * 5793; // 2 * new_sqrt2
     const __m512i newsqrt = _mm512_set1_epi32(sqrt);
     const __m512i rounding = _mm512_set1_epi32(1 << (bits - 1));
     __m512i temp;
