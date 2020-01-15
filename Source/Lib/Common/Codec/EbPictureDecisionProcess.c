@@ -1638,11 +1638,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         //Prune reference and reduce ME SR based on HME/ME distortion
         // 0: OFF
         // 1: ON
-#if ENABLE_MULTI_STAGED_ME_SC
-        if (MR_MODE)
-#else
         if (picture_control_set_ptr->sc_content_detected || MR_MODE)
-#endif
             picture_control_set_ptr->prune_ref_based_me = 0;
         else
             picture_control_set_ptr->prune_ref_based_me = 1;
