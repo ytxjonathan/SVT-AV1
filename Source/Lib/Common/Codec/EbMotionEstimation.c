@@ -5847,6 +5847,9 @@ static void open_loop_me_fullpel_search_sblock(
     MeContext *context_ptr, uint32_t listIndex,
     uint32_t ref_pic_index,
     int16_t x_search_area_origin, int16_t y_search_area_origin,
+#if SP_FP
+    uint32_t start_y, uint32_t step_y, 
+#endif
     uint32_t search_area_width, uint32_t search_area_height)
 {
     uint32_t xSearchIndex, ySearchIndex;
@@ -5855,7 +5858,11 @@ static void open_loop_me_fullpel_search_sblock(
 #if SPARSE_ME
     for (ySearchIndex = 0; ySearchIndex < search_area_height; ySearchIndex+=2) {
 #else
+#if SP_FP
+    for (ySearchIndex = start_y; ySearchIndex < search_area_height; ySearchIndex+=step_y) {
+#else
     for (ySearchIndex = 0; ySearchIndex < search_area_height; ySearchIndex++) {
+#endif
 #endif
         for (xSearchIndex = 0; xSearchIndex < searchAreaWidthMult8;
              xSearchIndex += 8) {
@@ -13874,7 +13881,7 @@ void integer_search_sb(
 #endif
 #endif
 
-#if MSTG_ME
+#if 0//MSTG_ME
             if (context_ptr->me_stage == 1) {
             
                 search_area_width = ((search_area_width / 2) + 7) & ~0x07;
@@ -13906,6 +13913,29 @@ void integer_search_sb(
                 search_area_height = (search_area_height + 3) & ~0x03;
             }
 #endif
+#if SP_FP
+            uint32_t start_y=0, step_y=1, reset_results=1;
+            //sparse one y axis--stage2 needs to know if spare is done in stage1
+            uint8_t use_sparse_y = (context_ptr->me_stage > 0 && search_area_height >= 4) ? 1 : 0;
+            if (use_sparse_y) {
+                //i need the 1/2 search height to be even to hit 0,0 line
+                uint16_t half_h = search_area_height >> 1;
+                if (half_h & 1 == 1) {
+                    // Constrain height to be a multiple of 4 (round up)
+                    search_area_height = (search_area_height + 3) & ~0x03;
+                }
+                step_y = 2;
+                if (context_ptr->me_stage == 1) {
+                    start_y = 0;
+                    reset_results = 1;
+                }
+                else if (context_ptr->me_stage == 2) {
+                    start_y = 1;
+                    reset_results = 0;
+                }
+            }
+#endif
+
 
             x_search_area_origin = x_search_center - (search_area_width >> 1);
             y_search_area_origin = y_search_center - (search_area_height >> 1);
@@ -14071,12 +14101,18 @@ void integer_search_sb(
                 yTopLeftSearchRegion * refPicPtr->stride_y;
             if (picture_control_set_ptr->pic_depth_mode <=
                 PIC_ALL_C_DEPTH_MODE) {
+
+#if SP_FP
+                if(reset_results)
+#endif
                 initialize_buffer_32bits(
                     context_ptr
                     ->p_sb_best_sad[list_index][ref_pic_index],
                     52,
                     1,
                     MAX_SAD_VALUE);
+
+//why can't we move all these to init time??!!!
                 context_ptr->p_best_sad64x64 = &(
                     context_ptr->p_sb_best_sad[list_index][ref_pic_index]
                     [ME_TIER_ZERO_PU_64x64]);
@@ -14227,6 +14263,10 @@ void integer_search_sb(
                     ref_pic_index,
                     x_search_area_origin,
                     y_search_area_origin,
+#if SP_FP             
+                    start_y,
+                    step_y,
+#endif
                     search_area_width,
                     search_area_height);
 
@@ -14407,7 +14447,7 @@ void prune_references_mestage(
     }
 
 
-    uint8_t  BIGGER_THAN_TH = 30;
+    uint8_t  BIGGER_THAN_TH = SP_FP_PERC_TH;
     uint64_t best = sorted[0][0].hme_sad;//is this always the best?
     for (uint32_t li = 0; li < MAX_NUM_OF_REF_PIC_LIST; li++) {
         for (uint32_t ri = 0; ri < REF_LIST_MAX_DEPTH; ri++) {
@@ -15606,7 +15646,7 @@ EbErrorType motion_estimate_lcu(
     context_ptr->me_stage = context_ptr->me_alt_ref ? 0 : 1; //for altref there is only 1 stage=0
 
     //if (context_ptr->me_stage && sb_origin_x > 128 && sb_origin_y > 128)
-    //    printf("CTOPMESTG");
+  //     printf("CTOPMESTG");
 #endif
     //Stage1
     integer_search_sb(

@@ -32,15 +32,18 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    //TODO: prune the final ME outliers
+#define MSTG_ME                1
+#define SP_FP                  1
+#define SP_FP_PERC_TH         30
 
-#define MSTG_ME                 1
+#define SPARSE_ME               0
+#define ME_SR_TUNE              0 
 
-#define SPARSE_ME                 0
+#define ENCDEC_SERIAL           1 // No ENCDec Segment. To improme MD rate estimation. Active for M0-M3 ---1 ONLY in AWS
 
 
-#define ME_SR_TUNE                 0 
 
-#define ENCDEC_SERIAL           1 // No ENCDec Segment. To improme MD rate estimation. Active for M0-M3
 #define SHUT_HME_L1_CHECK      1//Remove usage of ME results for list=0 refIndex=0 to be decide HME centre. Feauture assumes no MRP. and list1 distance = list0 distance.
 #define MUS_ME                 1 //MUlti-Stage ME - HME pruning
 #if MUS_ME
