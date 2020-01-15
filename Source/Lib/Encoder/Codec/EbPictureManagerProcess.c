@@ -857,8 +857,8 @@ void *picture_manager_kernel(void *input_ptr) {
                         child_pcs_ptr->mi_stride = pic_width_in_sb * (scs_ptr->sb_size_pix >> MI_SIZE_LOG2);
 
                         // copy buffer info from the downsampled picture to the input frame 16 bit buffer
-                        if(scs_ptr->static_config.encoder_bit_depth > EB_8BIT){
-                            copy_buffer_info(child_pcs_ptr->input_frame16bit, entry_pcs_ptr->enhanced_downscaled_picture_ptr);
+                        if(entry_pcs_ptr->frame_superres_enabled && scs_ptr->static_config.encoder_bit_depth > EB_8BIT){
+                            copy_buffer_info(entry_pcs_ptr->enhanced_downscaled_picture_ptr, child_pcs_ptr->input_frame16bit);
                         }
 
                         uint32_t enc_dec_seg_w = (scs_ptr->static_config.super_block_size == 128) ?
