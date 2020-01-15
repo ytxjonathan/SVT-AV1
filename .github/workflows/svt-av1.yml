@@ -43,4 +43,4 @@ jobs:
     - name: Compile SVT-AV1
       run: |
         ./Build/linux/build.sh release
-        ./Bin/Release/SvtAv1EncApp -help
+        ./Bin/Release/SvtAv1EncApp --help
