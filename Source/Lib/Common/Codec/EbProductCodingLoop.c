@@ -4487,7 +4487,7 @@ uint8_t get_end_tx_depth(BlockSize bsize, EbBool is_inter) {
 uint8_t get_end_tx_depth(BlockSize bsize, uint8_t btype) {
 #endif
     uint8_t tx_depth = 0;
-#if ATB_INTER_2_DEPTH
+#if 0//ATB_INTER_2_DEPTH
     if (bsize == BLOCK_128X128)
         printf("");
 

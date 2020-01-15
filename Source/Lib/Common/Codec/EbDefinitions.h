@@ -148,6 +148,7 @@ extern "C" {
 #define ATB_INTER_2_DEPTH            0 // ATB INTRA Depth 2
 #define TX_ORG_INTERINTRA            1
 #define ENABLE_BC                    0 // ATB for BC
+#define FASTER_RDOQ                  0
 
 #define TX_TYPE_TX_SIZE_STAGES       1
 

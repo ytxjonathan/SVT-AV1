@@ -1304,6 +1304,36 @@ static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] = {
   { 17, 13 },
   { 16, 10 },
 };
+#if FASTER_RDOQ
+static INLINE void update_coeff_eob_fast(
+    uint16_t *eob, int shift,
+    const int16_t *dequant_ptr,
+    const int16_t *scan,
+    const TranLow *coeff_ptr,
+    TranLow *qcoeff_ptr,
+    TranLow *dqcoeff_ptr) {
+    // TODO(sarahparker) make this work for aomqm
+    int eob_out = *eob;
+    int zbin[2] = { dequant_ptr[0] + ROUND_POWER_OF_TWO(dequant_ptr[0] * 70, 7),
+                    dequant_ptr[1] + ROUND_POWER_OF_TWO(dequant_ptr[1] * 70, 7) };
+    for (int i = *eob - 1; i >= 0; i--) {
+        const int rc = scan[i];
+        const int qcoeff = qcoeff_ptr[rc];
+        const int coeff = coeff_ptr[rc];
+        const int coeff_sign = (coeff >> 31);
+        int64_t abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
+        if (((abs_coeff << (1 + shift)) < zbin[rc != 0]) || (qcoeff == 0)) {
+            eob_out--;
+            qcoeff_ptr[rc] = 0;
+            dqcoeff_ptr[rc] = 0;
+        }
+        else {
+            break;
+        }
+    }
+    *eob = eob_out;
+}
+#endif
 
 void eb_av1_optimize_b(
     ModeDecisionContext  *md_context,
@@ -1336,7 +1366,11 @@ void eb_av1_optimize_b(
 
     // Hsan (Trellis): hardcoded as not supported:
     int sharpness = 0; // No Sharpness
+#if FASTER_RDOQ
+    int fast_mode = 1; // TBD
+#else
     int fast_mode = 0; // TBD
+#endif
     AQ_MODE aq_mode = NO_AQ;
     DELTAQ_MODE deltaq_mode = NO_DELTA_Q;
     int8_t segment_id = 0;
@@ -1355,6 +1389,17 @@ void eb_av1_optimize_b(
     const LvMapCoeffCost *txb_costs = &md_context->md_rate_estimation_ptr->coeff_fac_bits[txs_ctx][plane_type];
     const int eob_multi_size = txsize_log2_minus4[tx_size];
     const LvMapEobCost *txb_eob_costs = &md_context->md_rate_estimation_ptr->eob_frac_bits[eob_multi_size][plane_type];
+#if FASTER_RDOQ
+    if (fast_mode) {
+        update_coeff_eob_fast(eob, shift, p->dequant_QTX, scan, coeff_ptr, qcoeff_ptr, dqcoeff_ptr);
+        //p->eobs[block] = eob;
+        if (*eob == 0) {
+            //*rate_cost = av1_cost_skip_txb(x, txb_ctx, plane, tx_size);
+            //return eob;
+            return;
+        }
+    }
+#endif
     const int rshift =
         (sharpness +
         (aq_mode == VARIANCE_AQ && segment_id < 4

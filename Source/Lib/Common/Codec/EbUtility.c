@@ -1174,11 +1174,11 @@ void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t 
 #if ATB_INTRA_2_DEPTH
             // tx_depth 2 geom settings
             tx_depth = 2;
-#if !ATB_INTER_2_DEPTH
+#if 1//!ATB_INTER_2_DEPTH
             blk_geom_mds[*idx_mds].txb_count[tx_depth] = blk_geom_mds[*idx_mds].bsize == BLOCK_128X128 ? 4 :
                 blk_geom_mds[*idx_mds].bsize == BLOCK_128X64 || blk_geom_mds[*idx_mds].bsize == BLOCK_64X128 ? 2 : 1;
 #endif
-#if ATB_INTER_2_DEPTH
+#if 0//ATB_INTER_2_DEPTH
             if (blk_geom_mds[*idx_mds].bsize == BLOCK_128X128 ||
                 blk_geom_mds[*idx_mds].bsize == BLOCK_64X64 ||
                 blk_geom_mds[*idx_mds].bsize == BLOCK_32X32 ||
@@ -1464,7 +1464,7 @@ void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t 
                 {
                     if (blk_geom_mds[*idx_mds].bsize == BLOCK_128X128)
                     {
-#if ATB_INTER_2_DEPTH
+#if 0//ATB_INTER_2_DEPTH
                         blk_geom_mds[*idx_mds].txsize[tx_depth][txb_itr] = av1_get_tx_size(BLOCK_32X32, 0);
                         blk_geom_mds[*idx_mds].txsize_uv[tx_depth][txb_itr] = blk_geom_mds[*idx_mds].txsize_uv[0][0];
 
