@@ -1039,6 +1039,8 @@ void init_resize_picture(SequenceControlSet* scs_ptr,
         // after temporal filtering and motion estimation
         pcs_ptr->enhanced_picture_ptr = pcs_ptr->enhanced_downscaled_picture_ptr;
 
+        pcs_ptr->frame_superres_enabled = EB_TRUE;
+
     }
 
     scale_pcs_params(scs_ptr, pcs_ptr, spr_params, input_picture_ptr->width, input_picture_ptr->height);

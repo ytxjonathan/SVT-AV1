@@ -53,6 +53,12 @@ void segmentation_map_dctor(EbPtr p) {
     EB_FREE_ARRAY(obj->data);
 }
 
+static void eb_pcs_sb_structs_dctor(EbPtr p) {
+    PictureParentControlSet *obj = (PictureParentControlSet *)p;
+    EB_FREE_ARRAY(obj->sb_params_array);
+    EB_FREE_ARRAY(obj->sb_geom);
+}
+
 EbErrorType segmentation_map_ctor(SegmentationNeighborMap *seg_neighbor_map, uint16_t pic_width,
                                   uint16_t pic_height) {
     uint32_t num_elements = (pic_width >> MI_SIZE_LOG2) * (pic_height >> MI_SIZE_LOG2);
@@ -1102,6 +1108,12 @@ static void picture_parent_control_set_dctor(EbPtr p) {
     EB_DESTROY_SEMAPHORE(obj->temp_filt_done_semaphore);
     EB_DESTROY_MUTEX(obj->temp_filt_mutex);
     EB_DESTROY_MUTEX(obj->debug_mutex);
+
+    if(obj->frame_superres_enabled){
+        eb_pcs_sb_structs_dctor(obj);
+        EB_DELETE(obj->enhanced_picture_ptr);
+    }
+
 }
 EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
                                             EbPtr                    object_init_data_ptr) {
@@ -1285,6 +1297,8 @@ EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
 
         EB_NEW(object_ptr->denoise_and_model, denoise_and_model_ctor, (EbPtr)&fg_init_data);
     }
+
+    object_ptr->frame_superres_enabled = EB_FALSE;
 
     return return_error;
 }

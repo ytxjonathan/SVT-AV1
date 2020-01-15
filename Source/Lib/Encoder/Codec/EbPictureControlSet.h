@@ -832,6 +832,8 @@ typedef struct PictureParentControlSet {
     uint16_t picture_sb_height;
     uint16_t sb_total_count_unscaled;
 
+    EbBool frame_superres_enabled;
+
 } PictureParentControlSet;
 
 typedef struct PictureControlSetInitData {
