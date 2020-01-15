@@ -34,6 +34,7 @@
 #define OUTPUT_STAT_FILE_TOKEN "--output-stat-file"
 #define STAT_FILE_TOKEN "--stat-file"
 #define WIDTH_TOKEN "-w"
+#define WIDTH_LONG_TOKEN "--width"
 #define HEIGHT_TOKEN "-h"
 #define NUMBER_OF_PICTURES_TOKEN "-n"
 #define BUFFERED_INPUT_TOKEN "--nb"
@@ -121,8 +122,8 @@
 #define ADAPTIVE_QP_ENABLE_TOKEN "--adaptive-quantization"
 #define LOOK_AHEAD_DIST_TOKEN "--lad"
 #define SUPER_BLOCK_SIZE_TOKEN "--sb-size"
-#define TILE_ROW_TOKEN "---tile-rows="
-#define TILE_COL_TOKEN "---tile-columns="
+#define TILE_ROW_TOKEN "--tile-rows"
+#define TILE_COL_TOKEN "--tile-columns"
 
 #define SQ_WEIGHT_TOKEN "--sqw"
 #define ENABLE_AMP_TOKEN "--enable-amp"
@@ -619,6 +620,7 @@ ConfigEntry config_entry_options[] = {
 ConfigEntry config_entry_global_options[] = {
     // Picture Dimensions
     {SINGLE_INPUT, WIDTH_TOKEN, "Frame width", set_cfg_source_width},
+    {SINGLE_INPUT, WIDTH_LONG_TOKEN, "Frame width", set_cfg_source_width},
     {SINGLE_INPUT, HEIGHT_TOKEN, "Frame height", set_cfg_source_height},
     {SINGLE_INPUT,
      NUMBER_OF_PICTURES_TOKEN,
@@ -1746,7 +1748,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         config_entry_intra_refresh[kf_token_index].name);
         }
         fprintf(stderr, "\n%-25s\n", "AV1 Specific Options:");
-		while (config_entry_specific[++sp_token_index].token != NULL) 
+		while (config_entry_specific[++sp_token_index].token != NULL)
 		{
             uint32_t second_position =
                 *(config_entry_specific[sp_token_index].token + 1) == '-' ? 1 : 0;
@@ -1764,7 +1766,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         config_entry_specific[sp_token_index].name);
 
 		}
-        
+
         return 1;
     } else
         return 0;
