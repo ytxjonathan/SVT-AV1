@@ -3,7 +3,9 @@
 
 /*!< Command line argument parsing */
 
+/**************/
 /*!< Includes */
+/**************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -48,7 +50,9 @@ static void set_num_pframes(const char *value, EbSvtAv1DecConfiguration *cfg) {
     }
 };
 
+/************************/
 /*!< Config Entry Array */
+/************************/
 ConfigEntry config_entry[] = {
     /*!< Decoder settings */
     {SKIP_FRAME_TOKEN, "SkipFrame", 1, set_skip_frame},

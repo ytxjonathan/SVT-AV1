@@ -155,7 +155,7 @@ errno_t strncpy_ss(char *dest, rsize_t dmax, const char *src, rsize_t slen) {
 
             if (slen == 0) {
                 /*!< Copying truncated to slen chars.  Note that the TR says to
-                 * copy slen chars plus the null char.  We null the slack. */
+                 *   copy slen chars plus the null char.  We null the slack. */
                 *dest = '\0';
                 return RCNEGATE(EOK);
             }
@@ -250,7 +250,7 @@ errno_t strcpy_ss(char *dest, rsize_t dmax, const char *src) {
     }
 
     /*!< the entire src must have been copied, if not reset dest
-     * to null the string. */
+     *   to null the string. */
     handle_error(orig_dest,
                  orig_dmax,
                  (char *)("strcpy_ss: not "

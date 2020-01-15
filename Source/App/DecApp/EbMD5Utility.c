@@ -21,7 +21,9 @@
  *  - Ian Jackson <ian@chiark.greenend.org.uk>.
  * Still in the public domain. */
 
+/**************/
 /*!< Includes */
+/**************/
 #include <string.h>
 #include <assert.h>
 
@@ -235,7 +237,7 @@ void write_md5(EbBufferHeaderType *recon_buffer, Md5Context *md5) {
     uint32_t       w                = img->width;
     uint32_t       h                = img->height;
     uint32_t       stride           = img->y_stride;
-    /*!< uint32_t b_size = w * h; */
+    // uint32_t b_size = w * h;
 
     /*!< luma MD5 generation */
     for (y = 0; y < h; ++y) {

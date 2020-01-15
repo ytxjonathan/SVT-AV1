@@ -116,7 +116,7 @@ typedef int32_t errno_t;
 typedef void (*constraint_handler_t)(const char * /*!< msg */, void * /*!< ptr */, errno_t /*!< error */);
 
 /*!< Function used by the libraries to invoke the registered
-* runtime-constraint handler. Always needed. */
+*    runtime-constraint handler. Always needed. */
 extern void invoke_safe_str_constraint_handler(const char *msg, void *ptr, errno_t error);
 
 static inline void handle_error(char *orig_dest, rsize_t orig_dmax, char *err_msg,

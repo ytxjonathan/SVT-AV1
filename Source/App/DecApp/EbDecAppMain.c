@@ -1,7 +1,9 @@
 /*!< Copyright(c) 2019 Netflix, Inc.
 * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
+/********************************/
 /*!< Includes */
+/********************************/
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -118,7 +120,9 @@ static void show_progress(int in_frame, uint64_t dx_time) {
             (double)in_frame * 1000000.0 / (double)dx_time);
 }
 
+/**********************/
 /*!< Decoder App Main */
+/**********************/
 int32_t main(int32_t argc, char *argv[]) {
 #ifdef _WIN32
     _setmode(_fileno(stdin), _O_BINARY);

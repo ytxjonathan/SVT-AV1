@@ -22,7 +22,9 @@ extern "C" {
 #define TOTAL_NUMBER_OF_QP_VALUES 64 /*!< qp range is 0 to 63 */
 
 #define TOTAL_NUMBER_OF_SLICE_TYPES 3 /*!< I, P and b */
-
+/**********************************************************************************************************************/
+/**********************************************************************************************************************/
+/**********************************************************************************************************************/
 /*!< prob.h */
 
 /*!< TODO(negge): Rename this AomProb once we remove vpxbool. */
@@ -543,7 +545,7 @@ static INLINE void update_cdf(AomCdfProb *cdf, int32_t val, int32_t nsymbs) {
     cdf[nsymbs] += (cdf[nsymbs] < 32);
 }
 
-
+/**********************************************************************************************************************/
 /*!< entropy.h */
 #define TOKEN_CDF_Q_CTXS 4
 
@@ -590,6 +592,7 @@ void init_mode_probs(struct FrameContexts *fc);
 
 struct FrameContexts;
 
+/**********************************************************************************************************************/
 /*!< txb_Common.h */
 static const TxClass tx_type_to_class[TX_TYPES] = {
     TX_CLASS_2D, /*!< DCT_DCT */
@@ -610,7 +613,7 @@ static const TxClass tx_type_to_class[TX_TYPES] = {
     TX_CLASS_HORIZ, /*!< H_FLIPADST  */
 };
 
-
+/**********************************************************************************************************************/
 /*!< entropymv.h */
 
 #define MV_UPDATE_PROB 252
@@ -686,7 +689,7 @@ typedef enum MvSubpelPrecision {
     MV_SUBPEL_HIGH_PRECISION,
 } MvSubpelPrecision;
 
-
+/**********************************************************************************************************************/
 /*!< entropymode.h */
 #define BlockSize_GROUPS 4
 
@@ -803,10 +806,9 @@ typedef struct FrameContexts {
     AomCdfProb                partition_cdf[PARTITION_CONTEXTS][CDF_SIZE(EXT_PARTITION_TYPES)];
 
     AomCdfProb switchable_interp_cdf[SWITCHABLE_FILTER_CONTEXTS][CDF_SIZE(SWITCHABLE_FILTERS)];
-    /* kf_y_cdf is discarded after use, so does not require persistent storage.
-       However, we keep it with the other CDFs in this struct since it needs to
-       be copied to each tile to support parallelism just like the others.
-       */
+    /*!< kf_y_cdf is discarded after use, so does not require persistent storage.
+     *   However, we keep it with the other CDFs in this struct since it needs to
+     *   be copied to each tile to support parallelism just like the others. */
     AomCdfProb kf_y_cdf[KF_MODE_CONTEXTS][KF_MODE_CONTEXTS][CDF_SIZE(INTRA_MODES)];
 
     AomCdfProb angle_delta_cdf[DIRECTIONAL_MODES][CDF_SIZE(2 * MAX_ANGLE_DELTA + 1)];
@@ -858,11 +860,14 @@ static INLINE int32_t av1_ceil_log2(int32_t n) {
     return i;
 }
 
-
+/**********************************************************************************************************************/
 /*!< onyxc_int.h */
 
+/**********************************************************************************************************************/
+/**********************************************************************************************************************/
+/**********************************************************************************************************************/
 
 #ifdef __cplusplus
 }
 #endif
-#endif //EbCabacContextModel_h
+#endif /*!< EbCabacContextModel_h */

@@ -7,7 +7,9 @@
 #include "EbSvtAv1Enc.h"
 #include "EbAppConfig.h"
 
+/*****************************/
 /*!<App Callback data struct */
+/*****************************/
 typedef struct EbAppContext {
     EbSvtAv1EncConfiguration eb_enc_parameters;
 
@@ -26,7 +28,9 @@ typedef struct EbAppContext {
     uint8_t instance_idx;
 } EbAppContext;
 
+/***********************/
 /*!< External Function */
+/***********************/
 extern EbErrorType init_encoder(EbConfig *config, EbAppContext *callback_data,
                                 uint32_t instance_idx);
 extern EbErrorType de_init_encoder(EbAppContext *callback_data_ptr, uint32_t instance_index);

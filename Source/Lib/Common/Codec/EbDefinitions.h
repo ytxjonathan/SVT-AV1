@@ -98,7 +98,9 @@ enum {
     FAST_DIAMOND = 6
 } UENUM1BYTE(SEARCH_METHODS);
 
+/********************************************************/
 /*!< Pre-defined Values */
+/********************************************************/
 
 /*!< maximum number of frames allowed for the Alt-ref picture computation
  *   this number can be increased by increasing the constant
@@ -129,7 +131,7 @@ enum {
 #define CFL_BUF_LINE_I256 (CFL_BUF_LINE >> 4)
 #define CFL_BUF_SQUARE (CFL_BUF_LINE * CFL_BUF_LINE)
 
-/*!< AV1_OBU */
+/*!< ********************** AV1_OBU ********************** */
 #define INVALID_NEIGHBOR_DATA 0xFFu
 #define CONFIG_BITSTREAM_DEBUG 0
 #define CONFIG_BUFFER_MODEL 1
@@ -248,8 +250,9 @@ enum {
 
 typedef int16_t InterpKernel[SUBPEL_TAPS];
 
-
+/*******************/
 /*!< Helper Macros */
+/*******************/
 void        aom_reset_mmx_state(void);
 extern void RunEmms();
 #define aom_clear_system_state() RunEmms() /*!< aom_reset_mmx_state() */
@@ -313,11 +316,12 @@ extern void RunEmms();
 
 #define SIMD_INLINE static AOM_FORCE_INLINE
 
-
+//*********************************************************************************************************************//
 /*!< mem.h */
 /*!< shift right or left depending on sign of n */
 #define RIGHT_SIGNED_SHIFT(value, n) ((n) < 0 ? ((value) << (-(n))) : ((value) >> (n)))
 
+//*********************************************************************************************************************//
 /*!< cpmmom.h */
 /*!< Only need this for fixed-size arrays, for structs just assign. */
 #define av1_copy(dest, src)                  \
@@ -414,7 +418,7 @@ static INLINE int av1_num_planes(EbColorConfig *color_info) {
     return color_info->mono_chrome ? 1 : MAX_MB_PLANE;
 }
 
-
+//*********************************************************************************************************************//
 /*!< enums.h */
 /*!< brief Decorator indicating that given struct/union/enum is packed */
 #ifndef ATTRIBUTE_PACKED
@@ -1075,7 +1079,7 @@ typedef enum ATTRIBUTE_PACKED {
     BWDREF_ALTREF2_FRAMES, /*!< { BWDREF_FRAME, ALTREF2_FRAME } */
     ALTREF2_ALTREF_FRAMES, /*!< { ALTREF2_FRAME, ALTREF_FRAME } */
     TOTAL_UNIDIR_COMP_REFS,
-    /*!< NOTE: UNIDIR_COMP_REFS is the number of uni-directional reference pairs 
+    /*!< NOTE: UNIDIR_COMP_REFS is the number of uni-directional reference pairs
      *         that are explicitly signaled. */
     UNIDIR_COMP_REFS = BWDREF_ALTREF_FRAMES + 1,
 } UniDirCompRef;
@@ -1102,7 +1106,7 @@ typedef enum ATTRIBUTE_PACKED {
 #define SUPERRES_SCALE_BITS 3
 #define SUPERRES_SCALE_DENOMINATOR_MIN (SCALE_NUMERATOR + 1)
 
-
+//*********************************************************************************************************************//
 /*!< assert.h */
 #undef assert
 
@@ -1115,6 +1119,7 @@ typedef enum ATTRIBUTE_PACKED {
 
 #endif
 
+//*********************************************************************************************************************//
 /*!< onyxc_int.h */
 #define CDEF_MAX_STRENGTHS 16
 
@@ -1173,7 +1178,7 @@ typedef enum RefreshFrameContextMode
     REFRESH_FRAME_CONTEXT_BACKWARD,
 } RefreshFrameContextMode;
 
-
+//*********************************************************************************************************************//
 /*!< aom_codec.h */
 /*!< brief Algorithm return codes */
 typedef enum AomCodecErr
@@ -1219,7 +1224,7 @@ typedef enum AomCodecErr
     AOM_CODEC_LIST_END
 } AomCodecErr;
 
-
+//*********************************************************************************************************************//
 /*!< Common_data.h */
 static const int32_t intra_mode_context[INTRA_MODES] = {
     0, 1, 2, 3, 4, 4, 4, 4, 3, 0, 1, 2, 0,
@@ -1471,6 +1476,7 @@ typedef struct SgrParamsType {
     int32_t s[2]; /*!< sgr parameters for r[0] and r[1], based on GenSgrprojVtable() */
 } SgrParamsType;
 
+//*********************************************************************************************************************//
 /*!< blockd.h */
 typedef enum FrameType {
     KEY_FRAME        = 0,
@@ -1550,7 +1556,7 @@ static INLINE int is_inter_singleref_mode(PredictionMode mode) {
     return mode >= SINGLE_INTER_MODE_START && mode < SINGLE_INTER_MODE_END;
 }
 
-
+//*********************************************************************************************************************//
 /*!< encoder.h */
 typedef enum FrameContextIndex {
     /*!< regular inter frame */
@@ -1568,14 +1574,14 @@ typedef enum FrameContextIndex {
     FRAME_CONTEXT_INDEXES
 } FrameContextIndex;
 
-
+//*********************************************************************************************************************//
 /*!< common.h */
 #define av1_zero(dest) memset(&(dest), 0, sizeof(dest))
 
 /*!< alloccommon.h */
 #define INVALID_IDX -1 /*!< Invalid buffer index. */
 
-
+//*********************************************************************************************************************//
 /*!< quant_common.h */
 #define MINQ 0
 #define MAXQ 255
@@ -1592,7 +1598,7 @@ typedef enum FrameContextIndex {
 #define DEFAULT_QM_FIRST 5
 #define DEFAULT_QM_LAST 9
 
-
+//*********************************************************************************************************************//
 /*!< blockd.h */
 #define NO_FILTER_FOR_IBC 1 /*!< Disable in-loop filters for frame with intrabc */
 
@@ -1639,7 +1645,7 @@ typedef struct LoopFilterInfoN {
     uint8_t          lvl[MAX_MB_PLANE][MAX_SEGMENTS][2][REF_FRAMES][MAX_MODE_LF_DELTAS];
 } LoopFilterInfoN;
 
-
+//*********************************************************************************************************************//
 /*!< cdef.h */
 #define CDEF_STRENGTH_BITS 6
 
@@ -1745,8 +1751,10 @@ static const EbWarpedMotionParams default_warp_params = {
 0,
 };
 
-/*!<   AV1_OBU */
+/*!< ************** AV1_OBU ************** */
 
+//**********************************************************************************************************************//
+//**********************************************************************************************************************//
 
 #define YBITS_THSHLD                        50
 #define YDC_THSHLD                          5
@@ -1766,6 +1774,7 @@ static const EbWarpedMotionParams default_warp_params = {
 #define $Line                   EB_MAKESTRING( EB_STRINGIZE, __LINE__ )
 #define EB_SRC_LINE             __FILE__ "(" $Line ") : message "
 
+/**********************************************************************************************************************/
 /*!< Definitions */
 #define PM_DC_TRSHLD1                       10 /*!< The threshold for DC to disable masking for DC */
 
@@ -1892,7 +1901,7 @@ typedef enum EbBitFieldMasks
 #define    SUB_SAD_SEARCH      0
 #define    FULL_SAD_SEARCH     1
 #define    SSD_SEARCH          2
-/*!< INPUT CLASS */
+/*!< ************** INPUT CLASS ************** */
 
 #define EbInputResolution             uint8_t
 #define INPUT_SIZE_576p_RANGE_OR_LOWER     0
@@ -2990,7 +2999,9 @@ typedef struct StatStruct
                                 /*!< the referenced area is normalized */
 #define SC_MAX_LEVEL 2 /*!< 2 sets of HME/ME settings are used depending on the scene content mode */
 
+/******************************************************************************/
 /*!< ME/HME settings */
+/******************************************************************************/
 /*!<     M0    M1    M2    M3    M4    M5    M6    M7    M8    M9    M10    M11    M12 */
 static const uint8_t enable_hme_flag[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {
@@ -3284,7 +3295,9 @@ static const uint16_t search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUP
     /*!<     M0    M1    M2    M3    M4    M5    M6    M7    M8    M9    M10    M11    M12 */
 };
 
+/*****************************************************************************/
 /*!< ME/HME settings for Altref Temporal Filtering */
+/******************************************************************************/
 /*!<     M0    M1    M2    M3    M4    M5    M6    M7    M8    M9    M10    M11    M12 */
 static const uint8_t tf_enable_hme_flag[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {

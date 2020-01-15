@@ -368,14 +368,12 @@ typedef struct SkipModeInfo {
 
 } SkipModeInfo;
 
-/*!< 
- *  typedef struct GlobalMotionParams {
- * 
- *      // Specifies the transform type 
- *      TransformationType  gm_type[ALTREF_FRAME - LAST_FRAME + 1];
- *      // Global motion parameter 
- *      int32_t             gm_params[ALTREF_FRAME - LAST_FRAME + 1][6];
- *  } GlobalMotionParams; */
+// typedef struct GlobalMotionParams {
+//     // Specifies the transform type
+//     TransformationType  gm_type[ALTREF_FRAME - LAST_FRAME + 1];
+//     // Global motion parameter
+//     int32_t             gm_params[ALTREF_FRAME - LAST_FRAME + 1][6];
+// } GlobalMotionParams;
 
 typedef struct GlobalMotionParams {
     /*!< Specifies the transform type */

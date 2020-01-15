@@ -42,8 +42,11 @@ extern EbErrorType output_bitstream_rbsp_to_payload(OutputBitstreamUnit *bitstre
                                                     uint32_t *           output_buffer_size,
                                                     uint32_t             startLocation);
 
-
+/********************************************************************************************************************************/
+/********************************************************************************************************************************/
+/********************************************************************************************************************************/
 #include "EbCabacContextModel.h"
+/********************************************************************************************************************************/
 /*!< bitops.h
 * These versions of get_msb() are only valid when n != 0 because all
 * of the optimized versions are undefined when n == 0:
@@ -85,6 +88,7 @@ static INLINE int32_t get_msb(uint32_t n) {
     return log;
 }
 #endif
+/********************************************************************************************************************************/
 /*!< odintrin.h */
 
 #define OD_DIVU_DMAX (1024)
@@ -145,6 +149,7 @@ extern uint32_t od_divu_small_consts[OD_DIVU_DMAX][2];
 #define OD_SIGNMASK(a) (-((a) < 0))
 #define OD_FLIPSIGNI(a, b) (((a) + OD_SIGNMASK(b)) ^ OD_SIGNMASK(b))
 
+/********************************************************************************************************************************/
 /*!<* entcode.h */
 #define EC_PROB_SHIFT 6
 #define EC_MIN_PROB 4 /*!< must be <= (1<<EC_PROB_SHIFT)/16 */
@@ -155,12 +160,13 @@ typedef uint32_t OdEcWindow;
 
 #define OD_EC_WINDOW_SIZE ((int32_t)sizeof(OdEcWindow) * CHAR_BIT)
 
-/*!< The resolution of fractional-precision bit usage measurements, 
+/*!< The resolution of fractional-precision bit usage measurements,
  * i.e., 3 => 1/8th bits.*/
 #define OD_BITRES (3)
 
 #define OD_ICDF AOM_ICDF
 
+/********************************************************************************************************************************/
 /*!< entenc.h */
 typedef struct OdEcEnc OdEcEnc;
 
@@ -213,6 +219,7 @@ OD_WARN_UNUSED_RESULT uint8_t *eb_od_ec_enc_done(OdEcEnc *enc, uint32_t *nbytes)
 
 OD_WARN_UNUSED_RESULT int32_t eb_od_ec_enc_tell(const OdEcEnc *enc) OD_ARG_NONNULL(1);
 
+/********************************************************************************************************************************/
 /*!< daalaboolwriter.h */
 struct DaalaWriter {
     uint32_t pos;
@@ -243,6 +250,7 @@ static INLINE void daala_write_symbol(DaalaWriter *w, int32_t symb, const AomCdf
     eb_od_ec_encode_cdf_q15(&w->ec, symb, cdf, nsymbs);
 }
 
+/********************************************************************************************************************************/
 /*!<* bitwriter.h */
 typedef struct DaalaWriter AomWriter;
 
@@ -276,6 +284,8 @@ static INLINE void aom_write_symbol(AomWriter *w, int32_t symb, AomCdfProb *cdf,
     if (w->allow_update_cdf) update_cdf(cdf, symb, nsymbs);
 }
 
+/********************************************************************************************************************************/
+/********************************************************************************************************************************/
 #ifdef __cplusplus
 }
 #endif

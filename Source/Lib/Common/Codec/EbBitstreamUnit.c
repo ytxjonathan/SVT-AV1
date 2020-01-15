@@ -70,7 +70,7 @@ EbErrorType output_bitstream_rbsp_to_payload(OutputBitstreamUnit *bitstream_ptr,
     /*!<  IVF data */
     read_byte_ptr  = (EbByte)bitstream_ptr->buffer_begin_av1;
     write_byte_ptr = &output_buffer[*output_buffer_index];
-    /*!< frame_count++; */
+    // frame_count++;
     while ((read_location < buffer_written_bytes_count)) {
         if ((*output_buffer_index) < (*output_buffer_size)) {
             write_byte_ptr[write_location++] = read_byte_ptr[read_location];
@@ -82,6 +82,10 @@ EbErrorType output_bitstream_rbsp_to_payload(OutputBitstreamUnit *bitstream_ptr,
     return return_error;
 }
 
+/********************************************************************************************************************************/
+/********************************************************************************************************************************/
+/********************************************************************************************************************************/
+/********************************************************************************************************************************/
 /*!<  daalaboolwriter.c */
 void eb_aom_daala_start_encode(DaalaWriter *br, uint8_t *source) {
     br->buffer = source;
@@ -399,3 +403,7 @@ int32_t eb_od_ec_enc_tell(const OdEcEnc *enc) {
      * bit, which we reserve for terminating the stream. */
     return (enc->cnt + 10) + enc->offs * 8;
 }
+/********************************************************************************************************************************/
+/********************************************************************************************************************************/
+/********************************************************************************************************************************/
+/********************************************************************************************************************************/

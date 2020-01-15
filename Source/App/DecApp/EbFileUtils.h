@@ -25,7 +25,9 @@
 
 static const char *const csp_names[] = {"400", "420", "422", "444", 0};
 
+/****************************/
 /*!< Input image properties */
+/****************************/
 
 enum VideoFileType { FILE_TYPE_OBU, FILE_TYPE_RAW, FILE_TYPE_IVF, FILE_TYPE_Y4M, FILE_TYPE_WEBM };
 
@@ -92,7 +94,7 @@ typedef struct {
     int      has_size_field;
     int      has_extension;
     /*!< The following fields come from the OBU extension header and
-     * therefore are only used if has_extension is true. */
+     *   therefore are only used if has_extension is true. */
     int temporal_layer_id;
     int spatial_layer_id;
 } ObuHeader;

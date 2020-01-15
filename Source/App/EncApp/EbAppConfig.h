@@ -1,5 +1,5 @@
 /*!< Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent */
+ * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 #ifndef EbAppConfig_h
 #define EbAppConfig_h
@@ -15,7 +15,7 @@
 /*!< Define Cross-Platform 64-bit fseek() and ftell() */
 
 /*!< The AppExitConditionType type is used to define the App main loop exit
- * conditions. */
+ *   conditions. */
 typedef enum AppExitConditionType {
     APP_ExitConditionNone = 0,
     APP_ExitConditionFinished,
@@ -23,11 +23,11 @@ typedef enum AppExitConditionType {
 } AppExitConditionType;
 
 /*!< The AppPortActiveType type is used to define the state of output ports in
-the App. */
+ *   the App. */
 typedef enum AppPortActiveType { APP_PortActive = 0, APP_PortInactive } AppPortActiveType;
 
 /*!< The EbPtr type is intended to be used to pass pointers to and from the svt
-API.  This is a 32 bit pointer and is aligned on a 32 bit word boundary. */
+ *   API.  This is a 32 bit pointer and is aligned on a 32 bit word boundary. */
 typedef void *EbPtr;
 
 /*!< The EB_NULL type is used to define the C style NULL pointer. */
@@ -106,7 +106,9 @@ extern uint32_t          app_malloc_count;
 #endif
 
 typedef struct EbPerformanceContext {
+    /************************************/
     /*!< Computational Performance Data */
+    /************************************/
     uint64_t lib_start_time[2]; /*!< [sec, micro_sec] including init time */
     uint64_t encode_start_time[2]; /*!< [sec, micro_sec] first frame sent */
 

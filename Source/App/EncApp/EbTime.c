@@ -49,7 +49,7 @@ void compute_overall_elapsed_time(uint64_t start_seconds, uint64_t start_u_secon
                                   uint64_t finish_seconds, uint64_t finish_u_seconds,
                                   double *duration) {
 #ifdef _WIN32
-    /*!<double  duration; */
+    // double  duration;
     *duration = (double)(finish_seconds - start_seconds) / CLOCKS_PER_SEC;
     (void)(start_u_seconds);
     (void)(finish_u_seconds);
@@ -123,9 +123,9 @@ void injector(uint64_t processed_frame_count, uint32_t injector_frame_rate) {
         predicted_time = (processed_frame_count - buffer_frames) * injector_interval;
         millisec_ahead = (int32_t)(1000 * (predicted_time - elapsed_time));
         if (millisec_ahead > 0) {
-            /*!<  timeBeginPeriod(1); */
+            //  timeBeginPeriod(1);
             sleep_ms(millisec_ahead);
-            /*!<  timeEndPeriod (1); */
+            //  timeEndPeriod (1);
         }
     }
 }

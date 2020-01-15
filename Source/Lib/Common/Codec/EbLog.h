@@ -1,5 +1,5 @@
 /*!< Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent */
+ * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 #ifndef EbLog_h
 #define EbLog_h
 

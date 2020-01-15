@@ -1,7 +1,5 @@
-/*
-* Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
+/*!< Copyright(c) 2019 Netflix, Inc.
+ * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 #ifndef EbDecInterPrediction_h
 #define EbDecInterPrediction_h
@@ -23,4 +21,4 @@ void svtav1_predict_inter_block_plane(DecModCtxt *dec_mod_ctx, EbDecHandle *dec_
 #ifdef __cplusplus
 }
 #endif
-#endif // EbDecInterPrediction_h
+#endif /*!< EbDecInterPrediction_h */

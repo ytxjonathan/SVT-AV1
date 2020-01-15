@@ -16,7 +16,9 @@
 #include <unistd.h>
 #endif
 
+/*************/
 /*!< Defines */
+/*************/
 #define HELP_TOKEN "-help"
 #define CHANNEL_NUMBER_TOKEN "-nch"
 #define COMMAND_LINE_MAX_SIZE 2048
@@ -153,7 +155,9 @@
 #define MDS2_PRUNE_C_TH "-mds2p-class-th"
 #define MDS2_PRUNE_S_TH "-mds2p-cand-th"
 
+/***********************/
 /*!< Set Cfg Functions */
+/***********************/
 static void set_cfg_input_file(const char *filename, EbConfig *cfg) {
     if (cfg->input_file && !cfg->input_file_is_fifo) fclose(cfg->input_file);
 
@@ -587,7 +591,9 @@ enum CfgType {
     ARRAY_INPUT /*!< Configuration parameters that have multiple values as input */
 };
 
+/*************************/
 /*!< Config Entry Struct */
+/*************************/
 typedef struct config_entry_s {
     enum CfgType type;
     const char * token;
@@ -595,7 +601,9 @@ typedef struct config_entry_s {
     void (*scf)(const char *, EbConfig *);
 } ConfigEntry;
 
+/************************/
 /*!< Config Entry Array */
+/************************/
 ConfigEntry config_entry[] = {
     /*!< File I/O */
     {SINGLE_INPUT, INPUT_FILE_TOKEN, "InputFile", set_cfg_input_file},
@@ -685,7 +693,7 @@ ConfigEntry config_entry[] = {
     /*!< GLOBAL MOTION */
     {SINGLE_INPUT, GLOBAL_MOTION_ENABLE_TOKEN, "GlobalMotion", set_enable_global_motion_flag},
 
-    //*!< CLASS 12 */
+    /*!< CLASS 12 */
     {SINGLE_INPUT, CLASS_12_TOKEN, "CombineClass12", set_class_12_flag},
     /*!< EDGE SKIP ANGLE INTRA */
     {SINGLE_INPUT,
@@ -754,7 +762,7 @@ ConfigEntry config_entry[] = {
      "UnrestrictedMotionVector",
      set_unrestricted_motion_vector},
 
-    /*!<    { SINGLE_INPUT, BITRATE_REDUCTION_TOKEN, "bit_rate_reduction", SetBitRateReduction }, */
+    // { SINGLE_INPUT, BITRATE_REDUCTION_TOKEN, "bit_rate_reduction", SetBitRateReduction },
     {SINGLE_INPUT, HDR_INPUT_TOKEN, "HighDynamicRangeInput", set_high_dynamic_range_input},
     /*!< Latency */
     {SINGLE_INPUT, INJECTOR_TOKEN, "Injector", set_injector},
@@ -766,7 +774,7 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, LEVEL_TOKEN, "Level", set_level},
     {SINGLE_INPUT, LATENCY_MODE, "LatencyMode", set_latency_mode},
     {SINGLE_INPUT, FILM_GRAIN_TOKEN, "FilmGrain", set_cfg_film_grain},
-    //*!< Asm Type */
+    /*!< Asm Type */
     {SINGLE_INPUT, ASM_TYPE_TOKEN, "Asm", set_asm_type},
     /*!< HME */
     {ARRAY_INPUT,
@@ -793,7 +801,7 @@ ConfigEntry config_entry[] = {
      HME_LEVEL2_HEIGHT,
      "HmeLevel2SearchAreaInHeight",
      set_hme_level_2_search_area_in_height_array},
-    //*!< --- start: ALTREF_FILTERING_SUPPORT */
+    /*!< --- start: ALTREF_FILTERING_SUPPORT */
     {SINGLE_INPUT, ENABLE_ALTREFS, "EnableAltRefs", set_enable_altrefs},
     {SINGLE_INPUT, ALTREF_STRENGTH, "AltRefStrength", set_altref_strength},
     {SINGLE_INPUT, ALTREF_NFRAMES, "AltRefNframes", set_altref_n_frames},
@@ -811,7 +819,9 @@ ConfigEntry config_entry[] = {
     /*!< Termination */
     {SINGLE_INPUT, NULL, NULL, NULL}};
 
+/*****************/
 /*!< Constructor */
+/*****************/
 void eb_config_ctor(EbConfig *config_ptr) {
     memset(config_ptr, 0, sizeof(*config_ptr));
     config_ptr->error_log_file       = stderr;
@@ -911,7 +921,9 @@ void eb_config_ctor(EbConfig *config_ptr) {
     return;
 }
 
+/****************/
 /*!< Destructor */
+/****************/
 void eb_config_dtor(EbConfig *config_ptr) {
     /*!< Close any files that are open */
     if (config_ptr->config_file) {
@@ -959,7 +971,9 @@ void eb_config_dtor(EbConfig *config_ptr) {
     return;
 }
 
+/***************/
 /*!< File Size */
+/***************/
 static int32_t find_file_size(FILE *const pFile) {
     int32_t file_size;
 
@@ -970,7 +984,9 @@ static int32_t find_file_size(FILE *const pFile) {
     return file_size;
 }
 
+/****************/
 /*!< Line Split */
+/****************/
 static void line_split(uint32_t *argc, char *argv[CONFIG_FILE_MAX_ARG_COUNT],
                        uint32_t arg_len[CONFIG_FILE_MAX_ARG_COUNT], char *linePtr) {
     uint32_t i = 0;
@@ -1004,7 +1020,9 @@ static void line_split(uint32_t *argc, char *argv[CONFIG_FILE_MAX_ARG_COUNT],
     return;
 }
 
+/**********************/
 /*!< Set Config value */
+/**********************/
 static void set_config_value(EbConfig *config, const char *name, const char *value) {
     int32_t i = 0;
 
@@ -1017,7 +1035,9 @@ static void set_config_value(EbConfig *config, const char *name, const char *val
     return;
 }
 
+/***********************/
 /*!< Parse Config File */
+/***********************/
 static void parse_config_file(EbConfig *config, char *buffer, int32_t size) {
     uint32_t argc;
     char *   argv[CONFIG_FILE_MAX_ARG_COUNT];
@@ -1085,7 +1105,9 @@ static void parse_config_file(EbConfig *config, char *buffer, int32_t size) {
     return;
 }
 
+/****************/
 /*!< Find Token */
+/****************/
 static int32_t find_token(int32_t argc, char *const argv[], char const *token, char *configStr) {
     int32_t return_error = -1;
 
@@ -1097,7 +1119,9 @@ static int32_t find_token(int32_t argc, char *const argv[], char const *token, c
     return return_error;
 }
 
+/**********************/
 /*!< Read Config File */
+/**********************/
 static int32_t read_config_file(EbConfig *config, char *config_path, uint32_t instance_idx) {
     int32_t return_error = 0;
 
@@ -1137,7 +1161,9 @@ static int32_t read_config_file(EbConfig *config, char *config_path, uint32_t in
     return return_error;
 }
 
+/*********************/
 /*!< Verify Settings */
+/*********************/
 static EbErrorType verify_settings(EbConfig *config, uint32_t channel_number) {
     EbErrorType return_error = EB_ErrorNone;
 
@@ -1217,7 +1243,9 @@ static EbErrorType verify_settings(EbConfig *config, uint32_t channel_number) {
     return return_error;
 }
 
+/************************************/
 /*!< Find Token for multiple inputs */
+/************************************/
 int32_t find_token_multiple_inputs(int32_t argc, char *const argv[], const char *token,
                                    char **configStr) {
     int32_t return_error = -1;
@@ -1272,7 +1300,9 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         return 0;
 }
 
+/***********************************************************/
 /*!< Get the number of channels and validate it with input */
+/***********************************************************/
 uint32_t get_number_of_channels(int32_t argc, char *const argv[]) {
     char     config_string[COMMAND_LINE_MAX_SIZE];
     uint32_t channel_number;
@@ -1339,7 +1369,9 @@ int32_t compute_frames_to_be_encoded(EbConfig *config) {
     return frame_count;
 }
 
+/***********************/
 /*!< Read Command Line */
+/***********************/
 EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **configs,
                               uint32_t num_channels, EbErrorType *return_errors) {
     EbErrorType return_error = EB_ErrorBadParameter;
@@ -1362,7 +1394,9 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
             cmd_copy[cmd_token_cnt++] = argv[token_index];
     }
 
+    /*******************************************************************/
     /*!< Find configuration files tokens and call respective functions */
+    /*******************************************************************/
 
     /*!< Find the Config File Path in the command line */
     if (find_token_multiple_inputs(argc, argv, CONFIG_FILE_TOKEN, config_strings) == 0) {
@@ -1381,7 +1415,9 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
             return_error = EB_ErrorNone;
     }
 
+    /************************************************************************************/
     /*!< Find SINGLE_INPUT configuration parameter tokens and call respective functions */
+    /************************************************************************************/
     token_index = -1;
     /*!< Parse command line for tokens */
     while (config_entry[++token_index].name != NULL) {
@@ -1402,8 +1438,9 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
         }
     }
 
-
+    /******************************************************************************************************/
     /*!< Parse parameters from input file if in y4m format overriding config file and command line inputs */
+    /******************************************************************************************************/
 
     for (index = 0; index < num_channels; ++index) {
         if ((configs[index])->y4m_input == EB_TRUE) {
@@ -1414,9 +1451,10 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
             }
         }
     }
-
+    /*********************************************************************************/
     /*!< Find SPECIAL configuration parameter tokens and call respective functions. */
-    /*!<Parse command line for search region at level 0 width token */
+    /********************************************************************************/
+    /*!< Parse command line for search region at level 0 width token */
     if (find_token_multiple_inputs(argc, argv, HME_LEVEL0_WIDTH, config_strings) == 0) {
         uint32_t input_index = 0, last_index = 0;
         uint32_t done = 1;
@@ -1488,7 +1526,7 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
         }
     }
 
-    //*!< Parse command line for search region at level 1 width token */
+    /*!< Parse command line for search region at level 1 width token */
     if (find_token_multiple_inputs(argc, argv, HME_LEVEL1_WIDTH, config_strings) == 0) {
         uint32_t input_index = 0, last_index = 0;
         uint32_t done = 1;
@@ -1560,8 +1598,9 @@ EbErrorType read_command_line(int32_t argc, char *const argv[], EbConfig **confi
         }
     }
 
-    /*!<   Verify configuration parameters */
-
+    /*************************************/
+    /*!< Verify configuration parameters */
+    /*************************************/
     /*!< Verify the config values */
     if (return_error == 0) {
         return_error = EB_ErrorBadParameter;

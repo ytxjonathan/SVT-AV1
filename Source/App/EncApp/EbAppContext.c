@@ -1,7 +1,9 @@
 /*!< Copyright(c) 2019 Intel Corporation
  * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
+/**************/
 /*!< Includes */
+/**************/
 #include <stdlib.h>
 
 #include "EbAppContext.h"
@@ -20,8 +22,10 @@
                ? 0x2DC6C0                               \
                : (ResolutionSize) < (INPUT_SIZE_4K_TH) ? 0x2DC6C0 : 0x2DC6C0)
 
+/************************************/
 /*!< Variables Defining a memory table
- *  hosting all allocated pointers */
+ *   hosting all allocated pointers */
+/************************************/
 EbMemoryMapEntry *       app_memory_map;
 uint32_t *               app_memory_map_index;
 uint64_t *               total_app_memory;
@@ -30,8 +34,10 @@ static EbMemoryMapEntry *app_memory_map_all_channels[MAX_CHANNEL_NUMBER];
 static uint32_t          app_memory_map_index_all_channels[MAX_CHANNEL_NUMBER];
 static uint64_t          app_memory_mallocd_all_channels[MAX_CHANNEL_NUMBER];
 
+/**********************************************/
 /*!< Allocation and initializing a memory table
-*  hosting all allocated pointers */
+ *   hosting all allocated pointers */
+/**********************************************/
 void allocate_memory_table(uint32_t instance_idx) {
     /*!< Malloc Memory Table for the instance @ instance_idx */
     app_memory_map_all_channels[instance_idx] =
@@ -55,12 +61,15 @@ void allocate_memory_table(uint32_t instance_idx) {
 
     return;
 }
-
+/*************************************/
 /*!< Helper functions Input / Output */
+/*************************************/
 
+/***********************************************/
 /*!< Copy configuration parameters from
  *  The config structure, to the
  *  callback structure to send to the library */
+/**********************************************/
 EbErrorType copy_configuration_parameters(EbConfig *config, EbAppContext *callback_data,
                                           uint32_t instance_idx) {
     EbErrorType return_error = EB_ErrorNone;
@@ -424,16 +433,21 @@ EbErrorType preload_frames_info_ram(EbConfig *config) {
     return return_error;
 }
 
+/******************************/
 /*!< Functions Implementation */
+/******************************/
 
+/*********************************/
 /*!< Initialize Core & Component */
+/*********************************/
 EbErrorType init_encoder(EbConfig *config, EbAppContext *callback_data, uint32_t instance_idx) {
     EbErrorType return_error = EB_ErrorNone;
 
     /*!< Allocate a memory table hosting all allocated pointers */
     allocate_memory_table(instance_idx);
 
-    /*!< LIBRARY INIT [START] */
+    /*!< ************************* LIBRARY INIT [START] *********************/
+
     /*!< STEP 1: Call the library to construct a Component Handle */
     return_error = eb_init_handle(
         &callback_data->svt_encoder_handle, callback_data, &callback_data->eb_enc_parameters);
@@ -453,9 +467,9 @@ EbErrorType init_encoder(EbConfig *config, EbAppContext *callback_data, uint32_t
     return_error = eb_init_encoder(callback_data->svt_encoder_handle);
     if (return_error != EB_ErrorNone) { return return_error; }
 
-    /*!< LIBRARY INIT [END] */
+    /*!< ************************* LIBRARY INIT [END] *********************/
 
-    /*!< APPLICATION INIT [START] */
+    /*!<********************** APPLICATION INIT [START] ******************/
 
     /*!< STEP 6: Allocate input buffers carrying the yuv frames in */
     return_error = allocate_input_buffers(config, callback_data);
@@ -476,12 +490,14 @@ EbErrorType init_encoder(EbConfig *config, EbAppContext *callback_data, uint32_t
     } else
         config->sequence_buffer = 0;
     if (return_error != EB_ErrorNone) return return_error;
-    /*!< APPLICATION INIT [END] */
+    /*!<********************** APPLICATION INIT [END] ******************/
 
     return return_error;
 }
 
+/***********************/
 /*!< Deinit Components */
+/***********************/
 EbErrorType de_init_encoder(EbAppContext *callback_data_ptr, uint32_t instance_index) {
     EbErrorType       return_error = EB_ErrorNone;
     int32_t           ptr_index    = 0;

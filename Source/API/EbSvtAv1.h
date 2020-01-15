@@ -27,7 +27,9 @@ extern "C" {
 
 #define EB_MAX_TEMPORAL_LAYERS MAX_TEMPORAL_LAYERS
 
+/********************************/
 /*!< Defines */
+/********************************/
 #define EB_PICTURE uint32_t
 
 typedef enum EbAv1PictureType {

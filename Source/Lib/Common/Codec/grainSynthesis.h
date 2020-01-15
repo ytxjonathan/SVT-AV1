@@ -107,15 +107,15 @@ void eb_av1_add_film_grain_run(AomFilmGrain *grain_params, uint8_t *luma, uint8_
      * \param[in]    src              Source image
      * \param[in]    dst              Resulting image with grain */
 
-/*!<void eb_av1_add_film_grain(AomFilmGrain *grain_params, EbPictureBufferDesc *src,
- *        EbPictureBufferDesc *dst); */
+/* void eb_av1_add_film_grain(AomFilmGrain *grain_params, EbPictureBufferDesc *src,
+        EbPictureBufferDesc *dst); */
 
-/*!<void av1_film_grain_write_updated(const AomFilmGrain *pars,
- *  int32_t monochrome, struct AomWriteBitBuffer *wb);
- *
- * void av1_film_grain_read_updated(AomFilmGrain *pars,
- *                                 int32_t monochrome, struct aom_read_bit_buffer *wb,
- *                                 struct aom_internal_error_info *error); */
+/* void av1_film_grain_write_updated(const AomFilmGrain *pars,
+  int32_t monochrome, struct AomWriteBitBuffer *wb);
+
+ void av1_film_grain_read_updated(AomFilmGrain *pars,
+                                 int32_t monochrome, struct aom_read_bit_buffer *wb,
+                                 struct aom_internal_error_info *error); */
 
 void fgn_copy_rect(uint8_t *src, int32_t src_stride, uint8_t *dst, int32_t dst_stride,
                    int32_t width, int32_t height, int32_t use_high_bit_depth);

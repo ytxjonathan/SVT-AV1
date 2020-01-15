@@ -295,8 +295,8 @@ static int obudec_read_obu_header_and_size(FILE *f, size_t buffer_capacity, uint
 }
 
 /*!< Reads OBU payload from 'f' and returns 0 for success when all payload bytes
- * are read from the file. Payload data is written to 'obu_data', and actual
- * bytes read added to 'bytes_read'. */
+ *   are read from the file. Payload data is written to 'obu_data', and actual
+ *   bytes read added to 'bytes_read'. */
 static int obudec_read_obu_payload(FILE *f, size_t payload_length, uint8_t *obu_data,
                                    size_t *bytes_read) {
     if (!f || payload_length == 0 || !obu_data || !bytes_read) return -1;

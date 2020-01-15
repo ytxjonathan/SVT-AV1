@@ -882,9 +882,11 @@ void send_qp_on_the_fly(EbConfig *config, EbBufferHeaderType *header_ptr) {
     return;
 }
 
+/*************************************/
 /*!< process_input_buffer
  * Reads yuv frames from file and copy
  * them into the input buffer */
+/*************************************/
 AppExitConditionType process_input_buffer(EbConfig *config, EbAppContext *app_call_back) {
     uint8_t             is_16bit         = (uint8_t)(config->encoder_bit_depth > 8);
     EbBufferHeaderType *header_ptr       = app_call_back->input_buffer_pool;
@@ -1000,17 +1002,17 @@ static void write_ivf_stream_header(EbConfig *config) {
     if (config->frame_rate_denominator != 0 && config->frame_rate_numerator != 0) {
         mem_put_le32(header + 16, config->frame_rate_numerator); /*!< rate */
         mem_put_le32(header + 20, config->frame_rate_denominator); /*!< scale */
-            /*!< mem_put_le32(header + 16, config->frame_rate_denominator);  /*!< rate */
-            /*!< mem_put_le32(header + 20, config->frame_rate_numerator);  /*!< scale */
+            // mem_put_le32(header + 16, config->frame_rate_denominator);  /*!< rate */
+            // mem_put_le32(header + 20, config->frame_rate_numerator);  /*!< scale */
     } else {
         mem_put_le32(header + 16, (config->frame_rate >> 16) * 1000); /*!< rate */
         mem_put_le32(header + 20, 1000); /*!< scale */
-            /*!< mem_put_le32(header + 16, config->frame_rate_denominator); // rate */
-            /*!< mem_put_le32(header + 20, config->frame_rate_numerator);  // scale */
+            // mem_put_le32(header + 16, config->frame_rate_denominator); /* rate */
+            // mem_put_le32(header + 20, config->frame_rate_numerator);  /* scale */
     }
     mem_put_le32(header + 24, 0); /*!< length */
     mem_put_le32(header + 28, 0); /*!< unused */
-    /*!< config->performance_context.byte_count += 32; */
+    // config->performance_context.byte_count += 32;
     if (config->bitstream_file) fwrite(header, 1, IVF_STREAM_HEADER_SIZE, config->bitstream_file);
 
     return;
@@ -1058,7 +1060,9 @@ double get_psnr(double sse, double max) {
     return psnr;
 }
 
+/**************************************/
 /*!< Process Output STATISTICS Buffer */
+/**************************************/
 void process_output_statistics_buffer(EbBufferHeaderType *header_ptr, EbConfig *config) {
     uint32_t max_luma_value = (config->encoder_bit_depth == 8) ? 255 : 1023;
     uint64_t picture_stream_size, luma_sse, cr_sse, cb_sse, picture_number, picture_qp;
@@ -1262,12 +1266,12 @@ AppExitConditionType process_output_stream_buffer(EbConfig *config, EbAppContext
 #if DEADLOCK_DEBUG
             ++frame_count;
 #else
-            /*!< ++frame_count; */
+            // ++frame_count;
             if (!(header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF))
                 fprintf(stderr, "\b\b\b\b\b\b\b\b\b%9d", ++frame_count);
 #endif
 
-            /*!< ++frame_count; */
+            // ++frame_count;
             fflush(stdout);
 
             {

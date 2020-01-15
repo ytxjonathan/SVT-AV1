@@ -12,6 +12,9 @@
 
 #include "EbCabacContextModel.h"
 
+/**********************************************************************************************************************/
+/**********************************************************************************************************************/
+/**********************************************************************************************************************/
 /*!< entropymode.c */
 
 const AomCdfProb default_kf_y_mode_cdf[KF_MODE_CONTEXTS][KF_MODE_CONTEXTS][CDF_SIZE(
@@ -385,18 +388,18 @@ static const AomCdfProb default_cfl_alpha_cdf[CFL_ALPHA_CONTEXTS][CDF_SIZE(CFL_A
     {AOM_CDF16(14738, 21678, 25779, 27901, 29024, 30302, 30980, 31843, 32144, 32413, 32520, 32594,
                32622, 32656, 32660)}};
 
-/*!< static const AomCdfProb
- * default_switchable_interp_cdf[SWITCHABLE_FILTER_CONTEXTS][CDF_SIZE(
- * SWITCHABLE_FILTERS)] = {
- *     { AOM_CDF3(31935, 32720) }, { AOM_CDF3(5568, 32719) },
- *     { AOM_CDF3(422, 2938) }, { AOM_CDF3(28244, 32608) },
- *     { AOM_CDF3(31206, 31953) }, { AOM_CDF3(4862, 32121) },
- *     { AOM_CDF3(770, 1152) }, { AOM_CDF3(20889, 25637) },
- *     { AOM_CDF3(31910, 32724) }, { AOM_CDF3(4120, 32712) },
- *     { AOM_CDF3(305, 2247) }, { AOM_CDF3(27403, 32636) },
- *     { AOM_CDF3(31022, 32009) }, { AOM_CDF3(2963, 32093) },
- *     { AOM_CDF3(601, 943) }, { AOM_CDF3(14969, 21398) }
- * }; */
+// static const AomCdfProb
+// default_switchable_interp_cdf[SWITCHABLE_FILTER_CONTEXTS][CDF_SIZE(
+// SWITCHABLE_FILTERS)] = {
+//     { AOM_CDF3(31935, 32720) }, { AOM_CDF3(5568, 32719) },
+//     { AOM_CDF3(422, 2938) }, { AOM_CDF3(28244, 32608) },
+//     { AOM_CDF3(31206, 31953) }, { AOM_CDF3(4862, 32121) },
+//     { AOM_CDF3(770, 1152) }, { AOM_CDF3(20889, 25637) },
+//     { AOM_CDF3(31910, 32724) }, { AOM_CDF3(4120, 32712) },
+//     { AOM_CDF3(305, 2247) }, { AOM_CDF3(27403, 32636) },
+//     { AOM_CDF3(31022, 32009) }, { AOM_CDF3(2963, 32093) },
+//     { AOM_CDF3(601, 943) }, { AOM_CDF3(14969, 21398) }
+// };
 
 static const AomCdfProb default_newmv_cdf[NEWMV_MODE_CONTEXTS][CDF_SIZE(2)] = {{AOM_CDF2(24035)},
                                                                                {AOM_CDF2(16630)},
@@ -909,6 +912,7 @@ void init_mode_probs(FRAME_CONTEXT *fc) {
     fc->ndvc = default_nmv_context;
 }
 
+/**********************************************************************************************************************/
 /*!< token_cdfs.h */
 static const AomCdfProb av1_default_dc_sign_cdfs[TOKEN_CDF_Q_CTXS][PLANE_TYPES][DC_SIGN_CONTEXTS]
                                                 [CDF_SIZE(2)] = {
@@ -3022,6 +3026,7 @@ static const AomCdfProb av1_default_coeff_base_eob_multi_cdfs[TOKEN_CDF_Q_CTXS][
                                                                     {AOM_CDF3(10923, 21845)}}}}};
 
 
+/**********************************************************************************************************************/
 /*!< entropy.c */
 static int32_t get_q_ctx(int32_t q) {
     if (q <= 20) return 0;
@@ -3171,3 +3176,8 @@ void eb_av1_reset_cdf_symbol_counters(FRAME_CONTEXT *fc) {
     RESET_CDF_COUNTER(fc->cfl_sign_cdf, CFL_JOINT_SIGNS);
     RESET_CDF_COUNTER(fc->cfl_alpha_cdf, CFL_ALPHABET_SIZE);
 }
+/**********************************************************************************************************************/
+
+/**********************************************************************************************************************/
+/**********************************************************************************************************************/
+/**********************************************************************************************************************/
