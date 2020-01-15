@@ -6,6 +6,22 @@
 #include "EbInterPrediction.h"
 #include "EbSequenceControlSet.h"
 
+typedef struct {
+    uint16_t encoding_width;
+    uint16_t encoding_height;
+    uint8_t superres_denom;
+} superres_params_type;
+
+EbErrorType av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
+                                        EbPictureBufferDesc *dst,
+                                        int bd,
+                                        const int num_planes,
+                                        const uint32_t ss_x,
+                                        const uint32_t ss_y);
+
+void init_resize_picture(SequenceControlSet* scs_ptr,
+                         PictureParentControlSet* pcs_ptr);
+
 #define UPSCALE_NORMATIVE_TAPS 8
 
 // Filters for interpolation (0.5-band) - note this also filters integer pels.
@@ -194,23 +210,6 @@ static const int16_t av1_resize_filter_normative[(
 
 // Filters for interpolation (full-band) - no filtering for integer pixels
 #define filteredinterp_filters1000 av1_resize_filter_normative
-
-typedef struct {
-    uint16_t encoding_width;
-    uint16_t encoding_height;
-    uint8_t superres_denom;
-} superres_params_type;
-
-EbErrorType av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
-                                        EbPictureBufferDesc *dst,
-                                        int bd,
-                                        const int num_planes,
-                                        const uint32_t ss_x,
-                                        const uint32_t ss_y);
-
-void calc_superres_params(superres_params_type* spr_params,
-                          SequenceControlSet* scs_ptr,
-                          PictureParentControlSet* pcs_ptr);
 
 #endif //SVT_AV1_SCALE_H
 

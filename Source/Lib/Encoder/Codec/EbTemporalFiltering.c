@@ -35,7 +35,6 @@
 #include "EbInterPrediction.h"
 #include "EbComputeVariance_C.h"
 #include "EbLog.h"
-#include "EbResize.h"
 
 #undef _MM_HINT_T2
 #define _MM_HINT_T2 1
@@ -2139,129 +2138,6 @@ static EbErrorType save_src_pic_buffers(PictureParentControlSet *picture_control
     return EB_ErrorNone;
 }
 
-EbErrorType downscaled_source_buffer_desc_ctor(EbPictureBufferDesc **picture_ptr,
-                                               EbPictureBufferDesc *picture_ptr_for_reference,
-                                               superres_params_type spr_params) {
-
-    EbPictureBufferDescInitData initData;
-
-    initData.buffer_enable_mask = PICTURE_BUFFER_DESC_FULL_MASK;
-    initData.max_width = spr_params.encoding_width;
-    initData.max_height = spr_params.encoding_height;
-    initData.bit_depth = picture_ptr_for_reference->bit_depth;
-    initData.color_format = picture_ptr_for_reference->color_format;
-    initData.split_mode = EB_TRUE;
-    initData.left_padding = picture_ptr_for_reference->origin_x;
-    initData.right_padding = picture_ptr_for_reference->origin_x;
-    initData.top_padding = picture_ptr_for_reference->origin_y;
-    initData.bot_padding = picture_ptr_for_reference->origin_y;
-
-    EB_NEW(*picture_ptr,
-           eb_picture_buffer_desc_ctor,
-           (EbPtr)&initData);
-
-    return EB_ErrorNone;
-}
-
-EbErrorType derive_input_resolution_pcs(PictureParentControlSet *pcs_ptr, uint32_t inputSize);
-
-EbErrorType sb_geom_init_pcs(SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr);
-
-EbErrorType sb_params_init_pcs(SequenceControlSet *scs_ptr,
-                               PictureParentControlSet *pcs_ptr);
-
-EbErrorType scale_pcs_params(SequenceControlSet* scs_ptr,
-                      PictureParentControlSet* pcs_ptr,
-                      superres_params_type spr_params,
-                      uint16_t source_width,
-                      uint16_t source_height){
-
-    Av1Common* cm = pcs_ptr->av1_cm;
-
-    // frame sizes
-    cm->frm_size.frame_width = spr_params.encoding_width;
-    cm->frm_size.frame_height = spr_params.encoding_height;
-    cm->frm_size.render_width = source_width;
-    cm->frm_size.render_height = source_height;
-    cm->frm_size.frame_height = spr_params.encoding_height;
-    cm->frm_size.superres_denominator = spr_params.superres_denom;
-
-    // number of SBs
-    const uint16_t picture_sb_width = (uint16_t)(
-            (spr_params.encoding_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
-    const uint16_t picture_sb_height = (uint16_t)(
-            (spr_params.encoding_height + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
-
-    pcs_ptr->sb_total_count = picture_sb_width * picture_sb_height;
-
-    // mi sizes
-    cm->mi_stride = picture_sb_width * (BLOCK_SIZE_64 / 4);
-    cm->mi_cols = spr_params.encoding_width >> MI_SIZE_LOG2;
-    cm->mi_rows = spr_params.encoding_height >> MI_SIZE_LOG2;
-
-    pcs_ptr->picture_sb_width = picture_sb_width;
-    pcs_ptr->picture_sb_height = picture_sb_height;
-
-    if(cm->frm_size.superres_denominator != SCALE_NUMERATOR){
-        derive_input_resolution_pcs(pcs_ptr, spr_params.encoding_width * spr_params.encoding_height);
-
-        // create new picture level sb_params and sb_geom
-        sb_params_init_pcs(scs_ptr, pcs_ptr);
-
-        sb_geom_init_pcs(scs_ptr, pcs_ptr);
-    }
-
-    return EB_ErrorNone;
-}
-
-void scale_frame_if_necessary(SequenceControlSet* scs_ptr,
-                              PictureParentControlSet* pcs_ptr){
-
-    EbPictureBufferDesc* input_picture_ptr = pcs_ptr->enhanced_picture_ptr;
-
-    // ---- super-resolution ---- downsample source picture, if necessary
-    superres_params_type spr_params = {input_picture_ptr->width, // encoding_width
-                                       input_picture_ptr->height, // encoding_height
-                                       scs_ptr->static_config.superres_mode};
-
-    // determine super-resolution parameters - encoding resolution
-    // given configs and frame type
-    calc_superres_params(&spr_params,
-                         scs_ptr,
-                         pcs_ptr);
-
-    //printf("picture number = %d, frame type = %d\n", (int)pcs_ptr->picture_number, pcs_ptr->frm_hdr.frame_type);
-
-    if(spr_params.superres_denom != SCALE_NUMERATOR){
-        // Allocate downsampled picture buffer descriptor
-        downscaled_source_buffer_desc_ctor(&pcs_ptr->enhanced_downscaled_picture_ptr,
-                                           input_picture_ptr,
-                                           spr_params);
-
-        const int32_t num_planes = av1_num_planes(&scs_ptr->seq_header.color_config);
-        const uint32_t ss_x = scs_ptr->subsampling_x;
-        const uint32_t ss_y = scs_ptr->subsampling_y;
-
-        // downsample picture buffer
-        av1_resize_and_extend_frame(input_picture_ptr,
-                                    pcs_ptr->enhanced_downscaled_picture_ptr,
-                                    pcs_ptr->enhanced_downscaled_picture_ptr->bit_depth,
-                                    num_planes,
-                                    ss_x,
-                                    ss_y);
-
-        // TODO: use downscaled picture instead of original res for mode decision, full-loop etc
-        // after temporal filtering and motion estimation
-
-        pcs_ptr->enhanced_picture_ptr = pcs_ptr->enhanced_downscaled_picture_ptr; // just a test, delete
-
-    }
-
-    scale_pcs_params(scs_ptr, pcs_ptr, spr_params, input_picture_ptr->width, input_picture_ptr->height);
-
-    // ---- super-resolution ---- end of processing
-}
-
 EbErrorType svt_av1_init_temporal_filtering(
     PictureParentControlSet ** list_picture_control_set_ptr,
     PictureParentControlSet *  picture_control_set_ptr_central,
@@ -2442,9 +2318,6 @@ EbErrorType svt_av1_init_temporal_filtering(
             ((picture_control_set_ptr_central->filtered_sse_uv << 8) /
              (central_picture_ptr->width >> ss_x) / (central_picture_ptr->height >> ss_y)) /
             2;
-
-        scale_frame_if_necessary(picture_control_set_ptr_central->scs_ptr,
-                                 picture_control_set_ptr_central);
 
         // signal that temp filt is done
         eb_post_semaphore(picture_control_set_ptr_central->temp_filt_done_semaphore);
