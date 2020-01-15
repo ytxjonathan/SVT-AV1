@@ -13837,7 +13837,12 @@ void integer_search_sb(
                 uint16_t dist = (context_ptr->me_alt_ref == EB_TRUE) ?
                     ABS((int16_t)(context_ptr->tf_frame_index - context_ptr->tf_index_center)) :
                     ABS((int16_t)(picture_control_set_ptr->picture_number - picture_control_set_ptr->ref_pic_poc_array[list_index][ref_pic_index]));
-
+#if DISTANCE_ME_FACTOR
+                if (!picture_control_set_ptr->sc_content_detected && context_ptr->me_alt_ref == 0) {
+                    int8_t round_up = ((dist%8) == 0) ? 0 : 1;
+                    dist = ((dist * 5) / 8) + round_up;
+                }
+#endif
                 search_area_width = MIN((search_area_width  * dist), context_ptr->max_search_area_width);
                 search_area_height = MIN((search_area_height * dist), context_ptr->max_search_area_height);
 
