@@ -1288,16 +1288,16 @@ AppExitConditionType process_output_stream_buffer(EbConfig *config, EbAppContext
                 progress = ((double)frame_count / config->processed_frame_count) * 100;
                 // if statement used for formatting
                 if (progress < 10) 
-				{ 
-					fprintf(stderr, "\b\b\b\b\b%.2f%%", progress);
-				}
-				else
-				{
+                { 
+                    fprintf(stderr, "\b\b\b\b\b%.2f%%", progress);
+                }
+                else
+                {
                     fprintf(stderr, "\b\b\b\b\b\b%.2f%%", progress);
-				}
+                }
 #endif                
-			}
-				
+            }
+            
 #endif
 
             //++frame_count;
