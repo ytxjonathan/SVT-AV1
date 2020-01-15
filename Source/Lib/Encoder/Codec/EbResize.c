@@ -645,6 +645,11 @@ EbErrorType av1_highbd_resize_plane(const uint16_t *const input, int height, int
                                arrbuf2);
     }
 
+    EB_FREE(intbuf);
+    EB_FREE(tmpbuf);
+    EB_FREE(arrbuf);
+    EB_FREE(arrbuf2);
+
     return EB_ErrorNone;
 
 }
