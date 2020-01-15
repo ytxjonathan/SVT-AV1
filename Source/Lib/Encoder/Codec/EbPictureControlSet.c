@@ -183,7 +183,7 @@ void picture_control_set_dctor(EbPtr p) {
         EB_DELETE(obj->md_ref_frame_type_neighbor_array[depth]);
         EB_DELETE(obj->md_interpolation_type_neighbor_array[depth]);
     }
-    EB_DELETE_PTR_ARRAY(obj->sb_ptr_array, obj->sb_total_count);
+    EB_DELETE_PTR_ARRAY(obj->sb_ptr_array, obj->sb_total_count_unscaled);
     EB_DELETE(obj->coeff_est_entropy_coder_ptr);
     EB_DELETE(obj->bitstream_ptr);
     EB_DELETE(obj->entropy_coder_ptr);
@@ -370,6 +370,7 @@ EbErrorType picture_control_set_ctor(PictureControlSet *object_ptr, EbPtr object
     // SB Array
     object_ptr->sb_max_depth   = (uint8_t)init_data_ptr->max_depth;
     object_ptr->sb_total_count = picture_sb_width * picture_sb_height;
+    object_ptr->sb_total_count_unscaled = object_ptr->sb_total_count;
     EB_ALLOC_PTR_ARRAY(object_ptr->sb_ptr_array, object_ptr->sb_total_count);
 
     sb_origin_x = 0;
@@ -1034,7 +1035,7 @@ static void picture_parent_control_set_dctor(EbPtr p) {
 
     EB_DELETE(obj->denoise_and_model);
 
-    EB_DELETE_PTR_ARRAY(obj->me_results, obj->sb_total_count);
+    EB_DELETE_PTR_ARRAY(obj->me_results, obj->sb_total_count_unscaled);
     if (obj->is_chroma_downsampled_picture_ptr_owner)
         EB_DELETE(obj->chroma_downsampled_picture_ptr);
 
@@ -1155,6 +1156,7 @@ EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
     object_ptr->total_num_bits       = 0;
     object_ptr->last_idr_picture     = 0;
     object_ptr->sb_total_count       = picture_sb_width * picture_sb_height;
+    object_ptr->sb_total_count_unscaled = object_ptr->sb_total_count;
 
     object_ptr->data_ll_head_ptr         = (EbLinkedListNode *)EB_NULL;
     object_ptr->app_out_data_ll_head_ptr = (EbLinkedListNode *)EB_NULL;

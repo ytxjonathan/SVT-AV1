@@ -350,6 +350,11 @@ EbErrorType av1_resize_plane(const uint8_t *const input, int height, int width,
         fill_arr_to_col(output + i, out_stride, height2, arrbuf2);
     }
 
+    EB_FREE_ARRAY(intbuf);
+    EB_FREE_ARRAY(tmpbuf);
+    EB_FREE_ARRAY(arrbuf);
+    EB_FREE_ARRAY(arrbuf2);
+
     return EB_ErrorNone;
 }
 

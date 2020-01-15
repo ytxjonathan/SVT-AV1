@@ -458,6 +458,7 @@ typedef struct PictureControlSet {
     TOKENEXTRA *                    tile_tok[64][64];
 
     uint16_t sb_total_count_pix;
+    uint16_t sb_total_count_unscaled;
 
 } PictureControlSet;
 
@@ -850,6 +851,7 @@ typedef struct PictureParentControlSet {
     EbInputResolution input_resolution;
     uint16_t picture_sb_width;
     uint16_t picture_sb_height;
+    uint16_t sb_total_count_unscaled;
 
 } PictureParentControlSet;
 
