@@ -8530,8 +8530,8 @@ void init_chroma_to_dc(
         uint8_t angle_delta_shift = 1;
         for (uint8_t angleDeltaCounter = 0; angleDeltaCounter < angleDeltaCandidateCount; ++angleDeltaCounter) {
             int32_t angle_delta = CLIP(angle_delta_shift * (angleDeltaCandidateCount == 1 ? 0 : angleDeltaCounter - (angleDeltaCandidateCount >> 1)), -MAX_ANGLE_DELTA, MAX_ANGLE_DELTA);
-            context_ptr->best_uv_mode[intra_mode][MAX_ANGLE_DELTA + angle_delta] = UV_DC_PRED;
-            context_ptr->best_uv_angle[intra_mode][MAX_ANGLE_DELTA + angle_delta] = UV_DC_PRED;
+            context_ptr->best_uv_mode[intra_mode][MAX_ANGLE_DELTA + angle_delta] = intra_mode;
+            context_ptr->best_uv_angle[intra_mode][MAX_ANGLE_DELTA + angle_delta] = angleDeltaCounter;
             context_ptr->best_uv_cost[intra_mode][MAX_ANGLE_DELTA + angle_delta] = (uint64_t)~0;
         }
     }
