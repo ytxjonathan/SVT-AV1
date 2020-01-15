@@ -1941,7 +1941,7 @@ static void adjust_filter_strength(
 
     // Adjust the strength of the temporal filtering
     // based on the amount of noise present in the frame
-    // adjustment in the integer range [-2, 1]
+    // adjustment in the integer range [-1, 1]
     // if noiselevel < 0, it means that the estimation was
     // unsuccessful and therefore keep the strength as it was set
     if (noise_level > 0) {
@@ -1979,6 +1979,12 @@ static void adjust_filter_strength(
     else
         strength = 0;
 
+#if ALTREF_STR_UPDATE
+    // Decrease the filter strength for low QPs
+    if (picture_control_set_ptr_central->sequence_control_set_ptr->static_config.qp <= 20) {
+        strength = strength - 1;
+    }
+#endif
     // if highbd, adjust filter strength strength = strength + 2*(bit depth - 8)
     if(is_highbd)
         strength = strength + 2 * (encoder_bit_depth - 8);
@@ -1986,11 +1992,7 @@ static void adjust_filter_strength(
 #if DEBUG_TF
     printf("[DEBUG] noise level: %g, strength = %d, adj_strength = %d\n", noise_level, *altref_strength, strength);
 #endif
-#if ALTREF_STR_UPDATE
-    if (picture_control_set_ptr_central->sequence_control_set_ptr->static_config.qp <= 20) {
-        strength = strength - 1;
-    }
-#endif
+
     *altref_strength = (uint8_t)strength;
     // TODO: apply further refinements to the filter parameters according to 1st pass statistics
 
