@@ -8546,6 +8546,9 @@ void search_best_independent_uv_mode(
     uint32_t               input_cb_origin_index,
     uint32_t               input_cr_origin_index,
     uint32_t               cu_chroma_origin_index,
+#if MOVE_OPT
+    uint32_t               pass,
+#endif
     ModeDecisionContext   *context_ptr)
 {
     FrameHeader *frm_hdr = &picture_control_set_ptr->parent_pcs_ptr->frm_hdr;
@@ -8563,9 +8566,17 @@ void search_best_independent_uv_mode(
 
     ModeDecisionCandidate *candidate_array = context_ptr->fast_candidate_array;
 #if INFR_OPT
-    uint32_t uv_mode_total_count = MODE_DECISION_CANDIDATE_MAX_COUNT_Y;
+    uint32_t start_fast_buffer_index = MODE_DECISION_CANDIDATE_MAX_COUNT_Y;
+    uint32_t start_full_buffer_index = MAX_NFL_BUFF_Y;
+    uint32_t uv_mode_total_count = start_fast_buffer_index;
 #else
     uint8_t uv_mode_total_count = 0;
+#endif
+#if MOVE_OPT
+    EbBool tem_md_staging_skip_rdoq = context_ptr->md_staging_skip_rdoq;
+    if (pass == 1) {
+        context_ptr->md_staging_skip_rdoq = 0;
+    }
 #endif
     for (uv_mode = UV_DC_PRED; uv_mode <= UV_PAETH_PRED; uv_mode++) {
         uint8_t uv_angleDeltaCandidateCount = (use_angle_delta && av1_is_directional_mode((PredictionMode)uv_mode)) ? 7 : 1;
@@ -8610,12 +8621,12 @@ void search_best_independent_uv_mode(
     }
     // Fast-loop search uv_mode
 #if INFR_OPT
-    uv_mode_total_count = uv_mode_total_count - MODE_DECISION_CANDIDATE_MAX_COUNT_Y;
+    uv_mode_total_count = uv_mode_total_count - start_fast_buffer_index;
 #endif
     for (uint8_t uv_mode_count = 0; uv_mode_count < uv_mode_total_count; uv_mode_count++) {
 #if INFR_OPT
-        ModeDecisionCandidateBuffer   *candidate_buffer = context_ptr->candidate_buffer_ptr_array[uv_mode_count + MAX_NFL_BUFF_Y];
-        candidate_buffer->candidate_ptr = &context_ptr->fast_candidate_array[uv_mode_count + MODE_DECISION_CANDIDATE_MAX_COUNT_Y];
+        ModeDecisionCandidateBuffer   *candidate_buffer = context_ptr->candidate_buffer_ptr_array[uv_mode_count + start_full_buffer_index];
+        candidate_buffer->candidate_ptr = &context_ptr->fast_candidate_array[uv_mode_count + start_fast_buffer_index];
 #else
         ModeDecisionCandidateBuffer   *candidate_buffer = context_ptr->candidate_buffer_ptr_array[uv_mode_count];
        candidate_buffer->candidate_ptr = &context_ptr->fast_candidate_array[uv_mode_count];
@@ -8667,18 +8678,27 @@ void search_best_independent_uv_mode(
     }
 
     // Sort uv_mode (in terms of distortion only)
+#if INFR_OPT
+    uint32_t uv_cand_buff_indices[MAX_NFL_BUFF_Y];
+    memset(uv_cand_buff_indices, 0xFFFFFFFF, MAX_NFL_BUFF_Y * sizeof(uint32_t));
+#else
     uint32_t uv_cand_buff_indices[MAX_NFL_BUFF];
     memset(uv_cand_buff_indices, 0xFFFFFFFF, MAX_NFL_BUFF * sizeof(uint32_t));
+#endif
     sort_fast_candidates(
         context_ptr,
+#if INFR_OPT
+        start_full_buffer_index,
+#else
         0,
+#endif
         uv_mode_total_count, //how many cand buffers to sort. one of the buffers can have max cost.
         uv_cand_buff_indices);
 
     // Reset *(candidate_buffer->fast_cost_ptr)
     for (uint8_t uv_mode_count = 0; uv_mode_count < uv_mode_total_count; uv_mode_count++) {
 #if INFR_OPT
-        ModeDecisionCandidateBuffer   *candidate_buffer = context_ptr->candidate_buffer_ptr_array[uv_mode_count + MAX_NFL_BUFF_Y];
+        ModeDecisionCandidateBuffer   *candidate_buffer = context_ptr->candidate_buffer_ptr_array[uv_mode_count + start_full_buffer_index];
 #else
         ModeDecisionCandidateBuffer   *candidate_buffer = context_ptr->candidate_buffer_ptr_array[uv_mode_count];
 #endif
@@ -8710,8 +8730,8 @@ void search_best_independent_uv_mode(
     // Full-loop search uv_mode
     for (uint8_t uv_mode_count = 0; uv_mode_count < MIN(uv_mode_total_count, uv_mode_nfl_count); uv_mode_count++) {
 #if INFR_OPT
-        ModeDecisionCandidateBuffer   *candidate_buffer = context_ptr->candidate_buffer_ptr_array[uv_cand_buff_indices[uv_mode_count] + MAX_NFL_BUFF_Y];
-        candidate_buffer->candidate_ptr = &context_ptr->fast_candidate_array[uv_cand_buff_indices[uv_mode_count] + MODE_DECISION_CANDIDATE_MAX_COUNT_Y];
+        ModeDecisionCandidateBuffer   *candidate_buffer = context_ptr->candidate_buffer_ptr_array[uv_cand_buff_indices[uv_mode_count]];
+        candidate_buffer->candidate_ptr = &context_ptr->fast_candidate_array[uv_cand_buff_indices[uv_mode_count] - start_full_buffer_index + start_fast_buffer_index];
 #else
         ModeDecisionCandidateBuffer   *candidate_buffer = context_ptr->candidate_buffer_ptr_array[uv_cand_buff_indices[uv_mode_count]];
         candidate_buffer->candidate_ptr = &context_ptr->fast_candidate_array[uv_cand_buff_indices[uv_mode_count]];
@@ -8801,7 +8821,7 @@ void search_best_independent_uv_mode(
 
             for (uint8_t uv_mode_count = 0; uv_mode_count < MIN(uv_mode_total_count, uv_mode_nfl_count); uv_mode_count++) {
 #if INFR_OPT
-                ModeDecisionCandidate *candidate_ptr = &(context_ptr->fast_candidate_array[uv_cand_buff_indices[uv_mode_count] + MODE_DECISION_CANDIDATE_MAX_COUNT_Y]);
+                ModeDecisionCandidate *candidate_ptr = &(context_ptr->fast_candidate_array[uv_cand_buff_indices[uv_mode_count] - start_full_buffer_index + start_fast_buffer_index]);
 #else
                 ModeDecisionCandidate *candidate_ptr = &(context_ptr->fast_candidate_array[uv_cand_buff_indices[uv_mode_count]]);
 #endif
@@ -8836,18 +8856,23 @@ void search_best_independent_uv_mode(
 #else
                 uint64_t uv_cost = RDCOST(context_ptr->full_lambda, rate, distortion[candidate_ptr->intra_chroma_mode][MAX_ANGLE_DELTA + candidate_ptr->angle_delta[PLANE_TYPE_UV]]);
 #endif
-                if (uv_cost < context_ptr->best_uv_cost[intra_mode][MAX_ANGLE_DELTA + angle_delta]) {
-                    context_ptr->best_uv_mode[intra_mode][MAX_ANGLE_DELTA + angle_delta] = candidate_ptr->intra_chroma_mode;
-                    context_ptr->best_uv_angle[intra_mode][MAX_ANGLE_DELTA + angle_delta] = candidate_ptr->angle_delta[PLANE_TYPE_UV];
+                    if (uv_cost < context_ptr->best_uv_cost[intra_mode][MAX_ANGLE_DELTA + angle_delta]) {
+                        context_ptr->best_uv_mode[intra_mode][MAX_ANGLE_DELTA + angle_delta] = candidate_ptr->intra_chroma_mode;
+                        context_ptr->best_uv_angle[intra_mode][MAX_ANGLE_DELTA + angle_delta] = candidate_ptr->angle_delta[PLANE_TYPE_UV];
 
-                    context_ptr->best_uv_cost[intra_mode][MAX_ANGLE_DELTA + angle_delta] = uv_cost;
-                    context_ptr->fast_luma_rate[intra_mode][MAX_ANGLE_DELTA + angle_delta] = candidate_ptr->fast_luma_rate;
-                    context_ptr->fast_chroma_rate[intra_mode][MAX_ANGLE_DELTA + angle_delta] = candidate_ptr->fast_chroma_rate;
+                        context_ptr->best_uv_cost[intra_mode][MAX_ANGLE_DELTA + angle_delta] = uv_cost;
+                        context_ptr->fast_luma_rate[intra_mode][MAX_ANGLE_DELTA + angle_delta] = candidate_ptr->fast_luma_rate;
+                        context_ptr->fast_chroma_rate[intra_mode][MAX_ANGLE_DELTA + angle_delta] = candidate_ptr->fast_chroma_rate;
+                    }
                 }
-            }
 
+            }
         }
+#if MOVE_OPT
+    if (pass == 1) {
+        context_ptr->md_staging_skip_rdoq = tem_md_staging_skip_rdoq;
     }
+#endif
     // End uv search path
     context_ptr->uv_search_path = EB_FALSE;
 }
@@ -9358,6 +9383,9 @@ void md_encode_block(
                         inputCbOriginIndex,
                         inputCbOriginIndex,
                         cuChromaOriginIndex,
+#if MOVE_OPT
+                        0,
+#endif
                         context_ptr);
 #else
                     search_best_independent_uv_mode(
@@ -9755,6 +9783,9 @@ void md_encode_block(
                             inputCbOriginIndex,
                             inputCbOriginIndex,
                             cuChromaOriginIndex,
+#if MOVE_OPT
+                            1,
+#endif
                             context_ptr);
 #if COMP_OPT
                     }
