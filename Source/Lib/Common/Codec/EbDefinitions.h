@@ -49,7 +49,12 @@ extern "C" {
 #define OPT_REC_SUBP            1
 #define SC_HME_PRUNING          1
 #endif
-
+#define CHROMA_SEARCH_OPT         0
+#if CHROMA_SEARCH_OPT         
+#define INFR_OPT                 1 // lossless
+#define MOVE_OPT                 1 // semi-lossless
+#define COMP_OPT                 1 // lossy
+#endif
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 
 
@@ -381,7 +386,12 @@ enum {
 #else
 #define MAX_NFL                                   80
 #endif
+#if INFR_OPT
+#define MAX_NFL_BUFF_Y                            (MAX_NFL + CAND_CLASS_TOTAL)
+#define MAX_NFL_BUFF                              MAX_NFL_BUFF_Y + 84  //need one extra temp buffer for each fast loop call
+#else
 #define MAX_NFL_BUFF                              (MAX_NFL + CAND_CLASS_TOTAL)  //need one extra temp buffer for each fast loop call
+#endif
 #define MAX_LAD                                   120 // max lookahead-distance 2x60fps
 #define ROUND_UV(x) (((x)>>3)<<3)
 #define AV1_PROB_COST_SHIFT 9
