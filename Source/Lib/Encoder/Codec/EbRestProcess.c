@@ -378,11 +378,19 @@ EbErrorType copy_recon_enc(SequenceControlSet *scs_ptr,
 }
 
 void get_recon_pic(PictureControlSet *pcs_ptr,
-               EbPictureBufferDesc **recon_ptr){
-    if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
-        *recon_ptr = ((EbReferenceObject*)pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture;
-    else
-        *recon_ptr = pcs_ptr->recon_picture_ptr;
+                   EbPictureBufferDesc **recon_ptr,
+                   EbBool is_highbd){
+    if(!is_highbd){
+        if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
+            *recon_ptr = ((EbReferenceObject*)pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture;
+        else
+            *recon_ptr = pcs_ptr->recon_picture_ptr;
+    }else {
+        if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
+            *recon_ptr = ((EbReferenceObject *) pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)->reference_picture16bit;
+        else
+            *recon_ptr = pcs_ptr->recon_picture16bit_ptr;
+    }
 }
 
 void eb_av1_superres_upscale_frame(struct Av1Common *cm,
@@ -392,8 +400,11 @@ void eb_av1_superres_upscale_frame(struct Av1Common *cm,
     // Set these parameters for testing since they are not correctly populated yet
     EbPictureBufferDesc *recon_ptr;
 
+    EbBool is_16bit = (EbBool)(scs_ptr->static_config.encoder_bit_depth > EB_8BIT);
+
     get_recon_pic(pcs_ptr,
-              &recon_ptr);
+                  &recon_ptr,
+                  is_16bit);
 
     uint16_t ss_x = scs_ptr->subsampling_x;
     uint16_t ss_y = scs_ptr->subsampling_y;

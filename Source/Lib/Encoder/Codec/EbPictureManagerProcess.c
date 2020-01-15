@@ -92,6 +92,24 @@ EbErrorType picture_manager_context_ctor(EbThreadContext *  thread_context_ptr,
     return EB_ErrorNone;
 }
 
+void copy_buffer_info(EbPictureBufferDesc *src_ptr, EbPictureBufferDesc *dst_ptr){
+    dst_ptr->width = src_ptr->width;
+    dst_ptr->height = src_ptr->height;
+    dst_ptr->max_width = src_ptr->max_width;
+    dst_ptr->max_height = src_ptr->max_height;
+    dst_ptr->stride_y = src_ptr->stride_y;
+    dst_ptr->stride_cb = src_ptr->stride_cb;
+    dst_ptr->stride_cr = src_ptr->stride_cr;
+    dst_ptr->origin_x = src_ptr->origin_x;
+    dst_ptr->origin_bot_y = src_ptr->origin_bot_y;
+    dst_ptr->origin_y = src_ptr->origin_y;
+    dst_ptr->stride_bit_inc_y = src_ptr->stride_bit_inc_y;
+    dst_ptr->stride_bit_inc_cb = src_ptr->stride_bit_inc_cb;
+    dst_ptr->stride_bit_inc_cr = src_ptr->stride_bit_inc_cr;
+    dst_ptr->luma_size = src_ptr->luma_size;
+    dst_ptr->chroma_size = src_ptr->chroma_size;
+}
+
 /***************************************************************************************************
  * Picture Manager Kernel
  *
@@ -837,6 +855,11 @@ void *picture_manager_kernel(void *input_ptr) {
 
                         // Update pcs_ptr->mi_stride
                         child_pcs_ptr->mi_stride = pic_width_in_sb * (scs_ptr->sb_size_pix >> MI_SIZE_LOG2);
+
+                        // copy buffer info from the downsampled picture to the input frame 16 bit buffer
+                        if(scs_ptr->static_config.encoder_bit_depth > EB_8BIT){
+                            copy_buffer_info(child_pcs_ptr->input_frame16bit, entry_pcs_ptr->enhanced_downscaled_picture_ptr);
+                        }
 
                         uint32_t enc_dec_seg_w = (scs_ptr->static_config.super_block_size == 128) ?
                                                  ((child_pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + 64) / 128) :

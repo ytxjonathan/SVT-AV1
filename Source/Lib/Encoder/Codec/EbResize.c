@@ -815,6 +815,12 @@ EbErrorType av1_resize_and_extend_frame(const EbPictureBufferDesc *src,
                           ss_y,
                           EB_TRUE);
 
+//        save_YUV_to_file_highbd("downsampled_640x720_10bit.yuv", dst_buffer_highbd[0], dst_buffer_highbd[1], dst_buffer_highbd[2],
+//                                dst->width, dst->height,
+//                                dst->stride_y, dst->stride_cb, dst->stride_cr,
+//                                dst->origin_y, dst->origin_x,
+//                                1, 1);
+
         EB_FREE(src_buffer_highbd[0]);
         EB_FREE(src_buffer_highbd[1]);
         EB_FREE(src_buffer_highbd[2]);
