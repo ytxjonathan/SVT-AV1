@@ -619,7 +619,7 @@ void psnr_calculations(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) 
             recon_ptr = pcs_ptr->recon_picture_ptr;
 
         EbPictureBufferDesc *input_picture_ptr =
-            (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr;
+            (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_unscaled_picture_ptr;
 
         uint64_t sse_total[3] = {0};
         uint32_t column_index;
