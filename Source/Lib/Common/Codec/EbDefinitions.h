@@ -55,6 +55,7 @@ extern "C" {
 #define MOVE_OPT                 1 // semi-lossless
 #define COMP_OPT                 1 // lossy
 #endif
+#define REDUCE_ME_OUTPUT         0
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 
 

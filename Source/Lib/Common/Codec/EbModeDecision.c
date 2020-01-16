@@ -4335,7 +4335,79 @@ void inject_new_candidates(
 
             (*candidateTotalCnt) = canTotalCnt;
         }
+#if REDUCE_ME_OUTPUT
+        void inject_zero_as_backup(
+            const SequenceControlSet   *sequence_control_set_ptr,
+            struct ModeDecisionContext *context_ptr,
+            PictureControlSet          *picture_control_set_ptr,
+            uint32_t                   *candidateTotalCnt) {
 
+            ModeDecisionCandidate    *candidateArray = context_ptr->fast_candidate_array;
+            IntMv  bestPredmv[2] = { {0}, {0} };
+            uint32_t canTotalCnt = (*candidateTotalCnt);
+            const uint8_t list0_ref_index = 0;
+            const uint8_t list1_ref_index = 0;
+            /**************
+            NEWMV (0,0) L0
+            ************* */
+            int16_t to_inject_mv_x = 0;
+            int16_t to_inject_mv_y = 0;
+            uint8_t to_inject_ref_type = svt_get_ref_frame_type(REF_LIST_0, list0_ref_index);
+            MvReferenceFrame rf[2];
+            rf[0] = to_inject_ref_type;
+            rf[1] = -1;
+            candidateArray[canTotalCnt].type = INTER_MODE;
+            candidateArray[canTotalCnt].distortion_ready = 0;
+            candidateArray[canTotalCnt].use_intrabc = 0;
+            candidateArray[canTotalCnt].merge_flag = EB_FALSE;
+            candidateArray[canTotalCnt].prediction_direction[0] = (EbPredDirection)0;
+            candidateArray[canTotalCnt].inter_mode = NEWMV;
+            candidateArray[canTotalCnt].pred_mode = NEWMV;
+            candidateArray[canTotalCnt].motion_mode = SIMPLE_TRANSLATION;
+
+            candidateArray[canTotalCnt].is_compound = 0;
+            candidateArray[canTotalCnt].is_new_mv = 1;
+            candidateArray[canTotalCnt].is_zero_mv = 0;
+
+            candidateArray[canTotalCnt].drl_index = 0;
+
+            // Set the MV to ME result
+            candidateArray[canTotalCnt].motion_vector_xl0 = to_inject_mv_x;
+            candidateArray[canTotalCnt].motion_vector_yl0 = to_inject_mv_y;
+
+            // will be needed later by the rate estimation
+            candidateArray[canTotalCnt].ref_mv_index = 0;
+            candidateArray[canTotalCnt].pred_mv_weight = 0;
+            candidateArray[canTotalCnt].ref_frame_type = svt_get_ref_frame_type(REF_LIST_0, list0_ref_index);
+            candidateArray[canTotalCnt].ref_frame_index_l0 = list0_ref_index;
+            candidateArray[canTotalCnt].ref_frame_index_l1 = -1;
+
+            candidateArray[canTotalCnt].transform_type[0] = DCT_DCT;
+            candidateArray[canTotalCnt].transform_type_uv = DCT_DCT;
+
+            ChooseBestAv1MvPred(
+                context_ptr,
+                candidateArray[canTotalCnt].md_rate_estimation_ptr,
+                context_ptr->cu_ptr,
+                candidateArray[canTotalCnt].ref_frame_type,
+                candidateArray[canTotalCnt].is_compound,
+                candidateArray[canTotalCnt].pred_mode,
+                candidateArray[canTotalCnt].motion_vector_xl0,
+                candidateArray[canTotalCnt].motion_vector_yl0,
+                0, 0,
+                &candidateArray[canTotalCnt].drl_index,
+                bestPredmv);
+
+            candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_0] = bestPredmv[0].as_mv.col;
+            candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_0] = bestPredmv[0].as_mv.row;
+
+            candidateArray[canTotalCnt].is_interintra_used = 0;
+            candidateArray[canTotalCnt].motion_mode = SIMPLE_TRANSLATION;
+
+            INCRMENT_CAND_TOTAL_COUNT(canTotalCnt);
+            (*candidateTotalCnt) = canTotalCnt;
+        }
+#endif
 void  inject_inter_candidates(
     PictureControlSet            *picture_control_set_ptr,
     ModeDecisionContext          *context_ptr,
@@ -5023,6 +5095,14 @@ void  inject_inter_candidates(
                 isCompoundEnabled,
                 allow_bipred,
                 &canTotalCnt);
+#if REDUCE_ME_OUTPUT
+        if (!canTotalCnt)
+            inject_zero_as_backup(
+                sequence_control_set_ptr,
+                context_ptr,
+                picture_control_set_ptr,
+                &canTotalCnt);
+#endif
 // update the total number of candidates injected
 (*candidateTotalCnt) = canTotalCnt;
 
