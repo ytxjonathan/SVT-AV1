@@ -70,8 +70,8 @@ extern "C" {
 #if REMOVE_TEMPORAL_LAYER_CHECK
 #define IFS_TL                   1   // remove temporal layer check for interpolation filter search @ PD1
 #define ATB_TL                   1   // remove temporal layer check for ATB
-#define ATB_REF_TL               1   // Turn ATB ON in REF pict only NO_SC
-#define NEW_NN_TL                0   // remove temporal layer check for NEW NEAREST NEAR COMP
+#define ATB_REF_TL               0   // Turn ATB ON in REF pict only NO_SC
+#define NEW_NN_TL                1   // remove temporal layer check for NEW NEAREST NEAR COMP
 #define F_INTRA_TL               1   // remove temporal layer check for Filter Intra
 #define PALETTE_TL               1   // remove temporal layer check for palette SC
 #endif
