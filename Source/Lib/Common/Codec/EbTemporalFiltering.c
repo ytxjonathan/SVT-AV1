@@ -504,7 +504,10 @@ static void create_ME_context_and_picture_control(MotionEstimationContext_t *con
 
     // set Lambda
     context_ptr->me_context_ptr->lambda = lambda_mode_decision_ra_sad[picture_control_set_ptr_central->picture_qp];
-
+#if TUNE_SUBPEL_SEARCH
+    context_ptr->me_context_ptr->h_pel_search_wind =  sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?
+                                                      H_PEL_SEARCH_WIND_2 : H_PEL_SEARCH_WIND_1;
+#endif
     // populate src block buffers: sb_buffer, quarter_sb_buffer and sixteenth_sb_buffer
     for (lcuRow = 0; lcuRow < BLOCK_SIZE_64; lcuRow++) {
         EB_MEMCPY((&(context_ptr->me_context_ptr->sb_buffer[lcuRow * BLOCK_SIZE_64])), (&(input_picture_ptr_central->buffer_y[bufferIndex + lcuRow * input_picture_ptr_central->stride_y])), BLOCK_SIZE_64 * sizeof(uint8_t));
