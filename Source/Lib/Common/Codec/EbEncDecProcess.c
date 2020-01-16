@@ -1776,6 +1776,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     }
     else
 #endif
+#if ADD_4TH_MD_STAGE
+    if (picture_control_set_ptr->enc_mode == ENC_M0)
+        context_ptr->md_staging_mode = MD_STAGING_MODE_1;
+    else
+#endif
     if (picture_control_set_ptr->enc_mode <= ENC_M4)
         context_ptr->md_staging_mode = MD_STAGING_MODE_1;
     else

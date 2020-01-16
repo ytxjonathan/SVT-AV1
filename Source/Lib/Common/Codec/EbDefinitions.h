@@ -116,16 +116,7 @@ extern "C" {
 
 #define ENHANCED_M0_SETTINGS         1 // Updated M0 settings(optimized independent chroma search for all layers, conservative coeff - based NSQ cands reduction, shut coeff - based skip tx size search, warped for all layers, SUB - SAD as ME search method for non - SC only)
 #define MULTI_PASS_PD                1 // Multi-Pass Partitioning Depth (Multi-Pass PD) performs multiple PD stages for the same SB towards 1 final Partitioning Structure. As we go from PDn to PDn + 1, the prediction accuracy of the MD feature(s) increases while the number of block(s) decreases
-
-#define COST_BASED_EARLY_EXIT        0
-#if COST_BASED_EARLY_EXIT
-#define EARLY_EXIT_PER_CLASS         1
-#endif
-
-#define MD_STAGE_1_EARLY_EXIT        0
-
 #define CHROMA_OPT_0                 1
-#define CHROMA_OPT_1                 0
 
 
 
@@ -157,6 +148,7 @@ extern "C" {
 #define ENABLE_BC                    0 // ATB for BC
 #define FASTER_RDOQ                  0
 #define UPGRAGDE_TX_WEIGHT           0 
+#define ADD_4TH_MD_STAGE             0
 
 #define IMPROVED_MULTI_PASS_PD       0
 #if IMPROVED_MULTI_PASS_PD
@@ -762,6 +754,9 @@ typedef enum MD_STAGE {
 #if REMOVE_MD_STAGE_1
 #define MD_STAGING_MODE_0    0
 #define MD_STAGING_MODE_1    1
+#if ADD_4TH_MD_STAGE
+#define MD_STAGING_MODE_2    2
+#endif
 #else
 #define MD_STAGING_MODE_0    0
 #define MD_STAGING_MODE_1    1
