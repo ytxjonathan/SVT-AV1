@@ -34,7 +34,6 @@
 #define OUTPUT_STAT_FILE_TOKEN "--output-stat-file"
 #define STAT_FILE_TOKEN "--stat-file"
 #define WIDTH_TOKEN "-w"
-#define WIDTH_LONG_TOKEN "--width"
 #define HEIGHT_TOKEN "-h"
 #define NUMBER_OF_PICTURES_TOKEN "-n"
 #define BUFFERED_INPUT_TOKEN "--nb"
@@ -620,7 +619,6 @@ ConfigEntry config_entry_options[] = {
 ConfigEntry config_entry_global_options[] = {
     // Picture Dimensions
     {SINGLE_INPUT, WIDTH_TOKEN, "Frame width", set_cfg_source_width},
-    {SINGLE_INPUT, WIDTH_LONG_TOKEN, "Frame width", set_cfg_source_width},
     {SINGLE_INPUT, HEIGHT_TOKEN, "Frame height", set_cfg_source_height},
     {SINGLE_INPUT,
      NUMBER_OF_PICTURES_TOKEN,
@@ -950,7 +948,7 @@ ConfigEntry config_entry_specific[] = {
 ConfigEntry config_entry[] = {
     // File I/O
     {SINGLE_INPUT, INPUT_FILE_TOKEN, "InputFile", set_cfg_input_file},
-    {SINGLE_INPUT, OUTPUT_BITSTREAM_TOKEN, "Output filename", set_cfg_stream_file},
+    {SINGLE_INPUT, OUTPUT_BITSTREAM_TOKEN, "StreamFile", set_cfg_stream_file},
     {SINGLE_INPUT, ERROR_FILE_TOKEN, "ErrorFile", set_cfg_error_file},
     {SINGLE_INPUT, OUTPUT_RECON_TOKEN, "ReconFile", set_cfg_recon_file},
     {SINGLE_INPUT, QP_FILE_TOKEN, "QpFile", set_cfg_qp_file},
@@ -958,26 +956,23 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, INPUT_STAT_FILE_TOKEN, "input_stat_file", set_input_stat_file},
     {SINGLE_INPUT, OUTPUT_STAT_FILE_TOKEN, "output_stat_file", set_output_stat_file},
     // Picture Dimensions
-    {SINGLE_INPUT, WIDTH_TOKEN, "Frame width", set_cfg_source_width},
-    {SINGLE_INPUT, HEIGHT_TOKEN, "Frame height", set_cfg_source_height},
+    {SINGLE_INPUT, WIDTH_TOKEN, "SourceWidth", set_cfg_source_width},
+    {SINGLE_INPUT, HEIGHT_TOKEN, "SourceHeight", set_cfg_source_height},
     // Prediction Structure
-    {SINGLE_INPUT,
-     NUMBER_OF_PICTURES_TOKEN,
-     "Stop encoding after n input frames",
-     set_cfg_frames_to_be_encoded},
+    {SINGLE_INPUT, NUMBER_OF_PICTURES_TOKEN, "FrameToBeEncoded", set_cfg_frames_to_be_encoded},
     {SINGLE_INPUT, BUFFERED_INPUT_TOKEN, "BufferedInput", set_buffered_input},
     {SINGLE_INPUT, BASE_LAYER_SWITCH_MODE_TOKEN, "BaseLayerSwitchMode", set_base_layer_switch_mode},
     {SINGLE_INPUT, ENCMODE_TOKEN, "EncoderMode", set_enc_mode},
     {SINGLE_INPUT, ENCMODE2P_TOKEN, "EncoderMode2p", set_snd_pass_enc_mode},
     {SINGLE_INPUT, INTRA_PERIOD_TOKEN, "IntraPeriod", set_cfg_intra_period},
     {SINGLE_INPUT, INTRA_REFRESH_TYPE_TOKEN, "IntraRefreshType", set_cfg_intra_refresh_type},
-    {SINGLE_INPUT, FRAME_RATE_TOKEN, "Stream frame rate (rate/scale)", set_frame_rate},
+    {SINGLE_INPUT, FRAME_RATE_TOKEN, "FrameRate", set_frame_rate},
     {SINGLE_INPUT, FRAME_RATE_NUMERATOR_TOKEN, "FrameRateNumerator", set_frame_rate_numerator},
     {SINGLE_INPUT,
      FRAME_RATE_DENOMINATOR_TOKEN,
      "FrameRateDenominator",
      set_frame_rate_denominator},
-    {SINGLE_INPUT, ENCODER_BIT_DEPTH, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
+    {SINGLE_INPUT, ENCODER_BIT_DEPTH, "EncoderBitDepth", set_encoder_bit_depth},
     {SINGLE_INPUT, ENCODER_COLOR_FORMAT, "EncoderColorFormat", set_encoder_color_format},
     {SINGLE_INPUT,
      INPUT_COMPRESSED_TEN_BIT_FORMAT,
@@ -985,21 +980,21 @@ ConfigEntry config_entry[] = {
      set_compressed_ten_bit_format},
     {SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "HierarchicalLevels", set_hierarchical_levels},
     {SINGLE_INPUT, PRED_STRUCT_TOKEN, "PredStructure", set_cfg_pred_structure},
-    {SINGLE_INPUT, TILE_ROW_TOKEN, "Number of tile rows to use, log2", set_tile_row},
-    {SINGLE_INPUT, TILE_COL_TOKEN, "Number of tile columns to use, log2", set_tile_col},
+    {SINGLE_INPUT, TILE_ROW_TOKEN, "TileRow", set_tile_row},
+    {SINGLE_INPUT, TILE_COL_TOKEN, "TileCol", set_tile_col},
     // Rate Control
     {SINGLE_INPUT,
      SCENE_CHANGE_DETECTION_TOKEN,
      "SceneChangeDetection",
      set_scene_change_detection},
-    {SINGLE_INPUT, QP_TOKEN, "Constant/Constrained Quality level", set_cfg_qp},
+    {SINGLE_INPUT, QP_TOKEN, "QP", set_cfg_qp},
     {SINGLE_INPUT, USE_QP_FILE_TOKEN, "UseQpFile", set_cfg_use_qp_file},
     {SINGLE_INPUT, STAT_REPORT_TOKEN, "StatReport", set_stat_report},
-    {SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "Rate control mode", set_rate_control_mode},
+    {SINGLE_INPUT, RATE_CONTROL_ENABLE_TOKEN, "RateControlMode", set_rate_control_mode},
     {SINGLE_INPUT, LOOK_AHEAD_DIST_TOKEN, "LookAheadDistance", set_look_ahead_distance},
-    {SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "Target Bitrate (kbps)", set_target_bit_rate},
-    {SINGLE_INPUT, MAX_QP_TOKEN, "Maximum (worst) quantizer", set_max_qp_allowed},
-    {SINGLE_INPUT, MIN_QP_TOKEN, "Minimum (best) quantizer", set_min_qp_allowed},
+    {SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "TargetBitRate", set_target_bit_rate},
+    {SINGLE_INPUT, MAX_QP_TOKEN, "MaxQpAllowed", set_max_qp_allowed},
+    {SINGLE_INPUT, MIN_QP_TOKEN, "MinQpAllowed", set_min_qp_allowed},
     {SINGLE_INPUT, VBV_BUFSIZE_TOKEN, "VBVBufSize", set_vbv_buf_size},
     {SINGLE_INPUT, ADAPTIVE_QP_ENABLE_TOKEN, "AdaptiveQuantization", set_adaptive_quantization},
 
@@ -1009,16 +1004,12 @@ ConfigEntry config_entry[] = {
     // RESTORATION
     {SINGLE_INPUT,
      RESTORATION_ENABLE_TOKEN,
-     "Enable the loop restoration filter",
+     "RestorationFilter",
      set_enable_restoration_filter_flag},
 
     {SINGLE_INPUT, MFMV_ENABLE_TOKEN, "Mfmv", set_enable_mfmv_flag},
     {SINGLE_INPUT, REDUNDANT_BLK_TOKEN, "RedundantBlock", set_enable_redundant_blk_flag},
-    {SINGLE_INPUT,
-     TRELLIS_ENABLE_TOKEN,
-     "Disable trellis optimization of quantized coefficients (0: false 1: true  2: true for rd "
-     "search 3: true for estimate yrd serch (default))",
-     set_enable_trellis_flag},
+    {SINGLE_INPUT, TRELLIS_ENABLE_TOKEN, "Trellis", set_enable_trellis_flag},
     {SINGLE_INPUT, SPATIAL_SSE_FL_TOKEN, "SpatialSSEfl", set_spatial_sse_fl_flag},
     {SINGLE_INPUT, SUBPEL_TOKEN, "Subpel", set_enable_sub_pel_flag},
     {SINGLE_INPUT, OVR_BNDRY_BLK_TOKEN, "OverBoundryBlock", set_over_bndry_blk_flag},
@@ -1041,39 +1032,30 @@ ConfigEntry config_entry[] = {
     // LOCAL WARPED MOTION
     {SINGLE_INPUT,
      LOCAL_WARPED_ENABLE_TOKEN,
-     "Enable local warped motion (0: false, 1: true (default))",
+     "LocalWarpedMotion",
      set_enable_local_warped_motion_flag},
     // GLOBAL MOTION
-    {SINGLE_INPUT,
-     GLOBAL_MOTION_ENABLE_TOKEN,
-     "Enable global motion (0: false, 1: true (default))",
-     set_enable_global_motion_flag},
+    {SINGLE_INPUT, GLOBAL_MOTION_ENABLE_TOKEN, "GlobalMotion", set_enable_global_motion_flag},
 
     // CLASS 12
     {SINGLE_INPUT, CLASS_12_TOKEN, "CombineClass12", set_class_12_flag},
     // EDGE SKIP ANGLE INTRA
     {SINGLE_INPUT,
      EDGE_SKIP_ANGLE_INTRA_TOKEN,
-     "Enable intra edge filtering (0: false, 1: true (default))",
+     "EdgeSkipAngleIntra",
      set_edge_skip_angle_intra_flag},
     // INTER INTRA COMPOUND
-    {SINGLE_INPUT,
-     INTER_INTRA_COMPOUND_TOKEN,
-     "Enable interintra compound (0: false, 1: true (default))",
-     set_interintra_compound_flag},
+    {SINGLE_INPUT, INTER_INTRA_COMPOUND_TOKEN, "InterIntraCompound", set_interintra_compound_flag},
     // FRACTIONAL SEARCH 64x64
     {SINGLE_INPUT, FRAC_SEARCH_64_TOKEN, "FractionalSearch64", set_fractional_search_64_flag},
 
     // OBMC
-    {SINGLE_INPUT, OBMC_TOKEN, "Enable OBMC (0: false, 1: true (default))", set_enable_obmc_flag},
+    {SINGLE_INPUT, OBMC_TOKEN, "Obmc", set_enable_obmc_flag},
     // RDOQ
     {SINGLE_INPUT, RDOQ_TOKEN, "RDOQ", set_enable_rdoq_flag},
 
     // Filter Intra
-    {SINGLE_INPUT,
-     FILTER_INTRA_TOKEN,
-     "Enable filter intra prediction mode (0: false, 1: true (default))",
-     set_enable_filter_intra_flag},
+    {SINGLE_INPUT, FILTER_INTRA_TOKEN, "FilterIntra", set_enable_filter_intra_flag},
 
     // PREDICTIVE ME
     {SINGLE_INPUT, PRED_ME_TOKEN, "PredMe", set_predictive_me_flag},
@@ -1112,10 +1094,7 @@ ConfigEntry config_entry[] = {
     // MD Parameters
     {SINGLE_INPUT, SCREEN_CONTENT_TOKEN, "ScreenContentMode", set_screen_content_mode},
     {SINGLE_INPUT, HBD_MD_ENABLE_TOKEN, "HighBitDepthModeDecision", set_enable_hbd_mode_decision},
-    {SINGLE_INPUT,
-     PALETTE_TOKEN,
-     "Enable palette prediction mode (0: false, 1: true (default))",
-     set_enable_palette},
+    {SINGLE_INPUT, PALETTE_TOKEN, "PaletteMode", set_enable_palette},
     {SINGLE_INPUT, OLPD_REFINEMENT_TOKEN, "OlpdRefinement", set_enable_olpd_refinement},
     // Thread Management
     {SINGLE_INPUT, THREAD_MGMNT, "LogicalProcessors", set_logical_processors},
@@ -1134,7 +1113,7 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "InjectorFrameRate", set_injector_frame_rate},
     {SINGLE_INPUT, SPEED_CONTROL_TOKEN, "speed_control_flag", speed_control_flag},
     // Annex A parameters
-    {SINGLE_INPUT, PROFILE_TOKEN, "Bitstream profile number to use", set_profile},
+    {SINGLE_INPUT, PROFILE_TOKEN, "Profile", set_profile},
     {SINGLE_INPUT, TIER_TOKEN, "Tier", set_tier},
     {SINGLE_INPUT, LEVEL_TOKEN, "Level", set_level},
     {SINGLE_INPUT, LATENCY_MODE, "LatencyMode", set_latency_mode},
@@ -1168,8 +1147,8 @@ ConfigEntry config_entry[] = {
      set_hme_level_2_search_area_in_height_array},
     // --- start: ALTREF_FILTERING_SUPPORT
     {SINGLE_INPUT, ENABLE_ALTREFS, "EnableAltRefs", set_enable_altrefs},
-    {SINGLE_INPUT, ALTREF_STRENGTH, "AltRef filter strength", set_altref_strength},
-    {SINGLE_INPUT, ALTREF_NFRAMES, "AltRef max frames", set_altref_n_frames},
+    {SINGLE_INPUT, ALTREF_STRENGTH, "AltRefStrength", set_altref_strength},
+    {SINGLE_INPUT, ALTREF_NFRAMES, "AltRefNframes", set_altref_n_frames},
     {SINGLE_INPUT, ENABLE_OVERLAYS, "EnableOverlays", set_enable_overlays},
     // --- end: ALTREF_FILTERING_SUPPORT
 
@@ -1707,7 +1686,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         config_entry_rc[rc_token_index].token,
                         config_entry_rc[rc_token_index].name);
             else
-                printf(stderr,
+                fprintf(stderr,
                        token_options_format,
                        config_entry_rc[rc_token_index].token,
                        empty_string,
@@ -1748,8 +1727,8 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         config_entry_intra_refresh[kf_token_index].name);
         }
         fprintf(stderr, "\n%-25s\n", "AV1 Specific Options:");
-		while (config_entry_specific[++sp_token_index].token != NULL)
-		{
+        while (config_entry_specific[++sp_token_index].token != NULL)
+        {
             uint32_t second_position =
                 *(config_entry_specific[sp_token_index].token + 1) == '-' ? 1 : 0;
             if (second_position)
@@ -1764,8 +1743,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         config_entry_specific[sp_token_index].token,
                         empty_string,
                         config_entry_specific[sp_token_index].name);
-
-		}
+        }
 
         return 1;
     } else
