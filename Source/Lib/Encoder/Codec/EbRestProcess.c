@@ -482,11 +482,26 @@ void *rest_kernel(void *input_ptr) {
         Av1Common *cm           = pcs_ptr->parent_pcs_ptr->av1_cm;
 
         if (scs_ptr->seq_header.enable_restoration && frm_hdr->allow_intrabc == 0) {
+
+            // ------- start: Normative upscaling - super-resolution tool
+            if(!av1_superres_unscaled(&cm->frm_size)) {
+
+                eb_av1_superres_upscale_frame(cm,
+                                              pcs_ptr,
+                                              scs_ptr);
+
+                uint16_t picture_sb_width = (uint16_t)(
+                        (cm->frm_size.superres_upscaled_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
+                cm->mi_stride = picture_sb_width * (BLOCK_SIZE_64 / 4);
+                cm->mi_cols = cm->frm_size.superres_upscaled_width >> MI_SIZE_LOG2;
+            }
+            // ------- end: Normative upscaling - super-resolution tool
+
             get_own_recon(scs_ptr, pcs_ptr, context_ptr, is_16bit);
 
             Yv12BufferConfig cpi_source;
             link_eb_to_aom_buffer_desc(is_16bit ? pcs_ptr->input_frame16bit
-                                                : pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr,
+                                                : pcs_ptr->parent_pcs_ptr->enhanced_unscaled_picture_ptr,
                                        &cpi_source);
 
             Yv12BufferConfig trial_frame_rst;
@@ -514,20 +529,6 @@ void *rest_kernel(void *input_ptr) {
                 if (cm->rst_info[0].frame_restoration_type != RESTORE_NONE ||
                     cm->rst_info[1].frame_restoration_type != RESTORE_NONE ||
                     cm->rst_info[2].frame_restoration_type != RESTORE_NONE) {
-                    
-                    // ------- start: Normative upscaling frame - super-resolution tool
-                    if(!av1_superres_unscaled(&cm->frm_size)) {
-
-                        eb_av1_superres_upscale_frame(cm,
-                                                      pcs_ptr,
-                                                      scs_ptr);
-
-                        uint16_t picture_sb_width = (uint16_t)(
-                                (cm->frm_size.superres_upscaled_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
-                        cm->mi_stride = picture_sb_width * (BLOCK_SIZE_64 / 4);
-                        cm->mi_cols = cm->frm_size.superres_upscaled_width >> MI_SIZE_LOG2;
-                    }
-                    // ------- end: Normative upscaling frame - super-resolution tool
 
                     eb_av1_loop_restoration_filter_frame(cm->frame_to_show, cm, 0);
                 }
