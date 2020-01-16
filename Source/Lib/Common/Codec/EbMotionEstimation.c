@@ -13914,6 +13914,7 @@ void integer_search_sb(
             }
 #endif
 #if SP_FP
+            //nned to assert that stage1 search and stage2 search are identicals(same location+same size)
             uint32_t start_y=0, step_y=1, reset_results=1;
             //sparse one y axis--stage2 needs to know if spare is done in stage1
             uint8_t use_sparse_y = (context_ptr->me_stage > 0 && search_area_height >= 4) ? 1 : 0;
@@ -14395,13 +14396,16 @@ void prune_references_mestage(
                 continue;
             }
 
+            //tested shutting 8x8/64x64 for 360p, and got better results!!
+            //also we can add a refinement step in stage1, to test the odd lines around the best even line. we can use the avg 16x16/32x32
+#if 0
             // 8x8   [64 partitions]
             p_best_sad = &(context_ptr->p_sb_best_sad[list_index][ref_pic_index][ME_TIER_ZERO_PU_8x8_0]);           
             for (pu_index = 0; pu_index < 64; ++pu_index) {
                 idx = tab8x8[pu_index];
                 context_ptr->hme_results[list_index][ref_pic_index].hme_sad += p_best_sad[idx];
             }
-
+#endif
             // 16x16 [16 partitions]
             p_best_sad = &(context_ptr->p_sb_best_sad[list_index][ref_pic_index][ME_TIER_ZERO_PU_16x16_0]);
             for (pu_index = 0; pu_index < 16; ++pu_index) {
@@ -14414,9 +14418,10 @@ void prune_references_mestage(
             for (pu_index = 0; pu_index < 4; ++pu_index) {
                 context_ptr->hme_results[list_index][ref_pic_index].hme_sad += p_best_sad[pu_index];
             }
-
+#if 0
             // 64x64 [1 partition]
             context_ptr->hme_results[list_index][ref_pic_index].hme_sad += context_ptr->p_sb_best_sad[list_index][ref_pic_index][ME_TIER_ZERO_PU_64x64];
+#endif
         }
     }
 
