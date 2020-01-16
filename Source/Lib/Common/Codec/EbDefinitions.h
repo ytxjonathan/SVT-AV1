@@ -77,6 +77,7 @@ extern "C" {
 #endif
 #define COMPOUND_WEDGE_OPT       1   // optimize compound wedge For M1 and higher
 
+#define NSQ_ME_OPT               1
 
 
 #if 1
