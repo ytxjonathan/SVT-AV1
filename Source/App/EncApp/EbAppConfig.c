@@ -1707,7 +1707,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         config_entry_rc[rc_token_index].token,
                         config_entry_rc[rc_token_index].name);
             else
-                printf(stderr,
+                fprintf(stderr,
                        token_options_format,
                        config_entry_rc[rc_token_index].token,
                        empty_string,
@@ -1748,8 +1748,8 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         config_entry_intra_refresh[kf_token_index].name);
         }
         fprintf(stderr, "\n%-25s\n", "AV1 Specific Options:");
-		while (config_entry_specific[++sp_token_index].token != NULL)
-		{
+        while (config_entry_specific[++sp_token_index].token != NULL)
+        {
             uint32_t second_position =
                 *(config_entry_specific[sp_token_index].token + 1) == '-' ? 1 : 0;
             if (second_position)
@@ -1764,8 +1764,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         config_entry_specific[sp_token_index].token,
                         empty_string,
                         config_entry_specific[sp_token_index].name);
-
-		}
+        }
 
         return 1;
     } else

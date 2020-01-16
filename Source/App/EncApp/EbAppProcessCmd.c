@@ -1279,7 +1279,7 @@ AppExitConditionType process_output_stream_buffer(EbConfig *config, EbAppContext
 #else
             //++frame_count;
             if (!(header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF))
-			{
+            {
 #if FRAME_OUTPUT
                 fprintf(stderr, "\b\b\b\b\b\b\b\b\b%9d", ++frame_count);
 #else
