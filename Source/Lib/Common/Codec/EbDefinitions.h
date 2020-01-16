@@ -49,13 +49,13 @@ extern "C" {
 #define OPT_REC_SUBP            1
 #define SC_HME_PRUNING          1
 #endif
-#define CHROMA_SEARCH_OPT         0
+#define CHROMA_SEARCH_OPT         1
 #if CHROMA_SEARCH_OPT
 #define INFR_OPT                 1 // lossless
 #define MOVE_OPT                 1 // semi-lossless
 #define COMP_OPT                 1 // lossy
 #endif
-#define REDUCE_ME_OUTPUT         0
+#define REDUCE_ME_OUTPUT         1
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 
 
@@ -69,7 +69,8 @@ extern "C" {
 #if REMOVE_TEMPORAL_LAYER_CHECK
 #define IFS_TL                   1   // remove temporal layer check for interpolation filter search @ PD1
 #define ATB_TL                   1   // remove temporal layer check for ATB
-#define NEW_NN_TL                1   // remove temporal layer check for NEW NEAREST NEAR COMP
+#define ATB_REF_TL               1   // Turn ATB ON in REF pict only NO_SC
+#define NEW_NN_TL                0   // remove temporal layer check for NEW NEAREST NEAR COMP
 #define F_INTRA_TL               1   // remove temporal layer check for Filter Intra
 #define PALETTE_TL               1   // remove temporal layer check for palette SC
 #endif
@@ -137,6 +138,7 @@ extern "C" {
 #define TUNE_TF_ME                   1
 #define DISTANCE_ME_FACTOR           1 // NON_SC
 #define TUNE_ME_MAX                  1 // NON_SC
+#define TUNE_PRUNE_SC                1 // SC ONLY
 
 
 #define DIST_BASED_PME_SEARCH_AREA   0
@@ -148,7 +150,7 @@ extern "C" {
 
 #define ATB_INTRA_2_DEPTH            1 // ATB INTRA Depth 2
 #define SHUT_TX_WEIGHT               0
-#define ATB_INTER_2_DEPTH            0 // ATB INTRA Depth 2
+#define ATB_INTER_2_DEPTH            1 // ATB INTRA Depth 2
 #define TX_ORG_INTERINTRA            1
 #define ENABLE_BC                    0 // ATB for BC
 #define FASTER_RDOQ                  0

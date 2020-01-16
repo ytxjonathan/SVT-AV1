@@ -26,8 +26,13 @@
 #if SC_HME_PRUNING
 #define SC_HME_TH_STILL 1000
 #define SC_HME_TH_EASY  100
+#if TUNE_PRUNE_SC
+#define SC_SR_DENOM_STILL 16
+#define SC_SR_DENOM_EASY 8
+#else
 #define SC_SR_DENOM_STILL 4
 #define SC_SR_DENOM_EASY 2
+#endif
 #endif
 int32_t OisPointTh[3][MAX_TEMPORAL_LAYERS][OIS_TH_COUNT] = {
     {// Light OIS
