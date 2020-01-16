@@ -16953,7 +16953,11 @@ if (context_ptr->me_alt_ref == EB_FALSE) {
                 ->me_candidate[pu_index][candidateIndex]
                 .distortion = me_candidate->distortion;
 #if REDUCE_ME_OUTPUT
+#if TUNE_REDUCE_ME_OUTPUT
+            uint8_t  BIGGER_THAN_TH = 30;
+#else
             uint8_t  BIGGER_THAN_TH = 70;
+#endif
             best = candidateIndex == 0 ? me_candidate->distortion : best;
             if ((me_candidate->distortion - best) * 100 > BIGGER_THAN_TH*best) {
                 adjusted_total_me_candidate_index--;

@@ -56,6 +56,7 @@ extern "C" {
 #define COMP_OPT                 1 // lossy
 #endif
 #define REDUCE_ME_OUTPUT         1
+#define TUNE_REDUCE_ME_OUTPUT    1
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 
 
