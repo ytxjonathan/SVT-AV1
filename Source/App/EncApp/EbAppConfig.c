@@ -26,8 +26,11 @@
 #define COMMAND_LINE_MAX_SIZE 2048
 #define CONFIG_FILE_TOKEN "-c"
 #define INPUT_FILE_TOKEN "-i"
+#define INPUT_FILE_LONG_TOKEN "--input"
 #define OUTPUT_BITSTREAM_TOKEN "-b"
+#define OUTPUT_BITSTREAM_LONG_TOKEN "--bitstream"
 #define OUTPUT_RECON_TOKEN "-o"
+#define OUTPUT_RECON_LONG_TOKEN "--output-recon"
 #define ERROR_FILE_TOKEN "--errlog"
 #define QP_FILE_TOKEN "--qp-file"
 #define INPUT_STAT_FILE_TOKEN "--input-stat-file"
@@ -36,10 +39,13 @@
 #define WIDTH_TOKEN "-w"
 #define WIDTH_LONG_TOKEN "--width"
 #define HEIGHT_TOKEN "-h"
+#define HEIGHT_LONG_TOKEN "--height"
 #define NUMBER_OF_PICTURES_TOKEN "-n"
+#define NUMBER_OF_PICTURES_LONG_TOKEN "--number-frames"
 #define BUFFERED_INPUT_TOKEN "--nb"
 #define BASE_LAYER_SWITCH_MODE_TOKEN "--base-layer-switch-mode" // no Eval
 #define QP_TOKEN "-q"
+#define QP_LONG_TOKEN "--quantizer"
 #define USE_QP_FILE_TOKEN "--use-q-file"
 #define STAT_REPORT_TOKEN "--stat-report"
 #define FRAME_RATE_TOKEN "--fps"
@@ -611,10 +617,10 @@ typedef struct config_entry_s {
 ConfigEntry config_entry_options[] = {
     // File I/O
     {SINGLE_INPUT, NULL, HELP_TOKEN, "Show usage options and exit", set_cfg_input_file},
-    {SINGLE_INPUT, NULL, INPUT_FILE_TOKEN, "Input filename", set_cfg_input_file},
-    {SINGLE_INPUT, NULL, OUTPUT_BITSTREAM_TOKEN, "Output filename", set_cfg_stream_file},
+    {SINGLE_INPUT, INPUT_FILE_TOKEN, INPUT_FILE_LONG_TOKEN, "Input filename", set_cfg_input_file},
+    {SINGLE_INPUT, OUTPUT_BITSTREAM_TOKEN, OUTPUT_BITSTREAM_LONG_TOKEN, "Output filename", set_cfg_stream_file},
     {SINGLE_INPUT, NULL, ERROR_FILE_TOKEN, "Error filename", set_cfg_error_file},
-    {SINGLE_INPUT, NULL, OUTPUT_RECON_TOKEN, "Recon filename", set_cfg_recon_file},
+    {SINGLE_INPUT, OUTPUT_RECON_TOKEN, OUTPUT_RECON_LONG_TOKEN, "Recon filename", set_cfg_recon_file},
     {SINGLE_INPUT, NULL, STAT_FILE_TOKEN, "Stat filename", set_cfg_stat_file},
     {SINGLE_INPUT, NULL, NULL, NULL, NULL}};
 
@@ -622,10 +628,10 @@ ConfigEntry config_entry_global_options[] = {
     // Picture Dimensions
     {SINGLE_INPUT, WIDTH_TOKEN, WIDTH_LONG_TOKEN, "Frame width", set_cfg_source_width},
     //{SINGLE_INPUT, WIDTH_LONG_TOKEN, "Frame width", set_cfg_source_width},
-    {SINGLE_INPUT, NULL, HEIGHT_TOKEN, "Frame height", set_cfg_source_height},
+    {SINGLE_INPUT, HEIGHT_TOKEN, HEIGHT_LONG_TOKEN, "Frame height", set_cfg_source_height},
     {SINGLE_INPUT,
-     NULL,
      NUMBER_OF_PICTURES_TOKEN,
+     NUMBER_OF_PICTURES_LONG_TOKEN,
      "Stop encoding after n input frames",
      set_cfg_frames_to_be_encoded},
     {SINGLE_INPUT, NULL, BUFFERED_INPUT_TOKEN, "buffer n input frames", set_buffered_input},
@@ -718,7 +724,7 @@ ConfigEntry config_entry_specific[] = {
      set_compressed_ten_bit_format},
     {SINGLE_INPUT, NULL, TILE_ROW_TOKEN, "Number of tile rows to use, log2", set_tile_row},
     {SINGLE_INPUT, NULL, TILE_COL_TOKEN, "Number of tile columns to use, log2", set_tile_col},
-    {SINGLE_INPUT, NULL, QP_TOKEN, "Constant/Constrained Quality level", set_cfg_qp},
+    {SINGLE_INPUT, QP_TOKEN, QP_LONG_TOKEN, "Constant/Constrained Quality level", set_cfg_qp},
     {SINGLE_INPUT, NULL, LOOK_AHEAD_DIST_TOKEN, "LookAheadDistance", set_look_ahead_distance},
     {SINGLE_INPUT,
      NULL,
