@@ -1792,7 +1792,6 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                             empty_string,
                             config_entry_global_options[global_options_token_index].name);
             }
-            
         }
         fprintf(stderr, "\n%-25s\n", "Rate Control Options:");
         while (config_entry_rc[++rc_token_index].token != NULL) {
