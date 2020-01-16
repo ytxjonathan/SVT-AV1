@@ -1748,157 +1748,89 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         const char *token_options_format = "\t%-5s\t%-25s\t%-25s\n";
         fprintf(stderr, "\n%-25s\n", "Usage: SvtAv1EncApp.exe <options> -b dst_filename -i src_filename");
         fprintf(stderr, "\n%-25s\n", "Options:");
-        while (config_entry_options[++options_token_index].token != NULL) {
-            uint32_t second_position =
-                *(config_entry_options[options_token_index].token + 1) == '-' ? 1 : 0;
-            //fprintf(stderr, "second position: %d\n", second_position);
+        while (config_entry_options[++options_token_index].token != NULL)
             if (config_entry_options[options_token_index].small_token != NULL)
                 fprintf(stderr,
                         token_options_format,
                         config_entry_options[options_token_index].small_token,
                         config_entry_options[options_token_index].token,
                         config_entry_options[options_token_index].name);
-            else {
-                if (second_position)
-                    fprintf(stderr,
-                            //"\t%-5s\t%-25s\t%-25s\n",
-                            token_options_format,
-                            empty_string,
-                            config_entry_options[options_token_index].token,
-                            config_entry_options[options_token_index].name);
-                else
-                    fprintf(stderr,
-                            token_options_format,
-                            config_entry_options[options_token_index].token,
-                            empty_string,
-                            config_entry_options[options_token_index].name);
-                }
-        }
+            else
+                fprintf(stderr,
+                        token_options_format,
+                        empty_string,
+                        config_entry_options[options_token_index].token,
+                        config_entry_options[options_token_index].name);
         fprintf(stderr, "\n%-25s\n", "Encoder Global Options:");
-        while (config_entry_global_options[++global_options_token_index].token != NULL) {
-            uint32_t second_position =
-                *(config_entry_global_options[global_options_token_index].token + 1) == '-' ? 1 : 0;
+        while (config_entry_global_options[++global_options_token_index].token != NULL)
             if (config_entry_global_options[global_options_token_index].small_token != NULL)
                 fprintf(stderr,
                         token_options_format,
                         config_entry_global_options[global_options_token_index].small_token,
                         config_entry_global_options[global_options_token_index].token,
                         config_entry_global_options[global_options_token_index].name);
-            else {
-                if (second_position)
-                    fprintf(stderr,
-                            token_options_format,
-                            empty_string,
-                            config_entry_global_options[global_options_token_index].token,
-                            config_entry_global_options[global_options_token_index].name);
-                else
-                    fprintf(stderr,
-                            token_options_format,
-                            config_entry_global_options[global_options_token_index].token,
-                            empty_string,
-                            config_entry_global_options[global_options_token_index].name);
-            }
-        }
+            else
+                fprintf(stderr,
+                        token_options_format,
+                        empty_string,
+                        config_entry_global_options[global_options_token_index].token,
+                        config_entry_global_options[global_options_token_index].name);
         fprintf(stderr, "\n%-25s\n", "Rate Control Options:");
-        while (config_entry_rc[++rc_token_index].token != NULL) {
-            uint32_t second_position = *(config_entry_rc[rc_token_index].token + 1) == '-' ? 1 : 0;
+        while (config_entry_rc[++rc_token_index].token != NULL)
             if (config_entry_rc[rc_token_index].small_token != NULL)
                 fprintf(stderr,
                         token_options_format,
                         config_entry_rc[rc_token_index].small_token,
                         config_entry_rc[rc_token_index].token,
                         config_entry_rc[rc_token_index].name);
-            else {
-                if (second_position)
-                    fprintf(stderr,
-                            token_options_format,
-                            empty_string,
-                            config_entry_rc[rc_token_index].token,
-                            config_entry_rc[rc_token_index].name);
-                else
-                    fprintf(stderr,
-                           token_options_format,
-                           config_entry_rc[rc_token_index].token,
-                           empty_string,
-                           config_entry_rc[rc_token_index].name);
-                }
-        }
+            else
+                fprintf(stderr,
+                        token_options_format,
+                        empty_string,
+                        config_entry_rc[rc_token_index].token,
+                        config_entry_rc[rc_token_index].name);
         fprintf(stderr, "\n%-25s\n", "Twopass Options:");
-        while (config_entry_2p[++two_p_token_index].token != NULL) {
-            uint32_t second_position =
-                *(config_entry_2p[two_p_token_index].token + 1) == '-' ? 1 : 0;
+        while (config_entry_2p[++two_p_token_index].token != NULL)
             if (config_entry_2p[two_p_token_index].small_token != NULL)
                 fprintf(stderr,
                         token_options_format,
                         config_entry_2p[two_p_token_index].small_token,
                         config_entry_2p[two_p_token_index].token,
                         config_entry_2p[two_p_token_index].name);
-            else {
-                if (second_position)
-                    fprintf(stderr,
-                            token_options_format,
-                            empty_string,
-                            config_entry_2p[two_p_token_index].token,
-                            config_entry_2p[two_p_token_index].name);
-                else
-                    fprintf(stderr,
-                            token_options_format,
-                            config_entry_2p[two_p_token_index].token,
-                            empty_string,
-                            config_entry_2p[two_p_token_index].name);
-                }
-        }
+            else
+                fprintf(stderr,
+                        token_options_format,
+                        empty_string,
+                        config_entry_2p[two_p_token_index].token,
+                        config_entry_2p[two_p_token_index].name);
         fprintf(stderr, "\n%-25s\n", "Keyframe Placement Options:");
-        while (config_entry_intra_refresh[++kf_token_index].token != NULL) {
-            uint32_t second_position =
-                *(config_entry_intra_refresh[kf_token_index].token + 1) == '-' ? 1 : 0;
+        while (config_entry_intra_refresh[++kf_token_index].token != NULL)
             if (config_entry_intra_refresh[kf_token_index].small_token != NULL)
                 fprintf(stderr,
                         token_options_format,
                         config_entry_intra_refresh[kf_token_index].small_token,
                         config_entry_intra_refresh[kf_token_index].token,
                         config_entry_intra_refresh[kf_token_index].name);
-            else {
-                if (second_position)
-                    fprintf(stderr,
-                            token_options_format,
-                            empty_string,
-                            config_entry_intra_refresh[kf_token_index].token,
-                            config_entry_intra_refresh[kf_token_index].name);
-                else
-                    fprintf(stderr,
-                            token_options_format,
-                            config_entry_intra_refresh[kf_token_index].token,
-                            empty_string,
-                            config_entry_intra_refresh[kf_token_index].name);
-                }
-        }
+            else
+                fprintf(stderr,
+                        token_options_format,
+                        empty_string,
+                        config_entry_intra_refresh[kf_token_index].token,
+                        config_entry_intra_refresh[kf_token_index].name);
         fprintf(stderr, "\n%-25s\n", "AV1 Specific Options:");
         while (config_entry_specific[++sp_token_index].token != NULL)
-        {
-            uint32_t second_position =
-                *(config_entry_specific[sp_token_index].token + 1) == '-' ? 1 : 0;
             if (config_entry_specific[sp_token_index].small_token != NULL)
                 fprintf(stderr,
                         token_options_format,
                         config_entry_specific[sp_token_index].small_token,
                         config_entry_specific[sp_token_index].token,
                         config_entry_specific[sp_token_index].name);
-            else {
-                if (second_position)
-                    fprintf(stderr,
-                            token_options_format,
-                            empty_string,
-                            config_entry_specific[sp_token_index].token,
-                            config_entry_specific[sp_token_index].name);
-                else
-                    fprintf(stderr,
-                            token_options_format,
-                            config_entry_specific[sp_token_index].token,
-                            empty_string,
-                            config_entry_specific[sp_token_index].name);
-                }
-        }
+            else
+                fprintf(stderr,
+                        token_options_format,
+                        empty_string,
+                        config_entry_specific[sp_token_index].token,
+                        config_entry_specific[sp_token_index].name);
 
         return 1;
     } else
