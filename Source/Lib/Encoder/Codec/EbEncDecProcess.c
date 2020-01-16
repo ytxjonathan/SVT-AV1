@@ -2843,7 +2843,7 @@ void *enc_dec_kernel(void *input_ptr) {
             //CHKN these are not needed for DLF
             enc_dec_results_ptr->completed_sb_row_index_start = 0;
             enc_dec_results_ptr->completed_sb_row_count =
-                ((scs_ptr->seq_header.max_frame_height + scs_ptr->sb_size_pix - 1) >> sb_size_log2);
+                ((pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height + scs_ptr->sb_size_pix - 1) >> sb_size_log2);
             // Post EncDec Results
             eb_post_full_object(enc_dec_results_wrapper_ptr);
         }

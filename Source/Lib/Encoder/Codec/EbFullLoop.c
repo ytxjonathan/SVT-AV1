@@ -3065,7 +3065,7 @@ void cu_full_distortion_fast_txb_mode_r(
                     ((context_ptr->sb_origin_x + ((txb_origin_x >> 3) << 3)) >> 1));
         int32_t cropped_tx_height_uv =
             MIN(context_ptr->blk_geom->tx_height_uv[tx_depth][txb_itr],
-                pcs_ptr->parent_pcs_ptr->scs_ptr->seq_header.max_frame_height / 2 -
+                pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height / 2 -
                     ((context_ptr->sb_origin_y + ((txb_origin_y >> 3) << 3)) >> 1));
         txb_origin_index =
             txb_origin_x + txb_origin_y * candidate_buffer->residual_quant_coeff_ptr->stride_y;

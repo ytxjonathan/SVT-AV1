@@ -921,7 +921,7 @@ uint64_t picture_sse_calculations(PictureControlSet *pcs_ptr, EbPictureBufferDes
 
             residual_distortion = 0;
 
-            while (row_index < scs_ptr->seq_header.max_frame_height) {
+            while (row_index < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height) {
                 column_index = 0;
                 while (column_index < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width) {
                     residual_distortion += (int64_t)SQR((int64_t)(input_buffer[column_index]) -
@@ -1007,7 +1007,7 @@ uint64_t picture_sse_calculations(PictureControlSet *pcs_ptr, EbPictureBufferDes
 
             residual_distortion = 0;
 
-            while (row_index < scs_ptr->seq_header.max_frame_height) {
+            while (row_index < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height) {
                 column_index = 0;
                 while (column_index < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width) {
                     residual_distortion +=
