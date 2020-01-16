@@ -1842,7 +1842,7 @@ void product_full_loop(ModeDecisionCandidateBuffer *candidate_buffer,
             pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - (context_ptr->sb_origin_x + tx_org_x));
     int32_t cropped_tx_height =
         MIN(context_ptr->blk_geom->tx_height[tx_depth][txb_itr],
-            scs_ptr->seq_header.max_frame_height - (context_ptr->sb_origin_y + tx_org_y));
+            pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - (context_ptr->sb_origin_y + tx_org_y));
     context_ptr->luma_txb_skip_context = 0;
     context_ptr->luma_dc_sign_context  = 0;
     get_txb_ctx(scs_ptr,

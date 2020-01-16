@@ -712,7 +712,7 @@ void *motion_estimation_kernel(void *input_ptr) {
             pic_width_in_sb =
                 (pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz;
             picture_height_in_sb =
-                (scs_ptr->seq_header.max_frame_height + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz;
+                (pcs_ptr->av1_cm->frm_size.frame_height + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz;
             SEGMENT_CONVERT_IDX_TO_XY(
                 segment_index, x_segment_index, y_segment_index, pcs_ptr->me_segments_column_count);
             x_sb_start_index = SEGMENT_START_IDX(
@@ -737,8 +737,8 @@ void *motion_estimation_kernel(void *input_ptr) {
                                 ? pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x
                                 : BLOCK_SIZE_64;
                         sb_height =
-                            (scs_ptr->seq_header.max_frame_height - sb_origin_y) < BLOCK_SIZE_64
-                                ? scs_ptr->seq_header.max_frame_height - sb_origin_y
+                            (pcs_ptr->av1_cm->frm_size.frame_height - sb_origin_y) < BLOCK_SIZE_64
+                                ? pcs_ptr->av1_cm->frm_size.frame_height  - sb_origin_y
                                 : BLOCK_SIZE_64;
 
                         // Load the SB from the input to the intermediate SB buffer
@@ -889,8 +889,8 @@ void *motion_estimation_kernel(void *input_ptr) {
                                     ? pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x
                                     : BLOCK_SIZE_64;
                             sb_height =
-                                (scs_ptr->seq_header.max_frame_height - sb_origin_y) < BLOCK_SIZE_64
-                                    ? scs_ptr->seq_header.max_frame_height - sb_origin_y
+                                (pcs_ptr->av1_cm->frm_size.frame_height - sb_origin_y) < BLOCK_SIZE_64
+                                    ? pcs_ptr->av1_cm->frm_size.frame_height - sb_origin_y
                                     : BLOCK_SIZE_64;
 
                             sb_index = (uint16_t)(x_sb_index + y_sb_index * pic_width_in_sb);
@@ -955,8 +955,8 @@ void *motion_estimation_kernel(void *input_ptr) {
                                     ? pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x
                                     : BLOCK_SIZE_64;
                             sb_height =
-                                (scs_ptr->seq_header.max_frame_height - sb_origin_y) < BLOCK_SIZE_64
-                                    ? scs_ptr->seq_header.max_frame_height - sb_origin_y
+                                (pcs_ptr->av1_cm->frm_size.frame_height - sb_origin_y) < BLOCK_SIZE_64
+                                    ? pcs_ptr->av1_cm->frm_size.frame_height - sb_origin_y
                                     : BLOCK_SIZE_64;
 
                             sb_index = (uint16_t)(x_sb_index + y_sb_index * pic_width_in_sb);

@@ -793,7 +793,7 @@ void eb_av1_loop_filter_frame(EbPictureBufferDesc *frame_buffer, PictureControlS
     uint32_t pic_width_in_sb =
         (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
     uint32_t picture_height_in_sb =
-        (scs_ptr->seq_header.max_frame_height + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
+        (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
 
     eb_av1_loop_filter_frame_init(&pcs_ptr->parent_pcs_ptr->frm_hdr,
                                   &pcs_ptr->parent_pcs_ptr->lf_info,

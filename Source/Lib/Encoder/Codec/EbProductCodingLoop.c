@@ -4362,7 +4362,7 @@ void full_loop_core(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, BlkStruct *b
              pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width &&
          context_ptr->sb_origin_y + context_ptr->blk_geom->origin_y +
                  context_ptr->blk_geom->bheight <
-             pcs_ptr->parent_pcs_ptr->scs_ptr->seq_header.max_frame_height))
+                 pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height))
         end_tx_depth =
             get_end_tx_depth(context_ptr->blk_geom->bsize, candidate_buffer->candidate_ptr->type);
     else
@@ -6500,7 +6500,7 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
         uint32_t sb_width =
             MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x);
         uint32_t sb_height =
-            MIN(scs_ptr->sb_size_pix, scs_ptr->seq_header.max_frame_height - sb_origin_y);
+            MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - sb_origin_y);
 
         pack2d_src(input_picture_ptr->buffer_y + input_luma_offset,
                    input_picture_ptr->stride_y,
@@ -6546,7 +6546,7 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
             if ((sb_origin_x + scs_ptr->static_config.super_block_size) <
                     pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width &&
                 (sb_origin_y + scs_ptr->static_config.super_block_size) <
-                    pcs_ptr->parent_pcs_ptr->scs_ptr->seq_header.max_frame_height) {
+                    pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height) {
                 float features[FEATURE_SIZE_MAX_MIN_PART_PRED] = {0.0f};
 
                 av1_get_max_min_partition_features(scs_ptr,

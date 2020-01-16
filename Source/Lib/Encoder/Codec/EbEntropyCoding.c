@@ -375,12 +375,12 @@ void get_txb_ctx(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr, const 
         txb_w_unit = MIN(tx_size_wide_unit[tx_size],
                          (int32_t)(pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width / 2 - blk_origin_x) >> 2);
         txb_h_unit = MIN(tx_size_high_unit[tx_size],
-                         (int32_t)(scs_ptr->seq_header.max_frame_height / 2 - blk_origin_y) >> 2);
+                         (int32_t)(pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height / 2 - blk_origin_y) >> 2);
     } else {
         txb_w_unit = MIN(tx_size_wide_unit[tx_size],
                          (int32_t)(pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - blk_origin_x) >> 2);
         txb_h_unit = MIN(tx_size_high_unit[tx_size],
-                         (int32_t)(scs_ptr->seq_header.max_frame_height - blk_origin_y) >> 2);
+                         (int32_t)(pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - blk_origin_y) >> 2);
     }
     int16_t  dc_sign = 0;
     uint16_t k       = 0;
@@ -6142,9 +6142,9 @@ EB_EXTERN EbErrorType write_sb(EntropyCodingContext *context_ptr, SuperBlock *tb
             if (blk_geom->shape != PART_N) blk_geom = get_blk_geom_mds(blk_geom->sqi_mds);
             code_blk_cond = EB_FALSE;
             if (((blk_origin_x + blk_geom->bwidth / 2 < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width) ||
-                 (blk_origin_y + blk_geom->bheight / 2 < scs_ptr->seq_header.max_frame_height)) &&
+                 (blk_origin_y + blk_geom->bheight / 2 < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height)) &&
                 blk_origin_x < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width &&
-                blk_origin_y < scs_ptr->seq_header.max_frame_height)
+                blk_origin_y < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height)
                 code_blk_cond = EB_TRUE;
         }
 

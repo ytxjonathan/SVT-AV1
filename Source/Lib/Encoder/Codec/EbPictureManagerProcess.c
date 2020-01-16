@@ -46,7 +46,7 @@ static void configure_picture_edges(SequenceControlSet *scs_ptr, PictureControlS
     const uint16_t pic_width_in_sb =
         (ppsPtr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
     const uint16_t picture_height_in_sb =
-        (scs_ptr->seq_header.max_frame_height + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
+        (ppsPtr->parent_pcs_ptr->av1_cm->frm_size.frame_height + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
     unsigned x_sb_index, y_sb_index, sb_index;
 
     // SB-loops
@@ -830,7 +830,7 @@ void *picture_manager_kernel(void *input_ptr) {
                                                      entry_scs_ptr->sb_size_pix - 1) /
                                                     entry_scs_ptr->sb_size_pix);
                         picture_height_in_sb =
-                            (uint8_t)((entry_scs_ptr->seq_header.max_frame_height +
+                            (uint8_t)((child_pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height +
                                        entry_scs_ptr->sb_size_pix - 1) /
                                       entry_scs_ptr->sb_size_pix);
 

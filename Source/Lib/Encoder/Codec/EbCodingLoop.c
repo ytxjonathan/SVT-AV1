@@ -2115,7 +2115,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
     uint32_t sb_width =
         MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x);
     uint32_t sb_height =
-        MIN(scs_ptr->sb_size_pix, scs_ptr->seq_header.max_frame_height - sb_origin_y);
+        MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - sb_origin_y);
     // MV merge mode
     uint32_t              y_has_coeff;
     uint32_t              u_has_coeff;
@@ -3635,7 +3635,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                             pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - blk_geom->bwidth);
                                     origin_y = MIN(
                                         origin_y,
-                                        scs_ptr->seq_header.max_frame_height - blk_geom->bheight);
+                                        pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - blk_geom->bheight);
                                     uint16_t sb_origin_x =
                                         origin_x / context_ptr->sb_sz * context_ptr->sb_sz;
                                     uint16_t sb_origin_y =
@@ -3734,7 +3734,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                         pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - blk_geom->bwidth);
                                 origin_y =
                                     MIN(origin_y,
-                                        scs_ptr->seq_header.max_frame_height - blk_geom->bheight);
+                                        pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - blk_geom->bheight);
                                 uint16_t sb_origin_x =
                                     origin_x / context_ptr->sb_sz * context_ptr->sb_sz;
                                 uint16_t sb_origin_y =
