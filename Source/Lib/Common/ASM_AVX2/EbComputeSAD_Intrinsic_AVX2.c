@@ -6107,7 +6107,7 @@ void ext_eigth_sad_calculation_nsq_avx2(
         _mm_unpackhi_epi16(*(__m128i*)a , _mm_setzero_si128())),\
         _mm256_setr_m128i(                                      \
         _mm_unpacklo_epi16(*(__m128i*)b , _mm_setzero_si128()), \
-        _mm_unpackhi_epi16(*(__m128i*)b, _mm_setzero_si128()))) ;   
+        _mm_unpackhi_epi16(*(__m128i*)b, _mm_setzero_si128()))) ;
 
 #define SEARCH_CALC_BEST_16BIT(a, b, best, best_mv)          \
     ADD_VECS_PACK_SAD(sad, a, b);\
@@ -6133,14 +6133,14 @@ void ext_eigth_sad_calculation_nsq_avx2(
         sad16x16_2_lo = _mm_unpacklo_epi16(sad16x16_2_128, _mm_setzero_si128());
         sad16x16_2_hi = _mm_unpackhi_epi16(sad16x16_2_128, _mm_setzero_si128());
         sad16x16_2 = _mm256_set_m128i(sad16x16_2_hi, sad16x16_2_lo);
-        *(__m256i *)sad_32x16[idx] = _mm256_add_epi32(sad16x16_0, sad16x16_1); //0 + 1 
-        *(__m256i *)sad_16x32[idx] = _mm256_add_epi32(sad16x16_0, sad16x16_2); //0 + 2 
+        *(__m256i *)sad_32x16[idx] = _mm256_add_epi32(sad16x16_0, sad16x16_1); //0 + 1
+        *(__m256i *)sad_16x32[idx] = _mm256_add_epi32(sad16x16_0, sad16x16_2); //0 + 2
         sad16x16_0_128 = _mm_loadu_si128((__m128i const *) p_sad16x16[pos + 3]);
         sad16x16_0_lo = _mm_unpacklo_epi16(sad16x16_0_128, _mm_setzero_si128());
         sad16x16_0_hi = _mm_unpackhi_epi16(sad16x16_0_128, _mm_setzero_si128());
         sad16x16_0 = _mm256_set_m128i(sad16x16_0_hi, sad16x16_0_lo);
-        *(__m256i *)sad_32x16[idx + 1] = _mm256_add_epi32(sad16x16_0, sad16x16_2); //2 + 3 
-        *(__m256i *)sad_16x32[idx + 1] = _mm256_add_epi32(sad16x16_0, sad16x16_1); //1 + 3 
+        *(__m256i *)sad_32x16[idx + 1] = _mm256_add_epi32(sad16x16_0, sad16x16_2); //2 + 3
+        *(__m256i *)sad_16x32[idx + 1] = _mm256_add_epi32(sad16x16_0, sad16x16_1); //1 + 3
     }
 
     // 16x8 and 8x16

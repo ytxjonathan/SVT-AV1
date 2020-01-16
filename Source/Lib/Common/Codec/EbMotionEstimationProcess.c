@@ -278,7 +278,7 @@ EbErrorType signal_derivation_me_kernel_oq(
             REFINMENT_QP_MODE;
     }
 #if TUNE_SUBPEL_SEARCH
-    context_ptr->me_context_ptr->h_pel_search_wind =  sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? 
+    context_ptr->me_context_ptr->h_pel_search_wind =  sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?
                                                     H_PEL_SEARCH_WIND_2 : H_PEL_SEARCH_WIND_1;
 
 #endif

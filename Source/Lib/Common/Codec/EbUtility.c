@@ -1187,7 +1187,7 @@ void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t 
                 blk_geom_mds[*idx_mds].txb_count[tx_depth] = 16;
             }
             if (blk_geom_mds[*idx_mds].bsize == BLOCK_128X64 ||
-                blk_geom_mds[*idx_mds].bsize == BLOCK_64X128 || 
+                blk_geom_mds[*idx_mds].bsize == BLOCK_64X128 ||
                 blk_geom_mds[*idx_mds].bsize == BLOCK_64X32 ||
                 blk_geom_mds[*idx_mds].bsize == BLOCK_32X64 ||
                 blk_geom_mds[*idx_mds].bsize == BLOCK_32X16 ||

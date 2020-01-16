@@ -5467,7 +5467,7 @@ void tx_partitioning_path(
     int32_t is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE || candidate_buffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
 
 #if TX_TYPE_TX_SIZE_STAGES
-    EbBool decouple_tx_size_tx_type = EB_FALSE;//EB_TRUE; // 
+    EbBool decouple_tx_size_tx_type = EB_FALSE;//EB_TRUE; //
 #endif
     uint8_t  best_tx_depth = 0;
     uint64_t best_cost_search = (uint64_t)~0;
@@ -5851,7 +5851,7 @@ void tx_partitioning_path(
             is_inter,
             end_tx_depth);
 
-    context_ptr->tx_depth = best_tx_depth;   
+    context_ptr->tx_depth = best_tx_depth;
 #if ATB_INTRA_2_DEPTH
         tx_reset_neighbor_arrays(
             picture_control_set_ptr,

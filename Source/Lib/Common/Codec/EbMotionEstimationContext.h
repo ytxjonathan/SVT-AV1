@@ -497,7 +497,7 @@ extern "C" {
         int tf_index_center;
 #endif
 #if TUNE_SUBPEL_SEARCH
-        uint8_t                     h_pel_search_wind; 
+        uint8_t                     h_pel_search_wind;
 #endif
     } MeContext;
 

@@ -50,7 +50,7 @@ extern "C" {
 #define SC_HME_PRUNING          1
 #endif
 #define CHROMA_SEARCH_OPT         0
-#if CHROMA_SEARCH_OPT         
+#if CHROMA_SEARCH_OPT
 #define INFR_OPT                 1 // lossless
 #define MOVE_OPT                 1 // semi-lossless
 #define COMP_OPT                 1 // lossy
