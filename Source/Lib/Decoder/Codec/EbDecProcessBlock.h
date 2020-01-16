@@ -1,7 +1,5 @@
-/*
-* Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
+/*!< Copyright(c) 2019 Netflix, Inc.
+ * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 #ifndef EbDecProcessBlock_h
 #define EbDecProcessBlock_h
@@ -20,4 +18,4 @@ void decode_block(DecModCtxt *dec_mod_ctxt, int32_t mi_row, int32_t mi_col, Bloc
 #ifdef __cplusplus
 }
 #endif
-#endif // EbDecProcessBlock_h
+#endif /*!< EbDecProcessBlock_h */

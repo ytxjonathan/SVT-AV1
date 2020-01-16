@@ -1474,7 +1474,7 @@ static INLINE int is_dv_valid(MV dv, ParseCtxt *parse_ctx, PartitionInfo *pi) {
     const int tile_right_edge = tile->mi_col_end * MI_SIZE * scale_px_to_mv;
     if (src_right_edge > tile_right_edge) return 0;
 
-    /*!< Special case for sub 8x8 chroma cases, to prevent referring to chroma 
+    /*!< Special case for sub 8x8 chroma cases, to prevent referring to chroma
      *   pixels outside current tile. */
     int     num_planes    = parse_ctx->seq_header->color_config.mono_chrome ? 1 : MAX_MB_PLANE;
     int32_t is_chroma_ref = pi->is_chroma_ref;
@@ -2115,7 +2115,7 @@ void inter_block_mode_info(EbDecHandle *dec_handle, ParseCtxt *parse_ctxt, Parti
 
     if (is_compound) {
         int ref_mv_idx = mbmi->ref_mv_idx;
-        /*!< Special case: NEAR_NEWMV and NEW_NEARMV modes use 
+        /*!< Special case: NEAR_NEWMV and NEW_NEARMV modes use
          * 1 + mbmi->ref_mv_idx (like NEARMV) instead of
          * mbmi->ref_mv_idx (like NEWMV) */
         if (mbmi->mode == NEAR_NEWMV || mbmi->mode == NEW_NEARMV) ref_mv_idx = 1 + mbmi->ref_mv_idx;

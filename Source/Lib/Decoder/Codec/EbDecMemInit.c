@@ -109,7 +109,7 @@ EbErrorType dec_eb_recon_picture_buffer_desc_ctor(
 }
 
 /**********************************/
-/*!< Master Frame Buf containing all 
+/*!< Master Frame Buf containing all
  *   frame level bufs like ModeInfo
  *   for all the frames in parallel */
 /**********************************/

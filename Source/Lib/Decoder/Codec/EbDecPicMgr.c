@@ -1,4 +1,4 @@
-/* Copyright(c) 2019 Netflix, Inc.
+/*!< Copyright(c) 2019 Netflix, Inc.
  * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 /*!< Copyright (c) 2016, Alliance for Open Media. All rights reserved

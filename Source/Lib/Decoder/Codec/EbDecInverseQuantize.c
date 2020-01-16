@@ -149,7 +149,7 @@ int32_t inverse_quantize(DecModCtxt *dec_mod_ctxt, PartitionInfo *part, BlockMod
                                         : dec_mod_ctxt->giqmatrix[NUM_QM_LEVELS - 1][0][qm_tx_size];
     const int shift = av1_get_tx_scale(tx_size);
 
-    /*!< Level is 1D array with eob length as first value then continued by 
+    /*!< Level is 1D array with eob length as first value then continued by
      *   coeffs value to the length of eob. */
 #if SVT_DEC_COEFF_DEBUG
     int16_t *cur_coeff = (int16_t *)level;

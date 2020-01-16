@@ -102,7 +102,7 @@ typedef struct ParseCtxt {
     /*!< Count of cur luma_trans_info */
     uint8_t cur_blk_luma_count;
     /*!< Chroma mode indo state acroos sub 8x8 blocks
-     * if Prev block does not have chroma info then this 
+     * if Prev block does not have chroma info then this
      * state is remembered in this variable to be used in next block */
     int32_t prev_blk_has_chroma;
 

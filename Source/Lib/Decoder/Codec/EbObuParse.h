@@ -1,13 +1,11 @@
-/*
-* Copyright(c) 2019 Netflix, Inc.
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
+/* Copyright(c) 2019 Netflix, Inc.
+ * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 #ifndef EbDecObuParser_h
 #define EbDecObuParser_h
 
 #include "assert.h"
-#include "EbCabacContextModel.h" //for ENTROPY_CONTEXT
+#include "EbCabacContextModel.h" /*!< for ENTROPY_CONTEXT */
 #include "EbDecBitstream.h"
 #include "EbDecBitReader.h"
 #include "../../Encoder/Codec/EbCodingUnit.h"
@@ -31,7 +29,7 @@
 #define MAX_NUM_SPATIAL_LAYERS 4
 #ifdef MAX_NUM_OPERATING_POINTS
 #undef MAX_NUM_OPERATING_POINTS
-#endif // MAX_NUM_OPERATING_POINTS
+#endif /*!< MAX_NUM_OPERATING_POINTS */
 
 #define MAX_NUM_OPERATING_POINTS MAX_NUM_TEMPORAL_LAYERS *MAX_NUM_SPATIAL_LAYERS
 #define OP_POINTS_CNT_MINUS_1_BITS 5
@@ -82,4 +80,4 @@ static INLINE int allow_intrabc(const EbDecHandle *dec_handle) {
            dec_handle->frame_header.allow_intrabc;
 }
 
-#endif // EbDecObuParser_h
+#endif /*!< EbDecObuParser_h */
