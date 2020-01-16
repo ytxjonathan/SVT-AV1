@@ -2694,7 +2694,11 @@ static EbErrorType verify_settings(
         return_error = EB_ErrorBadParameter;
     }
 
-    // TODO: add limits for superres-mode when known
+    if (config->superres_mode > SUPERRES_RANDOM) {
+        SVT_LOG("Error instance %u: invalid superres-mode, should be in the range [%d - %d], "
+                "only SUPERRES_NONE (0), SUPERRES_FIXED (1) and SUPERRES_RANDOM (2) are currently implemented \n", channel_number + 1, 0, 2);
+        return_error = EB_ErrorBadParameter;
+    }
 
     if (config->superres_qthres > 63) {
         SVT_LOG("Error instance %u: invalid superres-qthres, should be in the range [%d - %d] \n", channel_number + 1, MIN_QP_VALUE, MAX_QP_VALUE);
