@@ -518,17 +518,11 @@ void *rest_kernel(void *input_ptr) {
                     // ------- start: Normative upscaling frame - super-resolution tool
                     if(!av1_superres_unscaled(&cm->frm_size)) {
 
-                        // adjust parameters: number of SBs, mi
-                        uint16_t picture_sb_width = (uint16_t)(
-                                (cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
-                        cm->mi_stride = picture_sb_width * (BLOCK_SIZE_64 / 4);
-                        cm->mi_cols = cm->frm_size.frame_width >> MI_SIZE_LOG2;
-
                         eb_av1_superres_upscale_frame(cm,
                                                       pcs_ptr,
                                                       scs_ptr);
 
-                        picture_sb_width = (uint16_t)(
+                        uint16_t picture_sb_width = (uint16_t)(
                                 (cm->frm_size.superres_upscaled_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
                         cm->mi_stride = picture_sb_width * (BLOCK_SIZE_64 / 4);
                         cm->mi_cols = cm->frm_size.superres_upscaled_width >> MI_SIZE_LOG2;
