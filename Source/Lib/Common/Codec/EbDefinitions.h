@@ -156,8 +156,7 @@ extern "C" {
 #define TX_ORG_INTERINTRA            1
 #define ENABLE_BC                    0 // ATB for BC
 #define FASTER_RDOQ                  0
-
-#define TX_TYPE_TX_SIZE_STAGES       1
+#define UPGRAGDE_TX_WEIGHT           0 
 
 #define IMPROVED_MULTI_PASS_PD       0
 #if IMPROVED_MULTI_PASS_PD

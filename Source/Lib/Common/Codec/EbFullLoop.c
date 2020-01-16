@@ -1367,7 +1367,7 @@ void eb_av1_optimize_b(
     // Hsan (Trellis): hardcoded as not supported:
     int sharpness = 0; // No Sharpness
 #if FASTER_RDOQ
-    int fast_mode = 1; // TBD
+    int fast_mode = (is_inter && plane); // TBD
 #else
     int fast_mode = 0; // TBD
 #endif

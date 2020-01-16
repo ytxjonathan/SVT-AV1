@@ -448,6 +448,9 @@ extern "C" {
     uint32_t part_struct_best_array[MAX_PART_STRUCT_CANDIDATES];
 #endif
 #endif
+#if UPGRAGDE_TX_WEIGHT
+    uint64_t md_stage_1_best_cost_array[CAND_CLASS_TOTAL];
+#endif
     } ModeDecisionContext;
 
     typedef void(*EbAv1LambdaAssignFunc)(
