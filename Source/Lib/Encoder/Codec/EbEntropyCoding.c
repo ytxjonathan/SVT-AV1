@@ -1181,7 +1181,7 @@ int32_t partition_cdf_length(BlockSize bsize) {
     else
         return EXT_PARTITION_TYPES;
 }
-static void encode_partition_av1(SequenceControlSet *scs_ptr, FRAME_CONTEXT *frame_context,
+static void encode_partition_av1(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr, FRAME_CONTEXT *frame_context,
                                AomWriter *ec_writer, BlockSize bsize, PartitionType p,
                                uint32_t blk_origin_x, uint32_t blk_origin_y,
                                NeighborArrayUnit *partition_context_neighbor_array) {
@@ -1190,8 +1190,8 @@ static void encode_partition_av1(SequenceControlSet *scs_ptr, FRAME_CONTEXT *fra
     if (!is_partition_point) return;
 
     const int32_t hbs      = (mi_size_wide[bsize] << 2) >> 1;
-    const int32_t has_rows = (blk_origin_y + hbs) < scs_ptr->seq_header.max_frame_height;
-    const int32_t has_cols = (blk_origin_x + hbs) < scs_ptr->seq_header.max_frame_width;
+    const int32_t has_rows = (blk_origin_y + hbs) < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height;
+    const int32_t has_cols = (blk_origin_x + hbs) < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width;
 
     uint32_t partition_context_left_neighbor_index =
         get_neighbor_array_unit_left_index(partition_context_neighbor_array, blk_origin_y);
@@ -6183,6 +6183,7 @@ EB_EXTERN EbErrorType write_sb(EntropyCodingContext *context_ptr, SuperBlock *tb
 
                 // Code Split Flag
                 encode_partition_av1(scs_ptr,
+                                   pcs_ptr,
                                    frame_context,
                                    ec_writer,
                                    bsize,
