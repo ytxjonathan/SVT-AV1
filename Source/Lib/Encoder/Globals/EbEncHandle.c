@@ -2700,12 +2700,17 @@ static EbErrorType verify_settings(
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->superres_qthres > 63) {
+    if (config->superres_qthres > SUPERRES_NONE && (config->input_stat_file || config->output_stat_file)){
+        SVT_LOG("Error instance %u: superres cannot be enabled in 2-pass mode yet \n", channel_number + 1);
+        return_error = EB_ErrorBadParameter;
+    }
+
+    if (config->superres_qthres > MAX_QP_VALUE) {
         SVT_LOG("Error instance %u: invalid superres-qthres, should be in the range [%d - %d] \n", channel_number + 1, MIN_QP_VALUE, MAX_QP_VALUE);
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->superres_kf_denom > MIN_SUPERRES_DENOM || config->superres_kf_denom > MAX_SUPERRES_DENOM) {
+    if (config->superres_kf_denom < MIN_SUPERRES_DENOM || config->superres_kf_denom > MAX_SUPERRES_DENOM) {
         SVT_LOG("Error instance %u: invalid superres-kf-denom, should be in the range [%d - %d] \n", channel_number + 1, MIN_SUPERRES_DENOM, MAX_SUPERRES_DENOM);
         return_error = EB_ErrorBadParameter;
     }
