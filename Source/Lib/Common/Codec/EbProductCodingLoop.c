@@ -1936,6 +1936,13 @@ void set_md_stage_counts(
     context_ptr->md_stage_2_count[CAND_CLASS_6] = context_ptr->bypass_md_stage_1[CAND_CLASS_6] ? context_ptr->md_stage_1_count[CAND_CLASS_6] : context_ptr->md_stage_2_count[CAND_CLASS_6];
     context_ptr->md_stage_2_count[CAND_CLASS_8] = context_ptr->bypass_md_stage_1[CAND_CLASS_8] ? context_ptr->md_stage_1_count[CAND_CLASS_8] : context_ptr->md_stage_2_count[CAND_CLASS_8];
 
+
+#if PAL_CLASS
+    //TODO: use actual number of stages on the setting section and update using the following logic.
+    // stage1_cand_count[CAND_CLASS_i] = bypass_stage1 ? stage2_cand_count[CAND_CLASS_i] : stage1_cand_count[CAND_CLASS_i];
+    context_ptr->md_stage_2_count[CAND_CLASS_7] = context_ptr->bypass_md_stage_1[CAND_CLASS_7] ? context_ptr->md_stage_1_count[CAND_CLASS_7] : context_ptr->md_stage_2_count[CAND_CLASS_7];
+#endif
+
 #if ADD_4TH_MD_STAGE
     context_ptr->md_stage_3_count[CAND_CLASS_0] = context_ptr->md_stage_2_count[CAND_CLASS_0];
     context_ptr->md_stage_3_count[CAND_CLASS_1] = context_ptr->md_stage_2_count[CAND_CLASS_1];
@@ -1944,15 +1951,9 @@ void set_md_stage_counts(
     context_ptr->md_stage_3_count[CAND_CLASS_4] = context_ptr->md_stage_2_count[CAND_CLASS_4];
     context_ptr->md_stage_3_count[CAND_CLASS_5] = context_ptr->md_stage_2_count[CAND_CLASS_5];
     context_ptr->md_stage_3_count[CAND_CLASS_6] = context_ptr->md_stage_2_count[CAND_CLASS_6];
+    context_ptr->md_stage_3_count[CAND_CLASS_7] = context_ptr->md_stage_2_count[CAND_CLASS_7];
     context_ptr->md_stage_3_count[CAND_CLASS_8] = context_ptr->md_stage_2_count[CAND_CLASS_8];
 #endif
-
-#if PAL_CLASS
-    //TODO: use actual number of stages on the setting section and update using the following logic.
-    // stage1_cand_count[CAND_CLASS_i] = bypass_stage1 ? stage2_cand_count[CAND_CLASS_i] : stage1_cand_count[CAND_CLASS_i];
-    context_ptr->md_stage_2_count[CAND_CLASS_7] = context_ptr->bypass_md_stage_1[CAND_CLASS_7] ? context_ptr->md_stage_1_count[CAND_CLASS_7] : context_ptr->md_stage_2_count[CAND_CLASS_7];
-#endif
-
     // Step 4: zero-out count for CAND_CLASS_3 if CAND_CLASS_1 and CAND_CLASS_2 are merged (i.e. shift to the left)
     if (context_ptr->combine_class12)
         context_ptr->md_stage_1_count[CAND_CLASS_3] = context_ptr->md_stage_2_count[CAND_CLASS_3] = 0;
@@ -2702,7 +2703,11 @@ void md_stage_0(
     // Set MD Staging fast_loop_core settings
 #if REMOVE_MD_STAGE_1
 #if MULTI_PASS_PD
+#if ADD_4TH_MD_STAGE
+    context_ptr->md_staging_skip_interpolation_search = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 || context_ptr->md_staging_mode == MD_STAGING_MODE_2) ? EB_TRUE : context_ptr->interpolation_search_level >= IT_SEARCH_FAST_LOOP_UV_BLIND ? EB_FALSE : EB_TRUE;
+#else
     context_ptr->md_staging_skip_interpolation_search = (context_ptr->md_staging_mode == MD_STAGING_MODE_1) ? EB_TRUE : context_ptr->interpolation_search_level >= IT_SEARCH_FAST_LOOP_UV_BLIND ? EB_FALSE : EB_TRUE;
+#endif
 #else
     context_ptr->md_staging_skip_interpolation_search = (context_ptr->md_staging_mode == MD_STAGING_MODE_1) ? EB_TRUE : picture_control_set_ptr->parent_pcs_ptr->interpolation_search_level >= IT_SEARCH_FAST_LOOP_UV_BLIND ? EB_FALSE : EB_TRUE;
 #endif
@@ -2712,7 +2717,11 @@ void md_stage_0(
 #if FILTER_INTRA_FLAG
 #if REMOVE_MD_STAGE_1
 #if PAL_CLASS
+#if ADD_4TH_MD_STAGE
+    context_ptr->md_staging_skip_inter_chroma_pred = ((context_ptr->md_staging_mode == MD_STAGING_MODE_1 || context_ptr->md_staging_mode == MD_STAGING_MODE_2) &&
+#else
     context_ptr->md_staging_skip_inter_chroma_pred = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 &&
+#endif
         context_ptr->target_class != CAND_CLASS_0 && context_ptr->target_class != CAND_CLASS_6 && context_ptr->target_class != CAND_CLASS_7) ? EB_TRUE : EB_FALSE;
 #else
     context_ptr->md_staging_skip_inter_chroma_pred = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 && context_ptr->target_class != CAND_CLASS_0 && context_ptr->target_class != CAND_CLASS_6) ? EB_TRUE : EB_FALSE;
@@ -2724,7 +2733,11 @@ void md_stage_0(
     context_ptr->md_staging_skip_inter_chroma_pred = (context_ptr->md_staging_mode && context_ptr->md_stage == MD_STAGE_0 && context_ptr->target_class != CAND_CLASS_0) ? EB_TRUE : EB_FALSE;
 #endif
 #if REMOVE_MD_STAGE_1
+#if ADD_4TH_MD_STAGE
+    context_ptr->md_staging_use_bilinear = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 || context_ptr->md_staging_mode == MD_STAGING_MODE_2) ? EB_TRUE : EB_FALSE;
+#else
     context_ptr->md_staging_use_bilinear = (context_ptr->md_staging_mode == MD_STAGING_MODE_1) ? EB_TRUE : EB_FALSE;
+#endif
 #else
     context_ptr->md_staging_use_bilinear = (context_ptr->md_staging_mode) ? EB_TRUE : EB_FALSE;
 #endif
@@ -7260,7 +7273,11 @@ void md_stage_3(
 #if REMOVE_MD_STAGE_1
 #if MULTI_PASS_PD // Shut pred @ full loop if 1st pass
         context_ptr->md_staging_skip_full_pred = context_ptr->md_staging_mode == MD_STAGING_MODE_0;
+#if ADD_4TH_MD_STAGE
+        context_ptr->md_staging_skip_interpolation_search = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 || context_ptr->md_staging_mode == MD_STAGING_MODE_2);
+#else
         context_ptr->md_staging_skip_interpolation_search = context_ptr->md_staging_mode == MD_STAGING_MODE_1;
+#endif
 #else
         context_ptr->md_staging_skip_full_pred = (context_ptr->md_staging_mode == MD_STAGING_MODE_0 && picture_control_set_ptr->parent_pcs_ptr->interpolation_search_level != IT_SEARCH_FULL_LOOP);
         context_ptr->md_staging_skip_interpolation_search = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 || picture_control_set_ptr->parent_pcs_ptr->interpolation_search_level != IT_SEARCH_FULL_LOOP);

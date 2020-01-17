@@ -148,7 +148,7 @@ extern "C" {
 #define ENABLE_BC                    0 // ATB for BC
 #define FASTER_RDOQ                  0
 #define UPGRAGDE_TX_WEIGHT           0 
-#define ADD_4TH_MD_STAGE             0
+#define ADD_4TH_MD_STAGE             1
 
 #define IMPROVED_MULTI_PASS_PD       0
 #if IMPROVED_MULTI_PASS_PD
