@@ -491,8 +491,7 @@ EbErrorType motion_estimation_context_ctor(EbThreadContext *  thread_context_ptr
 /***************************************************************************************************
 * ZZ Decimated SAD Computation
 ***************************************************************************************************/
-EbErrorType compute_decimated_zz_sad(MotionEstimationContext_t *context_ptr,
-                                     SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr,
+EbErrorType compute_decimated_zz_sad(MotionEstimationContext_t *context_ptr, PictureParentControlSet *pcs_ptr,
                                      EbPictureBufferDesc *sixteenth_decimated_picture_ptr,
                                      uint32_t x_sb_start_index, uint32_t x_sb_end_index,
                                      uint32_t y_sb_start_index, uint32_t y_sb_end_index) {
@@ -860,7 +859,6 @@ void *motion_estimation_kernel(void *input_ptr) {
                     if (pcs_ptr->picture_number > 0) {
                         compute_decimated_zz_sad(
                             context_ptr,
-                            scs_ptr,
                             pcs_ptr,
                             (EbPictureBufferDesc *)pa_ref_obj_
                                 ->sixteenth_decimated_picture_ptr, // Hsan: always use decimated for ZZ SAD derivation until studying the trade offs and regenerating the activity threshold

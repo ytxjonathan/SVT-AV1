@@ -947,8 +947,8 @@ EbErrorType scale_pcs_params(SequenceControlSet* scs_ptr,
     cm->mi_cols = spr_params.encoding_width >> MI_SIZE_LOG2;
     cm->mi_rows = spr_params.encoding_height >> MI_SIZE_LOG2;
 
-    pcs_ptr->picture_sb_width = picture_sb_width;
-    pcs_ptr->picture_sb_height = picture_sb_height;
+    pcs_ptr->picture_sb_width = picture_sb_width; // TODO: use this instead of re-computing
+    pcs_ptr->picture_sb_height = picture_sb_height; // TODO: use this instead of re-computing
 
     if(cm->frm_size.superres_denominator != SCALE_NUMERATOR){
         derive_input_resolution_pcs(pcs_ptr, spr_params.encoding_width * spr_params.encoding_height);

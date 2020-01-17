@@ -54,8 +54,7 @@ EbErrorType source_based_operations_context_ctor(EbThreadContext *  thread_conte
 /***************************************************
 * Derives BEA statistics and set activity flags
 ***************************************************/
-void derive_picture_activity_statistics(SequenceControlSet *     scs_ptr,
-                                        PictureParentControlSet *pcs_ptr)
+void derive_picture_activity_statistics(PictureParentControlSet *pcs_ptr)
 
 {
     uint64_t non_moving_index_min = ~0u;
@@ -147,7 +146,7 @@ void *source_based_operations_kernel(void *input_ptr) {
         /*********************************************Picture-based operations**********************************************************/
 
         // Activity statistics derivation
-        derive_picture_activity_statistics(scs_ptr, pcs_ptr);
+        derive_picture_activity_statistics(pcs_ptr);
 
         // Get Empty Results Object
         eb_get_empty_object(context_ptr->picture_demux_results_output_fifo_ptr,

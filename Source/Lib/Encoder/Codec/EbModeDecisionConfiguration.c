@@ -248,7 +248,6 @@ EbErrorType mdc_refinement(
 }
 
 void refinement_prediction_loop(
-    SequenceControlSet                   *scs_ptr,
     PictureControlSet                    *pcs_ptr,
     uint32_t                              sb_index,
     ModeDecisionConfigurationContext     *context_ptr)
@@ -755,7 +754,6 @@ EbErrorType early_mode_decision_sb(
     );
 
     refinement_prediction_loop(
-        scs_ptr,
         pcs_ptr,
         sb_index,
         context_ptr);

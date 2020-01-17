@@ -1480,8 +1480,7 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
 
         context_ptr->md_context->luma_txb_skip_context = 0;
         context_ptr->md_context->luma_dc_sign_context  = 0;
-        get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                    pcs_ptr,
+        get_txb_ctx(pcs_ptr,
                     COMPONENT_LUMA,
                     pcs_ptr->ep_luma_dc_sign_level_coeff_neighbor_array,
                     txb_origin_x,
@@ -1717,8 +1716,7 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
 
         context_ptr->md_context->cb_txb_skip_context = 0;
         context_ptr->md_context->cb_dc_sign_context  = 0;
-        get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                    pcs_ptr,
+        get_txb_ctx(pcs_ptr,
                     COMPONENT_CHROMA,
                     pcs_ptr->ep_cb_dc_sign_level_coeff_neighbor_array,
                     blk_originx_uv,
@@ -1730,9 +1728,7 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
 
         context_ptr->md_context->cr_txb_skip_context = 0;
         context_ptr->md_context->cr_dc_sign_context  = 0;
-        get_txb_ctx(
-            pcs_ptr->parent_pcs_ptr->scs_ptr,
-            pcs_ptr,
+        get_txb_ctx(pcs_ptr,
             COMPONENT_CHROMA,
             pcs_ptr->ep_cr_dc_sign_level_coeff_neighbor_array,
             blk_originx_uv,
@@ -2468,8 +2464,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
 
                             context_ptr->md_context->luma_txb_skip_context = 0;
                             context_ptr->md_context->luma_dc_sign_context  = 0;
-                            get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                                        pcs_ptr,
+                            get_txb_ctx(pcs_ptr,
                                         COMPONENT_LUMA,
                                         pcs_ptr->ep_luma_dc_sign_level_coeff_neighbor_array,
                                         context_ptr->blk_origin_x,
@@ -2482,8 +2477,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                             if (context_ptr->blk_geom->has_uv) {
                                 context_ptr->md_context->cb_txb_skip_context = 0;
                                 context_ptr->md_context->cb_dc_sign_context  = 0;
-                                get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                                            pcs_ptr,
+                                get_txb_ctx(pcs_ptr,
                                             COMPONENT_CHROMA,
                                             pcs_ptr->ep_cb_dc_sign_level_coeff_neighbor_array,
                                             blk_originx_uv,
@@ -2495,8 +2489,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
 
                                 context_ptr->md_context->cr_txb_skip_context = 0;
                                 context_ptr->md_context->cr_dc_sign_context  = 0;
-                                get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                                            pcs_ptr,
+                                get_txb_ctx(pcs_ptr,
                                             COMPONENT_CHROMA,
                                             pcs_ptr->ep_cr_dc_sign_level_coeff_neighbor_array,
                                             blk_originx_uv,
@@ -3007,8 +3000,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
 
                             context_ptr->md_context->luma_txb_skip_context = 0;
                             context_ptr->md_context->luma_dc_sign_context  = 0;
-                            get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                                        pcs_ptr,
+                            get_txb_ctx(pcs_ptr,
                                         COMPONENT_LUMA,
                                         pcs_ptr->ep_luma_dc_sign_level_coeff_neighbor_array,
                                         txb_origin_x,
@@ -3023,7 +3015,6 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                 context_ptr->md_context->cb_txb_skip_context = 0;
                                 context_ptr->md_context->cb_dc_sign_context  = 0;
                                 get_txb_ctx(
-                                    pcs_ptr->parent_pcs_ptr->scs_ptr,
                                     pcs_ptr,
                                     COMPONENT_CHROMA,
                                     pcs_ptr->ep_cb_dc_sign_level_coeff_neighbor_array,
@@ -3037,8 +3028,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
 
                                 context_ptr->md_context->cr_txb_skip_context = 0;
                                 context_ptr->md_context->cr_dc_sign_context  = 0;
-                                get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                                            pcs_ptr,
+                                get_txb_ctx(pcs_ptr,
                                             COMPONENT_CHROMA,
                                             pcs_ptr->ep_cr_dc_sign_level_coeff_neighbor_array,
                                             ROUND_UV(txb_origin_x) >> 1,
@@ -3345,7 +3335,6 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                         context_ptr->md_context->luma_txb_skip_context = 0;
                         context_ptr->md_context->luma_dc_sign_context  = 0;
                         get_txb_ctx(
-                            pcs_ptr->parent_pcs_ptr->scs_ptr,
                             pcs_ptr,
                             COMPONENT_LUMA,
                             pcs_ptr->ep_luma_dc_sign_level_coeff_neighbor_array,
@@ -3360,7 +3349,6 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                             context_ptr->md_context->cb_txb_skip_context = 0;
                             context_ptr->md_context->cb_dc_sign_context  = 0;
                             get_txb_ctx(
-                                pcs_ptr->parent_pcs_ptr->scs_ptr,
                                 pcs_ptr,
                                 COMPONENT_CHROMA,
                                 pcs_ptr->ep_cb_dc_sign_level_coeff_neighbor_array,
@@ -3374,8 +3362,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
 
                             context_ptr->md_context->cr_txb_skip_context = 0;
                             context_ptr->md_context->cr_dc_sign_context  = 0;
-                            get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                                        pcs_ptr,
+                            get_txb_ctx(pcs_ptr,
                                         COMPONENT_CHROMA,
                                         pcs_ptr->ep_cr_dc_sign_level_coeff_neighbor_array,
                                         ROUND_UV(txb_origin_x) >> 1,

@@ -1827,7 +1827,6 @@ void product_full_loop(ModeDecisionCandidateBuffer *candidate_buffer,
                        uint64_t *y_full_distortion) {
     uint32_t            txb_origin_index;
     uint64_t            y_full_cost;
-    SequenceControlSet *scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
     //    uint32_t   current_txb_index,tu_it;
     uint64_t              y_txb_coeff_bits;
     EB_ALIGN(16) uint64_t txb_full_distortion[3][DIST_CALC_TOTAL];
@@ -1845,8 +1844,7 @@ void product_full_loop(ModeDecisionCandidateBuffer *candidate_buffer,
             pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - (context_ptr->sb_origin_y + tx_org_y));
     context_ptr->luma_txb_skip_context = 0;
     context_ptr->luma_dc_sign_context  = 0;
-    get_txb_ctx(scs_ptr,
-                pcs_ptr,
+    get_txb_ctx(pcs_ptr,
                 COMPONENT_LUMA,
                 context_ptr->full_loop_luma_dc_sign_level_coeff_neighbor_array,
                 context_ptr->sb_origin_x + tx_org_x,
@@ -2082,7 +2080,6 @@ uint8_t allowed_tx_set_b[TX_SIZES_ALL][TX_TYPES] = {
 void product_full_loop_tx_search(ModeDecisionCandidateBuffer *candidate_buffer,
                                  ModeDecisionContext *context_ptr, PictureControlSet *pcs_ptr) {
     uint32_t              txb_origin_index;
-    SequenceControlSet *  scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
     uint64_t              y_txb_coeff_bits;
     EB_ALIGN(16) uint64_t txb_full_distortion[3][DIST_CALC_TOTAL];
     int32_t               plane    = 0;
@@ -2148,8 +2145,7 @@ void product_full_loop_tx_search(ModeDecisionCandidateBuffer *candidate_buffer,
 
             context_ptr->luma_txb_skip_context = 0;
             context_ptr->luma_dc_sign_context  = 0;
-            get_txb_ctx(scs_ptr,
-                        pcs_ptr,
+            get_txb_ctx(pcs_ptr,
                         COMPONENT_LUMA,
                         context_ptr->luma_dc_sign_level_coeff_neighbor_array,
                         context_ptr->sb_origin_x + txb_origin_x,
@@ -2786,8 +2782,6 @@ void full_loop_r(SuperBlock *sb_ptr, ModeDecisionCandidateBuffer *candidate_buff
     uint32_t txb_origin_x;
     uint32_t txb_origin_y;
 
-    SequenceControlSet *scs_ptr = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
-
     context_ptr->three_quad_energy = 0;
 
     uint8_t tx_depth = candidate_buffer->candidate_ptr->tx_depth;
@@ -2802,8 +2796,7 @@ void full_loop_r(SuperBlock *sb_ptr, ModeDecisionCandidateBuffer *candidate_buff
 
         context_ptr->cb_txb_skip_context = 0;
         context_ptr->cb_dc_sign_context  = 0;
-        get_txb_ctx(scs_ptr,
-                    pcs_ptr,
+        get_txb_ctx(pcs_ptr,
                     COMPONENT_CHROMA,
                     context_ptr->cb_dc_sign_level_coeff_neighbor_array,
                     ROUND_UV(context_ptr->sb_origin_x + txb_origin_x) >> 1,
@@ -2815,8 +2808,7 @@ void full_loop_r(SuperBlock *sb_ptr, ModeDecisionCandidateBuffer *candidate_buff
 
         context_ptr->cr_txb_skip_context = 0;
         context_ptr->cr_dc_sign_context  = 0;
-        get_txb_ctx(scs_ptr,
-                    pcs_ptr,
+        get_txb_ctx(pcs_ptr,
                     COMPONENT_CHROMA,
                     context_ptr->cr_dc_sign_level_coeff_neighbor_array,
                     ROUND_UV(context_ptr->sb_origin_x + txb_origin_x) >> 1,

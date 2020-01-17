@@ -1099,7 +1099,7 @@ EbErrorType derive_default_segments(SequenceControlSet *              scs_ptr,
     Input   : distortion, detection signals
     Output  : SB score
 ******************************************************/
-void derive_sb_score(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
+void derive_sb_score(PictureControlSet *pcs_ptr,
                      ModeDecisionConfigurationContext *context_ptr) {
     uint32_t sb_index;
     uint32_t sb_score = 0;
@@ -1153,7 +1153,7 @@ void derive_sb_score(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
 Input   : cost per depth
 Output  : budget per picture
 ******************************************************/
-void set_target_budget_oq(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
+void set_target_budget_oq(PictureControlSet *pcs_ptr,
                           ModeDecisionConfigurationContext *context_ptr) {
     uint32_t budget;
 
@@ -1216,10 +1216,10 @@ void derive_sb_md_mode(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
     configure_adp(pcs_ptr, context_ptr);
 
     // Derive SB score
-    derive_sb_score(scs_ptr, pcs_ptr, context_ptr);
+    derive_sb_score(pcs_ptr, context_ptr);
 
     // Set the target budget
-    set_target_budget_oq(scs_ptr, pcs_ptr, context_ptr);
+    set_target_budget_oq(pcs_ptr, context_ptr);
 
     // Set the percentage based thresholds
     derive_default_segments(scs_ptr, context_ptr);

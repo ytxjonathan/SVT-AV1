@@ -1319,12 +1319,12 @@ EbErrorType derive_input_resolution_pcs(PictureParentControlSet *pcs_ptr, uint32
 EbErrorType sb_params_init_pcs(SequenceControlSet *scs_ptr,
                                PictureParentControlSet *pcs_ptr) {
     EbErrorType return_error = EB_ErrorNone;
-    uint16_t    sb_index;
-    uint16_t    raster_scan_blk_index;
+    uint16_t sb_index;
+    uint16_t raster_scan_blk_index;
     uint16_t encoding_width = pcs_ptr->av1_cm->frm_size.frame_width;
     uint16_t encoding_height = pcs_ptr->av1_cm->frm_size.frame_height;
 
-    uint8_t     picture_sb_width =
+    uint8_t picture_sb_width =
             (uint8_t)((encoding_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
     uint8_t picture_sb_height =
             (uint8_t)((encoding_height + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);

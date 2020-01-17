@@ -12524,7 +12524,6 @@ EbErrorType open_loop_intra_search_sb(PictureParentControlSet *pcs_ptr, uint32_t
                                       MotionEstimationContext_t *context_ptr,
                                       EbPictureBufferDesc *      input_ptr) {
     EbErrorType         return_error = EB_ErrorNone;
-    SequenceControlSet *scs_ptr      = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
 
     uint32_t      blk_origin_x;
     uint32_t      blk_origin_y;

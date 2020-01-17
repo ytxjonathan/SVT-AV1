@@ -3491,7 +3491,7 @@ void tx_reset_neighbor_arrays(PictureControlSet *pcs_ptr, ModeDecisionContext *c
     }
 }
 
-void tx_type_search(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
+void tx_type_search(PictureControlSet *pcs_ptr,
                     ModeDecisionContext *context_ptr, ModeDecisionCandidateBuffer *candidate_buffer,
                     uint32_t qp) {
     EbPictureBufferDesc *input_picture_ptr = context_ptr->hbd_mode_decision
@@ -3526,8 +3526,7 @@ void tx_type_search(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
 
     context_ptr->luma_txb_skip_context = 0;
     context_ptr->luma_dc_sign_context  = 0;
-    get_txb_ctx(scs_ptr,
-                pcs_ptr,
+    get_txb_ctx(pcs_ptr,
                 COMPONENT_LUMA,
                 context_ptr->full_loop_luma_dc_sign_level_coeff_neighbor_array,
                 context_ptr->sb_origin_x + txb_origin_x,
@@ -4068,7 +4067,6 @@ void tx_partitioning_path(ModeDecisionCandidateBuffer *candidate_buffer,
     EbPictureBufferDesc *input_picture_ptr = context_ptr->hbd_mode_decision
                                                  ? pcs_ptr->input_frame16bit
                                                  : pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr;
-    SequenceControlSet *scs_ptr  = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
     int32_t             is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE ||
                         candidate_buffer->candidate_ptr->use_intrabc)
                            ? EB_TRUE
@@ -4219,7 +4217,7 @@ void tx_partitioning_path(ModeDecisionCandidateBuffer *candidate_buffer,
             }
 
             if (!tx_search_skip_flag) {
-                tx_type_search(scs_ptr, pcs_ptr, context_ptr, tx_candidate_buffer, qp);
+                tx_type_search(pcs_ptr, context_ptr, tx_candidate_buffer, qp);
             }
 
             product_full_loop(tx_candidate_buffer,

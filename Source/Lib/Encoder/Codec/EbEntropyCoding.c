@@ -356,7 +356,7 @@ static INLINE void av1_txb_init_levels(int32_t *coeff_buffer_ptr, const uint32_t
 /************************************************************************************************/
 // blockd.h
 
-void get_txb_ctx(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr, const int32_t plane,
+void get_txb_ctx(PictureControlSet *pcs_ptr, const int32_t plane,
                  NeighborArrayUnit *dc_sign_level_coeff_neighbor_array, uint32_t blk_origin_x,
                  uint32_t blk_origin_y, const BlockSize plane_bsize, const TxSize tx_size,
                  int16_t *const txb_skip_ctx, int16_t *const dc_sign_ctx) {
@@ -736,8 +736,7 @@ static EbErrorType av1_encode_tx_coef_y(
             int16_t txb_skip_ctx = 0;
             int16_t dc_sign_ctx  = 0;
 
-            get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                        pcs_ptr,
+            get_txb_ctx(pcs_ptr,
                         COMPONENT_LUMA,
                         luma_dc_sign_level_coeff_neighbor_array,
                         blk_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] - blk_geom->origin_x,
@@ -823,8 +822,7 @@ static EbErrorType av1_encode_tx_coef_uv(PictureControlSet *   pcs_ptr,
                 int16_t txb_skip_ctx = 0;
                 int16_t dc_sign_ctx  = 0;
 
-                get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                            pcs_ptr,
+                get_txb_ctx(pcs_ptr,
                             COMPONENT_CHROMA,
                             cb_dc_sign_level_coeff_neighbor_array,
                             ROUND_UV(blk_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] -
@@ -861,8 +859,7 @@ static EbErrorType av1_encode_tx_coef_uv(PictureControlSet *   pcs_ptr,
                 int16_t txb_skip_ctx = 0;
                 int16_t dc_sign_ctx  = 0;
 
-                get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                            pcs_ptr,
+                get_txb_ctx(pcs_ptr,
                             COMPONENT_CHROMA,
                             cr_dc_sign_level_coeff_neighbor_array,
                             ROUND_UV(blk_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] -
@@ -994,8 +991,7 @@ static EbErrorType av1_encode_coeff_1d(PictureControlSet *   pcs_ptr,
                 int16_t txb_skip_ctx = 0;
                 int16_t dc_sign_ctx  = 0;
 
-                get_txb_ctx(pcs_ptr->parent_pcs_ptr->scs_ptr,
-                            pcs_ptr,
+                get_txb_ctx(pcs_ptr,
                             COMPONENT_LUMA,
                             luma_dc_sign_level_coeff_neighbor_array,
                             blk_origin_x + blk_geom->tx_org_x[blk_ptr->tx_depth][txb_itr] -
@@ -1031,7 +1027,6 @@ static EbErrorType av1_encode_coeff_1d(PictureControlSet *   pcs_ptr,
                     int16_t dc_sign_ctx  = 0;
 
                     get_txb_ctx(
-                        pcs_ptr->parent_pcs_ptr->scs_ptr,
                         pcs_ptr,
                         COMPONENT_CHROMA,
                         cb_dc_sign_level_coeff_neighbor_array,
@@ -1070,7 +1065,6 @@ static EbErrorType av1_encode_coeff_1d(PictureControlSet *   pcs_ptr,
                     int16_t dc_sign_ctx  = 0;
 
                     get_txb_ctx(
-                        pcs_ptr->parent_pcs_ptr->scs_ptr,
                         pcs_ptr,
                         COMPONENT_CHROMA,
                         cr_dc_sign_level_coeff_neighbor_array,
@@ -1181,7 +1175,7 @@ int32_t partition_cdf_length(BlockSize bsize) {
     else
         return EXT_PARTITION_TYPES;
 }
-static void encode_partition_av1(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr, FRAME_CONTEXT *frame_context,
+static void encode_partition_av1(PictureControlSet *pcs_ptr, FRAME_CONTEXT *frame_context,
                                AomWriter *ec_writer, BlockSize bsize, PartitionType p,
                                uint32_t blk_origin_x, uint32_t blk_origin_y,
                                NeighborArrayUnit *partition_context_neighbor_array) {
@@ -6182,8 +6176,7 @@ EB_EXTERN EbErrorType write_sb(EntropyCodingContext *context_ptr, SuperBlock *tb
                 }
 
                 // Code Split Flag
-                encode_partition_av1(scs_ptr,
-                                   pcs_ptr,
+                encode_partition_av1(pcs_ptr,
                                    frame_context,
                                    ec_writer,
                                    bsize,
