@@ -79,6 +79,9 @@ extern "C" {
 
 #define NSQ_ME_OPT               1
 
+#define MIN_POS_OPT              0
+#define REDUCE_LOADS             0
+
 
 #if 1
 #define OMARK_LAMBDA                1 // 2. fix lambda calculation for HBD0
