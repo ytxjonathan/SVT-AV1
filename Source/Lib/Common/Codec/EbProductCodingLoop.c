@@ -1948,8 +1948,15 @@ void set_md_stage_counts(
 #define NIC_S9       2
 #define NIC_S10      3
 #define NIC_S11      4
+#define NIC_S4_5     5 // SETTING_4.5 - for MR mode
 
+#if MR_NICS_LEVEL
+        uint8_t nics_level = NIC_S4_5;
+#elif M1_NICS_LEVEL
+        uint8_t nics_level = NIC_S11;
+#else
         uint8_t nics_level = picture_control_set_ptr->enc_mode == ENC_M0 ? NIC_S8 : picture_control_set_ptr->enc_mode <= ENC_M3 ? NIC_S11 : NIC_S_OLD;
+#endif
 
         if (nics_level == NIC_S_OLD){
                 // Step 2: set md_stage count
@@ -2217,7 +2224,11 @@ void set_md_stage_counts(
                 context_ptr->md_stage_1_count[CAND_CLASS_1] = context_ptr->md_stage_1_count[CAND_CLASS_1] * 2;
             }
 
+#if M3_MD_STAGE_1_COUNT
+            if (1) {
+#else
             if (picture_control_set_ptr->enc_mode >= ENC_M3) {
+#endif
                 context_ptr->md_stage_1_count[CAND_CLASS_1] = context_ptr->md_stage_1_count[CAND_CLASS_1] / 2;
                 context_ptr->md_stage_1_count[CAND_CLASS_2] = context_ptr->md_stage_1_count[CAND_CLASS_2] / 2;
                 context_ptr->md_stage_1_count[CAND_CLASS_3] = context_ptr->md_stage_1_count[CAND_CLASS_3] / 2;        }
@@ -2259,6 +2270,69 @@ void set_md_stage_counts(
 			    context_ptr->md_stage_2_count[CAND_CLASS_1] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 11 : 5;
 			    context_ptr->md_stage_2_count[CAND_CLASS_2] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 11 : 5;
                 context_ptr->md_stage_2_count[CAND_CLASS_3] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 5 : 2;
+            }
+        }
+        else if (nics_level == NIC_S4_5) { // s4.5 - MR mode
+            // Step 2: set md_stage count
+
+            context_ptr->md_stage_1_count[CAND_CLASS_0] = (picture_control_set_ptr->slice_type == I_SLICE) ? fastCandidateTotalCount : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 32 : 16;
+            context_ptr->md_stage_1_count[CAND_CLASS_1] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 32 : 16;
+            context_ptr->md_stage_1_count[CAND_CLASS_2] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 32 : 16;
+            context_ptr->md_stage_1_count[CAND_CLASS_3] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 32 : 16;
+            context_ptr->md_stage_1_count[CAND_CLASS_4] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 28 : 12;
+            context_ptr->md_stage_1_count[CAND_CLASS_5] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : 32;
+            context_ptr->md_stage_1_count[CAND_CLASS_6] = (picture_control_set_ptr->slice_type == I_SLICE) ? 20 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 20 : 10;
+            context_ptr->md_stage_1_count[CAND_CLASS_7] = 24;
+            context_ptr->md_stage_1_count[CAND_CLASS_8] = (picture_control_set_ptr->slice_type == I_SLICE) ? 10 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 10 : 8;
+
+
+            if (context_ptr->combine_class12) {
+                context_ptr->md_stage_1_count[CAND_CLASS_1] = context_ptr->md_stage_1_count[CAND_CLASS_1] * 2;
+            }
+
+            if (picture_control_set_ptr->enc_mode >= ENC_M3) {
+                context_ptr->md_stage_1_count[CAND_CLASS_1] = context_ptr->md_stage_1_count[CAND_CLASS_1] / 2;
+                context_ptr->md_stage_1_count[CAND_CLASS_2] = context_ptr->md_stage_1_count[CAND_CLASS_2] / 2;
+                context_ptr->md_stage_1_count[CAND_CLASS_3] = context_ptr->md_stage_1_count[CAND_CLASS_3] / 2;
+            }
+
+
+            context_ptr->md_stage_2_count[CAND_CLASS_0] = (picture_control_set_ptr->slice_type == I_SLICE) ? 15 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? ((scs->input_resolution >= INPUT_SIZE_1080i_RANGE) ? 11 : 15) : 6;
+            context_ptr->md_stage_2_count[CAND_CLASS_1] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 9 : 5;
+            context_ptr->md_stage_2_count[CAND_CLASS_2] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 9 : 5;
+            context_ptr->md_stage_2_count[CAND_CLASS_3] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 9 : 5;
+            context_ptr->md_stage_2_count[CAND_CLASS_4] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 18 : 6;
+
+            if (picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode == 1)
+                context_ptr->md_stage_2_count[CAND_CLASS_5] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0: 21;
+            else if (picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode <= 3)
+                context_ptr->md_stage_2_count[CAND_CLASS_5] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 18 : 6;
+            else
+                context_ptr->md_stage_2_count[CAND_CLASS_5] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 18 : 6;
+
+            context_ptr->md_stage_2_count[CAND_CLASS_6] = (picture_control_set_ptr->slice_type == I_SLICE) ? 8 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 8 : 3;
+
+            if (picture_control_set_ptr->parent_pcs_ptr->palette_mode == 1)
+                context_ptr->md_stage_2_count[CAND_CLASS_7] = (picture_control_set_ptr->slice_type == I_SLICE) ? 11 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 11 : 6;
+            else if (picture_control_set_ptr->parent_pcs_ptr->palette_mode == 2 || picture_control_set_ptr->parent_pcs_ptr->palette_mode == 3)
+                context_ptr->md_stage_2_count[CAND_CLASS_7] = (picture_control_set_ptr->slice_type == I_SLICE) ? 11 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 11 : 4;
+            else if (picture_control_set_ptr->parent_pcs_ptr->palette_mode == 4 || picture_control_set_ptr->parent_pcs_ptr->palette_mode == 5)
+                context_ptr->md_stage_2_count[CAND_CLASS_7] = (picture_control_set_ptr->slice_type == I_SLICE) ? 6 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 6 : 2;
+            else
+                context_ptr->md_stage_2_count[CAND_CLASS_7] = (picture_control_set_ptr->slice_type == I_SLICE) ? 3 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 3 : 2;
+
+            context_ptr->md_stage_2_count[CAND_CLASS_8] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 6 : 3;
+
+            if (context_ptr->combine_class12) {
+                context_ptr->md_stage_2_count[CAND_CLASS_1] = context_ptr->md_stage_2_count[CAND_CLASS_1] * 2;
+            }
+
+            if (!context_ptr->combine_class12 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) {
+
+                context_ptr->md_stage_2_count[CAND_CLASS_0] = (picture_control_set_ptr->slice_type == I_SLICE) ? 15 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 15 : 6;
+                context_ptr->md_stage_2_count[CAND_CLASS_1] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 18 : 9;
+                context_ptr->md_stage_2_count[CAND_CLASS_2] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 18 : 9;
+                context_ptr->md_stage_2_count[CAND_CLASS_3] = (picture_control_set_ptr->slice_type == I_SLICE) ? 0 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 18 : 9;
             }
         }
 #else
@@ -2526,7 +2600,11 @@ void set_md_stage_counts(
         context_ptr->md_stage_2_count[CAND_CLASS_0] = (picture_control_set_ptr->slice_type == I_SLICE) ? 10 : (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 1;
 
 #if PRESETS_TUNE
+#if M3_MD_STAGE_2_COUNT
+    if (1) {
+#else
     if (picture_control_set_ptr->enc_mode >= ENC_M3 && picture_control_set_ptr->enc_mode <= ENC_M4) {
+#endif
 #else
     if (picture_control_set_ptr->enc_mode >= ENC_M2 && picture_control_set_ptr->enc_mode <= ENC_M4) {
 #endif
@@ -10492,7 +10570,11 @@ void md_encode_block(
 
 #if MULTI_PASS_PD
 #if M1_OPT
+#if M2_IS_NSQ_TABLE_USED
+    is_nsq_table_used = (
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M1                                         ||
+#endif
 #else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0                                         ||
 #endif

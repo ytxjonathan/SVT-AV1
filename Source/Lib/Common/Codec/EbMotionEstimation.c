@@ -13786,7 +13786,11 @@ void integer_search_sb(
 
 #if MULTI_PASS_PD
 #if M1_OPT
+#if M2_IS_NSQ_TABLE_USED
+    is_nsq_table_used = (
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M1 ||
+#endif
 #else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
 #endif
@@ -14595,7 +14599,11 @@ void hme_sb(
 
 #if MULTI_PASS_PD
 #if M1_OPT
+#if M2_IS_NSQ_TABLE_USED
+    is_nsq_table_used = (
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M1 ||
+#endif
 #else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
 #endif
@@ -15356,7 +15364,11 @@ EbErrorType motion_estimate_lcu(
 
 #if MULTI_PASS_PD
 #if M1_OPT
+#if M2_IS_NSQ_TABLE_USED
+    is_nsq_table_used = (
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M1 ||
+#endif
 #else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0 ||
 #endif

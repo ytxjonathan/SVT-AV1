@@ -2640,6 +2640,8 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #if M1_OPT
 #if M2_ADOPTIONS
         enable_wm = (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M2 ||
+#elif M2_ENABLE_WM
+        enable_wm = (
 #else
         enable_wm = (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M1 ||
 #endif
@@ -2676,7 +2678,11 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #if PRESETS_TUNE
 #if M0_OPT
 #if SC_PRESETS_OPT
+#if M1_PIC_OBMC_MODE
+        if (0)
+#else
         if (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0 || (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M1 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected))
+#endif
 #else
         if (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0)
 #endif
@@ -2717,6 +2723,9 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
     else
         picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode = 0;
 
+#if M3_PIC_OBMC_MODE
+    picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode = 0;
+#endif
     frm_hdr->is_motion_mode_switchable =
         frm_hdr->is_motion_mode_switchable || picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode;
 

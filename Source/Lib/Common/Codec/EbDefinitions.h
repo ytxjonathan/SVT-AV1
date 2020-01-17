@@ -32,11 +32,116 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+#define MR_MODE                             0
+
+#define ENABLE_M1                           0
+#define ENABLE_M2                           0
+#define ENABLE_M3                           0
+
+// MR to M0
+#define MR_TX_WEIGHT                        0
+#define MR_MD_STAGE_2_CLASS_PRUNE_TH        0 // non-SC only
+#define MR_SQ_WEIGHT                        0 // non-SC only
+#define MR_PIC_DEPTH_MODE                   0 // non-SC only
+#define MR_INTER_INTER_WEDGE                0
+#define MR_CHROMA_LEVEL                     0
+#define MR_PME_15X15                        0
+#define MR_SUBPEL_7X7                       0
+#define MR_NICS_LEVEL                       0
+
+
+#define MR_ENABLE_INTERINTRA_COMPOUND       0 // SC only
+#define MR_MD_EXIT_TH                       0 // SC only
+#define MR_MD_STAGE_1_CAND_PRUNE_TH         0 // SC only, 720p+ only
+#define MR_COMPOUND_MODE                    0 // SC only
+
+// Old MR-M0 diffs; no longer relevant
+#define MR_INTERPOLATION_SEARCH_LEVEL       0 // removed from MR
+#define MR_HALF_QUARTER_PEL_MODE            0 // removed from MR
+#define MR_INJECT_INTRA_CANDS               0
+#define MR_PIC_OBMC_MODE                    0
+#define MR_NSQ_SEARCH_LEVEL                 0
+#define MR_GM_LEVEL                         0
+#define MR_PRUNE_REF_BASED_ME               0 // non-SC only
+#define MR_UV_MODE_NFL_COUNT                0 // deprecated by adopting CHROMA_OPT_0 OFF
+
+// M1 to M0 - non-SC only
+#if ENABLE_M1 || ENABLE_M2 || ENABLE_M3
+#define M1_NEW_NEAREST_NEAR_COMB            1
+#define M1_PRUNE_REF_BASED_ME               1
+#define M1_GM_LEVEL                         1
+#define M1_HME_ME_SEARCH_AREA_TF            1 // test after M0 adoptions
+#define M1_INTERPOLATION_SEARCH_LEVEL_PD1   1 // un-adopted M0 setting in M1
+#define M1_SWITCHED_HALF_PEL                1
+#define M1_CHROMA_SEARCH_OPT                1
+#define M1_NICS_LEVEL                       1
+
+// Old M1 to M0 - non-SC only - no longer relevant
+#define M1_MD_EXIT_TH                       0 // Adopted M0 setting in M1
+#define M1_HME_LEVEL                        0 // Adopted M0 setting in M1
+#define M1_INTER_INTER_WEDGE_MODE           0 // Adopted M1 setting in M0
+#define M1_CHROMA_LEVEL                     0 // Adopted M1 setting in M0
+#define M1_UV_MODE_NFL_COUNT                0 // don't test
+#define M1_PIC_OBMC_MODE                    0 // don't test
+#define M1_NSQ_SEARCH_LEVEL                 0 // don't test
+#define M1_ENABLE_HME_FLAGS                 0 // don't test
+#define M1_MD_STAGING_MODE                  0 // not a diff
+#endif
+
+// M2 to M1 - non-SC only
+#if ENABLE_M2 || ENABLE_M3
+#define M2_GLOBAL_MV_INJECT                 1
+#define M2_PRUNE_REF_FRAME                  1
+#define M2_MD_EXIT_TH                       1
+#define M2_MD_STAGE_1_CAND_PRUNE_TH         1
+#define M2_MD_STAGE_1_CLASS_PRUNE_TH        1 // redo macro
+#define M2_MD_STAGE_2_CAND_PRUNE_TH         1 // redo macro
+#define M2_FULL_PEL_REF_WINDOW              1
+#define M2_ENABLE_WM                        1
+#define M2_ME_HME_SEARCH_AREA               1
+#define M2_DIST_ME                          1
+#define M2_HALF_PEL_MODE                    1
+#define M2_GLOBAL_MOTION                    1
+#define M2_PIC_DEPTH_MODE                   1 //removed
+#define M2_INTRA_PRED_MODE                  1
+#define M2_WEDGE_MODE                       1 // don't test - only used if use with M1_compound mode
+#define M2_COMPOUND_MODE                    1
+#define M2_REF_COUNT_USED                   1
+#define M2_MFMV_ENABLED                     1
+#define M2_ENABLE_INTERINTRA                1
+
+#define M2_INTERPOLATION_SEARCH_LEVEL_PD1   0 // not a diff
+#define M2_NSQ_LEVEL                        0
+#define M2_IS_NSQ_TABLE_USED                0
+#endif
+
+// M3 to M2 - non-SC only
+#if ENABLE_M3
+#define M3_TX_SEARCH_REDUCED                1
+#define M3_INTERP_SEARCH_LEVEL              1
+#define M3_BIPRED3X3_INJ                    1
+#define M3_PREDICTIVE_ME_LEVEL              1
+#define M3_TRELLIS                          1
+#define M3_MD_STAGE_2_CAND_PRUNE            1 // redo macro
+#define M3_PIC_OBMC_MODE                    1
+#define M3_PIC_DEPTH_MODE                   1
+#define M3_SG_FILTER                        1
+#define M3_INTRA_PRED_MODE                  1
+#define M3_ATB_MODE                         1
+#define M3_REF_COUNT_USED                   1
+#define M3_NSQ_LEVEL                        1
+#define M3_ENABLE_HME_FLAGS                 1
+#define M3_ME_HME_SEARCH_AREA               1
+#define M3_MD_STAGE_1_COUNT                 1
+#define M3_MD_STAGE_2_COUNT                 1
+#endif
+
+
 #define PRED_DEBUG              0 //WIP
 #define PRED_DEBUG_L5           0
 
 #define COMP_SIMILAR     1
-
 
 #define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip
 #define NIC_LEVEL_CLEANUP           1 // Temp nics level clean up
@@ -307,8 +412,6 @@ extern "C" {
 #define NON_AVX512_SUPPORT
 #endif
 
-#define MR_MODE                           0
-
 #define WARP_UPDATE                       1 // Modified Warp settings: ON for MR mode. ON for ref frames in M0
 #define UPDATE_CDEF                       1 // Update bit cost estimation for CDEF filter
 #define EIGTH_PEL_MV                      1
@@ -344,8 +447,13 @@ extern "C" {
 
 #if OPTIMISED_EX_SUBPEL
 #if TUNE_SUBPEL_SEARCH
+#if MR_MODE || MR_SUBPEL_7X7
+#define H_PEL_SEARCH_WIND_1 3  // 1/2-pel serach window 1 makes SR 7x7
+#define H_PEL_SEARCH_WIND_2 3  // 1/2-pel serach window 2 makes SR 7x7
+#else
 #define H_PEL_SEARCH_WIND_1 1  // 1/2-pel serach window 1 makes SR 3x3
 #define H_PEL_SEARCH_WIND_2 2  // 1/2-pel serach window 2 makes SR 5x5
+#endif
 #else
 #define H_PEL_SEARCH_WIND 3  // 1/2-pel serach window
 #endif

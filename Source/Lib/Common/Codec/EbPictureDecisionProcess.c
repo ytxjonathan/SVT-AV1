@@ -775,6 +775,12 @@ EbErrorType signal_derivation_multi_processes_oq(
 
 #if TWO_PASS_USE_2NDP_ME_IN_1STP
     uint8_t enc_mode_hme = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
+
+#if M3_ENABLE_HME_FLAGS
+    enc_mode_hme = ENC_M3;
+#elif M1_ENABLE_HME_FLAGS
+    enc_mode_hme = ENC_M1;
+#endif
     picture_control_set_ptr->enable_hme_flag = enable_hme_flag[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][enc_mode_hme];
 
     picture_control_set_ptr->enable_hme_level0_flag = enable_hme_level0_flag[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][enc_mode_hme];
@@ -829,11 +835,19 @@ EbErrorType signal_derivation_multi_processes_oq(
                 picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
 #endif
 #if MULTI_PASS_PD
+#if MR_PIC_DEPTH_MODE
+        else if (1)
+#else
         else if (MR_MODE)
+#endif
             picture_control_set_ptr->pic_depth_mode = PIC_ALL_DEPTH_MODE;
 #if M1_OPT
-#if M2_ADOPTIONS
+#if M3_PIC_DEPTH_MODE
+        else if (0)
+#elif M2_ADOPTIONS
         else if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#elif M2_PIC_DEPTH_MODE
+        else if (0)
 #else
         else if (picture_control_set_ptr->enc_mode <= ENC_M1)
 #endif
@@ -850,7 +864,11 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if LOSSLESS_CLEAN_UP
         else if (picture_control_set_ptr->enc_mode <= ENC_M7)
 #else
+#if M3_PIC_DEPTH_MODE
+        else if (0)
+#else
         else if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#endif
 #endif
             // Use a single-stage PD if I_SLICE
             picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_2;
@@ -1052,7 +1070,11 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL7;
 #endif
 #if PRESETS_TUNE
+#if M1_NSQ_SEARCH_LEVEL
+        else if (0)
+#else
         else if (picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
         else if (picture_control_set_ptr->enc_mode <= ENC_M1)
             picture_control_set_ptr->nsq_search_level = (picture_control_set_ptr->is_used_as_reference_flag) ? NSQ_SEARCH_LEVEL6 : NSQ_SEARCH_LEVEL3;
@@ -1074,6 +1096,28 @@ EbErrorType signal_derivation_multi_processes_oq(
                 picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL3;
         else
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_OFF;
+#endif
+
+#if M3_NSQ_LEVEL
+        picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_OFF;
+#elif M2_NSQ_LEVEL
+        if (picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
+            picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
+            picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
+            picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_3) {
+
+            picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
+        }
+        else if (sc_content_detected)
+            if (picture_control_set_ptr->is_used_as_reference_flag)
+                picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL5;
+            else
+                picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL2;
+        else
+            if (picture_control_set_ptr->is_used_as_reference_flag)
+                picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL3;
+            else
+                picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL1;
 #endif
 
     if (picture_control_set_ptr->nsq_search_level > NSQ_SEARCH_OFF)
@@ -1297,7 +1341,11 @@ EbErrorType signal_derivation_multi_processes_oq(
             cm->sg_filter_mode = 0;
     else
 #if PRESETS_TUNE
+#if M3_SG_FILTER
+        if (0)
+#else
         if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#endif
 #else
         if (picture_control_set_ptr->enc_mode <= ENC_M4)
 #endif
@@ -1473,6 +1521,20 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->intra_pred_mode = 4;
     }
 
+#if M3_INTRA_PRED_MODE
+    if (picture_control_set_ptr->slice_type != I_SLICE)
+        if (sc_content_detected)
+            picture_control_set_ptr->intra_pred_mode = (picture_control_set_ptr->temporal_layer_index == 0) ? 2 : 3;
+        else
+            picture_control_set_ptr->intra_pred_mode = (picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 3;
+#elif M2_INTRA_PRED_MODE
+    if (picture_control_set_ptr->slice_type != I_SLICE)
+        if (sc_content_detected)
+            picture_control_set_ptr->intra_pred_mode = (picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 2;
+        else
+            picture_control_set_ptr->intra_pred_mode = (picture_control_set_ptr->temporal_layer_index == 0) ? 0 : 3;
+#endif
+
     if (MR_MODE)
         picture_control_set_ptr->intra_pred_mode = 0;
 
@@ -1539,6 +1601,10 @@ EbErrorType signal_derivation_multi_processes_oq(
         else
             picture_control_set_ptr->atb_mode = 0;
 
+#if M3_ATB_MODE
+        picture_control_set_ptr->atb_mode = 0;
+#endif
+
         // Set skip atb                          Settings
         // 0                                     OFF
         // 1                                     ON
@@ -1570,7 +1636,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 3                 Fast: Mode 1 & Mode 2
 #if COMPOUND_WEDGE_OPT
 #if M1_OPT
+#if M2_WEDGE_MODE
+    if (0)
+#else
     if (MR_MODE || picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #else
     if (MR_MODE || picture_control_set_ptr->enc_mode <= ENC_M0)
 #endif
@@ -1599,7 +1669,11 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if PRESETS_TUNE
                 if (picture_control_set_ptr->sc_content_detected)
 #if SC_PRESETS_OPT
+#if MR_COMPOUND_MODE
+                    if (1)
+#else
                     if (MR_MODE)
+#endif
                         picture_control_set_ptr->compound_mode = 2;
                     else
                         picture_control_set_ptr->compound_mode = 0;
@@ -1607,7 +1681,11 @@ EbErrorType signal_derivation_multi_processes_oq(
                     picture_control_set_ptr->compound_mode = (picture_control_set_ptr->enc_mode <= ENC_M0) ? 2 : 0;
 #endif
                 else
+#if M2_COMPOUND_MODE
+                    picture_control_set_ptr->compound_mode = 1;
+#else
                     picture_control_set_ptr->compound_mode = picture_control_set_ptr->enc_mode <= ENC_M1 ? 2 : 1;
+#endif
 #else
                 picture_control_set_ptr->compound_mode = picture_control_set_ptr->sc_content_detected ? 0 :
                 picture_control_set_ptr->enc_mode <= ENC_M1 ? 2 : 1;
@@ -1668,7 +1746,11 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if M0_ADOPT_GM_LEVEL
         if (picture_control_set_ptr->sc_content_detected)
             picture_control_set_ptr->gm_level = GM_TRAN_ONLY;
+#if M1_GM_LEVEL
+        else if (0)
+#else
         else if (picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
             picture_control_set_ptr->gm_level = GM_FULL;
         else
             picture_control_set_ptr->gm_level = GM_DOWN;
@@ -1678,7 +1760,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 #else
         picture_control_set_ptr->gm_level = GM_DOWN;
 #endif
-#if MR_MODE
+#if MR_MODE || MR_GM_LEVEL
         picture_control_set_ptr->gm_level = GM_FULL;
 #endif
 #else
@@ -1696,7 +1778,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 0: OFF
         // 1: ON
 #if M0_ADOPT_PRUNE_REF_BASED_ME
+#if M1_PRUNE_REF_BASED_ME
+        if (0)
+#else
         if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
 #else
         if (picture_control_set_ptr->sc_content_detected || MR_MODE)
 #endif

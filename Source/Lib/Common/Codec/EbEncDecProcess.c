@@ -1223,7 +1223,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->tx_weight = FC_SKIP_TX_SR_TH025;
     else
 #if PRESETS_TUNE
+#if MR_TX_WEIGHT
+        if (1)
+#else
         if (MR_MODE) // tx weight
+#endif
             context_ptr->tx_weight = MAX_MODE_COST;
         else {
             if (context_ptr->tx_search_level == TX_SEARCH_ENC_DEC)
@@ -1288,7 +1292,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         if (context_ptr->tx_search_level == TX_SEARCH_ENC_DEC)
             context_ptr->tx_search_reduced_set = 0;
 #if PRESETS_TUNE
+#if M3_TX_SEARCH_REDUCED
+        else if (0)
+#else
         else if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#endif
             context_ptr->tx_search_reduced_set = 0;
         else
             context_ptr->tx_search_reduced_set = 1;
@@ -1316,9 +1324,17 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else if (context_ptr->pd_pass == PD_PASS_1) {
 #if IFS_TL
 #if M1_ADOPT_M0_INTERP_SEARCH_PD1
+#if M2_INTERPOLATION_SEARCH_LEVEL_PD1
+        if (0)
+#else
         if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
+#else
+#if M1_INTERPOLATION_SEARCH_LEVEL_PD1
+        if (0)
 #else
         if (picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
 #endif
             context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP_UV_BLIND;
         else
@@ -1330,7 +1346,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     }
     else
 #if !MR_MODE_CLEAN_UP
+#if MR_INTERPOLATION_SEARCH_LEVEL
+        if (1)
+#else
     if (MR_MODE)
+#endif
         context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP;
     else 
 #endif
@@ -1344,7 +1364,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->interpolation_search_level = IT_SEARCH_OFF;
 #endif
 #if PRESETS_TUNE
+#if M3_INTERP_SEARCH_LEVEL
+    else if (0)
+#else
     else if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#endif
 #else
     else if (picture_control_set_ptr->enc_mode <= ENC_M1)
 #endif
@@ -1399,10 +1423,18 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
 #if PRESETS_TUNE
 #if ENHANCED_M0_SETTINGS && !M0_ADOPT_M1_CHROMA_LEVEL
+#if M1_CHROMA_LEVEL
+            if (0)
+#else
             if (picture_control_set_ptr->enc_mode == ENC_M0)
+#endif
                 context_ptr->chroma_level = CHROMA_MODE_0;
 #else
+#if MR_CHROMA_LEVEL
+            if (1)
+#else
             if (MR_MODE)
+#endif
                 context_ptr->chroma_level = CHROMA_MODE_0;
 #endif
             else
@@ -1481,7 +1513,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
 #endif
 #if PRESETS_OPT
+#if M2_GLOBAL_MV_INJECT
+        if (0)
+#else
         if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #else
         if (picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
@@ -1538,7 +1574,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #if FIX_NEAREST_NEW
 #if NEW_NN_TL
+#if M1_NEW_NEAREST_NEAR_COMB
+            if (0)
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
 #else
             if (picture_control_set_ptr->enc_mode <= ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
 #endif
@@ -1665,7 +1705,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             else
                 context_ptr->bipred3x3_injection = 0;
         else
+#if M3_BIPRED3X3_INJ
+            if (0)
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#endif
                 context_ptr->bipred3x3_injection = 1;
             else if (picture_control_set_ptr->enc_mode <= ENC_M4)
                 context_ptr->bipred3x3_injection = 2;
@@ -1722,7 +1766,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                     context_ptr->predictive_me_level = 0;
             else
 #if M0_OPT
+#if M3_PREDICTIVE_ME_LEVEL
+                if (0)
+#else
                 if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#endif
 #if PRESETS_OPT
                     context_ptr->predictive_me_level = 5;
 #else
@@ -1788,7 +1836,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if ADD_4TH_MD_STAGE
+#if M1_MD_STAGING_MODE
+    if (0)
+#else
     if (picture_control_set_ptr->enc_mode == ENC_M0)
+#endif
 #if TX_SIZE_ONLY_MD_STAGE_2
         context_ptr->md_staging_mode = MD_STAGING_MODE_1;
 #else
@@ -1990,12 +2042,20 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (sequence_control_set_ptr->static_config.enable_trellis == DEFAULT)
 #if PRESETS_TUNE
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#if M3_TRELLIS
+            if (0)
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#endif
                 context_ptr->trellis_quant_coeff_optimization = EB_TRUE;
             else
                 context_ptr->trellis_quant_coeff_optimization = EB_FALSE;
         else
+#if M3_TRELLIS
+            if (0)
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#endif
                 context_ptr->trellis_quant_coeff_optimization = EB_TRUE;
             else
                 context_ptr->trellis_quant_coeff_optimization = EB_FALSE;
@@ -2101,7 +2161,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
     if (sequence_control_set_ptr->static_config.prune_ref_rec_part == DEFAULT)
 #if PRESETS_TUNE
+#if M2_PRUNE_REF_FRAME
+        if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#else
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #else
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
@@ -2117,9 +2181,17 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // Phoenix: Active only when inter/inter compound is on
 #if COMPOUND_WEDGE_OPT
 #if M0_ADOPT_M1_INTER_INTER_WEDGE
+#if MR_INTER_INTER_WEDGE
+    if (1)
+#else
     if (MR_MODE)
+#endif
+#else
+#if M1_INTER_INTER_WEDGE_MODE
+    if (0)
 #else
     if (MR_MODE || picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
 #endif
 #else
     if (picture_control_set_ptr->enc_mode <= ENC_M7)
@@ -2144,14 +2216,21 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if M0_OPT
-#if M1_ADOPT_M0_MD_EXIT_TH
+#if MR_MD_EXIT_TH
+    if (1)
+#elif M1_ADOPT_M0_MD_EXIT_TH
 #if M2_ADOPTIONS
     if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M2 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0))
+#elif M2_MD_EXIT_TH
+        if (0)
 #else
     if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0))
 #endif
+#elif M1_MD_EXIT_TH
+    if (0)
 #else
     if (MR_MODE ||( picture_control_set_ptr->enc_mode == ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0))
+#endif
 #endif
 #else
     if (MR_MODE)
@@ -2179,6 +2258,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if M1_OPT
 #if MD_STAGE_1_CAND_PRUNNING_TH
     if (picture_control_set_ptr->enc_mode <= ENC_M2 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#elif M2_MD_STAGE_1_CAND_PRUNE_TH
+    if (sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#elif MR_MD_STAGE_1_CAND_PRUNE_TH
+    if (1)
 #else
     if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
@@ -2226,6 +2309,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if M1_OPT
 #if MD_STAGE_1_CLASS_PRUNNING_TH
         if (picture_control_set_ptr->enc_mode <= ENC_M1 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#elif M2_MD_STAGE_1_CLASS_PRUNE_TH
+        if (sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #else
         if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
@@ -2265,6 +2350,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if (PRESETS_TUNE && !PRESETS_OPT) || M1_OPT
 #if MD_STAGE_2_CAND_PRUNNING_TH
         if (picture_control_set_ptr->enc_mode <= ENC_M1 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#elif M2_MD_STAGE_2_CAND_PRUNE_TH
+        if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #else
         if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M1)
 #endif
@@ -2285,7 +2372,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else 
         context_ptr->md_stage_2_cand_prune_th = 5;
 #else
+#if M3_MD_STAGE_2_CAND_PRUNE
+    else if (0)
+#else
     else if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#endif
         context_ptr->md_stage_2_cand_prune_th = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 15 : 12;
     else if (picture_control_set_ptr->enc_mode <= ENC_M4)
         context_ptr->md_stage_2_cand_prune_th = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 5 : 3;
@@ -2307,7 +2398,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #if M0_OPT
 #if SC_PRESETS_OPT
+#if MR_MD_STAGE_2_CLASS_PRUNE_TH
+        if (1)
+#else
     if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)))
+#endif
 #else
     if (MR_MODE)
 #endif
@@ -2360,7 +2455,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
+#if MR_SQ_WEIGHT
+    if (1)
+#else
     if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#endif
 #else
     if (MR_MODE)
 #endif
@@ -2402,6 +2501,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if M2_ADOPTIONS
         context_ptr->full_pel_ref_window_width_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode <= ENC_M2) ? FULL_PEL_REF_WINDOW_WIDTH_EXTENDED : FULL_PEL_REF_WINDOW_WIDTH;
         context_ptr->full_pel_ref_window_height_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode <= ENC_M2) ? FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED : FULL_PEL_REF_WINDOW_HEIGHT;
+#elif M2_FULL_PEL_REF_WINDOW
+        context_ptr->full_pel_ref_window_width_th = FULL_PEL_REF_WINDOW_WIDTH;
+        context_ptr->full_pel_ref_window_height_th = FULL_PEL_REF_WINDOW_HEIGHT;
 #else
         context_ptr->full_pel_ref_window_width_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode <= ENC_M1) ? FULL_PEL_REF_WINDOW_WIDTH_EXTENDED : FULL_PEL_REF_WINDOW_WIDTH;
         context_ptr->full_pel_ref_window_height_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->enc_mode <= ENC_M1) ? FULL_PEL_REF_WINDOW_HEIGHT_EXTENDED : FULL_PEL_REF_WINDOW_HEIGHT;
@@ -2578,7 +2680,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 
 #if MOVE_OPT
+#if M1_CHROMA_SEARCH_OPT
+    context_ptr->chroma_search_opt = 1;
+#else
     context_ptr->chroma_search_opt = picture_control_set_ptr->enc_mode <= ENC_M0 ? 0 : 1;
+#endif
 #endif
 
     return return_error;

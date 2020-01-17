@@ -108,6 +108,13 @@ void* set_me_hme_params_oq(
 #endif
         hmeMeLevel = ENC_M0;
 #endif
+
+#if M3_ME_HME_SEARCH_AREA
+    hmeMeLevel = ENC_M3;
+#elif M2_ME_HME_SEARCH_AREA
+    hmeMeLevel = ENC_M2;
+#endif
+
     // HME/ME default settings
     me_context_ptr->number_hme_search_region_in_width = 2;
     me_context_ptr->number_hme_search_region_in_height = 2;
@@ -182,6 +189,10 @@ EbErrorType signal_derivation_me_kernel_oq(
 #if DIST_BASED_ME_SEARCH_AREA
     uint8_t  hmeMeLevel = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
 
+#if M2_DIST_ME
+    hmeMeLevel = ENC_M2;
+#endif
+
 #if M2_ADOPTIONS
     if (hmeMeLevel <= ENC_M2)
 #else
@@ -255,7 +266,11 @@ EbErrorType signal_derivation_me_kernel_oq(
         context_ptr->me_context_ptr->use_subpel_flag = sequence_control_set_ptr->static_config.enable_subpel;
 #if !MR_MODE_CLEAN_UP
 #if SC_PRESETS_OPT
+#if MR_HALF_QUARTER_PEL_MODE
+    if (1) {
+#else
     if (MR_MODE && !picture_control_set_ptr->sc_content_detected) {
+#endif
 #else
     if (MR_MODE) {
 #endif
@@ -269,7 +284,11 @@ EbErrorType signal_derivation_me_kernel_oq(
 #if !MR_MODE_CLEAN_UP
     else 
 #endif
+#if M2_HALF_PEL_MODE
+        if (0) {
+#else
         if (enc_mode <= ENC_M1) {
+#endif
 #else
     else if (enc_mode == ENC_M0) {
 #endif
@@ -291,7 +310,11 @@ EbErrorType signal_derivation_me_kernel_oq(
     }
 
 #if SWITCHED_HALF_PEL_MODE
+#if M1_SWITCHED_HALF_PEL
+    context_ptr->me_context_ptr->switched_half_pel_mode = 1;
+#else
     context_ptr->me_context_ptr->switched_half_pel_mode = enc_mode <= ENC_M0 ? 0 : 1;
+#endif
 #endif
 #if TUNE_SUBPEL_SEARCH
     context_ptr->me_context_ptr->h_pel_search_wind =  sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?
@@ -358,7 +381,11 @@ EbErrorType signal_derivation_me_kernel_oq(
     if (sequence_control_set_ptr->static_config.enable_global_motion == EB_TRUE)
     {
 #if PRESETS_OPT
+#if M2_GLOBAL_MOTION
+        if (0)
+#else
         if (enc_mode <= ENC_M1)
+#endif
 #else
         if (enc_mode == ENC_M0)
 #endif
@@ -515,6 +542,13 @@ void* tf_set_me_hme_params_oq(
 
     uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
 
+#if M3_ME_HME_SEARCH_AREA
+    hmeMeLevel = ENC_M3;
+#elif M2_ME_HME_SEARCH_AREA
+    hmeMeLevel = ENC_M2;
+#elif M1_HME_ME_SEARCH_AREA_TF
+    hmeMeLevel = ENC_M1;
+#endif
 #if M2_ADOPTIONS
     if (picture_control_set_ptr->enc_mode == ENC_M2)
         hmeMeLevel = ENC_M1;
@@ -574,7 +608,13 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
 
 #if DIST_BASED_ME_SEARCH_AREA
     uint8_t  hmeMeLevel = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
-
+    
+#if M1_HME_LEVEL
+    hmeMeLevel = ENC_M1;
+#endif
+#if M2_DIST_ME
+    hmeMeLevel = ENC_M2;
+#endif
 #if M1_ADOPT_M0_DIST_ME
 #if M2_ADOPTIONS
     if (hmeMeLevel <= ENC_M2 && picture_control_set_ptr->sc_content_detected == 0)
@@ -651,8 +691,13 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
             context_ptr->me_context_ptr->use_subpel_flag = 1;
     else
         context_ptr->me_context_ptr->use_subpel_flag = sequence_control_set_ptr->static_config.enable_subpel;
+
 #if !MR_MODE_CLEAN_UP
+#if MR_HALF_QUARTER_PEL_MODE
+    if (1) {
+#else
     if (MR_MODE) {
+#endif
         context_ptr->me_context_ptr->half_pel_mode =
             EX_HP_MODE;
         context_ptr->me_context_ptr->quarter_pel_mode =
@@ -663,7 +708,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
 #if !MR_MODE_CLEAN_UP
     else
 #endif
+#if M2_HALF_PEL_MODE
+        if (0) {
+#else
         if (enc_mode <= ENC_M1) {
+#endif
 #else
     else if (enc_mode == ENC_M0) {
 #endif
@@ -684,7 +733,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
     }
 
 #if SWITCHED_HALF_PEL_MODE
+#if M1_SWITCHED_HALF_PEL
+    context_ptr->me_context_ptr->switched_half_pel_mode = 1;
+#else
     context_ptr->me_context_ptr->switched_half_pel_mode = enc_mode <= ENC_M0 ? 0 : 1;
+#endif
 #endif
 
     // Set fractional search model
