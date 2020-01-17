@@ -105,7 +105,6 @@ void *source_based_operations_kernel(void *input_ptr) {
     SourceBasedOperationsContext *context_ptr =
         (SourceBasedOperationsContext *)thread_context_ptr->priv;
     PictureParentControlSet *  pcs_ptr;
-    SequenceControlSet *       scs_ptr;
     EbObjectWrapper *          in_results_wrapper_ptr;
     InitialRateControlResults *in_results_ptr;
     EbObjectWrapper *          out_results_wrapper_ptr;
@@ -118,7 +117,6 @@ void *source_based_operations_kernel(void *input_ptr) {
 
         in_results_ptr = (InitialRateControlResults *)in_results_wrapper_ptr->object_ptr;
         pcs_ptr        = (PictureParentControlSet *)in_results_ptr->pcs_wrapper_ptr->object_ptr;
-        scs_ptr        = (SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr;
         pcs_ptr->dark_back_groundlight_fore_ground = EB_FALSE;
         context_ptr->complete_sb_count             = 0;
         uint32_t sb_total_count                    = pcs_ptr->sb_total_count;
