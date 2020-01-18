@@ -345,7 +345,7 @@ int eb_av1_diamond_search_sad_c(IntraBcContext *x, const SearchSiteConfig *cfg, 
         int all_in = 1, t;
 
         /*!< All_in is true if every one of the points we are checking are within
-         *   the bounds of the image.*/ 
+         *   the bounds of the image.*/
         all_in &= ((best_mv->row + ss[i].mv.row) > x->mv_limits.row_min);
         all_in &= ((best_mv->row + ss[i + 1].mv.row) < x->mv_limits.row_max);
         all_in &= ((best_mv->col + ss[i + 2].mv.col) > x->mv_limits.col_min);

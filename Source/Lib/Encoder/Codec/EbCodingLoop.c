@@ -2635,7 +2635,7 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
 
                                     /*!< Set the Candidate Buffer */
                                     candidate_buffer = candidate_buffer_ptr_array[0];
-                                    /*!< Rate estimation function uses the values from CandidatePtr. 
+                                    /*!< Rate estimation function uses the values from CandidatePtr.
                                      *   The right values are copied from blk_ptr to CandidatePtr */
                                     candidate_buffer->candidate_ptr->type =
                                         blk_ptr->prediction_mode_flag;

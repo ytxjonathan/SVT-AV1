@@ -1,7 +1,5 @@
-/*
-* Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
+/*!< Copyright(c) 2019 Intel Corporation
+ * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 #ifndef EbEntropyCodingObject_h
 #define EbEntropyCodingObject_h
@@ -21,7 +19,7 @@ typedef struct Bitstream {
 typedef struct EntropyCoder {
     EbDctor        dctor;
     EbPtr          cabac_encode_context_ptr;
-    FRAME_CONTEXT *fc; /* this frame entropy */
+    FRAME_CONTEXT *fc; /*!< this frame entropy */
     AomWriter      ec_writer;
     EbPtr          ec_output_bitstream_ptr;
     uint64_t       ec_frame_size;
@@ -36,4 +34,4 @@ extern EbPtr entropy_coder_get_bitstream_ptr(EntropyCoder *entropy_coder_ptr);
 #ifdef __cplusplus
 }
 #endif
-#endif // EbEntropyCodingObject_h
+#endif /*!< EbEntropyCodingObject_h */

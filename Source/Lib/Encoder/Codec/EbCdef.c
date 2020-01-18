@@ -554,7 +554,7 @@ void eb_av1_cdef_frame(EncDecContext *context_ptr, SequenceControlSet *scs_ptr,
              *   frame boundaries. Then bottom-left and top-right mi structures are
              *   accessed to check whether the bottom and right boundaries
              *   (respectively) are frame boundaries.
-             * 
+             *
              *   Note that we can't just check the bottom-right mi structure - eg. if
              *   we're at the right-hand edge of the frame but not the bottom, then
              *   the bottom-right mi is NULL but the bottom-left is not. */

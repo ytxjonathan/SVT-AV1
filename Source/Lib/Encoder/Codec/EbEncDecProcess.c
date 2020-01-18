@@ -840,7 +840,7 @@ void psnr_calculations(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) 
                         }
                     }
 
-                    /*!< U+V
+                    /*!< U+V */
 
                     tb_origin_x = sb_num_in_width * 32;
                     tb_origin_y = sb_num_in_height * 32;
@@ -1359,7 +1359,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
             context_ptr->chroma_level =
                 (scs_ptr->encoder_bit_depth == EB_8BIT) ? CHROMA_MODE_2 : CHROMA_MODE_3;
 
-    } else /*!< use specified level
+    } else /*!< use specified level */
         context_ptr->chroma_level = scs_ptr->static_config.set_chroma_mode;
 
     /*!< Set the full loop escape level
