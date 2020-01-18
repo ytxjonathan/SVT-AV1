@@ -32,7 +32,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-
+#define  DISABLE_WARPED_MOTION 0
+#define WARP_IMPROVEMENT       0
 #define ALTREF_TL1             1 // Enable TF for layer 1, where the distance is more or equal to 4
 #define ALTREF_STR_UPDATE      1 // Adjust the filter strength
 

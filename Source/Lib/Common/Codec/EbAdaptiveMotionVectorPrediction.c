@@ -2061,7 +2061,7 @@ EbBool warped_motion_parameters(
     MvReferenceFrame rf[2];
     av1_set_ref_frame(rf, ref_frame_type);
 
-    uint16_t nsamples = wm_find_samples(
+    uint16_t nsamples = wm_find_samples( // AMIR to clean up
         cu_ptr,
         blk_geom,
         cu_origin_x,
@@ -2075,9 +2075,14 @@ EbBool warped_motion_parameters(
         return apply_wm;
 
     MV mv;
+#if WARP_IMPROVEMENT
+    mv_unit->pred_direction;
+    mv.col = mv_unit->mv[mv_unit->pred_direction].x;
+    mv.row = mv_unit->mv[mv_unit->pred_direction].y;
+#else
     mv.col = mv_unit->mv[REF_LIST_0].x;
     mv.row = mv_unit->mv[REF_LIST_0].y;
-
+#endif
     if(nsamples > 1)
         nsamples = select_samples(&mv, pts, pts_inref, nsamples, bsize);
     *num_samples = nsamples;

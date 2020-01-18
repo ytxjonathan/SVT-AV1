@@ -2656,9 +2656,13 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #if !FIX_WM_SETTINGS
     enable_wm = picture_control_set_ptr->parent_pcs_ptr->temporal_layer_index > 0 ? EB_FALSE : enable_wm;
 #endif
+
     frm_hdr->allow_warped_motion = enable_wm
         && !(frm_hdr->frame_type == KEY_FRAME || frm_hdr->frame_type == INTRA_ONLY_FRAME)
         && !frm_hdr->error_resilient_mode;
+#if DISABLE_WARPED_MOTION
+    frm_hdr->allow_warped_motion = EB_FALSE;
+#endif
     frm_hdr->is_motion_mode_switchable = frm_hdr->allow_warped_motion;
 #if OBMC_FLAG
     // OBMC Level                                   Settings

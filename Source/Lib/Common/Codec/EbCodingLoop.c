@@ -3108,6 +3108,19 @@ EB_EXTERN void av1_encode_pass(
                         if (doMC &&
                             pu_ptr->motion_mode == WARPED_CAUSAL)
                         {
+#if WARP_IMPROVEMENT
+                            EbPictureBufferDesc             *ref_pic_list0;
+                            EbPictureBufferDesc             *ref_pic_list1;
+
+                            if (!is16bit) {
+                                ref_pic_list0 = cu_ptr->prediction_unit_array->ref_frame_index_l0 >= 0 ? refObj0->reference_picture : (EbPictureBufferDesc*)EB_NULL;
+                                ref_pic_list1 = cu_ptr->prediction_unit_array->ref_frame_index_l1 >= 0 ? refObj1->reference_picture : (EbPictureBufferDesc*)EB_NULL;
+                            }
+                            else {
+                                ref_pic_list0 = cu_ptr->prediction_unit_array->ref_frame_index_l0 >= 0 ? refObj0->reference_picture16bit : (EbPictureBufferDesc*)EB_NULL;
+                                ref_pic_list1 = cu_ptr->prediction_unit_array->ref_frame_index_l1 >= 0 ? refObj1->reference_picture16bit : (EbPictureBufferDesc*)EB_NULL;
+                            }
+#endif
                             warped_motion_prediction(
                                 picture_control_set_ptr,
                                 &context_ptr->mv_unit,
@@ -3118,8 +3131,13 @@ EB_EXTERN void av1_encode_pass(
                                 context_ptr->cu_origin_y,
                                 cu_ptr,
                                 blk_geom,
+#if WARP_IMPROVEMENT
+                                ref_pic_list0,
+                                ref_pic_list1,
+#else
                                 is16bit ? refObj0->reference_picture16bit : refObj0->reference_picture,
                                 ref_idx_l1 >= 0 ? is16bit ? refObj1->reference_picture16bit : refObj1->reference_picture : NULL,
+#endif
                                 recon_buffer,
                                 context_ptr->cu_origin_x,
                                 context_ptr->cu_origin_y,

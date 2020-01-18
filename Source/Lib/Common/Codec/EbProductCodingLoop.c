@@ -2823,7 +2823,10 @@ void md_stage_0(
                     use_ssd);
 
             }
-
+#if 0//WARP_IMPROVEMENT
+            if(candidate_buffer->candidate_ptr->motion_mode == WARPED_CAUSAL)
+            *(candidate_buffer->fast_cost_ptr) = 10;
+#endif
             // Find the buffer with the highest cost
             if (fastLoopCandidateIndex || scratch_buffer_pesent_flag)
             {
@@ -7126,6 +7129,11 @@ void full_loop_core(
             &cr_coeff_bits,
             context_ptr->blk_geom->bsize);
 
+
+#if 0//WARP_IMPROVEMENT
+        if (candidate_buffer->candidate_ptr->motion_mode == WARPED_CAUSAL)
+            *(candidate_buffer->full_cost_ptr) = 10;
+#endif
         candidate_buffer->cb_distortion[DIST_CALC_RESIDUAL] = cbFullDistortion[DIST_CALC_RESIDUAL];
         candidate_buffer->cb_distortion[DIST_CALC_PREDICTION] = cbFullDistortion[DIST_CALC_PREDICTION];
         candidate_buffer->cb_coeff_bits = cb_coeff_bits;
