@@ -1523,9 +1523,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
     if (sequence_control_set_ptr->static_config.new_nearest_comb_inject == DEFAULT)
 #if M0_OPT
+#if !ENABLE_NEW_NN_SC
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
             context_ptr->new_nearest_near_comb_injection = 0;
         else
+#endif
 #endif
 #if FIX_NEAREST_NEW
 #if NEW_NN_TL
@@ -1587,9 +1589,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     }
     else
 #endif
+#if !ENABLE_WARPED_SC
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
         context_ptr->warped_motion_injection = 0;
     else
+#endif
         context_ptr->warped_motion_injection = 1;
 
     // Set unipred3x3 injection

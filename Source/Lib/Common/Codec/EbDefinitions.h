@@ -49,13 +49,13 @@ extern "C" {
 #define OPT_REC_SUBP            1
 #define SC_HME_PRUNING          1
 #endif
-#define CHROMA_SEARCH_OPT         1
+#define CHROMA_SEARCH_OPT         0
 #if CHROMA_SEARCH_OPT
 #define INFR_OPT                 1 // lossless
 #define MOVE_OPT                 1 // semi-lossless
 #define COMP_OPT                 1 // lossy
 #endif
-#define REDUCE_ME_OUTPUT         1
+#define REDUCE_ME_OUTPUT         0
 #define TUNE_REDUCE_ME_OUTPUT    1
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 
@@ -132,6 +132,8 @@ extern "C" {
 #define DISTANCE_ME_FACTOR           1 // NON_SC
 #define TUNE_ME_MAX                  1 // NON_SC
 #define TUNE_PRUNE_SC                1 // SC ONLY
+#define ENABLE_WARPED_SC             1 // SC ONLY
+#define ENABLE_NEW_NN_SC             1 // SC ONLY
 
 
 #define DIST_BASED_PME_SEARCH_AREA   0
