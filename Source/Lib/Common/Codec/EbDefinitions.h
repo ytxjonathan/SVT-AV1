@@ -58,6 +58,8 @@ extern "C" {
 #endif
 #define REDUCE_ME_OUTPUT         0
 #define TUNE_REDUCE_ME_OUTPUT    1
+#define OBMC_OPT2                0
+#define OBMC_OPT3                0
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 
 
@@ -312,7 +314,15 @@ typedef struct {
     uint8_t bx;
     uint8_t skip;
 } cdef_list;
-
+#if OBMC_OPT2
+#define MD2_MAX_NIC 100
+typedef struct {
+    int16_t mvx;
+    int16_t mvy;
+    uint8_t ref_list;
+    uint8_t ref_indx;
+} simple_motion_type;
+#endif
 /*!\brief force enum to be unsigned 1 byte*/
 #define UENUM1BYTE(enumvar) \
   ;                         \
