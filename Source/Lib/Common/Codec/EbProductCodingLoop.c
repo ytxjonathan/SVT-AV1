@@ -5916,35 +5916,13 @@ void tx_partitioning_path(
                 block_has_coeff = EB_TRUE;
 
 #if LOSSLESS_TX_SIZE_OPT
-            uint64_t tx_size_bits = 0;
-            if (picture_control_set_ptr->parent_pcs_ptr->frm_hdr.tx_mode == TX_MODE_SELECT)
-                tx_size_bits = get_tx_size_bits(
-                    tx_candidate_buffer,
-                    context_ptr,
-                    picture_control_set_ptr,
-                    context_ptr->tx_depth,
-                    block_has_coeff);
-            current_tx_cost = RDCOST(full_lambda, (tx_y_coeff_bits + tx_size_bits), tx_y_full_distortion[DIST_CALC_RESIDUAL]);
+            current_tx_cost = RDCOST(full_lambda, tx_y_coeff_bits, tx_y_full_distortion[DIST_CALC_RESIDUAL]);
             if (current_tx_cost > best_cost_search)
                 break;
 #endif
 
         } // Transform Loop
-#if LOSSLESS_TX_SIZE_OPT
-        if (current_tx_cost < best_cost_search) {
-            best_cost_search = current_tx_cost;
-            best_tx_depth = context_ptr->tx_depth;
-#if TX_SIZE_EARLY_EXIT
-            is_best_has_coeff = block_has_coeff;
-#endif
-            y_full_distortion[DIST_CALC_RESIDUAL] = tx_y_full_distortion[DIST_CALC_RESIDUAL];
-            y_full_distortion[DIST_CALC_PREDICTION] = tx_y_full_distortion[DIST_CALC_PREDICTION];
-            *y_coeff_bits = tx_y_coeff_bits;
-            for (context_ptr->txb_itr = 0; context_ptr->txb_itr < txb_count; context_ptr->txb_itr++) {
-                y_count_non_zero_coeffs[context_ptr->txb_itr] = tx_y_count_non_zero_coeffs[context_ptr->txb_itr];
-            }
-        }
-#else
+
         uint64_t tx_size_bits = 0;
         if (picture_control_set_ptr->parent_pcs_ptr->frm_hdr.tx_mode == TX_MODE_SELECT)
             tx_size_bits = get_tx_size_bits(
@@ -5973,6 +5951,10 @@ void tx_partitioning_path(
             }
 
         }
+
+#if LOSSY_TX_SIZE_OPT
+        if (context_ptr->tx_depth == 1 && best_tx_depth == 0 && (((current_tx_cost - best_cost_search) * 100) / best_cost_search) > 5)
+            break;
 #endif
     } // Transform Depth Loop
 

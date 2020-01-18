@@ -145,6 +145,7 @@ extern "C" {
 #define ENHANCED_SQ_WEIGHT           1
 
 #define LOSSLESS_TX_SIZE_OPT         0 
+#define LOSSY_TX_SIZE_OPT            0       
 #define ATB_INTRA_2_DEPTH            1 // ATB INTRA Depth 2
 #define SHUT_TX_WEIGHT               0
 #define ATB_INTER_2_DEPTH            1 // ATB INTRA Depth 2
