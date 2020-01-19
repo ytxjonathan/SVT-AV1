@@ -156,6 +156,11 @@ extern "C" {
 #define FASTER_RDOQ                  1
 #define UPGRAGDE_TX_WEIGHT           0 
 #define ADD_4TH_MD_STAGE             0
+#if ADD_4TH_MD_STAGE
+#define TX_SIZE_ONLY_MD_STAGE_2      1
+#define TX_TYPE_ONLY_MD_STAGE_2      0
+#define RDOQ_ONLY_MD_STAGE_2         0
+#endif
 
 #define IMPROVED_MULTI_PASS_PD       0
 #if IMPROVED_MULTI_PASS_PD

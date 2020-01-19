@@ -349,7 +349,11 @@ extern "C" {
 
     // full_loop_core signals
     EbBool                              md_staging_skip_full_pred; // 0: perform luma & chroma prediction + interpolation search, 2: nothing (use information from previous stages)
+#if TX_SIZE_ONLY_MD_STAGE_2
+    EbBool                              md_staging_tx_size_mode; // 0: Tx Size recon only, 1:Tx Size search and recon
+#else
     EbBool                              md_staging_skip_atb;
+#endif
     EbBool                              md_staging_tx_search; // 0: skip, 1: use ref cost, 2: no shortcuts
     EbBool                              md_staging_skip_full_chroma;
     EbBool                              md_staging_skip_rdoq;

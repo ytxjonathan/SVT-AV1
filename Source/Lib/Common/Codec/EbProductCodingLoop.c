@@ -2108,6 +2108,17 @@ void set_md_stage_counts(
 #endif
 
 #if ADD_4TH_MD_STAGE
+#if TX_SIZE_ONLY_MD_STAGE_2
+    context_ptr->md_stage_3_count[CAND_CLASS_0] =  (context_ptr->md_stage_2_count[CAND_CLASS_0] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_1] =  (context_ptr->md_stage_2_count[CAND_CLASS_1] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_2] =  (context_ptr->md_stage_2_count[CAND_CLASS_2] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_3] =  (context_ptr->md_stage_2_count[CAND_CLASS_3] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_4] =  (context_ptr->md_stage_2_count[CAND_CLASS_4] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_5] =  (context_ptr->md_stage_2_count[CAND_CLASS_5] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_6] =  (context_ptr->md_stage_2_count[CAND_CLASS_6] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_7] =  (context_ptr->md_stage_2_count[CAND_CLASS_7] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_8] =  (context_ptr->md_stage_2_count[CAND_CLASS_8] + 1) >> 1;
+#else
     context_ptr->md_stage_3_count[CAND_CLASS_0] = context_ptr->md_stage_2_count[CAND_CLASS_0];
     context_ptr->md_stage_3_count[CAND_CLASS_1] = context_ptr->md_stage_2_count[CAND_CLASS_1];
     context_ptr->md_stage_3_count[CAND_CLASS_2] = context_ptr->md_stage_2_count[CAND_CLASS_2];
@@ -2117,6 +2128,7 @@ void set_md_stage_counts(
     context_ptr->md_stage_3_count[CAND_CLASS_6] = context_ptr->md_stage_2_count[CAND_CLASS_6];
     context_ptr->md_stage_3_count[CAND_CLASS_7] = context_ptr->md_stage_2_count[CAND_CLASS_7];
     context_ptr->md_stage_3_count[CAND_CLASS_8] = context_ptr->md_stage_2_count[CAND_CLASS_8];
+#endif
 #endif
     // Step 4: zero-out count for CAND_CLASS_3 if CAND_CLASS_1 and CAND_CLASS_2 are merged (i.e. shift to the left)
     if (context_ptr->combine_class12)
@@ -5696,6 +5708,9 @@ void tx_partitioning_path(
     ModeDecisionContext          *context_ptr,
     PictureControlSet            *picture_control_set_ptr,
     uint64_t                      ref_fast_cost,
+#if TX_SIZE_ONLY_MD_STAGE_2
+    uint8_t                       start_tx_depth,
+#endif
     uint8_t                       end_tx_depth,
     uint32_t                      qp,
     uint32_t                     *y_count_non_zero_coeffs,
@@ -5951,7 +5966,11 @@ void tx_partitioning_path(
 #endif
 
     // Transform Depth Loop
+#if TX_SIZE_ONLY_MD_STAGE_2
+    for (context_ptr->tx_depth = start_tx_depth; context_ptr->tx_depth <= end_tx_depth; context_ptr->tx_depth++) {
+#else
     for (context_ptr->tx_depth = 0; context_ptr->tx_depth <= end_tx_depth; context_ptr->tx_depth++) {
+#endif
 #if TX_SIZE_EARLY_EXIT
         if (picture_control_set_ptr->parent_pcs_ptr->tx_size_early_exit) {
 #if !ATB_INTRA_2_DEPTH
@@ -6985,9 +7004,18 @@ void full_loop_core(
         candidate_ptr->transform_type[2] = DCT_DCT;
         candidate_ptr->transform_type[3] = DCT_DCT;
 #endif
+#if TX_SIZE_ONLY_MD_STAGE_2
+        uint8_t start_tx_depth = 0;
+#endif
         uint8_t end_tx_depth = 0;
 #if ENABLE_BC
         int32_t is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE || candidate_buffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
+#endif
+
+#if TX_SIZE_ONLY_MD_STAGE_2
+        if (context_ptr->md_staging_tx_size_mode == 0) {
+            start_tx_depth = end_tx_depth = candidate_buffer->candidate_ptr->tx_depth;
+        } else {
 #endif
         // end_tx_depth set to zero for blocks which go beyond the picture boundaries
         if ((context_ptr->sb_origin_x + context_ptr->blk_geom->origin_x + context_ptr->blk_geom->bwidth < picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->seq_header.max_frame_width &&
@@ -6999,14 +7027,20 @@ void full_loop_core(
 #endif
         else
             end_tx_depth = 0;
-
+#if TX_SIZE_ONLY_MD_STAGE_2
+        }
+#endif
         // Transform partitioning path (INTRA Luma)
 #if ENHANCE_ATB
 #if MULTI_PASS_PD
 #if ENABLE_BC
         if (context_ptr->md_atb_mode && context_ptr->md_staging_skip_atb == EB_FALSE && end_tx_depth) {
 #else
+#if TX_SIZE_ONLY_MD_STAGE_2
+        if (context_ptr->md_atb_mode && end_tx_depth && candidate_buffer->candidate_ptr->use_intrabc == 0) {
+#else
         if (context_ptr->md_atb_mode && context_ptr->md_staging_skip_atb == EB_FALSE && end_tx_depth && candidate_buffer->candidate_ptr->use_intrabc == 0) {
+#endif
 #endif
 #else
         if (picture_control_set_ptr->parent_pcs_ptr->atb_mode && context_ptr->md_staging_skip_atb == EB_FALSE && end_tx_depth && candidate_buffer->candidate_ptr->use_intrabc == 0) {
@@ -7040,6 +7074,9 @@ void full_loop_core(
                 context_ptr,
                 picture_control_set_ptr,
                 ref_fast_cost,
+#if TX_SIZE_ONLY_MD_STAGE_2
+                start_tx_depth,
+#endif
                 end_tx_depth,
                 context_ptr->cu_ptr->qp,
                 &(*count_non_zero_coeffs[0]),
@@ -7507,7 +7544,11 @@ void md_stage_2(
 #if !REMOVE_MD_STAGE_1
     context_ptr->md_staging_skip_full_pred = EB_TRUE;
 #endif
+#if TX_SIZE_ONLY_MD_STAGE_2
+    context_ptr->md_staging_tx_size_mode = 0;
+#else
     context_ptr->md_staging_skip_atb = EB_TRUE;
+#endif
     context_ptr->md_staging_tx_search = 0;
 #if FILTER_INTRA_FLAG
 #if REMOVE_MD_STAGE_1
@@ -7593,23 +7634,50 @@ void md_stage_2(
         uint32_t candidateIndex;
 
         // Set MD Staging full_loop_core settings
+#if !TX_SIZE_ONLY_MD_STAGE_2
         context_ptr->md_staging_skip_atb = EB_TRUE;
         context_ptr->md_staging_tx_search = 0;
 
         context_ptr->md_staging_skip_full_chroma = EB_TRUE;
 
         context_ptr->md_staging_skip_rdoq = EB_TRUE;
+#endif
         for (fullLoopCandidateIndex = 0; fullLoopCandidateIndex < context_ptr->md_stage_1_count[context_ptr->target_class]; ++fullLoopCandidateIndex) {
 
             candidateIndex = context_ptr->cand_buff_indices[context_ptr->target_class][fullLoopCandidateIndex];
             candidate_buffer = candidate_buffer_ptr_array[candidateIndex];
             candidate_ptr = candidate_buffer->candidate_ptr;
 
+
+#if TX_TYPE_ONLY_MD_STAGE_2
+            context_ptr->md_staging_tx_size_mode = 0;
+            context_ptr->md_staging_tx_search =
+                (candidate_ptr->cand_class == CAND_CLASS_0 || candidate_ptr->cand_class == CAND_CLASS_6 || candidate_ptr->cand_class == CAND_CLASS_7)
+                ? 2 : 1;
+            context_ptr->md_staging_skip_rdoq = EB_TRUE;
+            context_ptr->md_staging_skip_full_chroma = EB_TRUE;
+#elif RDOQ_ONLY_MD_STAGE_2
+            context_ptr->md_staging_tx_size_mode = 0;
+            context_ptr->md_staging_tx_search = 0;
+            context_ptr->md_staging_skip_rdoq = EB_FALSE;
+            context_ptr->md_staging_skip_full_chroma = EB_TRUE;
+#elif TX_SIZE_ONLY_MD_STAGE_2
+            context_ptr->md_staging_tx_size_mode = !context_ptr->coeff_based_skip_atb;
+            context_ptr->md_staging_tx_search = 0;
+            context_ptr->md_staging_skip_rdoq = EB_TRUE;
+            context_ptr->md_staging_skip_full_chroma = EB_TRUE;
+#endif
+
+#if TX_SIZE_ONLY_MD_STAGE_2
+            context_ptr->md_staging_skip_full_pred = EB_TRUE;
+            context_ptr->md_staging_skip_interpolation_search = EB_TRUE;
+            context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
+#else
             context_ptr->md_staging_skip_full_pred = EB_FALSE;
             context_ptr->md_staging_skip_interpolation_search = EB_FALSE;
             context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
             candidate_buffer->candidate_ptr->interp_filters = 0;
-
+#endif
                 full_loop_core(
                     picture_control_set_ptr,
                     sb_ptr,
@@ -7680,7 +7748,11 @@ void md_stage_3(
 #else
         context_ptr->md_staging_skip_full_pred = (context_ptr->md_staging_mode == MD_STAGING_MODE_3) ? EB_FALSE: EB_TRUE;
 #endif
+#if TX_SIZE_ONLY_MD_STAGE_2
+        context_ptr->md_staging_tx_size_mode = !context_ptr->coeff_based_skip_atb;
+#else
         context_ptr->md_staging_skip_atb = context_ptr->coeff_based_skip_atb;
+#endif
 #if FILTER_INTRA_FLAG
 #if PAL_CLASS
         context_ptr->md_staging_tx_search =
