@@ -196,7 +196,6 @@ extern "C" {
 #define REMOVE_MR_NSQ_SEARCH         1
 #define REMOVE_INNJ_INTRA_MR_CHECK   1
 #define REMOVE_PIC_OBMC_MR_CHECK     1
-#define REMOVE_INTERP_SEARCH_MR      1
 #define REMOVE_AUTO_MAX_MR           1
 
 /* Note: shutting the macro PAL_SUP will not give SS as pcs->palette_mode = 0
