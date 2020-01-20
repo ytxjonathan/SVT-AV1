@@ -394,7 +394,7 @@ enum {
 #if II_COMP_FLAG
 #if OBMC_FLAG
 #if FILTER_INTRA_FLAG
-#define MAX_NFL                                 250 // Maximum number of candidates MD can support
+#define MAX_NFL                                 125 // Maximum number of candidates MD can support
 #else
 #define MAX_NFL                                 120 // Maximum number of candidates MD can support
 #endif
