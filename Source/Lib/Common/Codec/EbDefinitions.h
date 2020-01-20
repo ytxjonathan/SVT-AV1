@@ -38,7 +38,7 @@ extern "C" {
 #define ALTREF_TL1             1 // Enable TF for layer 1, where the distance is more or equal to 4
 #define ALTREF_STR_UPDATE      1 // Adjust the filter strength
 
-#define ENCDEC_SERIAL          0 // No ENCDec Segment. To improme MD rate estimation. Active for M0-M3
+#define ENCDEC_SERIAL          1 // No ENCDec Segment. To improme MD rate estimation. Active for M0-M3
 #define SHUT_HME_L1_CHECK      1//Remove usage of ME results for list=0 refIndex=0 to be decide HME centre. Feauture assumes no MRP. and list1 distance = list0 distance.
 #define MUS_ME                 1 //MUlti-Stage ME - HME pruning
 #if MUS_ME
@@ -120,7 +120,7 @@ extern "C" {
 
 #define ENHANCED_M0_SETTINGS         1 // Updated M0 settings(optimized independent chroma search for all layers, conservative coeff - based NSQ cands reduction, shut coeff - based skip tx size search, warped for all layers, SUB - SAD as ME search method for non - SC only)
 #define MULTI_PASS_PD                1 // Multi-Pass Partitioning Depth (Multi-Pass PD) performs multiple PD stages for the same SB towards 1 final Partitioning Structure. As we go from PDn to PDn + 1, the prediction accuracy of the MD feature(s) increases while the number of block(s) decreases
-#define CHROMA_OPT_0                 1
+#define CHROMA_OPT_0                 0
 
 
 
@@ -188,6 +188,16 @@ extern "C" {
 #define PRESETS_TUNE                 1
 #define PRESETS_OPT                  1
 #define SC_PRESETS_OPT               1
+#define M0_ADOPT_UV_NFL              1
+#define M0_ADOPT_PRUNE_REF_BASED_ME  1
+#define M0_ADOPT_GM_LEVEL            1
+#define M0_ADOPT_SQ_WEIGHT           1
+#define M0_ME_ADOPT                  1
+#define REMOVE_MR_NSQ_SEARCH         1
+#define REMOVE_INNJ_INTRA_MR_CHECK   1
+#define REMOVE_PIC_OBMC_MR_CHECK     1
+#define REMOVE_INTERP_SEARCH_MR      1
+#define REMOVE_AUTO_MAX_MR           1
 
 /* Note: shutting the macro PAL_SUP will not give SS as pcs->palette_mode = 0
    rate estimation is changed for I frame + enabled sc for P (rate estimation
@@ -3593,10 +3603,17 @@ typedef struct stat_struct_t
 static const uint16_t max_search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {
 #if TUNE_ME_MAX
+#if M0_ME_ADOPT
+        { 128,  128,  128,  128,   128,   128,   128,   128,   128,   128,   128,    128,   128 },
+        { 256,  160,  160,  160,   160,   160,   160,   160,   160,   160,   160,    160,   160 },
+        { 384,  192,  192,  192,   192,   192,   192,   192,   192,   192,   192,    192,   192 },
+        { 384,  192,  192,  192,   192,   192,   192,   192,   192,   192,   192,    192,   192 }
+#else
         { 128,  128,  128,  128,   128,   128,   128,   128,   128,   128,   128,    128,   128 },
         { 192,  160,  160,  160,   160,   160,   160,   160,   160,   160,   160,    160,   160 },
         { 256,  192,  192,  192,   192,   192,   192,   192,   192,   192,   192,    192,   192 },
         { 256,  192,  192,  192,   192,   192,   192,   192,   192,   192,   192,    192,   192 }
+#endif
 #else
         { 128,  128,  128,  128,   128,   128,   128,   128,   128,   128,   128,    128,   128 },
         { 160,  160,  160,  160,   160,   160,   160,   160,   160,   160,   160,    160,   160 },
@@ -3613,10 +3630,17 @@ static const uint16_t max_search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_
 static const uint16_t max_search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {
 #if TUNE_ME_MAX
+#if M0_ME_ADOPT
+        {  64,  128,  128,  128,   128,   128,   128,   128,   128,   128,   128,    128,   128 },
+        { 128,  160,  160,  160,   160,   160,   160,   160,   160,   160,   160,    160,   160 },
+        { 192,  192,  192,  192,   192,   192,   192,   192,   192,   192,   192,    192,   192 },
+        { 192,  192,  192,  192,   192,   192,   192,   192,   192,   192,   192,    192,   192 }
+#else
         {  64,  128,  128,  128,   128,   128,   128,   128,   128,   128,   128,    128,   128 },
         {  96,  160,  160,  160,   160,   160,   160,   160,   160,   160,   160,    160,   160 },
         { 128,  192,  192,  192,   192,   192,   192,   192,   192,   192,   192,    192,   192 },
         { 128,  192,  192,  192,   192,   192,   192,   192,   192,   192,   192,    192,   192 }
+#endif
 #else
         { 128,  128,  128,  128,   128,   128,   128,   128,   128,   128,   128,    128,   128 },
         { 160,  160,  160,  160,   160,   160,   160,   160,   160,   160,   160,    160,   160 },
@@ -3633,11 +3657,17 @@ static const uint16_t max_search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX
 #if ENABLE_FRAME_RATE_ME
 static const uint16_t min_search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {
+#if M0_ME_ADOPT
+        {  32,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
+        {  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
+        {  96,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
+        {  96,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64}
+#else
         {  32,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
         {  48,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
         {  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
         {  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64}
-
+#endif
     } , {
 
         {  96,  96,  96,  96,  96,  96,  96,  96,  96,  96,  96,  96,  96},
@@ -3649,11 +3679,17 @@ static const uint16_t min_search_area_width[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_
 };
 static const uint16_t min_search_area_height[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {
+#if M0_ME_ADOPT
+        {  16,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
+        {  32,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
+        {  48,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
+        {  48,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64}
+#else
         {  16,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
         {  24,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
         {  32,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64},
         {  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64,  64}
-
+#endif
     } , {
 
         {  96,  96,  96,  96,  96,  96,  96,  96,  96,  96,  96,  96,  96},

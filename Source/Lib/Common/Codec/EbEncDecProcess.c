@@ -1324,9 +1324,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
             context_ptr->interpolation_search_level = IT_SEARCH_OFF;
     }
+#if !REMOVE_INTERP_SEARCH_MR
     else
     if (MR_MODE)
         context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP;
+#endif
     else if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #if SC_PRESETS_OPT
         if (picture_control_set_ptr->enc_mode <= ENC_M0)
@@ -2278,7 +2280,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else if (context_ptr->pd_pass == PD_PASS_1)
 #if ENHANCED_M0_SETTINGS // lossless change - PD_PASS_2 and PD_PASS_1 should be completely decoupled: previous merge conflict
 #if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
+#if M0_ADOPT_SQ_WEIGHT
+        context_ptr->sq_weight = 100;
+#else
         context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?  125 : 100;
+#endif
 #else
         context_ptr->sq_weight = 100;
 #endif
@@ -2295,7 +2301,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->sq_weight = (uint32_t)~0;
     else
 #if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
+#if M0_ADOPT_SQ_WEIGHT
+        context_ptr->sq_weight = 105;
+#else
         context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? sequence_control_set_ptr->static_config.sq_weight + 25 : sequence_control_set_ptr->static_config.sq_weight;
+#endif
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
 #endif
@@ -2462,7 +2472,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->enable_auto_max_partition = 0;
 #if ENHANCED_M0_SETTINGS
 #if TUNE_AUTO_MAX_PARTITION
+#if REMOVE_AUTO_MAX_MR
+    else if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
+#else
     else if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
+#endif
 #else
     else if (picture_control_set_ptr->enc_mode <= ENC_M0 || picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
 #endif

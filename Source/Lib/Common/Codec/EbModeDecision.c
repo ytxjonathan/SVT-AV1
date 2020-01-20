@@ -7022,10 +7022,12 @@ void  inject_intra_candidates(
         disable_angle_prediction    = 0;
         angleDeltaCandidateCount = disable_angle_refinement ? 1: angleDeltaCandidateCount;
     }
+#if !REMOVE_INNJ_INTRA_MR_CHECK
 #if MR_MODE
     disable_z2_prediction       = 0;
     disable_angle_refinement    = 0;
     disable_angle_prediction    = 0;
+#endif
 #endif
     for (openLoopIntraCandidate = intra_mode_start; openLoopIntraCandidate <= intra_mode_end ; ++openLoopIntraCandidate) {
         if (av1_is_directional_mode((PredictionMode)openLoopIntraCandidate)) {

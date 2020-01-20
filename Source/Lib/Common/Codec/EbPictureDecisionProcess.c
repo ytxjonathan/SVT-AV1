@@ -957,6 +957,17 @@ EbErrorType signal_derivation_multi_processes_oq(
     // NSQ_SEARCH_LEVEL6                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff + reordering nsq_table number and testing only 6 NSQ SHAPE
     // NSQ_SEARCH_FULL                                Allow NSQ Intra-FULL and Inter-FULL
 
+#if REMOVE_MR_NSQ_SEARCH
+#if MULTI_PASS_PD
+        if (picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
+            picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
+            picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
+            picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_3) {
+
+            picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
+        }
+#endif
+#else
         if (MR_MODE)
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_FULL;
 #if MULTI_PASS_PD
@@ -967,6 +978,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
         }
+#endif
 #endif
         else if (sc_content_detected)
 #if PRESETS_TUNE
@@ -1626,7 +1638,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         // GM_TRAN_ONLY                               Translation only using ME MV.
 #if GM_DOWNSAMPLED
 #if ENABLE_GM_TRANS
+#if M0_ADOPT_GM_LEVEL
+        picture_control_set_ptr->gm_level = picture_control_set_ptr->sc_content_detected ? GM_TRAN_ONLY : GM_FULL;
+#else
         picture_control_set_ptr->gm_level = picture_control_set_ptr->sc_content_detected ? GM_TRAN_ONLY : GM_DOWN;
+#endif
 #else
         picture_control_set_ptr->gm_level = GM_DOWN;
 #endif
@@ -1647,7 +1663,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         //Prune reference and reduce ME SR based on HME/ME distortion
         // 0: OFF
         // 1: ON
+#if M0_ADOPT_PRUNE_REF_BASED_ME
+        if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M0)
+#else
         if (picture_control_set_ptr->sc_content_detected || MR_MODE)
+#endif
             picture_control_set_ptr->prune_ref_based_me = 0;
         else
             picture_control_set_ptr->prune_ref_based_me = 1;
