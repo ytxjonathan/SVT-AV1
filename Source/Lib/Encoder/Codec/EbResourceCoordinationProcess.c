@@ -787,7 +787,7 @@ void *resource_coordination_kernel(void *input_ptr) {
 
         // Init SB Params
         if (context_ptr->scs_instance_array[instance_index]->encode_context_ptr->initial_picture) {
-            derive_input_resolution(scs_ptr, input_size);
+            derive_input_resolution(&scs_ptr->input_resolution, input_size);
 
             sb_params_init(scs_ptr);
             sb_geom_init(scs_ptr);
