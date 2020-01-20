@@ -32,6 +32,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define ADOPT_SETTING_8_NIC_CHANGES 1
 #define  DISABLE_WARPED_MOTION 0
 #define WARP_IMPROVEMENT       0
 #define ALTREF_TL1             1 // Enable TF for layer 1, where the distance is more or equal to 4
@@ -394,7 +395,11 @@ enum {
 #if II_COMP_FLAG
 #if OBMC_FLAG
 #if FILTER_INTRA_FLAG
+#if ADOPT_SETTING_8_NIC_CHANGES
+#define MAX_NFL                                 250 // Maximum number of candidates MD can support
+#else
 #define MAX_NFL                                 125 // Maximum number of candidates MD can support
+#endif
 #else
 #define MAX_NFL                                 120 // Maximum number of candidates MD can support
 #endif
@@ -783,9 +788,16 @@ typedef enum MD_STAGE {
 #define MD_STAGING_MODE_2    2
 #define MD_STAGING_MODE_3    3
 #endif
+#if ADOPT_SETTING_8_NIC_CHANGES
+#define INTRA_NFL           24
+#define INTER_NEW_NFL       24
+#define INTER_PRED_NFL      24
+#define INTER_COMP_NFL		16
+#else
 #define INTRA_NFL           16
 #define INTER_NEW_NFL       16
 #define INTER_PRED_NFL      16
+#endif
 
 
 #define BEST_CANDIDATE_COUNT 4
