@@ -1916,7 +1916,7 @@ void set_param_based_on_input(SequenceControlSet *scs_ptr)
     scs_ptr->static_config.source_height = scs_ptr->max_input_luma_height;
 
     derive_input_resolution(
-        scs_ptr,
+        &scs_ptr->input_resolution,
         scs_ptr->seq_header.max_frame_width*scs_ptr->seq_header.max_frame_height);
     // In two pass encoding, the first pass uses sb size=64
     if (scs_ptr->static_config.screen_content_mode == 1 || scs_ptr->use_output_stat_file)

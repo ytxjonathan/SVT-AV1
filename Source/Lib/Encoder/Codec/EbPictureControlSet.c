@@ -2059,19 +2059,6 @@ EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
     return return_error;
 }
 
-EbErrorType derive_input_resolution_pcs(PictureParentControlSet *pcs_ptr, uint32_t inputSize) {
-    EbErrorType return_error = EB_ErrorNone;
-
-    pcs_ptr->input_resolution =
-            (inputSize < INPUT_SIZE_1080i_TH)
-            ? INPUT_SIZE_576p_RANGE_OR_LOWER
-            : (inputSize < INPUT_SIZE_1080p_TH)
-              ? INPUT_SIZE_1080i_RANGE
-              : (inputSize < INPUT_SIZE_4K_TH) ? INPUT_SIZE_1080p_RANGE : INPUT_SIZE_4K_RANGE;
-
-    return return_error;
-}
-
 EbErrorType sb_params_init_pcs(SequenceControlSet *scs_ptr,
                                PictureParentControlSet *pcs_ptr) {
     EbErrorType return_error = EB_ErrorNone;

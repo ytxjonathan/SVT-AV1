@@ -911,8 +911,6 @@ EbErrorType downscaled_source_buffer_desc_ctor(EbPictureBufferDesc **picture_ptr
     return EB_ErrorNone;
 }
 
-EbErrorType derive_input_resolution_pcs(PictureParentControlSet *pcs_ptr, uint32_t inputSize);
-
 EbErrorType sb_geom_init_pcs(SequenceControlSet *scs_ptr, PictureParentControlSet *pcs_ptr);
 
 EbErrorType sb_params_init_pcs(SequenceControlSet *scs_ptr,
@@ -931,7 +929,6 @@ EbErrorType scale_pcs_params(SequenceControlSet* scs_ptr,
     cm->frm_size.frame_height = spr_params.encoding_height;
     cm->frm_size.render_width = source_width;
     cm->frm_size.render_height = source_height;
-    cm->frm_size.frame_height = spr_params.encoding_height;
     cm->frm_size.superres_denominator = spr_params.superres_denom;
 
     // number of SBs
@@ -951,7 +948,7 @@ EbErrorType scale_pcs_params(SequenceControlSet* scs_ptr,
     pcs_ptr->picture_sb_height = picture_sb_height; // TODO: use this instead of re-computing
 
     if(cm->frm_size.superres_denominator != SCALE_NUMERATOR){
-        derive_input_resolution_pcs(pcs_ptr, spr_params.encoding_width * spr_params.encoding_height);
+        derive_input_resolution(&pcs_ptr->input_resolution, spr_params.encoding_width * spr_params.encoding_height);
 
         // create new picture level sb_params and sb_geom
         sb_params_init_pcs(scs_ptr, pcs_ptr);
