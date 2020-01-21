@@ -296,6 +296,9 @@ extern "C" {
     EbBool      variance_ready;
 
 #if REMOVE_MD_STAGE_1
+#if ADD_4TH_MD_STAGE
+    MD_STAGE                            md_stage;
+#endif
     uint32_t                            cand_buff_indices[CAND_CLASS_TOTAL][MAX_NFL_BUFF];
     uint8_t                             md_staging_mode;
 #if MULTI_PASS_PD

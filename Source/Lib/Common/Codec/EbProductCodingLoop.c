@@ -5212,6 +5212,10 @@ void tx_type_search(
         uint64_t y_tu_coeff_bits = 0;
         uint32_t y_count_non_zero_coeffs;
 
+#if TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2 || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
+        if (context_ptr->md_stage <= MD_STAGE_2 && tx_type != DCT_DCT && tx_type != V_DCT && tx_type != H_DCT)
+            continue;
+#endif
         //context_ptr->three_quad_energy = 0;
         if (tx_type != DCT_DCT) {
             if (is_inter) {
@@ -6139,6 +6143,9 @@ void tx_partitioning_path(
                     context_ptr->blk_geom->tx_height[context_ptr->tx_depth][context_ptr->txb_itr]);
 #endif
             }
+#if LOSSLESS_TX_TYPE_OPT
+            if(context_ptr->blk_geom->tx_width[context_ptr->tx_depth][context_ptr->txb_itr] <= 32 && context_ptr->blk_geom->tx_height[context_ptr->tx_depth][context_ptr->txb_itr] <= 32)
+#endif
                 if (!tx_search_skip_flag) {
 
                     tx_type_search(
@@ -7102,6 +7109,14 @@ void full_loop_core(
 #if TX_SIZE_ONLY_MD_STAGE_2
         }
 #endif
+
+
+        
+#if LIGHT_TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2
+        if (context_ptr->md_stage <= MD_STAGE_2 && end_tx_depth == 2)
+            end_tx_depth = 1;
+#endif
+
         // Transform partitioning path (INTRA Luma)
 #if ENHANCE_ATB
 #if MULTI_PASS_PD
@@ -7734,9 +7749,23 @@ void md_stage_2(
             context_ptr->md_staging_skip_rdoq = EB_FALSE;
             context_ptr->md_staging_skip_full_chroma = EB_TRUE;
 #elif TX_SIZE_ONLY_MD_STAGE_2
+#if TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2
+            context_ptr->md_staging_tx_size_mode = !context_ptr->coeff_based_skip_atb;
+            context_ptr->md_staging_tx_search =
+                (candidate_ptr->cand_class == CAND_CLASS_0 || candidate_ptr->cand_class == CAND_CLASS_6 || candidate_ptr->cand_class == CAND_CLASS_7)
+                ? 2 : 1;
+            context_ptr->md_staging_skip_rdoq = EB_TRUE;
+#elif RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
+            context_ptr->md_staging_tx_size_mode = 0;
+            context_ptr->md_staging_tx_search =
+                (candidate_ptr->cand_class == CAND_CLASS_0 || candidate_ptr->cand_class == CAND_CLASS_6 || candidate_ptr->cand_class == CAND_CLASS_7)
+                ? 2 : 1;
+            context_ptr->md_staging_skip_rdoq = EB_FALSE;
+#else
             context_ptr->md_staging_tx_size_mode = !context_ptr->coeff_based_skip_atb;
             context_ptr->md_staging_tx_search = 0;
             context_ptr->md_staging_skip_rdoq = EB_TRUE;
+#endif
             context_ptr->md_staging_skip_full_chroma = EB_TRUE;
 #endif
 
@@ -10094,7 +10123,9 @@ void md_encode_block(
 #if INTER_INTRA_CLASS_PRUNING
         uint64_t best_md_stage_cost = (uint64_t)~0;
 #endif
-
+#if ADD_4TH_MD_STAGE // tag
+        context_ptr->md_stage = MD_STAGE_0;
+#endif
         for (cand_class_it = CAND_CLASS_0; cand_class_it < CAND_CLASS_TOTAL; cand_class_it++) {
 
             //number of next level candidates could not exceed number of curr level candidates
@@ -10235,6 +10266,9 @@ void md_encode_block(
 #if INTER_INTRA_CLASS_PRUNING
         best_md_stage_cost = (uint64_t)~0;
 #endif
+#if ADD_4TH_MD_STAGE // tag
+        context_ptr->md_stage = MD_STAGE_1;
+#endif
 #if REMOVE_MD_STAGE_1
         for (cand_class_it = CAND_CLASS_0; cand_class_it < CAND_CLASS_TOTAL; cand_class_it++) {
             //number of next level candidates could not exceed number of curr level candidates
@@ -10301,7 +10335,9 @@ void md_encode_block(
 #if ADD_4TH_MD_STAGE
         // 2nd Full-Loop
         best_md_stage_cost = (uint64_t)~0;
-
+#if ADD_4TH_MD_STAGE // tag
+        context_ptr->md_stage = MD_STAGE_2;
+#endif
         for (cand_class_it = CAND_CLASS_0; cand_class_it < CAND_CLASS_TOTAL; cand_class_it++) {
 
             //number of next level candidates could not exceed number of curr level candidates
@@ -10393,7 +10429,11 @@ void md_encode_block(
         }
 #endif
 
+#if ADD_4TH_MD_STAGE // tag
+        context_ptr->md_stage = MD_STAGE_3;
+#else
         // 2nd Full-Loop
+#endif
 #if REMOVE_MD_STAGE_1
 #if ADD_4TH_MD_STAGE
         md_stage_3(

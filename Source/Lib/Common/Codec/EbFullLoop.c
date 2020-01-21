@@ -2220,6 +2220,12 @@ void product_full_loop_tx_search(
         if (picture_control_set_ptr->parent_pcs_ptr->tx_search_reduced_set)
             if (!allowed_tx_set_a[txSize][tx_type]) continue;
 #endif
+
+
+#if TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2 || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
+        if (context_ptr->md_stage <= MD_STAGE_2 && tx_type != DCT_DCT && tx_type != V_DCT && tx_type != H_DCT)
+            continue;
+#endif
         context_ptr->three_quad_energy = 0;
         uint32_t txb_itr = 0;
         uint16_t txb_count = context_ptr->blk_geom->txb_count[tx_depth];
