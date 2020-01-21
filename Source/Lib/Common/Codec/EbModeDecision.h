@@ -67,6 +67,11 @@ extern "C" {
             uint64_t mvs;
         };
 
+#if STEST2
+        uint32_t  cand_num;
+        uint32_t  knock;
+#endif
+
         uint8_t                                skip_flag;
         EbBool                                 merge_flag;
         uint16_t                               count_non_zero_coeffs;

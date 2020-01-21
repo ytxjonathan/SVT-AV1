@@ -112,6 +112,11 @@ extern "C" {
         ModeDecisionCandidate       **fast_candidate_ptr_array;
         ModeDecisionCandidate        *fast_candidate_array;
         ModeDecisionCandidateBuffer **candidate_buffer_ptr_array;
+#if COMP_FEAT
+        ModeDecisionCandidateBuffer **comp_cand_buffers;
+        ModeDecisionCandidate         comp_cand[MD_COMP_TYPES];
+#endif
+
 #if ENHANCE_ATB
 #if ATB_INTRA_2_DEPTH
         ModeDecisionCandidateBuffer  *candidate_buffer_tx_depth_1;

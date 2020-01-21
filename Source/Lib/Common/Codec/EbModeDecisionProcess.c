@@ -200,6 +200,25 @@ EbErrorType mode_decision_context_ctor(
             &(context_ptr->full_cost_merge_ptr[bufferIndex])
         );
     }
+
+#if COMP_FEAT    
+    EB_ALLOC_PTR_ARRAY(context_ptr->comp_cand_buffers, MD_COMP_TYPES);
+    for (bufferIndex = 0; bufferIndex < MD_COMP_TYPES; ++bufferIndex) {
+        EB_NEW(
+            context_ptr->comp_cand_buffers[bufferIndex],
+            mode_decision_candidate_buffer_ctor,
+            context_ptr->hbd_mode_decision ? EB_10BIT : EB_8BIT,
+            0,
+            0,
+            0,
+            0);
+        context_ptr->comp_cand_buffers[bufferIndex]->fast_cost_ptr = malloc(sizeof(uint64_t));
+        context_ptr->comp_cand_buffers[bufferIndex]->full_cost_ptr = malloc(sizeof(uint64_t));
+        context_ptr->comp_cand_buffers[bufferIndex]->full_cost_skip_ptr = malloc(sizeof(uint64_t));
+        context_ptr->comp_cand_buffers[bufferIndex]->full_cost_merge_ptr = malloc(sizeof(uint64_t));
+    }
+#endif
+
 #if ENHANCE_ATB
 #if ATB_INTRA_2_DEPTH
     EB_NEW(

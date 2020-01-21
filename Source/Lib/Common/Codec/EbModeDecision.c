@@ -602,6 +602,8 @@ COMPOUND_TYPE to_av1_compound_lut[] = {
     COMPOUND_WEDGE
 };
 
+
+
 void determine_compound_mode(
     PictureControlSet            *picture_control_set_ptr,
     ModeDecisionContext          *context_ptr,
@@ -6278,6 +6280,11 @@ EbErrorType generate_md_stage_0_cand(
     {
         ModeDecisionCandidate * cand_ptr = &context_ptr->fast_candidate_array[cand_i];
 
+#if STEST2
+        cand_ptr->cand_num = cand_i;
+        cand_ptr->knock = 0;
+#endif
+
         if (cand_ptr->type == INTRA_MODE) {
             // Intra prediction
 #if FILTER_INTRA_FLAG
@@ -6337,13 +6344,48 @@ EbErrorType generate_md_stage_0_cand(
                 else {
                     if (cand_ptr->is_new_mv) {
                         // ME pred
+#if SPLIT_C1C2
+                        if (context_ptr->pd_pass == PD_PASS_2) {
+                            if (!cand_ptr->is_compound) {
+                                cand_ptr->cand_class = CAND_CLASS_1;
+                                context_ptr->md_stage_0_count[CAND_CLASS_1]++;
+                            }
+                            else {
+                                cand_ptr->cand_class = CAND_CLASS_9;
+                                context_ptr->md_stage_0_count[CAND_CLASS_9]++;
+                            }
+                        }
+                        else {
+                            cand_ptr->cand_class = CAND_CLASS_1;
+                            context_ptr->md_stage_0_count[CAND_CLASS_1]++;
+                        
+                        }
+#else
                         cand_ptr->cand_class = CAND_CLASS_1;
                         context_ptr->md_stage_0_count[CAND_CLASS_1]++;
+#endif
                     }
                     else {
                         // MV pred
+#if SPLIT_C1C2
+                        if (context_ptr->pd_pass == PD_PASS_2) {
+                            if (!cand_ptr->is_compound) {
+                                cand_ptr->cand_class = CAND_CLASS_2;
+                                context_ptr->md_stage_0_count[CAND_CLASS_2]++;
+                            }
+                            else {
+                                cand_ptr->cand_class = CAND_CLASS_10;
+                                context_ptr->md_stage_0_count[CAND_CLASS_10]++;
+                            }
+                        }
+                        else {
+                            cand_ptr->cand_class = CAND_CLASS_2;
+                            context_ptr->md_stage_0_count[CAND_CLASS_2]++;
+                        }
+#else
                         cand_ptr->cand_class = CAND_CLASS_2;
                         context_ptr->md_stage_0_count[CAND_CLASS_2]++;
+#endif
                     }
                 }
             }

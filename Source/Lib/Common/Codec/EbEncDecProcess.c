@@ -2334,6 +2334,12 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
             context_ptr->compound_types_to_try = MD_COMP_AVG;
     }
+
+
+#if  COMP_FEAT
+    context_ptr->compound_types_to_try = MD_COMP_AVG;
+#endif
+
     // Set coeff_based_nsq_cand_reduction
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->coeff_based_nsq_cand_reduction = EB_FALSE;

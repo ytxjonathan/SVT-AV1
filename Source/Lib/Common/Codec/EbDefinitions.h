@@ -33,10 +33,19 @@
 extern "C" {
 #endif
 
+
+#define STEST1           0
+#define STEST2           1
+
+#define SPLIT_C1C2           0
+#define COMP_FEAT            0//compound as feature
+#define INC_NIC              0//increase NICs 
+
+
 #define ALTREF_TL1             1 // Enable TF for layer 1, where the distance is more or equal to 4
 #define ALTREF_STR_UPDATE      1 // Adjust the filter strength
 
-#define ENCDEC_SERIAL          1 // No ENCDec Segment. To improme MD rate estimation. Active for M0-M3
+#define ENCDEC_SERIAL         0 // No ENCDec Segment. To improme MD rate estimation. Active for M0-M3
 #define SHUT_HME_L1_CHECK      1//Remove usage of ME results for list=0 refIndex=0 to be decide HME centre. Feauture assumes no MRP. and list1 distance = list0 distance.
 #define MUS_ME                 1 //MUlti-Stage ME - HME pruning
 #if MUS_ME
@@ -374,7 +383,7 @@ enum {
 #if II_COMP_FLAG
 #if OBMC_FLAG
 #if FILTER_INTRA_FLAG
-#define MAX_NFL                                 125 // Maximum number of candidates MD can support
+#define MAX_NFL                               500 // 125 // Maximum number of candidates MD can support
 #else
 #define MAX_NFL                                 120 // Maximum number of candidates MD can support
 #endif
@@ -741,6 +750,10 @@ typedef enum CAND_CLASS {
     CAND_CLASS_7,
 #endif
     CAND_CLASS_8,
+#if SPLIT_C1C2
+    CAND_CLASS_9,
+    CAND_CLASS_10,
+#endif
     CAND_CLASS_TOTAL
 } CAND_CLASS;
 
