@@ -2222,7 +2222,7 @@ void product_full_loop_tx_search(
 #endif
 
 
-#if TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2 || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
+#if TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2
         if (context_ptr->md_stage <= MD_STAGE_2 && tx_type != DCT_DCT && tx_type != V_DCT && tx_type != H_DCT)
             continue;
 #endif

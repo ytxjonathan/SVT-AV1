@@ -5212,7 +5212,7 @@ void tx_type_search(
         uint64_t y_tu_coeff_bits = 0;
         uint32_t y_count_non_zero_coeffs;
 
-#if TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2 || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
+#if TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2
         if (context_ptr->md_stage <= MD_STAGE_2 && tx_type != DCT_DCT && tx_type != V_DCT && tx_type != H_DCT)
             continue;
 #endif
