@@ -3423,7 +3423,7 @@ void write_sequence_header(SequenceControlSet *      scs_ptr /*Av1Comp *cpi*/,
             eb_aom_wb_write_bit(wb, 0);
             eb_aom_wb_write_bit(wb, scs_ptr->seq_header.seq_force_screen_content_tools);
         }
-        
+
         if (scs_ptr->seq_header.seq_force_screen_content_tools > 0) {
             if (scs_ptr->seq_header.seq_force_integer_mv == 2)
                 eb_aom_wb_write_bit(wb, 1);
