@@ -38,6 +38,7 @@ extern "C" {
 #endif
 
 #define MR_MODE 0
+#define SHUT_FILTERING 0
 
 #define HIGH_PRECISION_MV_QTHRESH 150
 // Actions in the second pass: Frame and SB QP assignment and temporal filtering strenght change

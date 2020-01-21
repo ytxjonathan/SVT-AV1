@@ -1180,7 +1180,7 @@ void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureC
 
     if (context_ptr->source_variance < context_ptr->inter_inter_wedge_variance_th)
         tot_comp_types = MIN(tot_comp_types, MD_COMP_DIFF0);
-
+#if 0
     if (is_compound_enabled) {
         /**************
        NEW_NEWMV
@@ -1543,7 +1543,7 @@ void bipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, PictureC
             }
         }
     }
-
+#endif
     // update the total number of candidates injected
     (*candidate_total_cnt) = cand_total_cnt;
 
@@ -1583,8 +1583,7 @@ BIPred     : NEARST_NEARST  + upto 3x NEAR_NEAR
 **********************************************************************
 **********************************************************************/
 void inject_mvp_candidates_ii(struct ModeDecisionContext *context_ptr, PictureControlSet *pcs_ptr,
-                              BlkStruct *blk_ptr, MvReferenceFrame ref_pair,
-                              uint32_t *candTotCnt) {
+                              BlkStruct *blk_ptr, MvReferenceFrame ref_pair, uint32_t *candTotCnt) {
     FrameHeader *frm_hdr = &pcs_ptr->parent_pcs_ptr->frm_hdr;
     EbBool       allow_compound =
         (frm_hdr->reference_mode == SINGLE_REFERENCE || context_ptr->blk_geom->bwidth == 4 ||
@@ -1826,7 +1825,9 @@ void inject_mvp_candidates_ii(struct ModeDecisionContext *context_ptr, PictureCo
                 }
             }
         }
-    } else if (allow_compound) {
+    }
+#if 0
+else if (allow_compound) {
         uint8_t ref_idx_0 = get_ref_frame_idx(rf[0]);
         uint8_t ref_idx_1 = get_ref_frame_idx(rf[1]);
         if (ref_idx_0 > context_ptr->md_max_ref_count - 1 ||
@@ -2047,7 +2048,7 @@ void inject_mvp_candidates_ii(struct ModeDecisionContext *context_ptr, PictureCo
             }
         }
     }
-
+#endif
     //update tot Candidate count
     *candTotCnt = cand_idx;
 }
@@ -2076,7 +2077,7 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
                                       : context_ptr->compound_types_to_try == MD_COMP_WEDGE
                                             ? MD_COMP_DIFF0
                                             : context_ptr->compound_types_to_try;
-
+#if 0
     if (context_ptr->source_variance < context_ptr->inter_inter_wedge_variance_th)
         tot_comp_types = MIN(tot_comp_types, MD_COMP_DIFF0);
     {
@@ -2534,7 +2535,7 @@ void inject_new_nearest_new_comb_candidates(const SequenceControlSet *  scs_ptr,
             }
         }
     }
-
+#endif
     //update tot Candidate count
     *candTotCnt = cand_idx;
 }
@@ -3291,6 +3292,7 @@ void inject_new_candidates(const SequenceControlSet *  scs_ptr,
             /**************
                NEW_NEWMV
             ************* */
+#if 0
             if (allow_bipred) {
                 if (list0_ref_index > context_ptr->md_max_ref_count - 1 ||
                     list1_ref_index > context_ptr->md_max_ref_count - 1)
@@ -3443,6 +3445,7 @@ void inject_new_candidates(const SequenceControlSet *  scs_ptr,
                     }
                 }
             }
+#endif
         }
     }
     // update the total number of candidates injected
@@ -3665,6 +3668,7 @@ void inject_predictive_me_candidates(
     /**************
                 NEW_NEWMV
             ************* */
+#if 0
     if (allow_bipred) {
         uint8_t ref_pic_index_l0;
         uint8_t ref_pic_index_l1;
@@ -3781,6 +3785,7 @@ void inject_predictive_me_candidates(
             }
         }
     }
+#endif
 
     (*candidate_total_cnt) = cand_total_cnt;
 }
@@ -4032,7 +4037,7 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                         EbWarpedMotionParams *params_l1 =
                             &pcs_ptr->parent_pcs_ptr->global_motion[svt_get_ref_frame_type(
                                 REF_LIST_1, list_ref_index_l1)];
-
+#if 0
                         if (is_compound_enabled && allow_bipred &&
                             (params_l0->wmtype > TRANSLATION && params_l1->wmtype > TRANSLATION)) {
                             /**************
@@ -4138,6 +4143,7 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                                 }
                             }
                         }
+#endif
                     }
                 }
         } else {
@@ -4233,7 +4239,7 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                     to_inject_ref_type;
                 ++context_ptr->injected_mv_count_l0;
             }
-
+#if 0
             if (is_compound_enabled && allow_bipred) {
                 /**************
             GLOBAL_GLOBALMV
@@ -4340,6 +4346,7 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                     }
                 }
             }
+#endif
         }
 #endif
     }
