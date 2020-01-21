@@ -32,9 +32,10 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip
 #define ADOPT_SETTING_8_NIC_CHANGES 1
-#define  DISABLE_WARPED_MOTION 0
-#define WARP_IMPROVEMENT       0
+#define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip
+#define WARP_IMPROVEMENT       1 // Improve Warp motion by adding all the candidates in list0 and list 1
 #define ALTREF_TL1             1 // Enable TF for layer 1, where the distance is more or equal to 4
 #define ALTREF_STR_UPDATE      1 // Adjust the filter strength
 

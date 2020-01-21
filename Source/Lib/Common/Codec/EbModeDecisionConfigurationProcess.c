@@ -2660,9 +2660,6 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
     frm_hdr->allow_warped_motion = enable_wm
         && !(frm_hdr->frame_type == KEY_FRAME || frm_hdr->frame_type == INTRA_ONLY_FRAME)
         && !frm_hdr->error_resilient_mode;
-#if DISABLE_WARPED_MOTION
-    frm_hdr->allow_warped_motion = EB_FALSE;
-#endif
     frm_hdr->is_motion_mode_switchable = frm_hdr->allow_warped_motion;
 #if OBMC_FLAG
     // OBMC Level                                   Settings

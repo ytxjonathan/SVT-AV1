@@ -3071,10 +3071,6 @@ void md_stage_0(
                     use_ssd);
 
             }
-#if 0//WARP_IMPROVEMENT
-            if(candidate_buffer->candidate_ptr->motion_mode == WARPED_CAUSAL)
-            *(candidate_buffer->fast_cost_ptr) = 10;
-#endif
             // Find the buffer with the highest cost
             if (fastLoopCandidateIndex || scratch_buffer_pesent_flag)
             {
@@ -7399,11 +7395,6 @@ void full_loop_core(
             &cr_coeff_bits,
             context_ptr->blk_geom->bsize);
 
-
-#if 0//WARP_IMPROVEMENT
-        if (candidate_buffer->candidate_ptr->motion_mode == WARPED_CAUSAL)
-            *(candidate_buffer->full_cost_ptr) = 10;
-#endif
         candidate_buffer->cb_distortion[DIST_CALC_RESIDUAL] = cbFullDistortion[DIST_CALC_RESIDUAL];
         candidate_buffer->cb_distortion[DIST_CALC_PREDICTION] = cbFullDistortion[DIST_CALC_PREDICTION];
         candidate_buffer->cb_coeff_bits = cb_coeff_bits;
@@ -11330,10 +11321,18 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #endif
             // Initialize tx_depth
             cu_ptr->tx_depth = 0;
+#if MD_SKIP_FIX
+#if ADD_SUPPORT_TO_SKIP_PART_N
+            if (blk_geom->quadi > 0 && d1_block_itr == 0 && !skip_next_sq) {
+#else
+            if (blk_geom->quadi > 0 && blk_geom->shape == PART_N && !skip_next_sq) {
+#endif
+#else
 #if ADD_SUPPORT_TO_SKIP_PART_N
             if (blk_geom->quadi > 0 && d1_block_itr == 0) {
 #else
             if (blk_geom->quadi > 0 && blk_geom->shape == PART_N) {
+#endif
 #endif
 
                 uint32_t blk_mds = context_ptr->blk_geom->sqi_mds;
@@ -11362,7 +11361,12 @@ EB_EXTERN EbErrorType mode_decision_sb(
                 // when md_exit_th=0 the estimated cost for the remaining child is not taken into account and the action will be lossless compared to no exit
                 // MD_EXIT_THSL could be tuned toward a faster encoder but lossy
 #if SPEED_OPT
+#if MD_SKIP_FIX
+                if (parent_depth_cost != MAX_MODE_COST && 
+                    parent_depth_cost <= current_depth_cost + (current_depth_cost* (4 - context_ptr->blk_geom->quadi)* context_ptr->md_exit_th / context_ptr->blk_geom->quadi / 100)) {
+#else
                 if (parent_depth_cost <= current_depth_cost + (current_depth_cost* (4 - context_ptr->blk_geom->quadi)* context_ptr->md_exit_th / context_ptr->blk_geom->quadi / 100)) {
+#endif
 #else
                 if (parent_depth_cost <= current_depth_cost + (current_depth_cost* (4 - context_ptr->blk_geom->quadi)* MD_EXIT_THSL / context_ptr->blk_geom->quadi / 100)) {
 #endif
