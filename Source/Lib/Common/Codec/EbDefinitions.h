@@ -33,7 +33,8 @@
 extern "C" {
 #endif
 #define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip
-#define ADOPT_SETTING_8_NIC_CHANGES 1
+#define ADOPT_SETTING_8_NIC_CHANGES 1 // Modify MD_STAGE_COUNT_candidates
+#define ADOPT_SETTING_9_NIC_CHANGES 0 // Modify MD_STAGE_COUNT candidates for enc-mode 0 only
 #define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip
 #define WARP_IMPROVEMENT       1 // Improve Warp motion by adding all the candidates in list0 and list 1
 #define ALTREF_TL1             1 // Enable TF for layer 1, where the distance is more or equal to 4
@@ -417,7 +418,7 @@ enum {
 #if II_COMP_FLAG
 #if OBMC_FLAG
 #if FILTER_INTRA_FLAG
-#if ADOPT_SETTING_8_NIC_CHANGES
+#if ADOPT_SETTING_8_NIC_CHANGES || ADOPT_SETTING_9_NIC_CHANGES
 #define MAX_NFL                                 250 // Maximum number of candidates MD can support
 #else
 #define MAX_NFL                                 125 // Maximum number of candidates MD can support
