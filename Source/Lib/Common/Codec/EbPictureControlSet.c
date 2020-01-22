@@ -179,7 +179,7 @@ void picture_control_set_dctor(EbPtr p)
 #endif
             EB_DELETE(obj->md_luma_recon_neighbor_array16bit[depth]);
             EB_DELETE(obj->md_tx_depth_1_luma_recon_neighbor_array16bit[depth]);
-#if UPDATE_ATB_INTRA_2_DEPTH
+#if ATB_INTRA_2_DEPTH
             EB_DELETE(obj->md_tx_depth_2_luma_recon_neighbor_array16bit[depth]);
 #endif
             EB_DELETE(obj->md_cb_recon_neighbor_array16bit[depth]);
@@ -192,7 +192,7 @@ void picture_control_set_dctor(EbPtr p)
 #endif
             EB_DELETE(obj->md_luma_recon_neighbor_array[depth]);
             EB_DELETE(obj->md_tx_depth_1_luma_recon_neighbor_array[depth]);
-#if UPDATE_ATB_INTRA_2_DEPTH
+#if ATB_INTRA_2_DEPTH
             EB_DELETE(obj->md_tx_depth_2_luma_recon_neighbor_array[depth]);
 #endif
             EB_DELETE(obj->md_cb_recon_neighbor_array[depth]);
@@ -650,7 +650,7 @@ EbErrorType picture_control_set_ctor(
                     SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
                     NEIGHBOR_ARRAY_UNIT_FULL_MASK,
                 },
-#if UPDATE_ATB_INTRA_2_DEPTH
+#if ATB_INTRA_2_DEPTH
                  {
                     &object_ptr->md_tx_depth_2_luma_recon_neighbor_array[depth],
                     MAX_PICTURE_WIDTH_SIZE,
@@ -710,7 +710,7 @@ EbErrorType picture_control_set_ctor(
                     SAMPLE_NEIGHBOR_ARRAY_GRANULARITY,
                     NEIGHBOR_ARRAY_UNIT_FULL_MASK,
                 },
-#if UPDATE_ATB_INTRA_2_DEPTH
+#if ATB_INTRA_2_DEPTH
                 {
                     &object_ptr->md_tx_depth_2_luma_recon_neighbor_array16bit[depth],
                     MAX_PICTURE_WIDTH_SIZE,

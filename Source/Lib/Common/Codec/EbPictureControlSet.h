@@ -416,16 +416,16 @@ extern "C" {
         NeighborArrayUnit                  *md_leaf_depth_neighbor_array[NEIGHBOR_ARRAY_TOTAL_COUNT];
         NeighborArrayUnit                  *md_luma_recon_neighbor_array[NEIGHBOR_ARRAY_TOTAL_COUNT];
         NeighborArrayUnit                  *md_tx_depth_1_luma_recon_neighbor_array[NEIGHBOR_ARRAY_TOTAL_COUNT];
-#if UPDATE_ATB_INTRA_2_DEPTH
+#if ATB_INTRA_2_DEPTH
         NeighborArrayUnit                  *md_tx_depth_2_luma_recon_neighbor_array[NEIGHBOR_ARRAY_TOTAL_COUNT];
-#endif 
+#endif
         NeighborArrayUnit                  *md_cb_recon_neighbor_array[NEIGHBOR_ARRAY_TOTAL_COUNT];
         NeighborArrayUnit                  *md_cr_recon_neighbor_array[NEIGHBOR_ARRAY_TOTAL_COUNT];
 
         uint8_t                             hbd_mode_decision;
         NeighborArrayUnit                  *md_luma_recon_neighbor_array16bit[NEIGHBOR_ARRAY_TOTAL_COUNT];
         NeighborArrayUnit                  *md_tx_depth_1_luma_recon_neighbor_array16bit[NEIGHBOR_ARRAY_TOTAL_COUNT];
-#if UPDATE_ATB_INTRA_2_DEPTH
+#if ATB_INTRA_2_DEPTH
         NeighborArrayUnit                  *md_tx_depth_2_luma_recon_neighbor_array16bit[NEIGHBOR_ARRAY_TOTAL_COUNT];
 #endif
         NeighborArrayUnit                  *md_cb_recon_neighbor_array16bit[NEIGHBOR_ARRAY_TOTAL_COUNT];
@@ -746,7 +746,12 @@ extern "C" {
         uint16_t                              full_sb_count;
         EbBool                                init_pred_struct_position_flag;
         int8_t                                hierarchical_layers_diff;
+#if DIST_BASED_ME_SEARCH_AREA
+        // Distance based ME SR Flag
+        EbBool                                distance_me_flag;
 
+
+#endif
         // HME Flags
         EbBool                                enable_hme_flag;
         EbBool                                enable_hme_level0_flag;

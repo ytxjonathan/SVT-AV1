@@ -430,8 +430,13 @@ extern "C" {
         uint8_t                     *p_best_nsq64x64;
         uint16_t                     *p_eight_pos_sad16x16;
         EB_ALIGN(64) uint32_t         p_eight_sad32x32[4][8];
+#if NSQ_ME_OPT
+        EB_ALIGN(64) uint16_t         p_eight_sad16x16[16][8];
+        EB_ALIGN(64) uint16_t         p_eight_sad8x8[64][8];
+#else
         EB_ALIGN(64) uint32_t         p_eight_sad16x16[16][8];
         EB_ALIGN(64) uint32_t         p_eight_sad8x8[64][8];
+#endif
         EbBitFraction               *mvd_bits_array;
         uint64_t                      lambda;
         uint8_t                       hme_search_type;
@@ -486,7 +491,7 @@ extern "C" {
         HmeResults                   hme_results[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
 #endif
 #if SKIP_ME_BASED_ON_HME
-        EbBool                       reduce_me_sr_flag[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
+        uint32_t                       reduce_me_sr_flag[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
 #endif
 #if SWITCHED_HALF_PEL_MODE
         EbBool                       local_hp_mode[MAX_NUM_OF_REF_PIC_LIST][REF_LIST_MAX_DEPTH];
@@ -496,7 +501,9 @@ extern "C" {
         int tf_frame_index;
         int tf_index_center;
 #endif
-
+#if TUNE_SUBPEL_SEARCH
+        uint8_t                     h_pel_search_wind;
+#endif
     } MeContext;
 
     typedef uint64_t(*EB_ME_DISTORTION_FUNC)(

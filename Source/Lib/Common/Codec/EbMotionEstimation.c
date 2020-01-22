@@ -23,7 +23,17 @@
 #include "EbLambdaRateTables.h"
 
 #define OIS_TH_COUNT 4
-
+#if SC_HME_PRUNING
+#define SC_HME_TH_STILL 1000
+#define SC_HME_TH_EASY  100
+#if TUNE_PRUNE_SC
+#define SC_SR_DENOM_STILL 16
+#define SC_SR_DENOM_EASY 8
+#else
+#define SC_SR_DENOM_STILL 4
+#define SC_SR_DENOM_EASY 2
+#endif
+#endif
 int32_t OisPointTh[3][MAX_TEMPORAL_LAYERS][OIS_TH_COUNT] = {
     {// Light OIS
      {-20, 50, 150, 200},
@@ -1735,7 +1745,11 @@ Calcualte SAD for Rect H, V and H4, V4 partitions
 and update its Motion info if the result SAD is better
 ****************************************************/
 void ext_eigth_sad_calculation_nsq_c(
+#if NSQ_ME_OPT
+    uint16_t p_sad8x8[64][8], uint16_t p_sad16x16[16][8],
+#else
     uint32_t p_sad8x8[64][8], uint32_t p_sad16x16[16][8],
+#endif
     uint32_t p_sad32x32[4][8], uint32_t *p_best_sad64x32,
     uint32_t *p_best_mv64x32, uint32_t *p_best_sad32x16,
     uint32_t *p_best_mv32x16, uint32_t *p_best_sad16x8, uint32_t *p_best_mv16x8,
@@ -2775,10 +2789,17 @@ static void ext_eight_sad_calculation_8x8_16x16(
     uint8_t *src, uint32_t src_stride, uint8_t *ref, uint32_t ref_stride,
     uint32_t mv, uint32_t start_16x16_pos, uint32_t *p_best_sad8x8,
     uint32_t *p_best_sad16x16, uint32_t *p_best_mv8x8, uint32_t *p_best_mv16x16,
+#if NSQ_ME_OPT
+    uint16_t p_eight_sad16x16[16][8], uint16_t p_eight_sad8x8[64][8]) {
+    const uint32_t start_8x8_pos = 4 * start_16x16_pos;
+    uint16_t sad8x8_0, sad8x8_1, sad8x8_2, sad8x8_3;
+    uint16_t sad16x16;
+#else
     uint32_t p_eight_sad16x16[16][8], uint32_t p_eight_sad8x8[64][8]) {
     const uint32_t start_8x8_pos = 4 * start_16x16_pos;
     uint32_t sad8x8_0, sad8x8_1, sad8x8_2, sad8x8_3;
     uint32_t sad16x16;
+#endif
     uint32_t search_index;
     int16_t x_mv, y_mv;
     uint32_t srcStrideSub = (src_stride << 1);
@@ -2855,7 +2876,11 @@ void ext_all_sad_calculation_8x8_16x16_c(
     uint8_t *src, uint32_t src_stride, uint8_t *ref, uint32_t ref_stride,
     uint32_t mv, uint32_t *p_best_sad8x8, uint32_t *p_best_sad16x16,
     uint32_t *p_best_mv8x8, uint32_t *p_best_mv16x16,
+#if NSQ_ME_OPT
+    uint16_t p_eight_sad16x16[16][8], uint16_t p_eight_sad8x8[64][8]) {
+#else
     uint32_t p_eight_sad16x16[16][8], uint32_t p_eight_sad8x8[64][8]) {
+#endif
     static const char offsets[16] = {
         0, 1, 4, 5, 2, 3, 6, 7, 8, 9, 12, 13, 10, 11, 14, 15};
 
@@ -2886,7 +2911,11 @@ and check if there is improvment, if yes keep
 the best SAD+MV
 *******************************************/
 void ext_eight_sad_calculation_32x32_64x64_c(
+#if NSQ_ME_OPT
+    uint16_t p_sad16x16[16][8], uint32_t *p_best_sad32x32,
+#else
     uint32_t p_sad16x16[16][8], uint32_t *p_best_sad32x32,
+#endif
     uint32_t *p_best_sad64x64, uint32_t *p_best_mv32x32,
     uint32_t *p_best_mv64x64, uint32_t mv, uint32_t p_sad32x32[4][8]) {
     uint32_t search_index;
@@ -3012,11 +3041,11 @@ void generate_nsq_mv(MeContext *context_ptr) {
     p_best_mv16x8[29] =p_sad8x8[58] < p_sad8x8[59] ? p_best_mv8x8[58] : p_best_mv8x8[59];
     p_best_mv16x8[30] =p_sad8x8[60] < p_sad8x8[61] ? p_best_mv8x8[60] : p_best_mv8x8[61];
     p_best_mv16x8[31] =p_sad8x8[62] < p_sad8x8[63] ? p_best_mv8x8[62] : p_best_mv8x8[63];
-    
+
     // 32x64
     p_best_mv32x64[0] = p_sad32x32[0] < p_sad32x32[2] ? p_best_mv32x32[0] : p_best_mv32x32[2];
     p_best_mv32x64[1] = p_sad32x32[1] < p_sad32x32[3] ? p_best_mv32x32[1] : p_best_mv32x32[3];
-    
+
 
     // 16x32
     p_best_mv16x32[0] =p_sad16x16[0] < p_sad16x16[2] ? p_best_mv16x16[0] : p_best_mv16x16[2];
@@ -3027,7 +3056,7 @@ void generate_nsq_mv(MeContext *context_ptr) {
     p_best_mv16x32[5] =p_sad16x16[9] < p_sad16x16[11] ? p_best_mv16x16[9] : p_best_mv16x16[11];
     p_best_mv16x32[6] =p_sad16x16[12] < p_sad16x16[14] ? p_best_mv16x16[12] : p_best_mv16x16[14];
     p_best_mv16x32[7] =p_sad16x16[13] < p_sad16x16[15] ? p_best_mv16x16[13] : p_best_mv16x16[15];
-    
+
     // 16x64
     p_best_mv16x64[0] =(p_sad16x16[0] + p_sad16x16[2]) < (p_sad16x16[8] + p_sad16x16[10])  ? p_best_mv32x16[0] : p_best_mv32x16[4];
     p_best_mv16x64[1] =(p_sad16x16[1] + p_sad16x16[3]) < (p_sad16x16[9] + p_sad16x16[11])  ? p_best_mv32x16[1] : p_best_mv32x16[5];
@@ -3067,7 +3096,7 @@ void generate_nsq_mv(MeContext *context_ptr) {
     p_best_mv8x16[29] =p_sad8x8[57] < p_sad8x8[59]  ? p_best_mv8x8[57] : p_best_mv8x8[59];
     p_best_mv8x16[30] =p_sad8x8[60] < p_sad8x8[62]  ? p_best_mv8x8[60] : p_best_mv8x8[62];
     p_best_mv8x16[31] =p_sad8x8[61] < p_sad8x8[63]  ? p_best_mv8x8[61] : p_best_mv8x8[63];
-    
+
     // 32x8
     p_best_mv32x8[0] =(p_sad8x8[0] + p_sad8x8[1]) < (p_sad16x16[4] + p_sad8x8[5])  ? p_best_mv16x8[0] : p_best_mv16x8[2];
     p_best_mv32x8[1] =(p_sad8x8[2] + p_sad8x8[3]) < (p_sad16x16[6] + p_sad8x8[7])  ? p_best_mv16x8[1] : p_best_mv16x8[3];
@@ -4314,8 +4343,15 @@ static void half_pel_refinement_block(
     (void)ineteger_mv;
     // copute distance between best mv and the integer mv candidate
     int16_t offset_x, offset_y;
+#if TUNE_SUBPEL_SEARCH
+    int8_t h_pel_search_wind = context_ptr->h_pel_search_wind;
+
+    for (offset_x = -h_pel_search_wind; offset_x <= h_pel_search_wind; offset_x++) {
+        for (offset_y = -h_pel_search_wind; offset_y <= h_pel_search_wind; offset_y++) {
+#else
     for (offset_x = -H_PEL_SEARCH_WIND; offset_x <= H_PEL_SEARCH_WIND; offset_x++) {
         for (offset_y = -H_PEL_SEARCH_WIND; offset_y <= H_PEL_SEARCH_WIND; offset_y++) {
+#endif
             x_best_mv = _MVXT(*best_pervious_stage_mv);
             y_best_mv = _MVYT(*best_pervious_stage_mv);
             x_mv = x_best_mv + (offset_x * 4);
@@ -5099,6 +5135,9 @@ void half_pel_refinement_sb(
     uint32_t search_area_height,  // input parameter, search area height
     uint32_t search_area_width,  // input parameter, search area width
 #endif
+#if OPT_REC_SUBP
+    uint8_t ref_pic_index,
+#endif
     uint32_t inetger_mv)
 {
     uint32_t idx;
@@ -5248,403 +5287,409 @@ void half_pel_refinement_sb(
                                   &context_ptr->p_best_full_pel_mv8x8[idx],
                                   inetger_mv);
     }
-    if (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE) {
-        // 64x32
-        for (pu_index = 0; pu_index < 2; ++pu_index) {
-            block_index_shift_x = 0;
-            block_index_shift_y = pu_index << 5;
-            src_block_index = block_index_shift_x +
-                              block_index_shift_y * context_ptr->sb_src_stride;
-            posb_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posh_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posj_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            half_pel_refinement_block(
-                context_ptr,
-                &(refBuffer[block_index_shift_y * ref_stride +
-                            block_index_shift_x]),
-                ref_stride,
-                &context_ptr->p_best_ssd64x32[pu_index],
-                src_block_index,
-                &(pos_b_buffer[posb_buffer_index]),
-                &(pos_h_buffer[posh_buffer_index]),
-                &(pos_j_buffer[posj_buffer_index]),
-                64,
-                32,
-                x_search_area_origin,
-                y_search_area_origin,
-#if OPTIMISED_EX_SUBPEL
-                search_area_height,
-                search_area_width,
+#if OPT_REC_SUBP
+    if (!ref_pic_index || !context_ptr->use_best_sq_mv) {
 #endif
-                &context_ptr->p_best_sad64x32[pu_index],
-                &context_ptr->p_best_mv64x32[pu_index],
-                &context_ptr->psub_pel_direction64x32[pu_index],
-                &context_ptr->p_best_full_pel_mv64x32[pu_index],
-                inetger_mv);
-        }
-        // 32x16
-        for (pu_index = 0; pu_index < 8; ++pu_index) {
-            idx = tab32x16[pu_index];  // TODO bitwise this
-            block_index_shift_x = (pu_index & 0x01) << 5;
-            block_index_shift_y = (pu_index >> 1) << 4;
-            src_block_index = block_index_shift_x +
-                              block_index_shift_y * context_ptr->sb_src_stride;
-            posb_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posh_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posj_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            half_pel_refinement_block(
-                context_ptr,
-                &(refBuffer[block_index_shift_y * ref_stride +
-                            block_index_shift_x]),
-                ref_stride,
-                &context_ptr->p_best_ssd32x16[idx],
-                src_block_index,
-                &(pos_b_buffer[posb_buffer_index]),
-                &(pos_h_buffer[posh_buffer_index]),
-                &(pos_j_buffer[posj_buffer_index]),
-                32,
-                16,
-                x_search_area_origin,
-                y_search_area_origin,
+        if (picture_control_set_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE) {
+            // 64x32
+            for (pu_index = 0; pu_index < 2; ++pu_index) {
+                block_index_shift_x = 0;
+                block_index_shift_y = pu_index << 5;
+                src_block_index = block_index_shift_x +
+                    block_index_shift_y * context_ptr->sb_src_stride;
+                posb_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posh_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posj_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                half_pel_refinement_block(
+                    context_ptr,
+                    &(refBuffer[block_index_shift_y * ref_stride +
+                        block_index_shift_x]),
+                    ref_stride,
+                    &context_ptr->p_best_ssd64x32[pu_index],
+                    src_block_index,
+                    &(pos_b_buffer[posb_buffer_index]),
+                    &(pos_h_buffer[posh_buffer_index]),
+                    &(pos_j_buffer[posj_buffer_index]),
+                    64,
+                    32,
+                    x_search_area_origin,
+                    y_search_area_origin,
 #if OPTIMISED_EX_SUBPEL
-                search_area_height,
-                search_area_width,
+                    search_area_height,
+                    search_area_width,
 #endif
-                &context_ptr->p_best_sad32x16[idx],
-                &context_ptr->p_best_mv32x16[idx],
-                &context_ptr->psub_pel_direction32x16[idx],
-                &context_ptr->p_best_full_pel_mv32x16[idx],
-                inetger_mv);
-        }
-        // 16x8
-        for (pu_index = 0; pu_index < 32; ++pu_index) {
-            idx = tab16x8[pu_index];
-            block_index_shift_x = (pu_index & 0x03) << 4;
-            block_index_shift_y = (pu_index >> 2) << 3;
-            src_block_index = block_index_shift_x +
-                              block_index_shift_y * context_ptr->sb_src_stride;
-            posb_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posh_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posj_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            half_pel_refinement_block(
-                context_ptr,
-                &(refBuffer[block_index_shift_y * ref_stride +
-                            block_index_shift_x]),
-                ref_stride,
-                &context_ptr->p_best_ssd16x8[idx],
-                src_block_index,
-                &(pos_b_buffer[posb_buffer_index]),
-                &(pos_h_buffer[posh_buffer_index]),
-                &(pos_j_buffer[posj_buffer_index]),
-                16,
-                8,
-                x_search_area_origin,
-                y_search_area_origin,
+                    &context_ptr->p_best_sad64x32[pu_index],
+                    &context_ptr->p_best_mv64x32[pu_index],
+                    &context_ptr->psub_pel_direction64x32[pu_index],
+                    &context_ptr->p_best_full_pel_mv64x32[pu_index],
+                    inetger_mv);
+            }
+            // 32x16
+            for (pu_index = 0; pu_index < 8; ++pu_index) {
+                idx = tab32x16[pu_index];  // TODO bitwise this
+                block_index_shift_x = (pu_index & 0x01) << 5;
+                block_index_shift_y = (pu_index >> 1) << 4;
+                src_block_index = block_index_shift_x +
+                    block_index_shift_y * context_ptr->sb_src_stride;
+                posb_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posh_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posj_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                half_pel_refinement_block(
+                    context_ptr,
+                    &(refBuffer[block_index_shift_y * ref_stride +
+                        block_index_shift_x]),
+                    ref_stride,
+                    &context_ptr->p_best_ssd32x16[idx],
+                    src_block_index,
+                    &(pos_b_buffer[posb_buffer_index]),
+                    &(pos_h_buffer[posh_buffer_index]),
+                    &(pos_j_buffer[posj_buffer_index]),
+                    32,
+                    16,
+                    x_search_area_origin,
+                    y_search_area_origin,
 #if OPTIMISED_EX_SUBPEL
-                search_area_height,
-                search_area_width,
+                    search_area_height,
+                    search_area_width,
 #endif
-                &context_ptr->p_best_sad16x8[idx],
-                &context_ptr->p_best_mv16x8[idx],
-                &context_ptr->psub_pel_direction16x8[idx],
-                &context_ptr->p_best_full_pel_mv16x8[idx],
-                inetger_mv);
-        }
-        // 32x64
-        for (pu_index = 0; pu_index < 2; ++pu_index) {
-            block_index_shift_x = pu_index << 5;
-            block_index_shift_y = 0;
-            src_block_index = block_index_shift_x +
-                              block_index_shift_y * context_ptr->sb_src_stride;
-            posb_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posh_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posj_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            half_pel_refinement_block(
-                context_ptr,
-                &(refBuffer[block_index_shift_y * ref_stride +
-                            block_index_shift_x]),
-                ref_stride,
-                &context_ptr->p_best_ssd32x64[pu_index],
-                src_block_index,
-                &(pos_b_buffer[posb_buffer_index]),
-                &(pos_h_buffer[posh_buffer_index]),
-                &(pos_j_buffer[posj_buffer_index]),
-                32,
-                64,
-                x_search_area_origin,
-                y_search_area_origin,
+                    &context_ptr->p_best_sad32x16[idx],
+                    &context_ptr->p_best_mv32x16[idx],
+                    &context_ptr->psub_pel_direction32x16[idx],
+                    &context_ptr->p_best_full_pel_mv32x16[idx],
+                    inetger_mv);
+            }
+            // 16x8
+            for (pu_index = 0; pu_index < 32; ++pu_index) {
+                idx = tab16x8[pu_index];
+                block_index_shift_x = (pu_index & 0x03) << 4;
+                block_index_shift_y = (pu_index >> 2) << 3;
+                src_block_index = block_index_shift_x +
+                    block_index_shift_y * context_ptr->sb_src_stride;
+                posb_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posh_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posj_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                half_pel_refinement_block(
+                    context_ptr,
+                    &(refBuffer[block_index_shift_y * ref_stride +
+                        block_index_shift_x]),
+                    ref_stride,
+                    &context_ptr->p_best_ssd16x8[idx],
+                    src_block_index,
+                    &(pos_b_buffer[posb_buffer_index]),
+                    &(pos_h_buffer[posh_buffer_index]),
+                    &(pos_j_buffer[posj_buffer_index]),
+                    16,
+                    8,
+                    x_search_area_origin,
+                    y_search_area_origin,
 #if OPTIMISED_EX_SUBPEL
-                search_area_height,
-                search_area_width,
+                    search_area_height,
+                    search_area_width,
 #endif
-                &context_ptr->p_best_sad32x64[pu_index],
-                &context_ptr->p_best_mv32x64[pu_index],
-                &context_ptr->psub_pel_direction32x64[pu_index],
-                &context_ptr->p_best_full_pel_mv32x64[pu_index],
-                inetger_mv);
-        }
-        // 16x32
-        for (pu_index = 0; pu_index < 8; ++pu_index) {
-            idx = tab16x32[pu_index];
-            block_index_shift_x = (pu_index & 0x03) << 4;
-            block_index_shift_y = (pu_index >> 2) << 5;
-            src_block_index = block_index_shift_x +
-                              block_index_shift_y * context_ptr->sb_src_stride;
-            posb_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posh_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posj_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            half_pel_refinement_block(
-                context_ptr,
-                &(refBuffer[block_index_shift_y * ref_stride +
-                            block_index_shift_x]),
-                ref_stride,
-                &context_ptr->p_best_ssd16x32[idx],
-                src_block_index,
-                &(pos_b_buffer[posb_buffer_index]),
-                &(pos_h_buffer[posh_buffer_index]),
-                &(pos_j_buffer[posj_buffer_index]),
-                16,
-                32,
-                x_search_area_origin,
-                y_search_area_origin,
+                    &context_ptr->p_best_sad16x8[idx],
+                    &context_ptr->p_best_mv16x8[idx],
+                    &context_ptr->psub_pel_direction16x8[idx],
+                    &context_ptr->p_best_full_pel_mv16x8[idx],
+                    inetger_mv);
+            }
+            // 32x64
+            for (pu_index = 0; pu_index < 2; ++pu_index) {
+                block_index_shift_x = pu_index << 5;
+                block_index_shift_y = 0;
+                src_block_index = block_index_shift_x +
+                    block_index_shift_y * context_ptr->sb_src_stride;
+                posb_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posh_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posj_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                half_pel_refinement_block(
+                    context_ptr,
+                    &(refBuffer[block_index_shift_y * ref_stride +
+                        block_index_shift_x]),
+                    ref_stride,
+                    &context_ptr->p_best_ssd32x64[pu_index],
+                    src_block_index,
+                    &(pos_b_buffer[posb_buffer_index]),
+                    &(pos_h_buffer[posh_buffer_index]),
+                    &(pos_j_buffer[posj_buffer_index]),
+                    32,
+                    64,
+                    x_search_area_origin,
+                    y_search_area_origin,
 #if OPTIMISED_EX_SUBPEL
-                search_area_height,
-                search_area_width,
+                    search_area_height,
+                    search_area_width,
 #endif
-                &context_ptr->p_best_sad16x32[idx],
-                &context_ptr->p_best_mv16x32[idx],
-                &context_ptr->psub_pel_direction16x32[idx],
-                &context_ptr->p_best_full_pel_mv16x32[idx],
-                inetger_mv);
-        }
-        // 8x16
-        for (pu_index = 0; pu_index < 32; ++pu_index) {
-            idx = tab8x16[pu_index];
-            block_index_shift_x = (pu_index & 0x07) << 3;
-            block_index_shift_y = (pu_index >> 3) << 4;
-            src_block_index = block_index_shift_x +
-                              block_index_shift_y * context_ptr->sb_src_stride;
-            posb_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posh_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posj_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            half_pel_refinement_block(
-                context_ptr,
-                &(refBuffer[block_index_shift_y * ref_stride +
-                            block_index_shift_x]),
-                ref_stride,
-                &context_ptr->p_best_ssd8x16[idx],
-                src_block_index,
-                &(pos_b_buffer[posb_buffer_index]),
-                &(pos_h_buffer[posh_buffer_index]),
-                &(pos_j_buffer[posj_buffer_index]),
-                8,
-                16,
-                x_search_area_origin,
-                y_search_area_origin,
+                    &context_ptr->p_best_sad32x64[pu_index],
+                    &context_ptr->p_best_mv32x64[pu_index],
+                    &context_ptr->psub_pel_direction32x64[pu_index],
+                    &context_ptr->p_best_full_pel_mv32x64[pu_index],
+                    inetger_mv);
+            }
+            // 16x32
+            for (pu_index = 0; pu_index < 8; ++pu_index) {
+                idx = tab16x32[pu_index];
+                block_index_shift_x = (pu_index & 0x03) << 4;
+                block_index_shift_y = (pu_index >> 2) << 5;
+                src_block_index = block_index_shift_x +
+                    block_index_shift_y * context_ptr->sb_src_stride;
+                posb_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posh_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posj_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                half_pel_refinement_block(
+                    context_ptr,
+                    &(refBuffer[block_index_shift_y * ref_stride +
+                        block_index_shift_x]),
+                    ref_stride,
+                    &context_ptr->p_best_ssd16x32[idx],
+                    src_block_index,
+                    &(pos_b_buffer[posb_buffer_index]),
+                    &(pos_h_buffer[posh_buffer_index]),
+                    &(pos_j_buffer[posj_buffer_index]),
+                    16,
+                    32,
+                    x_search_area_origin,
+                    y_search_area_origin,
 #if OPTIMISED_EX_SUBPEL
-                search_area_height,
-                search_area_width,
+                    search_area_height,
+                    search_area_width,
 #endif
-                &context_ptr->p_best_sad8x16[idx],
-                &context_ptr->p_best_mv8x16[idx],
-                &context_ptr->psub_pel_direction8x16[idx],
-                &context_ptr->p_best_full_pel_mv8x16[idx],
-                inetger_mv);
-        }
-        // 32x8
-        for (pu_index = 0; pu_index < 16; ++pu_index) {
-            idx = tab32x8[pu_index];
-            block_index_shift_x = (pu_index & 0x01) << 5;
-            block_index_shift_y = (pu_index >> 1) << 3;
-            src_block_index = block_index_shift_x +
-                              block_index_shift_y * context_ptr->sb_src_stride;
-            posb_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posh_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posj_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            half_pel_refinement_block(
-                context_ptr,
-                &(refBuffer[block_index_shift_y * ref_stride +
-                            block_index_shift_x]),
-                ref_stride,
-                &context_ptr->p_best_ssd32x8[idx],
-                src_block_index,
-                &(pos_b_buffer[posb_buffer_index]),
-                &(pos_h_buffer[posh_buffer_index]),
-                &(pos_j_buffer[posj_buffer_index]),
-                32,
-                8,
-                x_search_area_origin,
-                y_search_area_origin,
+                    &context_ptr->p_best_sad16x32[idx],
+                    &context_ptr->p_best_mv16x32[idx],
+                    &context_ptr->psub_pel_direction16x32[idx],
+                    &context_ptr->p_best_full_pel_mv16x32[idx],
+                    inetger_mv);
+            }
+            // 8x16
+            for (pu_index = 0; pu_index < 32; ++pu_index) {
+                idx = tab8x16[pu_index];
+                block_index_shift_x = (pu_index & 0x07) << 3;
+                block_index_shift_y = (pu_index >> 3) << 4;
+                src_block_index = block_index_shift_x +
+                    block_index_shift_y * context_ptr->sb_src_stride;
+                posb_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posh_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posj_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                half_pel_refinement_block(
+                    context_ptr,
+                    &(refBuffer[block_index_shift_y * ref_stride +
+                        block_index_shift_x]),
+                    ref_stride,
+                    &context_ptr->p_best_ssd8x16[idx],
+                    src_block_index,
+                    &(pos_b_buffer[posb_buffer_index]),
+                    &(pos_h_buffer[posh_buffer_index]),
+                    &(pos_j_buffer[posj_buffer_index]),
+                    8,
+                    16,
+                    x_search_area_origin,
+                    y_search_area_origin,
 #if OPTIMISED_EX_SUBPEL
-                search_area_height,
-                search_area_width,
+                    search_area_height,
+                    search_area_width,
 #endif
-                &context_ptr->p_best_sad32x8[idx],
-                &context_ptr->p_best_mv32x8[idx],
-                &context_ptr->psub_pel_direction32x8[idx],
-                &context_ptr->p_best_full_pel_mv32x8[idx],
-                inetger_mv);
-        }
-        for (pu_index = 0; pu_index < 16; ++pu_index) {
-            idx = tab8x32[pu_index];
-            block_index_shift_x = (pu_index & 0x07) << 3;
-            block_index_shift_y = (pu_index >> 3) << 5;
-            src_block_index = block_index_shift_x +
-                              block_index_shift_y * context_ptr->sb_src_stride;
-            posb_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posh_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posj_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            half_pel_refinement_block(
-                context_ptr,
-                &(refBuffer[block_index_shift_y * ref_stride +
-                            block_index_shift_x]),
-                ref_stride,
-                &context_ptr->p_best_ssd8x32[idx],
-                src_block_index,
-                &(pos_b_buffer[posb_buffer_index]),
-                &(pos_h_buffer[posh_buffer_index]),
-                &(pos_j_buffer[posj_buffer_index]),
-                8,
-                32,
-                x_search_area_origin,
-                y_search_area_origin,
+                    &context_ptr->p_best_sad8x16[idx],
+                    &context_ptr->p_best_mv8x16[idx],
+                    &context_ptr->psub_pel_direction8x16[idx],
+                    &context_ptr->p_best_full_pel_mv8x16[idx],
+                    inetger_mv);
+            }
+            // 32x8
+            for (pu_index = 0; pu_index < 16; ++pu_index) {
+                idx = tab32x8[pu_index];
+                block_index_shift_x = (pu_index & 0x01) << 5;
+                block_index_shift_y = (pu_index >> 1) << 3;
+                src_block_index = block_index_shift_x +
+                    block_index_shift_y * context_ptr->sb_src_stride;
+                posb_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posh_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posj_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                half_pel_refinement_block(
+                    context_ptr,
+                    &(refBuffer[block_index_shift_y * ref_stride +
+                        block_index_shift_x]),
+                    ref_stride,
+                    &context_ptr->p_best_ssd32x8[idx],
+                    src_block_index,
+                    &(pos_b_buffer[posb_buffer_index]),
+                    &(pos_h_buffer[posh_buffer_index]),
+                    &(pos_j_buffer[posj_buffer_index]),
+                    32,
+                    8,
+                    x_search_area_origin,
+                    y_search_area_origin,
 #if OPTIMISED_EX_SUBPEL
-                search_area_height,
-                search_area_width,
+                    search_area_height,
+                    search_area_width,
 #endif
-                &context_ptr->p_best_sad8x32[idx],
-                &context_ptr->p_best_mv8x32[idx],
-                &context_ptr->psub_pel_direction8x32[idx],
-                &context_ptr->p_best_full_pel_mv8x32[idx],
-                inetger_mv);
-        }
-        for (pu_index = 0; pu_index < 4; ++pu_index) {
-            idx = pu_index;
-            block_index_shift_x = 0;
-            block_index_shift_y = pu_index << 4;
-            src_block_index = block_index_shift_x +
-                              block_index_shift_y * context_ptr->sb_src_stride;
-            posb_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posh_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posj_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            half_pel_refinement_block(
-                context_ptr,
-                &(refBuffer[block_index_shift_y * ref_stride +
-                            block_index_shift_x]),
-                ref_stride,
-                &context_ptr->p_best_ssd64x16[idx],
-                src_block_index,
-                &(pos_b_buffer[posb_buffer_index]),
-                &(pos_h_buffer[posh_buffer_index]),
-                &(pos_j_buffer[posj_buffer_index]),
-                64,
-                16,
-                x_search_area_origin,
-                y_search_area_origin,
+                    &context_ptr->p_best_sad32x8[idx],
+                    &context_ptr->p_best_mv32x8[idx],
+                    &context_ptr->psub_pel_direction32x8[idx],
+                    &context_ptr->p_best_full_pel_mv32x8[idx],
+                    inetger_mv);
+            }
+            for (pu_index = 0; pu_index < 16; ++pu_index) {
+                idx = tab8x32[pu_index];
+                block_index_shift_x = (pu_index & 0x07) << 3;
+                block_index_shift_y = (pu_index >> 3) << 5;
+                src_block_index = block_index_shift_x +
+                    block_index_shift_y * context_ptr->sb_src_stride;
+                posb_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posh_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posj_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                half_pel_refinement_block(
+                    context_ptr,
+                    &(refBuffer[block_index_shift_y * ref_stride +
+                        block_index_shift_x]),
+                    ref_stride,
+                    &context_ptr->p_best_ssd8x32[idx],
+                    src_block_index,
+                    &(pos_b_buffer[posb_buffer_index]),
+                    &(pos_h_buffer[posh_buffer_index]),
+                    &(pos_j_buffer[posj_buffer_index]),
+                    8,
+                    32,
+                    x_search_area_origin,
+                    y_search_area_origin,
 #if OPTIMISED_EX_SUBPEL
-                search_area_height,
-                search_area_width,
+                    search_area_height,
+                    search_area_width,
 #endif
-                &context_ptr->p_best_sad64x16[idx],
-                &context_ptr->p_best_mv64x16[idx],
-                &context_ptr->psub_pel_direction64x16[idx],
-                &context_ptr->p_best_full_pel_mv64x16[idx],
-                inetger_mv);
-        }
-        for (pu_index = 0; pu_index < 4; ++pu_index) {
-            idx = pu_index;
-            block_index_shift_x = pu_index << 4;
-            block_index_shift_y = 0;
-            src_block_index = block_index_shift_x +
-                              block_index_shift_y * context_ptr->sb_src_stride;
-            posb_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posh_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            posj_buffer_index =
-                block_index_shift_x +
-                block_index_shift_y * context_ptr->interpolated_stride;
-            half_pel_refinement_block(
-                context_ptr,
-                &(refBuffer[block_index_shift_y * ref_stride +
-                            block_index_shift_x]),
-                ref_stride,
-                &context_ptr->p_best_ssd16x64[idx],
-                src_block_index,
-                &(pos_b_buffer[posb_buffer_index]),
-                &(pos_h_buffer[posh_buffer_index]),
-                &(pos_j_buffer[posj_buffer_index]),
-                16,
-                64,
-                x_search_area_origin,
-                y_search_area_origin,
+                    &context_ptr->p_best_sad8x32[idx],
+                    &context_ptr->p_best_mv8x32[idx],
+                    &context_ptr->psub_pel_direction8x32[idx],
+                    &context_ptr->p_best_full_pel_mv8x32[idx],
+                    inetger_mv);
+            }
+            for (pu_index = 0; pu_index < 4; ++pu_index) {
+                idx = pu_index;
+                block_index_shift_x = 0;
+                block_index_shift_y = pu_index << 4;
+                src_block_index = block_index_shift_x +
+                    block_index_shift_y * context_ptr->sb_src_stride;
+                posb_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posh_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posj_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                half_pel_refinement_block(
+                    context_ptr,
+                    &(refBuffer[block_index_shift_y * ref_stride +
+                        block_index_shift_x]),
+                    ref_stride,
+                    &context_ptr->p_best_ssd64x16[idx],
+                    src_block_index,
+                    &(pos_b_buffer[posb_buffer_index]),
+                    &(pos_h_buffer[posh_buffer_index]),
+                    &(pos_j_buffer[posj_buffer_index]),
+                    64,
+                    16,
+                    x_search_area_origin,
+                    y_search_area_origin,
 #if OPTIMISED_EX_SUBPEL
-                search_area_height,
-                search_area_width,
+                    search_area_height,
+                    search_area_width,
 #endif
-                &context_ptr->p_best_sad16x64[idx],
-                &context_ptr->p_best_mv16x64[idx],
-                &context_ptr->psub_pel_direction16x64[idx],
-                &context_ptr->p_best_full_pel_mv16x64[idx],
-                inetger_mv);
+                    &context_ptr->p_best_sad64x16[idx],
+                    &context_ptr->p_best_mv64x16[idx],
+                    &context_ptr->psub_pel_direction64x16[idx],
+                    &context_ptr->p_best_full_pel_mv64x16[idx],
+                    inetger_mv);
+            }
+            for (pu_index = 0; pu_index < 4; ++pu_index) {
+                idx = pu_index;
+                block_index_shift_x = pu_index << 4;
+                block_index_shift_y = 0;
+                src_block_index = block_index_shift_x +
+                    block_index_shift_y * context_ptr->sb_src_stride;
+                posb_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posh_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                posj_buffer_index =
+                    block_index_shift_x +
+                    block_index_shift_y * context_ptr->interpolated_stride;
+                half_pel_refinement_block(
+                    context_ptr,
+                    &(refBuffer[block_index_shift_y * ref_stride +
+                        block_index_shift_x]),
+                    ref_stride,
+                    &context_ptr->p_best_ssd16x64[idx],
+                    src_block_index,
+                    &(pos_b_buffer[posb_buffer_index]),
+                    &(pos_h_buffer[posh_buffer_index]),
+                    &(pos_j_buffer[posj_buffer_index]),
+                    16,
+                    64,
+                    x_search_area_origin,
+                    y_search_area_origin,
+#if OPTIMISED_EX_SUBPEL
+                    search_area_height,
+                    search_area_width,
+#endif
+                    &context_ptr->p_best_sad16x64[idx],
+                    &context_ptr->p_best_mv16x64[idx],
+                    &context_ptr->psub_pel_direction16x64[idx],
+                    &context_ptr->p_best_full_pel_mv16x64[idx],
+                    inetger_mv);
+            }
         }
+#if OPT_REC_SUBP
     }
+#endif
     return;
 }
 /*******************************************
@@ -5690,7 +5735,14 @@ static void open_loop_me_half_pel_search_sblock(
         y_search_area_origin,
         search_area_height,
         search_area_width,
+#if OPT_REC_SUBP
+        ref_pic_index,
+#endif
         0);
+#if OPT_REC_SUBP
+    if(ref_pic_index && context_ptr->use_best_sq_mv)
+        generate_nsq_mv(context_ptr);
+#endif
 }
 #else
 static void open_loop_me_half_pel_search_sblock(
@@ -13802,32 +13854,87 @@ void integer_search_sb(
             x_search_center = context_ptr->hme_results[list_index][ref_pic_index].hme_sc_x;
             y_search_center = context_ptr->hme_results[list_index][ref_pic_index].hme_sc_y;
 #if DIST_BASED_ME_SEARCH_AREA
-            search_area_width = context_ptr->search_area_width;
-            search_area_height = context_ptr->search_area_height;
+            if (picture_control_set_ptr->distance_me_flag) {
+                search_area_width = context_ptr->search_area_width;
+                search_area_height = context_ptr->search_area_height;
 
-            uint16_t dist = (context_ptr->me_alt_ref == EB_TRUE) ?
-                ABS((int16_t)(context_ptr->tf_frame_index - context_ptr->tf_index_center)) :
-                ABS((int16_t)(picture_control_set_ptr->picture_number - picture_control_set_ptr->ref_pic_poc_array[list_index][ref_pic_index]));
-
-            search_area_width = MIN((search_area_width  * dist), context_ptr->max_search_area_width);
-            search_area_height = MIN((search_area_height * dist), context_ptr->max_search_area_height);
+                uint16_t dist = (context_ptr->me_alt_ref == EB_TRUE) ?
+                    ABS((int16_t)(context_ptr->tf_frame_index - context_ptr->tf_index_center)) :
+                    ABS((int16_t)(picture_control_set_ptr->picture_number - picture_control_set_ptr->ref_pic_poc_array[list_index][ref_pic_index]));
+#if DISTANCE_ME_FACTOR
+                if (!picture_control_set_ptr->sc_content_detected && context_ptr->me_alt_ref == 0) {
+                    int8_t round_up = ((dist%8) == 0) ? 0 : 1;
+                    dist = ((dist * 5) / 8) + round_up;
+                }
+#endif
+                search_area_width = MIN((search_area_width  * dist), context_ptr->max_search_area_width);
+                search_area_height = MIN((search_area_height * dist), context_ptr->max_search_area_height);
 
 #if SKIP_ME_BASED_ON_HME
-            // Constrain x_ME to be a multiple of 8 (round up)
-            // Update ME search reagion size based on hme-data
-            if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
-                search_area_width = ((search_area_width / 8) + 7) & ~0x07;
-                search_area_height = (search_area_height / 8);
-            }
-            else {
+                // Constrain x_ME to be a multiple of 8 (round up)
+                // Update ME search reagion size based on hme-data
+#if SC_HME_PRUNING
+                if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == SC_HME_TH_STILL) {
+                    search_area_width = ((search_area_width / SC_SR_DENOM_STILL) + 7) & ~0x07;
+                    search_area_height = (search_area_height / SC_SR_DENOM_STILL);
+                }
+                else if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == SC_HME_TH_EASY) {
+                    search_area_width = ((search_area_width / SC_SR_DENOM_EASY) + 7) & ~0x07;
+                    search_area_height = (search_area_height / SC_SR_DENOM_EASY);
+                }else if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
+                    search_area_width = ((search_area_width / 8) + 7) & ~0x07;
+                    search_area_height = (search_area_height / 8);
+                }
+                else {
+                    search_area_width = (search_area_width + 7) & ~0x07;
+                    search_area_height = search_area_height;
+                }
+#else
+                if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
+                    search_area_width = ((search_area_width / 8) + 7) & ~0x07;
+                    search_area_height = (search_area_height / 8);
+                }
+                else {
+                    search_area_width = (search_area_width + 7) & ~0x07;
+                    search_area_height = search_area_height;
+                }
+#endif
+#else
+                // Constrain x_ME to be a multiple of 8 (round up)
                 search_area_width = (search_area_width + 7) & ~0x07;
                 search_area_height = search_area_height;
-            }
-#else
-            // Constrain x_ME to be a multiple of 8 (round up)
-            search_area_width = (search_area_width + 7) & ~0x07;
-            search_area_height = search_area_height;
 #endif
+        }
+            else {
+                // Constrain x_ME to be a multiple of 8 (round up)
+                search_area_width = (context_ptr->search_area_width + 7) & ~0x07;
+                search_area_height = context_ptr->search_area_height;
+#if SKIP_ME_BASED_ON_HME
+#if SC_HME_PRUNING
+                if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == SC_HME_TH_STILL) {
+                    search_area_width = ((search_area_width / SC_SR_DENOM_STILL) + 7) & ~0x07;
+                    search_area_height = (search_area_height / SC_SR_DENOM_STILL);
+                }
+                else if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index] == SC_HME_TH_EASY) {
+                    search_area_width = ((search_area_width / SC_SR_DENOM_EASY) + 7) & ~0x07;
+                    search_area_height = (search_area_height / SC_SR_DENOM_EASY);
+                }else if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
+                    search_area_width = ((search_area_width / 8) + 7) & ~0x07;
+                    search_area_height = (search_area_height / 8);
+                }
+                else {
+                    search_area_width = (search_area_width + 7) & ~0x07;
+                    search_area_height = search_area_height;
+                }
+#else
+                // Update ME search reagion size based on hme-data
+                if (context_ptr->reduce_me_sr_flag[list_index][ref_pic_index]) {
+                    search_area_width = ((context_ptr->search_area_width/8) + 7) & ~0x07;
+                    search_area_height = (context_ptr->search_area_height/8);
+                }
+#endif
+#endif
+            }
 #else
             // Constrain x_ME to be a multiple of 8 (round up)
             search_area_width = (context_ptr->search_area_width + 7) & ~0x07;
@@ -14993,7 +15100,26 @@ void hme_sb(
     }
 }
 
-
+#if SC_HME_PRUNING
+void prune_references_sc(
+    PictureParentControlSet   *picture_control_set_ptr,
+    uint32_t                   sb_index,
+    uint32_t                   sb_origin_x,
+    uint32_t                   sb_origin_y,
+    MeContext                 *context_ptr,
+    EbPictureBufferDesc       *input_ptr
+)
+{
+    for (uint32_t li = 0; li < MAX_NUM_OF_REF_PIC_LIST; li++) {
+        for (uint32_t ri = 0; ri < REF_LIST_MAX_DEPTH; ri++){
+            if (context_ptr->hme_results[li][ri].hme_sc_x == 0 && context_ptr->hme_results[li][ri].hme_sc_y == 0 && context_ptr->hme_results[li][ri].hme_sad < SC_HME_TH_EASY)
+                context_ptr->reduce_me_sr_flag[li][ri] = SC_HME_TH_STILL;
+            else if (context_ptr->hme_results[li][ri].hme_sad < SC_HME_TH_EASY)
+                context_ptr->reduce_me_sr_flag[li][ri] = SC_HME_TH_EASY;
+        }
+    }
+}
+#endif
 void prune_references(
     PictureParentControlSet   *picture_control_set_ptr,
     uint32_t                   sb_index,
@@ -15281,6 +15407,16 @@ EbErrorType motion_estimate_lcu(
             sb_origin_y,
             context_ptr,
             input_ptr);
+#if SC_HME_PRUNING
+    else if (picture_control_set_ptr->sc_content_detected)
+        prune_references_sc(
+            picture_control_set_ptr,
+            sb_index,
+            sb_origin_x,
+            sb_origin_y,
+            context_ptr,
+            input_ptr);
+#endif
 
 #if MUS_ME_FP
     integer_search_sb(
@@ -16210,6 +16346,7 @@ EbErrorType motion_estimate_lcu(
                                                            search_area_height);
 #endif
                         context_ptr->full_quarter_pel_refinement = 0;
+
 #if SWITCHED_HALF_PEL_MODE
                         if (context_ptr->half_pel_mode ==
                             EX_HP_MODE && context_ptr->local_hp_mode[listIndex][ref_pic_index] == EX_HP_MODE) {
@@ -16822,6 +16959,10 @@ if (context_ptr->me_alt_ref == EB_FALSE) {
 
         mePuResult->total_me_candidate_index[pu_index] =
             MIN(total_me_candidate_index, ME_RES_CAND_MRP_MODE_0);
+#if REDUCE_ME_OUTPUT
+        uint8_t adjusted_total_me_candidate_index = total_me_candidate_index;
+        uint64_t best =  MAX_CU_COST;
+#endif
         // Assining the ME candidates to the me Results buffer
         for (candidateIndex = 0; candidateIndex < total_me_candidate_index;
              ++candidateIndex) {
@@ -16830,6 +16971,18 @@ if (context_ptr->me_alt_ref == EB_FALSE) {
             picture_control_set_ptr->me_results[sb_index]
                 ->me_candidate[pu_index][candidateIndex]
                 .distortion = me_candidate->distortion;
+#if REDUCE_ME_OUTPUT
+#if TUNE_REDUCE_ME_OUTPUT
+            uint8_t  BIGGER_THAN_TH = 30;
+#else
+            uint8_t  BIGGER_THAN_TH = 70;
+#endif
+            best = candidateIndex == 0 ? me_candidate->distortion : best;
+            if ((me_candidate->distortion - best) * 100 > BIGGER_THAN_TH*best) {
+                adjusted_total_me_candidate_index--;
+                continue;
+            }
+#endif
             picture_control_set_ptr->me_results[sb_index]
                 ->me_candidate[pu_index][candidateIndex]
                 .direction = me_candidate->prediction_direction;
@@ -16846,7 +16999,11 @@ if (context_ptr->me_alt_ref == EB_FALSE) {
                 ->me_candidate[pu_index][candidateIndex]
                 .ref1_list = me_candidate->ref1_list;
         }
-
+#if REDUCE_ME_OUTPUT
+        //printf("%d\t%d\t%d\n", total_me_candidate_index, adjusted_total_me_candidate_index,total_me_candidate_index - adjusted_total_me_candidate_index);
+        mePuResult->total_me_candidate_index[pu_index] =
+        MIN(adjusted_total_me_candidate_index, ME_RES_CAND_MRP_MODE_0);
+#endif
         for (listIndex = REF_LIST_0; listIndex <= numOfListToSearch;
              ++listIndex) {
             num_of_ref_pic_to_search =

@@ -1304,6 +1304,36 @@ static const int plane_rd_mult[REF_TYPES][PLANE_TYPES] = {
   { 17, 13 },
   { 16, 10 },
 };
+#if FASTER_RDOQ
+static INLINE void update_coeff_eob_fast(
+    uint16_t *eob, int shift,
+    const int16_t *dequant_ptr,
+    const int16_t *scan,
+    const TranLow *coeff_ptr,
+    TranLow *qcoeff_ptr,
+    TranLow *dqcoeff_ptr) {
+    // TODO(sarahparker) make this work for aomqm
+    int eob_out = *eob;
+    int zbin[2] = { dequant_ptr[0] + ROUND_POWER_OF_TWO(dequant_ptr[0] * 70, 7),
+                    dequant_ptr[1] + ROUND_POWER_OF_TWO(dequant_ptr[1] * 70, 7) };
+    for (int i = *eob - 1; i >= 0; i--) {
+        const int rc = scan[i];
+        const int qcoeff = qcoeff_ptr[rc];
+        const int coeff = coeff_ptr[rc];
+        const int coeff_sign = (coeff >> 31);
+        int64_t abs_coeff = (coeff ^ coeff_sign) - coeff_sign;
+        if (((abs_coeff << (1 + shift)) < zbin[rc != 0]) || (qcoeff == 0)) {
+            eob_out--;
+            qcoeff_ptr[rc] = 0;
+            dqcoeff_ptr[rc] = 0;
+        }
+        else {
+            break;
+        }
+    }
+    *eob = eob_out;
+}
+#endif
 
 void eb_av1_optimize_b(
     ModeDecisionContext  *md_context,
@@ -1336,7 +1366,18 @@ void eb_av1_optimize_b(
 
     // Hsan (Trellis): hardcoded as not supported:
     int sharpness = 0; // No Sharpness
+#if FASTER_RDOQ
+    int fast_mode = (is_inter && plane); // TBD
+
+
+#if TEST_10
+    if (md_context->md_stage <= MD_STAGE_2)
+        fast_mode = 1;
+#endif
+
+#else
     int fast_mode = 0; // TBD
+#endif
     AQ_MODE aq_mode = NO_AQ;
     DELTAQ_MODE deltaq_mode = NO_DELTA_Q;
     int8_t segment_id = 0;
@@ -1355,6 +1396,17 @@ void eb_av1_optimize_b(
     const LvMapCoeffCost *txb_costs = &md_context->md_rate_estimation_ptr->coeff_fac_bits[txs_ctx][plane_type];
     const int eob_multi_size = txsize_log2_minus4[tx_size];
     const LvMapEobCost *txb_eob_costs = &md_context->md_rate_estimation_ptr->eob_frac_bits[eob_multi_size][plane_type];
+#if FASTER_RDOQ
+    if (fast_mode) {
+        update_coeff_eob_fast(eob, shift, p->dequant_QTX, scan, coeff_ptr, qcoeff_ptr, dqcoeff_ptr);
+        //p->eobs[block] = eob;
+        if (*eob == 0) {
+            //*rate_cost = av1_cost_skip_txb(x, txb_ctx, plane, tx_size);
+            //return eob;
+            return;
+        }
+    }
+#endif
     const int rshift =
         (sharpness +
         (aq_mode == VARIANCE_AQ && segment_id < 4
@@ -1837,8 +1889,14 @@ void product_full_loop(
     for (txb_itr = 0; txb_itr < txb_count; txb_itr++)
     {
 #endif
+#if TX_ORG_INTERINTRA
+        int32_t is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE || candidate_buffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
+        uint16_t tx_org_x = context_ptr->blk_geom->tx_org_x[is_inter][tx_depth][txb_itr];
+        uint16_t tx_org_y = context_ptr->blk_geom->tx_org_y[is_inter][tx_depth][txb_itr];
+#else
         uint16_t tx_org_x = context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr];
         uint16_t tx_org_y = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
+#endif
         int32_t cropped_tx_width = MIN(context_ptr->blk_geom->tx_width[tx_depth][txb_itr], sequence_control_set_ptr->seq_header.max_frame_width - (context_ptr->sb_origin_x + tx_org_x));
         int32_t cropped_tx_height = MIN(context_ptr->blk_geom->tx_height[tx_depth][txb_itr], sequence_control_set_ptr->seq_header.max_frame_height - (context_ptr->sb_origin_y + tx_org_y));
         context_ptr->luma_txb_skip_context = 0;
@@ -2169,13 +2227,24 @@ void product_full_loop_tx_search(
         if (picture_control_set_ptr->parent_pcs_ptr->tx_search_reduced_set)
             if (!allowed_tx_set_a[txSize][tx_type]) continue;
 #endif
+
+
+#if TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2 || TEST_9
+        if (context_ptr->md_stage <= MD_STAGE_2 && tx_type != DCT_DCT && tx_type != V_DCT && tx_type != H_DCT)
+            continue;
+#endif
         context_ptr->three_quad_energy = 0;
         uint32_t txb_itr = 0;
         uint16_t txb_count = context_ptr->blk_geom->txb_count[tx_depth];
         for (txb_itr = 0; txb_itr < txb_count; txb_itr++)
         {
+#if TX_ORG_INTERINTRA
+            uint8_t txb_origin_x = (uint8_t)context_ptr->blk_geom->tx_org_x[is_inter][tx_depth][txb_itr];
+            uint8_t txb_origin_y = (uint8_t)context_ptr->blk_geom->tx_org_y[is_inter][tx_depth][txb_itr];
+#else
             uint8_t txb_origin_x = (uint8_t)context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr];
             uint8_t txb_origin_y = (uint8_t)context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
+#endif
             tu_origin_index = txb_origin_x + (txb_origin_y * candidate_buffer->residual_ptr->stride_y);
             y_tu_coeff_bits = 0;
 
@@ -2439,7 +2508,11 @@ void encode_pass_tx_search(
     TxType                 txk_end = TX_TYPES;
     TxType                 tx_type;
     TxSize                 txSize = context_ptr->blk_geom->txsize[cu_ptr->tx_depth][context_ptr->txb_itr];
+#if TX_ORG_INTERINTRA
+    const uint32_t         scratch_luma_offset = context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr] + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][context_ptr->txb_itr] * SB_STRIDE_Y;
+#else
     const uint32_t         scratch_luma_offset = context_ptr->blk_geom->tx_org_x[cu_ptr->tx_depth][context_ptr->txb_itr] + context_ptr->blk_geom->tx_org_y[cu_ptr->tx_depth][context_ptr->txb_itr] * SB_STRIDE_Y;
+#endif
     assert(txSize < TX_SIZES_ALL);
     const TxSetType        tx_set_type =
         get_ext_tx_set_type(txSize, is_inter, picture_control_set_ptr->parent_pcs_ptr->frm_hdr.reduced_tx_set);
@@ -2889,10 +2962,19 @@ void full_loop_r(
     uint32_t  txb_1d_offset = 0;
     tuCount = tx_depth ? 1 : tuCount; //NM: 128x128 exeption
 
+#if TX_ORG_INTERINTRA
+    int32_t is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE || candidate_buffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
+#endif
+
     txb_itr = 0;
     do {
+#if TX_ORG_INTERINTRA
+        txb_origin_x = context_ptr->blk_geom->tx_org_x[is_inter][tx_depth][txb_itr];
+        txb_origin_y = context_ptr->blk_geom->tx_org_y[is_inter][tx_depth][txb_itr];
+#else
         txb_origin_x = context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr];
         txb_origin_y = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
+#endif
 
         context_ptr->cb_txb_skip_context = 0;
         context_ptr->cb_dc_sign_context = 0;
@@ -3170,9 +3252,19 @@ void cu_full_distortion_fast_tu_mode_r(
     candidate_ptr->u_has_coeff = 0;
     candidate_ptr->v_has_coeff = 0;
     tuTotalCount = tx_depth ? 1 : tuTotalCount; //NM: 128x128 exeption
+
+#if TX_ORG_INTERINTRA
+    int32_t is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE || candidate_buffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
+#endif
+
     do {
+#if TX_ORG_INTERINTRA
+        txb_origin_x = context_ptr->blk_geom->tx_org_x[is_inter][tx_depth][txb_itr];
+        txb_origin_y = context_ptr->blk_geom->tx_org_y[is_inter][tx_depth][txb_itr];
+#else
         txb_origin_x = context_ptr->blk_geom->tx_org_x[tx_depth][txb_itr];
         txb_origin_y = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
+#endif
         int32_t cropped_tx_width_uv = MIN(context_ptr->blk_geom->tx_width_uv[tx_depth][txb_itr], picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->seq_header.max_frame_width / 2 - ((context_ptr->sb_origin_x + ((txb_origin_x >> 3) << 3)) >> 1));
         int32_t cropped_tx_height_uv = MIN(context_ptr->blk_geom->tx_height_uv[tx_depth][txb_itr], picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->seq_header.max_frame_height / 2 - ((context_ptr->sb_origin_y + ((txb_origin_y >> 3) << 3)) >> 1));
         tu_origin_index = txb_origin_x + txb_origin_y * candidate_buffer->residual_quant_coeff_ptr->stride_y;

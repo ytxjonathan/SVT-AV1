@@ -504,7 +504,10 @@ static void create_ME_context_and_picture_control(MotionEstimationContext_t *con
 
     // set Lambda
     context_ptr->me_context_ptr->lambda = lambda_mode_decision_ra_sad[picture_control_set_ptr_central->picture_qp];
-
+#if TUNE_SUBPEL_SEARCH
+    context_ptr->me_context_ptr->h_pel_search_wind =  sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?
+                                                      H_PEL_SEARCH_WIND_2 : H_PEL_SEARCH_WIND_1;
+#endif
     // populate src block buffers: sb_buffer, quarter_sb_buffer and sixteenth_sb_buffer
     for (lcuRow = 0; lcuRow < BLOCK_SIZE_64; lcuRow++) {
         EB_MEMCPY((&(context_ptr->me_context_ptr->sb_buffer[lcuRow * BLOCK_SIZE_64])), (&(input_picture_ptr_central->buffer_y[bufferIndex + lcuRow * input_picture_ptr_central->stride_y])), BLOCK_SIZE_64 * sizeof(uint8_t));
@@ -1249,8 +1252,7 @@ static void tf_inter_prediction(PictureParentControlSet *picture_control_set_ptr
                                 int encoder_bit_depth)
 {
     const InterpFilters interp_filters =
-        av1_make_interp_filters(MULTITAP_SHARP, MULTITAP_SHARP);
-
+    av1_make_interp_filters(MULTITAP_SHARP, MULTITAP_SHARP);
     EbBool is_highbd = (encoder_bit_depth == 8) ? (uint8_t)EB_FALSE : (uint8_t)EB_TRUE;
 
     CodingUnit       cu_ptr;
@@ -1368,10 +1370,8 @@ static void tf_inter_prediction(PictureParentControlSet *picture_control_set_ptr
                 signed short best_mv_y = 0;
                 signed short mv_x = (_MVXT(context_ptr->p_best_mv16x16[mv_index])) << 1;
                 signed short mv_y = (_MVYT(context_ptr->p_best_mv16x16[mv_index])) << 1;
-
                 for (signed short i = -1; i <= 1; i++) {
                     for (signed short j = -1; j <= 1; j++) {
-
                         mv_unit.mv->x = mv_x + i;
                         mv_unit.mv->y = mv_y + j;
 
@@ -1944,14 +1944,18 @@ static void adjust_filter_strength(
 
     // Adjust the strength of the temporal filtering
     // based on the amount of noise present in the frame
-    // adjustment in the integer range [-2, 1]
+    // adjustment in the integer range [-1, 1]
     // if noiselevel < 0, it means that the estimation was
     // unsuccessful and therefore keep the strength as it was set
     if (noise_level > 0) {
         int noiselevel_adj;
+#if ALTREF_STR_UPDATE
+        if (noise_level < 1.2)
+#else
         if (noise_level < 0.75)
             noiselevel_adj = -2;
         else if (noise_level < 1.75)
+#endif
             noiselevel_adj = -1;
         else if (noise_level < 4.0)
             noiselevel_adj = 0;
@@ -1978,6 +1982,12 @@ static void adjust_filter_strength(
     else
         strength = 0;
 
+#if ALTREF_STR_UPDATE
+    // Decrease the filter strength for low QPs
+    if (picture_control_set_ptr_central->sequence_control_set_ptr->static_config.qp <= 20) {
+        strength = strength - 1;
+    }
+#endif
     // if highbd, adjust filter strength strength = strength + 2*(bit depth - 8)
     if(is_highbd)
         strength = strength + 2 * (encoder_bit_depth - 8);
@@ -1987,7 +1997,6 @@ static void adjust_filter_strength(
 #endif
 
     *altref_strength = (uint8_t)strength;
-
     // TODO: apply further refinements to the filter parameters according to 1st pass statistics
 
 }

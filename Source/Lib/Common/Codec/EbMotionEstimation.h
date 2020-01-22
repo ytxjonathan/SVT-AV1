@@ -375,7 +375,64 @@ void interpolate_search_region_AVC_chroma(
         uint32_t  *p_best_mv32x32,
         uint32_t  *p_best_mv64x64,
         uint32_t   mv);
+#if NSQ_ME_OPT
+    extern void ext_all_sad_calculation_8x8_16x16_c(
+        uint8_t *src,
+        uint32_t src_stride,
+        uint8_t *ref,
+        uint32_t ref_stride,
+        uint32_t mv,
+        uint32_t *p_best_sad8x8,
+        uint32_t *p_best_sad16x16,
+        uint32_t *p_best_mv8x8,
+        uint32_t *p_best_mv16x16,
+        uint16_t p_eight_sad16x16[16][8],
+        uint16_t p_eight_sad8x8[64][8]);
 
+    /****************************************************
+    Calcualte SAD for Rect H, V and H4, V4 partitions
+    and update its Motion info if the result SAD is better
+    ****************************************************/
+    extern void ext_eigth_sad_calculation_nsq_c(
+        uint16_t p_sad8x8[64][8],
+        uint16_t p_sad16x16[16][8],
+        uint32_t p_sad32x32[4][8],
+        uint32_t *p_best_sad64x32,
+        uint32_t *p_best_mv64x32,
+        uint32_t *p_best_sad32x16,
+        uint32_t *p_best_mv32x16,
+        uint32_t *p_best_sad16x8,
+        uint32_t *p_best_mv16x8,
+        uint32_t *p_best_sad32x64,
+        uint32_t *p_best_mv32x64,
+        uint32_t *p_best_sad16x32,
+        uint32_t *p_best_mv16x32,
+        uint32_t *p_best_sad8x16,
+        uint32_t *p_best_mv8x16,
+        uint32_t *p_best_sad32x8,
+        uint32_t *p_best_mv32x8,
+        uint32_t *p_best_sad8x32,
+        uint32_t *p_best_mv8x32,
+        uint32_t *p_best_sad64x16,
+        uint32_t *p_best_mv64x16,
+        uint32_t *p_best_sad16x64,
+        uint32_t *p_best_mv16x64,
+        uint32_t mv);
+
+    /*******************************************
+    Calcualte SAD for 32x32,64x64 from 16x16
+    and check if there is improvment, if yes keep
+    the best SAD+MV
+    *******************************************/
+    extern void ext_eight_sad_calculation_32x32_64x64_c(
+        uint16_t p_sad16x16[16][8],
+        uint32_t *p_best_sad32x32,
+        uint32_t *p_best_sad64x64,
+        uint32_t *p_best_mv32x32,
+        uint32_t *p_best_mv64x64,
+        uint32_t mv,
+        uint32_t p_sad32x32[4][8]);
+#else
     extern void ext_all_sad_calculation_8x8_16x16_c(
         uint8_t *src,
         uint32_t src_stride,
@@ -432,7 +489,7 @@ void interpolate_search_region_AVC_chroma(
         uint32_t *p_best_mv64x64,
         uint32_t mv,
         uint32_t p_sad32x32[4][8]);
-
+#endif
     // Nader - to be replaced by loock-up table
     /*******************************************
     * get_me_info_index
@@ -465,6 +522,9 @@ void interpolate_search_region_AVC_chroma(
 #if OPTIMISED_EX_SUBPEL
         uint32_t search_area_height,  // input parameter, search area height
         uint32_t search_area_width,  // input parameter, search area width
+#endif
+#if OPT_REC_SUBP
+        uint8_t ref_pic_index,
 #endif
         uint32_t integer_mv);         // input parameter, integer MV
 

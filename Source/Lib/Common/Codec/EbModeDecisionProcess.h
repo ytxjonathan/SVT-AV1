@@ -24,7 +24,12 @@ extern "C" {
     /**************************************
      * Defines
      **************************************/
+#if INFR_OPT
+#define MODE_DECISION_CANDIDATE_MAX_COUNT_Y             1855
+#define MODE_DECISION_CANDIDATE_MAX_COUNT               MODE_DECISION_CANDIDATE_MAX_COUNT_Y + 84
+#else
 #define MODE_DECISION_CANDIDATE_MAX_COUNT               1855
+#endif
 #define DEPTH_ONE_STEP   21
 #define DEPTH_TWO_STEP    5
 #define DEPTH_THREE_STEP  1
@@ -291,19 +296,32 @@ extern "C" {
     EbBool      variance_ready;
 
 #if REMOVE_MD_STAGE_1
+#if ADD_4TH_MD_STAGE
+    MD_STAGE                            md_stage;
+#endif
     uint32_t                            cand_buff_indices[CAND_CLASS_TOTAL][MAX_NFL_BUFF];
     uint8_t                             md_staging_mode;
 #if MULTI_PASS_PD
     uint8_t                             md_staging_count_level;
 #endif
     uint8_t                             bypass_md_stage_1[CAND_CLASS_TOTAL];
-
+#if ADD_4TH_MD_STAGE
+    uint8_t                             bypass_md_stage_2[CAND_CLASS_TOTAL];
+#endif
     uint32_t                            md_stage_0_count[CAND_CLASS_TOTAL];
     uint32_t                            md_stage_1_count[CAND_CLASS_TOTAL];
     uint32_t                            md_stage_2_count[CAND_CLASS_TOTAL];
-
+#if ADD_4TH_MD_STAGE
+    uint32_t                            md_stage_3_count[CAND_CLASS_TOTAL];
+#endif
     uint32_t                            md_stage_1_total_count;
     uint32_t                            md_stage_2_total_count;
+#if ADD_4TH_MD_STAGE
+    uint32_t                            md_stage_3_total_count;
+#endif
+#if COMP_OPT
+    uint32_t                            md_stage_3_total_intra_count;
+#endif
 
     uint8_t                             combine_class12; // 1:class1 and 2 are combined.
 #else
@@ -334,7 +352,11 @@ extern "C" {
 
     // full_loop_core signals
     EbBool                              md_staging_skip_full_pred; // 0: perform luma & chroma prediction + interpolation search, 2: nothing (use information from previous stages)
+#if TX_SIZE_ONLY_MD_STAGE_2
+    EbBool                              md_staging_tx_size_mode; // 0: Tx Size recon only, 1:Tx Size search and recon
+#else
     EbBool                              md_staging_skip_atb;
+#endif
     EbBool                              md_staging_tx_search; // 0: skip, 1: use ref cost, 2: no shortcuts
     EbBool                              md_staging_skip_full_chroma;
     EbBool                              md_staging_skip_rdoq;
@@ -439,6 +461,9 @@ extern "C" {
     uint32_t part_struct_union_block_index_array[MAX_PART_STRUCT_CANDIDATES * MAX_BLOCK_PER_PART_STRUCT];
     uint32_t part_struct_best_array[MAX_PART_STRUCT_CANDIDATES];
 #endif
+#endif
+#if UPGRAGDE_TX_WEIGHT
+    uint64_t md_stage_1_best_cost_array[CAND_CLASS_TOTAL];
 #endif
     } ModeDecisionContext;
 

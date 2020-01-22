@@ -1250,6 +1250,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         }
 #endif
 
+#if SHUT_TX_WEIGHT
+    context_ptr->tx_weight = MAX_MODE_COST;
+#endif
     // Set tx search reduced set falg (0: full tx set; 1: reduced tx set; 1: two tx))
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->tx_search_reduced_set = 0;
@@ -1520,9 +1523,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
     if (sequence_control_set_ptr->static_config.new_nearest_comb_inject == DEFAULT)
 #if M0_OPT
+#if !ENABLE_NEW_NN_SC
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
             context_ptr->new_nearest_near_comb_injection = 0;
         else
+#endif
 #endif
 #if FIX_NEAREST_NEW
 #if NEW_NN_TL
@@ -1584,9 +1589,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     }
     else
 #endif
+#if !ENABLE_WARPED_SC
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
         context_ptr->warped_motion_injection = 0;
     else
+#endif
         context_ptr->warped_motion_injection = 1;
 
     // Set unipred3x3 injection
@@ -1771,6 +1778,15 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else if (context_ptr->pd_pass == PD_PASS_1) {
         context_ptr->md_staging_mode = MD_STAGING_MODE_1;
     }
+    else
+#endif
+#if ADD_4TH_MD_STAGE
+    if (picture_control_set_ptr->enc_mode == ENC_M0)
+#if TX_SIZE_ONLY_MD_STAGE_2
+        context_ptr->md_staging_mode = MD_STAGING_MODE_2;
+#else
+        context_ptr->md_staging_mode = MD_STAGING_MODE_1;
+#endif
     else
 #endif
     if (picture_control_set_ptr->enc_mode <= ENC_M4)
@@ -2262,7 +2278,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else if (context_ptr->pd_pass == PD_PASS_1)
 #if ENHANCED_M0_SETTINGS // lossless change - PD_PASS_2 and PD_PASS_1 should be completely decoupled: previous merge conflict
 #if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
+#if M0_ADOPT_SQ_WEIGHT
+        context_ptr->sq_weight = 100;
+#else
         context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?  125 : 100;
+#endif
 #else
         context_ptr->sq_weight = 100;
 #endif
@@ -2279,7 +2299,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->sq_weight = (uint32_t)~0;
     else
 #if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
+#if M0_ADOPT_SQ_WEIGHT
+        context_ptr->sq_weight = 105;
+#else
         context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? sequence_control_set_ptr->static_config.sq_weight + 25 : sequence_control_set_ptr->static_config.sq_weight;
+#endif
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
 #endif
@@ -2446,7 +2470,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->enable_auto_max_partition = 0;
 #if ENHANCED_M0_SETTINGS
 #if TUNE_AUTO_MAX_PARTITION
+#if REMOVE_AUTO_MAX_MR
+    else if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
+#else
     else if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
+#endif
 #else
     else if (picture_control_set_ptr->enc_mode <= ENC_M0 || picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
 #endif

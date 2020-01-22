@@ -957,6 +957,17 @@ EbErrorType signal_derivation_multi_processes_oq(
     // NSQ_SEARCH_LEVEL6                              Allow only NSQ Inter-NEAREST/NEAR/GLOBAL if parent SQ has no coeff + reordering nsq_table number and testing only 6 NSQ SHAPE
     // NSQ_SEARCH_FULL                                Allow NSQ Intra-FULL and Inter-FULL
 
+#if REMOVE_MR_NSQ_SEARCH
+#if MULTI_PASS_PD
+        if (picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_0 ||
+            picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_1 ||
+            picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_2 ||
+            picture_control_set_ptr->pic_depth_mode == PIC_MULTI_PASS_PD_MODE_3) {
+
+            picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
+        }
+#endif
+#else
         if (MR_MODE)
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_FULL;
 #if MULTI_PASS_PD
@@ -967,6 +978,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
         }
+#endif
 #endif
         else if (sc_content_detected)
 #if PRESETS_TUNE
@@ -1474,7 +1486,20 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if SPEED_OPT
 #if SC_PRESETS_OPT
 #if ATB_TL
+#if ENABLE_BC
+            picture_control_set_ptr->atb_mode = 1;
+#else
+#if ATB_REF_TL
+            if (picture_control_set_ptr->sc_content_detected)
+                picture_control_set_ptr->atb_mode = (picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 0;
+            else if (MR_MODE)
+                picture_control_set_ptr->atb_mode = 1;
+            else
+                picture_control_set_ptr->atb_mode = (picture_control_set_ptr->is_used_as_reference_flag) ? 1 : 0;
+#else
             picture_control_set_ptr->atb_mode = (picture_control_set_ptr->temporal_layer_index == 0 || !picture_control_set_ptr->sc_content_detected ) ? 1 : 0;
+#endif
+#endif
 #else
             picture_control_set_ptr->atb_mode = ((MR_MODE && !picture_control_set_ptr->sc_content_detected) || picture_control_set_ptr->temporal_layer_index == 0) ? 1 : 0;
 #endif
@@ -1612,7 +1637,20 @@ EbErrorType signal_derivation_multi_processes_oq(
         // GM_DOWN                                    Downsampled resolution with a downsampling factor of 2 in each dimension
         // GM_TRAN_ONLY                               Translation only using ME MV.
 #if GM_DOWNSAMPLED
+#if ENABLE_GM_TRANS
+#if M0_ADOPT_GM_LEVEL
+        if (picture_control_set_ptr->sc_content_detected)
+            picture_control_set_ptr->gm_level = GM_TRAN_ONLY;
+        else if (picture_control_set_ptr->enc_mode <= ENC_M0)
+            picture_control_set_ptr->gm_level = GM_FULL;
+        else
+            picture_control_set_ptr->gm_level = GM_DOWN;
+#else
+        picture_control_set_ptr->gm_level = picture_control_set_ptr->sc_content_detected ? GM_TRAN_ONLY : GM_DOWN;
+#endif
+#else
         picture_control_set_ptr->gm_level = GM_DOWN;
+#endif
 #if MR_MODE
         picture_control_set_ptr->gm_level = GM_FULL;
 #endif
@@ -1630,7 +1668,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         //Prune reference and reduce ME SR based on HME/ME distortion
         // 0: OFF
         // 1: ON
+#if M0_ADOPT_PRUNE_REF_BASED_ME
+        if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M0)
+#else
         if (picture_control_set_ptr->sc_content_detected || MR_MODE)
+#endif
             picture_control_set_ptr->prune_ref_based_me = 0;
         else
             picture_control_set_ptr->prune_ref_based_me = 1;
@@ -4239,7 +4281,11 @@ void* picture_decision_kernel(void *input_ptr)
 #endif
                                   (picture_control_set_ptr->slice_type != I_SLICE && picture_control_set_ptr->temporal_layer_index == 0)
 #if TWO_PASS
+#if ALTREF_TL1
+                                    || (sequence_control_set_ptr->static_config.hierarchical_levels >= 3 && picture_control_set_ptr->temporal_layer_index == 1 && picture_control_set_ptr->sc_content_detected == 0)
+#else
                                     || (sequence_control_set_ptr->use_input_stat_file && picture_control_set_ptr->temporal_layer_index == 1 && picture_control_set_ptr->sc_content_detected == 0)
+#endif
 #endif
                                     ) ) {
                                 int altref_nframes = picture_control_set_ptr->sequence_control_set_ptr->static_config.altref_nframes;
@@ -4294,8 +4340,10 @@ void* picture_decision_kernel(void *input_ptr)
                                     picture_control_set_ptr->temp_filt_pcs_list[pic_itr] = NULL;
 #if NON_KF_INTRA_TF_FIX
                                 // Jing: Intra CRA case
-                                num_past_pics = MIN(num_past_pics, (int)encode_context_ptr->pre_assignment_buffer_count -1);
-
+                                num_past_pics = MIN(num_past_pics, (int)encode_context_ptr->pre_assignment_buffer_count - 1);
+#if ALTREF_TL1
+                                num_past_pics = MIN(num_past_pics, (int)pictureIndex);
+#endif
                                 //get previous+current pictures from the the pre-assign buffer
                                 for (int pic_itr = 0; pic_itr <= num_past_pics; pic_itr++) {
                                     PictureParentControlSet* pcs_itr = (PictureParentControlSet*)encode_context_ptr->pre_assignment_buffer[pictureIndex - num_past_pics + pic_itr]->object_ptr;
