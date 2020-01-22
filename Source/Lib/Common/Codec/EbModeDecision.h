@@ -72,9 +72,9 @@ extern "C" {
         uint32_t  knock;
 #endif
 
-        uint8_t                                skip_flag;
+        uint8_t                                skip_flag;                //not used
         EbBool                                 merge_flag;
-        uint16_t                               count_non_zero_coeffs;
+        uint16_t                               count_non_zero_coeffs;     //not used
         uint8_t                                type;
 #if PAL_SUP
         PaletteInfo                          palette_info;
@@ -85,19 +85,19 @@ extern "C" {
         uint64_t                               fast_chroma_rate;
         uint64_t                               chroma_distortion;
         uint64_t                               chroma_distortion_inter_depth;
-        uint32_t                               luma_fast_distortion;
-        uint32_t                               full_distortion;
-        EbPtr                                 prediction_context_ptr;
-        PictureControlSet                   *picture_control_set_ptr;
+        uint32_t                               luma_fast_distortion;//not used
+        uint32_t                               full_distortion;//not used
+        EbPtr                                 prediction_context_ptr;//not used
+     //   PictureControlSet                   *picture_control_set_ptr;
         EbPredDirection                        prediction_direction[MAX_NUM_OF_PU_PER_CU]; // 2 bits // Hsan: does not seem to be used why not removed ?
 
         int16_t                                motion_vector_pred_x[MAX_NUM_OF_REF_PIC_LIST]; // 16 bits // Hsan: does not seem to be used why not removed ?
         int16_t                                motion_vector_pred_y[MAX_NUM_OF_REF_PIC_LIST]; // 16 bits // Hsan: does not seem to be used why not removed ?
-        uint8_t                                motion_vector_pred_idx[MAX_NUM_OF_REF_PIC_LIST]; // 2 bits
-        uint8_t                                block_has_coeff;             // ?? bit - determine empirically
+        uint8_t                                motion_vector_pred_idx[MAX_NUM_OF_REF_PIC_LIST]; // 2 bits   //not used
+        uint8_t                                block_has_coeff;             // ?? bit - determine empirically //not used
         uint8_t                                u_has_coeff;               // ?? bit
         uint8_t                                v_has_coeff;               // ?? bit
-        uint32_t                               y_has_coeff;                // Issue, should be less than 32
+        uint32_t                               y_has_coeff;                // Issue, should be less than 32   //not used
 
         PredictionMode                         pred_mode; // AV1 mode, no need to convert
         uint8_t                                drl_index;

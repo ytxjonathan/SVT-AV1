@@ -1928,27 +1928,18 @@ void set_md_stage_counts(
 
 #if SPLIT_C1C2
     uint8_t is_ref = picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag;
-    context_ptr->md_stage_1_count[CAND_CLASS_1] = is_ref ? 6  : 3;
-    context_ptr->md_stage_1_count[CAND_CLASS_9] = is_ref ? 10 : 5;
+    context_ptr->md_stage_1_count[CAND_CLASS_1] = is_ref ? 16 : 8;
+    context_ptr->md_stage_1_count[CAND_CLASS_9] = is_ref ? 24 : 12;
 
-    context_ptr->md_stage_1_count[CAND_CLASS_2]  = is_ref ? 6 : 3;
-    context_ptr->md_stage_1_count[CAND_CLASS_10] = is_ref ? 10 : 5;
+    context_ptr->md_stage_1_count[CAND_CLASS_2]  = is_ref ? 16 : 8;
+    context_ptr->md_stage_1_count[CAND_CLASS_10] = is_ref ? 24 : 12;
 
-    context_ptr->md_stage_2_count[CAND_CLASS_1] = is_ref ? 4 : 2;
-    context_ptr->md_stage_2_count[CAND_CLASS_9] = is_ref ? 2 : 1;
+    context_ptr->md_stage_2_count[CAND_CLASS_1] = is_ref ? 6 : 3;
+    context_ptr->md_stage_2_count[CAND_CLASS_9] = is_ref ? 4 : 2;
 
-    context_ptr->md_stage_2_count[CAND_CLASS_2]  = is_ref ? 4 : 2;
-    context_ptr->md_stage_2_count[CAND_CLASS_10] = is_ref ? 2 : 1;
-
-
-
-    
-    context_ptr->md_stage_1_count[CAND_CLASS_9]  +=  5;  
-    context_ptr->md_stage_1_count[CAND_CLASS_10] +=  5;
-
-    context_ptr->md_stage_2_count[CAND_CLASS_9] += 5;
-    context_ptr->md_stage_2_count[CAND_CLASS_10] += 5;
-
+    context_ptr->md_stage_2_count[CAND_CLASS_2]  = is_ref ? 6 : 3;
+    context_ptr->md_stage_2_count[CAND_CLASS_10] = is_ref ? 4 : 2;    
+   
 #endif
 
 #if INC_NIC     
@@ -7223,10 +7214,11 @@ void inter_inter_compound_decision(
     MD_COMP_TYPE cur_type;
     uint32_t cand_i;   
     uint32_t best_cand_idx = 100;
-    uint64_t best_cost = MAX_MODE_COST;// org_cand->full_cost_ptr[0];//
+    uint64_t best_cost =  org_cand->full_cost_ptr[0];//MAX_MODE_COST;//
+    uint64_t best_fast_cost = org_cand->fast_cost_ptr[0];//MAX_MODE_COST;//this was done using BILINEAR interp filter
    
     MD_COMP_TYPE  compound_types[]  = { MD_COMP_AVG, MD_COMP_DIST,MD_COMP_DIFF0,MD_COMP_WEDGE };
-    uint8_t           enable_type[] = { 1,1,1,1};  
+    uint8_t           enable_type[] = { 0,1,1,1};  
 
     for (cand_i = 0; cand_i < 4; cand_i++) {
        
@@ -7264,19 +7256,29 @@ void inter_inter_compound_decision(
 
         uint64_t                     ref_fast_cost = 1570;
 
-        full_loop_core(
-            pcs,
-            sb_ptr,
-            cu_ptr,
-            context_ptr,
-            cand_buff,
-            cand,
-            input_picture_ptr,
-            input_origin_index,
-            NOT_USED_VALUE,
-            cu_origin_index,
-            NOT_USED_VALUE,
-            ref_fast_cost);
+        //to skip full pass if current cand fast loop cost is way worse than best-so-far 
+        int  skip_full_loop = 0;
+        cand_buff->full_cost_ptr[0] = MAX_MODE_COST;
+        if (cand_buff->fast_cost_ptr[0] > best_fast_cost)
+            if ((cand_buff->fast_cost_ptr[0] - best_fast_cost) >  best_fast_cost)
+                  skip_full_loop = 0;
+
+        //context_ptr->spatial_sse_full_loop
+
+        if(!skip_full_loop)
+            full_loop_core(
+                pcs,
+                sb_ptr,
+                cu_ptr,
+                context_ptr,
+                cand_buff,
+                cand,
+                input_picture_ptr,
+                input_origin_index,
+                NOT_USED_VALUE,
+                cu_origin_index,
+                NOT_USED_VALUE,
+                ref_fast_cost);
 
         //expected that fast cost(prediction) is different, coz here we do IFS
 #if 0
@@ -7307,10 +7309,13 @@ void inter_inter_compound_decision(
         ModeDecisionCandidateBuffer *best_cand_buff = context_ptr->comp_cand_buffers[best_cand_idx];
         ModeDecisionCandidate       *best_cand = best_cand_buff->candidate_ptr;
        
-       // org_cand->fast_cost_ptr[0] = best_cand_buff->fast_cost_ptr[0];
-       // org_cand->full_cost_ptr[0] = best_cand_buff->full_cost_ptr[0];
+        org_cand->fast_cost_ptr[0] = best_cand_buff->fast_cost_ptr[0];
+        org_cand->full_cost_ptr[0] = best_cand_buff->full_cost_ptr[0];
 
-        //fast_luma_rate
+      
+       
+        org_cand->candidate_ptr->interp_filters = best_cand->interp_filters;
+        org_cand->candidate_ptr->fast_luma_rate = best_cand->fast_luma_rate;
 
         org_cand->candidate_ptr->compound_idx = best_cand->compound_idx;
         org_cand->candidate_ptr->comp_group_idx = best_cand->comp_group_idx;
@@ -7374,6 +7379,7 @@ void inplace_inter_inter_compound_decision(
             0);
 
         uint64_t                     ref_fast_cost = 1570;
+
 
         full_loop_core(
             pcs,
@@ -7501,16 +7507,16 @@ void md_stage_2(
       //  if (test_comp && picture_control_set_ptr->picture_number == 16 && context_ptr->cu_origin_x == 0 && context_ptr->cu_origin_y == 0 && context_ptr->blk_geom->bsize == BLOCK_32X32)
       //      printf("CHEDDCOMP\n");
 
-        if (test_comp)
-            inplace_inter_inter_compound_decision(
-                picture_control_set_ptr,
-                sb_ptr,
-                cu_ptr,
-                context_ptr,
-                candidate_buffer,
-                input_picture_ptr,
-                inputOriginIndex,
-                cuOriginIndex);
+        //if (test_comp)
+        //    inplace_inter_inter_compound_decision(
+        //        picture_control_set_ptr,
+        //        sb_ptr,
+        //        cu_ptr,
+        //        context_ptr,
+        //        candidate_buffer,
+        //        input_picture_ptr,
+        //        inputOriginIndex,
+        //        cuOriginIndex);
 
 #endif
 
@@ -7528,8 +7534,21 @@ void md_stage_2(
             cuChromaOriginIndex,
             ref_fast_cost);
 
-
-
+        
+#if COMP_FEAT
+        //since pred with IFS is done uisng fast loop core
+        context_ptr->md_staging_skip_full_pred = EB_TRUE;
+        if (test_comp)
+           inter_inter_compound_decision(
+                picture_control_set_ptr,
+                sb_ptr,
+                cu_ptr,
+                context_ptr,
+                candidate_buffer,
+                input_picture_ptr,
+                inputOriginIndex,
+                cuOriginIndex);
+#endif
 
     }
 }
@@ -10085,6 +10104,9 @@ void md_encode_block(
         }  
 #endif
 
+#if COMP_MID
+
+#endif
 
 
 

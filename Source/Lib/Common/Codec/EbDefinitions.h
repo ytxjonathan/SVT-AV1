@@ -35,7 +35,8 @@ extern "C" {
 
 
 #define STEST1           0
-#define STEST2           1
+#define STEST2           0
+#define COMP_MID            0  //start compound in mid way
 
 #define SPLIT_C1C2           0
 #define COMP_FEAT            0//compound as feature
