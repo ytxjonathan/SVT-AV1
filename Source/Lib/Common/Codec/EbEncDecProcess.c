@@ -1315,7 +1315,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->interpolation_search_level = IT_SEARCH_OFF;
     else if (context_ptr->pd_pass == PD_PASS_1) {
 #if IFS_TL
+#if M1_ADOPT_M0_INTERP_SEARCH_PD1
+        if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#else
         if (picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
             context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP_UV_BLIND;
         else
 #endif
@@ -1391,7 +1395,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                     CHROMA_MODE_3;
         else
 #if PRESETS_TUNE
-#if ENHANCED_M0_SETTINGS
+#if ENHANCED_M0_SETTINGS && !M0_ADOPT_M1_CHROMA_LEVEL
             if (picture_control_set_ptr->enc_mode == ENC_M0)
                 context_ptr->chroma_level = CHROMA_MODE_0;
 #else
@@ -2101,7 +2105,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if PRESETS_OPT
     // Phoenix: Active only when inter/inter compound is on
 #if COMPOUND_WEDGE_OPT
+#if M0_ADOPT_M1_INTER_INTER_WEDGE
+    if (MR_MODE)
+#else
     if (MR_MODE || picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
 #else
     if (picture_control_set_ptr->enc_mode <= ENC_M7)
 #endif
@@ -2125,7 +2133,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if M0_OPT
+#if M1_ADOPT_M0_MD_EXIT_TH
+    if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0))
+#else
     if (MR_MODE ||( picture_control_set_ptr->enc_mode == ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0))
+#endif
 #else
     if (MR_MODE)
 #endif
@@ -2300,7 +2312,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
 #if M0_ADOPT_SQ_WEIGHT
-        context_ptr->sq_weight = 105;
+        // Adopt settings which aren't resolution-dependent
+        if (picture_control_set_ptr->enc_mode <= ENC_M3)
+            context_ptr->sq_weight = 105;
+        else
+            context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? sequence_control_set_ptr->static_config.sq_weight + 25 : sequence_control_set_ptr->static_config.sq_weight;
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? sequence_control_set_ptr->static_config.sq_weight + 25 : sequence_control_set_ptr->static_config.sq_weight;
 #endif
@@ -2470,8 +2486,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->enable_auto_max_partition = 0;
 #if ENHANCED_M0_SETTINGS
 #if TUNE_AUTO_MAX_PARTITION
-#if REMOVE_AUTO_MAX_MR
-    else if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
+#if SHUT_AUTO_MAX_PARTITION
+    else if (picture_control_set_ptr->enc_mode <= ENC_M3 || picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
 #else
     else if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT)
 #endif

@@ -9357,15 +9357,10 @@ void search_best_independent_uv_mode(
     // Derive uv_mode_nfl_count
     uint8_t uv_mode_nfl_count;
 #if CHROMA_OPT_0
-#if MR_MODE && !M0_ADOPT_UV_NFL
+#if MR_MODE
     uv_mode_nfl_count = uv_mode_total_count;
 #else
     SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
-#if M0_ADOPT_UV_NFL
-    if (picture_control_set_ptr->enc_mode <= ENC_M0)
-        uv_mode_nfl_count = uv_mode_total_count;
-    else
-#endif
     if (picture_control_set_ptr->slice_type == I_SLICE)
         uv_mode_nfl_count = uv_mode_total_count;
     else if (sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER)
@@ -9374,11 +9369,6 @@ void search_best_independent_uv_mode(
         uv_mode_nfl_count = 8;
 #endif
 #else
-#if M0_ADOPT_UV_NFL
-    if (picture_control_set_ptr->enc_mode <= ENC_M0)
-        uv_mode_nfl_count = uv_mode_total_count;
-    else
-#endif
     if (picture_control_set_ptr->temporal_layer_index == 0)
         uv_mode_nfl_count = uv_mode_total_count;
     else if (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)

@@ -554,6 +554,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
 #if DIST_BASED_ME_SEARCH_AREA
     uint8_t  hmeMeLevel = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
 
+#if M1_ADOPT_M0_DIST_ME
+    if (hmeMeLevel <= ENC_M1)
+        hmeMeLevel = ENC_M0;
+#endif
+
     picture_control_set_ptr->distance_me_flag = 0;
     if (hmeMeLevel == 0)
         picture_control_set_ptr->distance_me_flag = 1;
