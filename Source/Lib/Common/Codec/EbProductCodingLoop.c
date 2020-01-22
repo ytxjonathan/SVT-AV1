@@ -5868,8 +5868,11 @@ uint64_t get_tx_size_bits(
 
     return tx_size_bits;
 }
-
+#if LOSSLESS_TX_TYPE_OPT
+void perform_tx_partitioning(
+#else
 void tx_partitioning_path(
+#endif
     ModeDecisionCandidateBuffer  *candidate_buffer,
     ModeDecisionContext          *context_ptr,
     PictureControlSet            *picture_control_set_ptr,
@@ -5902,8 +5905,14 @@ void tx_partitioning_path(
 #endif
     // Fill the scratch buffer
 #if ATB_INTRA_2_DEPTH
+#if LOSSLESS_TX_TYPE_OPT
+    if (end_tx_depth) {
+#endif
     memcpy(context_ptr->candidate_buffer_tx_depth_1->candidate_ptr, candidate_buffer->candidate_ptr, sizeof(ModeDecisionCandidate));
     memcpy(context_ptr->candidate_buffer_tx_depth_2->candidate_ptr, candidate_buffer->candidate_ptr, sizeof(ModeDecisionCandidate));
+#if LOSSLESS_TX_TYPE_OPT
+    }
+#endif
 #else
     memcpy(context_ptr->scratch_candidate_buffer->candidate_ptr, candidate_buffer->candidate_ptr, sizeof(ModeDecisionCandidate));
 #endif
@@ -6200,6 +6209,9 @@ void tx_partitioning_path(
             // Y Prediction
 
             if (!is_inter) {
+#if LOSSLESS_TX_TYPE_OPT // ----
+                if (context_ptr->tx_depth)
+#endif
                 av1_intra_luma_prediction(
                     context_ptr,
                     picture_control_set_ptr,
@@ -6275,34 +6287,49 @@ void tx_partitioning_path(
 
         } // Transform Loop
 
-        uint64_t tx_size_bits = 0;
-        if (picture_control_set_ptr->parent_pcs_ptr->frm_hdr.tx_mode == TX_MODE_SELECT)
-            tx_size_bits = get_tx_size_bits(
-                tx_candidate_buffer,
-                context_ptr,
-                picture_control_set_ptr,
-                context_ptr->tx_depth,
-                block_has_coeff);
+#if LOSSLESS_TX_TYPE_OPT 
+        if (end_tx_depth) {
+#endif
+            uint64_t tx_size_bits = 0;
+            if (picture_control_set_ptr->parent_pcs_ptr->frm_hdr.tx_mode == TX_MODE_SELECT)
+                tx_size_bits = get_tx_size_bits(
+                    tx_candidate_buffer,
+                    context_ptr,
+                    picture_control_set_ptr,
+                    context_ptr->tx_depth,
+                    block_has_coeff);
 #if NEW_MD_LAMBDA
-        uint64_t cost = RDCOST(full_lambda, (tx_y_coeff_bits + tx_size_bits), tx_y_full_distortion[DIST_CALC_RESIDUAL]);
+            uint64_t cost = RDCOST(full_lambda, (tx_y_coeff_bits + tx_size_bits), tx_y_full_distortion[DIST_CALC_RESIDUAL]);
 #else
-        uint64_t cost = RDCOST(context_ptr->full_lambda, (tx_y_coeff_bits + tx_size_bits), tx_y_full_distortion[DIST_CALC_RESIDUAL]);
+            uint64_t cost = RDCOST(context_ptr->full_lambda, (tx_y_coeff_bits + tx_size_bits), tx_y_full_distortion[DIST_CALC_RESIDUAL]);
 #endif
 
-        if (cost < best_cost_search) {
-            best_cost_search = cost;
-            best_tx_depth = context_ptr->tx_depth;
+            if (cost < best_cost_search) {
+                best_cost_search = cost;
+                best_tx_depth = context_ptr->tx_depth;
 #if TX_SIZE_EARLY_EXIT
-            is_best_has_coeff = block_has_coeff;
+                is_best_has_coeff = block_has_coeff;
 #endif
+                y_full_distortion[DIST_CALC_RESIDUAL] = tx_y_full_distortion[DIST_CALC_RESIDUAL];
+                y_full_distortion[DIST_CALC_PREDICTION] = tx_y_full_distortion[DIST_CALC_PREDICTION];
+                *y_coeff_bits = tx_y_coeff_bits;
+                for (context_ptr->txb_itr = 0; context_ptr->txb_itr < txb_count; context_ptr->txb_itr++) {
+                    y_count_non_zero_coeffs[context_ptr->txb_itr] = tx_y_count_non_zero_coeffs[context_ptr->txb_itr];
+                }
+            }
+
+#if LOSSLESS_TX_TYPE_OPT 
+        }
+        else {
+
             y_full_distortion[DIST_CALC_RESIDUAL] = tx_y_full_distortion[DIST_CALC_RESIDUAL];
             y_full_distortion[DIST_CALC_PREDICTION] = tx_y_full_distortion[DIST_CALC_PREDICTION];
             *y_coeff_bits = tx_y_coeff_bits;
             for (context_ptr->txb_itr = 0; context_ptr->txb_itr < txb_count; context_ptr->txb_itr++) {
                 y_count_non_zero_coeffs[context_ptr->txb_itr] = tx_y_count_non_zero_coeffs[context_ptr->txb_itr];
             }
-
         }
+#endif
 
 #if LOSSY_TX_SIZE_OPT
         if (context_ptr->tx_depth == 1 && best_tx_depth == 0 && (((current_tx_cost - best_cost_search) * 100) / best_cost_search) > 5)
@@ -7113,7 +7140,7 @@ void full_loop_core(
     uint64_t                     ref_fast_cost)
 {
 #if NEW_MD_LAMBDA
-    uint32_t full_lambda =  context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
+    uint32_t full_lambda = context_ptr->hbd_mode_decision ? context_ptr->full_lambda_md[EB_10_BIT_MD] : context_ptr->full_lambda_md[EB_8_BIT_MD]; //OMK
 #endif
     uint64_t      y_full_distortion[DIST_CALC_TOTAL];
     uint32_t      count_non_zero_coeffs[3][MAX_NUM_OF_TU_PER_CU];
@@ -7125,66 +7152,64 @@ void full_loop_core(
     uint64_t      cb_coeff_bits = 0;
     uint64_t      cr_coeff_bits = 0;
 
-        // initialize TU Split
-        y_full_distortion[DIST_CALC_RESIDUAL] = 0;
-        y_full_distortion[DIST_CALC_PREDICTION] = 0;
-        y_coeff_bits = 0;
+    // initialize TU Split
+    y_full_distortion[DIST_CALC_RESIDUAL] = 0;
+    y_full_distortion[DIST_CALC_PREDICTION] = 0;
+    y_coeff_bits = 0;
 
-        candidate_ptr->full_distortion = 0;
+    candidate_ptr->full_distortion = 0;
 
-        memset(candidate_ptr->eob[0], 0, sizeof(uint16_t));
-        memset(candidate_ptr->eob[1], 0, sizeof(uint16_t));
-        memset(candidate_ptr->eob[2], 0, sizeof(uint16_t));
+    memset(candidate_ptr->eob[0], 0, sizeof(uint16_t));
+    memset(candidate_ptr->eob[1], 0, sizeof(uint16_t));
+    memset(candidate_ptr->eob[2], 0, sizeof(uint16_t));
 
-        candidate_ptr->chroma_distortion = 0;
-        candidate_ptr->chroma_distortion_inter_depth = 0;
-        // Set Skip Flag
-        candidate_ptr->skip_flag = EB_FALSE;
+    candidate_ptr->chroma_distortion = 0;
+    candidate_ptr->chroma_distortion_inter_depth = 0;
+    // Set Skip Flag
+    candidate_ptr->skip_flag = EB_FALSE;
 
-        if (candidate_ptr->type != INTRA_MODE) {
+    if (candidate_ptr->type != INTRA_MODE) {
 #if REMOVE_MD_STAGE_1
-            if (context_ptr->md_staging_skip_full_pred == EB_FALSE) {
+        if (context_ptr->md_staging_skip_full_pred == EB_FALSE) {
 #else
-            if (picture_control_set_ptr->parent_pcs_ptr->interpolation_search_level > IT_SEARCH_OFF)
-                if (picture_control_set_ptr->parent_pcs_ptr->interpolation_search_level == IT_SEARCH_FULL_LOOP || context_ptr->md_staging_skip_full_pred == EB_FALSE) {
-                    context_ptr->md_staging_skip_interpolation_search = EB_FALSE;
-                    context_ptr->md_staging_skip_inter_chroma_pred = EB_FALSE;
+        if (picture_control_set_ptr->parent_pcs_ptr->interpolation_search_level > IT_SEARCH_OFF)
+            if (picture_control_set_ptr->parent_pcs_ptr->interpolation_search_level == IT_SEARCH_FULL_LOOP || context_ptr->md_staging_skip_full_pred == EB_FALSE) {
+                context_ptr->md_staging_skip_interpolation_search = EB_FALSE;
+                context_ptr->md_staging_skip_inter_chroma_pred = EB_FALSE;
 #endif
-                    ProductPredictionFunTable[candidate_ptr->type](
-                        context_ptr->hbd_mode_decision,
-                        context_ptr,
-                        picture_control_set_ptr,
-                        candidate_buffer);
-                }
+                ProductPredictionFunTable[candidate_ptr->type](
+                    context_ptr->hbd_mode_decision,
+                    context_ptr,
+                    picture_control_set_ptr,
+                    candidate_buffer);
         }
+    }
 
-        // Initialize luma CBF
-        candidate_ptr->y_has_coeff = 0;
-        candidate_ptr->u_has_coeff = 0;
-        candidate_ptr->v_has_coeff = 0;
+    // Initialize luma CBF
+    candidate_ptr->y_has_coeff = 0;
+    candidate_ptr->u_has_coeff = 0;
+    candidate_ptr->v_has_coeff = 0;
 
-        // Initialize tx type
+    // Initialize tx type
 #if ATB_INTRA_2_DEPTH
-        for (int tu_index = 0; tu_index < MAX_TXB_COUNT; tu_index++)
-            candidate_ptr->transform_type[tu_index] = DCT_DCT;
+    for (int tu_index = 0; tu_index < MAX_TXB_COUNT; tu_index++)
+        candidate_ptr->transform_type[tu_index] = DCT_DCT;
 #else
-        candidate_ptr->transform_type[0] = DCT_DCT;
-        candidate_ptr->transform_type[1] = DCT_DCT;
-        candidate_ptr->transform_type[2] = DCT_DCT;
-        candidate_ptr->transform_type[3] = DCT_DCT;
+    candidate_ptr->transform_type[0] = DCT_DCT;
+    candidate_ptr->transform_type[1] = DCT_DCT;
+    candidate_ptr->transform_type[2] = DCT_DCT;
+    candidate_ptr->transform_type[3] = DCT_DCT;
 #endif
-#if TX_SIZE_ONLY_MD_STAGE_2
-        uint8_t start_tx_depth = 0;
+#if LOSSLESS_TX_TYPE_OPT
+    uint8_t start_tx_depth = 0;
 #endif
-        uint8_t end_tx_depth = 0;
-#if ENABLE_BC
-        int32_t is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE || candidate_buffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
-#endif
+    uint8_t end_tx_depth = 0;
 
-#if TX_SIZE_ONLY_MD_STAGE_2
-        if (context_ptr->md_staging_tx_size_mode == 0) {
-            start_tx_depth = end_tx_depth = candidate_buffer->candidate_ptr->tx_depth;
-        } else {
+#if LOSSLESS_TX_TYPE_OPT
+    if (context_ptr->md_atb_mode == 0 || context_ptr->md_staging_tx_size_mode == 0 || candidate_buffer->candidate_ptr->use_intrabc) {
+        start_tx_depth = end_tx_depth = candidate_buffer->candidate_ptr->tx_depth;
+     }
+    else {
 #endif
         // end_tx_depth set to zero for blocks which go beyond the picture boundaries
         if ((context_ptr->sb_origin_x + context_ptr->blk_geom->origin_x + context_ptr->blk_geom->bwidth < picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->seq_header.max_frame_width &&
@@ -7196,28 +7221,14 @@ void full_loop_core(
 #endif
         else
             end_tx_depth = 0;
-#if TX_SIZE_ONLY_MD_STAGE_2
-        }
+#if LOSSLESS_TX_TYPE_OPT
+    }
 #endif
-
-
-        
-#if LIGHT_TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2
-        if (context_ptr->md_stage <= MD_STAGE_2 && end_tx_depth == 2)
-            end_tx_depth = 1;
-#endif
-
         // Transform partitioning path (INTRA Luma)
 #if ENHANCE_ATB
 #if MULTI_PASS_PD
-#if ENABLE_BC
-        if (context_ptr->md_atb_mode && context_ptr->md_staging_skip_atb == EB_FALSE && end_tx_depth) {
-#else
-#if TX_SIZE_ONLY_MD_STAGE_2
-        if (context_ptr->md_atb_mode && end_tx_depth && candidate_buffer->candidate_ptr->use_intrabc == 0) {
-#else
+#if !LOSSLESS_TX_TYPE_OPT
         if (context_ptr->md_atb_mode && context_ptr->md_staging_skip_atb == EB_FALSE && end_tx_depth && candidate_buffer->candidate_ptr->use_intrabc == 0) {
-#endif
 #endif
 #else
         if (picture_control_set_ptr->parent_pcs_ptr->atb_mode && context_ptr->md_staging_skip_atb == EB_FALSE && end_tx_depth && candidate_buffer->candidate_ptr->use_intrabc == 0) {
@@ -7241,8 +7252,11 @@ void full_loop_core(
                     context_ptr->hbd_mode_decision,
                     context_ptr->blk_geom->bwidth,
                     context_ptr->blk_geom->bheight);
-
+#if LOSSLESS_TX_TYPE_OPT
+            perform_tx_partitioning(
+#else
             tx_partitioning_path(
+#endif
 #else
         if (picture_control_set_ptr->parent_pcs_ptr->atb_mode && context_ptr->md_staging_skip_atb == EB_FALSE && end_tx_depth && candidate_buffer->candidate_ptr->type == INTRA_MODE && candidate_buffer->candidate_ptr->use_intrabc == 0) {
             perform_intra_tx_partitioning(
@@ -7259,6 +7273,7 @@ void full_loop_core(
                 &(*count_non_zero_coeffs[0]),
                 &y_coeff_bits,
                 &y_full_distortion[0]);
+#if !LOSSLESS_TX_TYPE_OPT
         }
         else {
             // Transform partitioning free patch (except the 128x128 case)
@@ -7281,25 +7296,7 @@ void full_loop_core(
             // Transform partitioning free path
 #if MULTI_PASS_PD
             uint8_t  tx_search_skip_flag;
-#if UPGRAGDE_TX_WEIGHT
-            if (context_ptr->md_staging_tx_search == 0)
-                tx_search_skip_flag = EB_TRUE;
-            else {
-                uint64_t class_best_cost = context_ptr->md_stage_1_best_cost_array[candidate_buffer->candidate_ptr->cand_class];
 
-                if (*candidate_buffer->full_cost_ptr < class_best_cost)
-                    printf("error");
-
-                tx_search_skip_flag = EB_FALSE;
-                uint64_t  tx_th = (candidate_buffer->candidate_ptr->cand_class == CAND_CLASS_0 || candidate_buffer->candidate_ptr->cand_class == CAND_CLASS_6 || candidate_buffer->candidate_ptr->cand_class == CAND_CLASS_7) ?
-                    INTRA_CLASS_TH :
-                    INTER_CLASS_TH;
-
-        
-                if (!class_best_cost || ((((*candidate_buffer->full_cost_ptr - class_best_cost) * 100) / class_best_cost) > tx_th) || context_ptr->blk_geom->sq_size >= 128)
-                    tx_search_skip_flag = EB_TRUE;
-            }
-#else
             if (context_ptr->md_staging_tx_search == 0)
                 tx_search_skip_flag = EB_TRUE;
             else if (context_ptr->md_staging_tx_search == 1)
@@ -7310,7 +7307,6 @@ void full_loop_core(
                     context_ptr->tx_weight) : EB_TRUE;
             else
                 tx_search_skip_flag = context_ptr->tx_search_level == TX_SEARCH_FULL_LOOP ? EB_FALSE : EB_TRUE;
-#endif
 #else
             uint8_t  tx_search_skip_flag;
             if (context_ptr->md_staging_tx_search == 0)
@@ -7353,7 +7349,7 @@ void full_loop_core(
                 &y_coeff_bits,
                 &y_full_distortion[0]);
         }
-
+#endif
         candidate_ptr->chroma_distortion_inter_depth = 0;
         candidate_ptr->chroma_distortion = 0;
 
@@ -7716,7 +7712,7 @@ void md_stage_2(
 #if !REMOVE_MD_STAGE_1
     context_ptr->md_staging_skip_full_pred = EB_TRUE;
 #endif
-#if TX_SIZE_ONLY_MD_STAGE_2
+#if LOSSLESS_TX_TYPE_OPT
     context_ptr->md_staging_tx_size_mode = 0;
 #else
     context_ptr->md_staging_skip_atb = EB_TRUE;
@@ -7934,7 +7930,7 @@ void md_stage_3(
 #else
         context_ptr->md_staging_skip_full_pred = (context_ptr->md_staging_mode == MD_STAGING_MODE_3) ? EB_FALSE: EB_TRUE;
 #endif
-#if TX_SIZE_ONLY_MD_STAGE_2
+#if LOSSLESS_TX_TYPE_OPT
         context_ptr->md_staging_tx_size_mode = !context_ptr->coeff_based_skip_atb;
 #else
         context_ptr->md_staging_skip_atb = context_ptr->coeff_based_skip_atb;

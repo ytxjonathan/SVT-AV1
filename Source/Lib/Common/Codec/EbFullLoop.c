@@ -2143,7 +2143,7 @@ uint8_t allowed_tx_set_b[TX_SIZES_ALL][TX_TYPES] = {
 {1,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0},
 {1,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0}
 };
-
+#if !LOSSLESS_TX_TYPE_OPT
 void product_full_loop_tx_search(
     ModeDecisionCandidateBuffer  *candidate_buffer,
     ModeDecisionContext          *context_ptr,
@@ -2464,7 +2464,7 @@ void product_full_loop_tx_search(
     if (is_inter)
         candidate_buffer->candidate_ptr->transform_type_uv = candidate_buffer->candidate_ptr->transform_type[0];
 }
-
+#endif
 void encode_pass_tx_search(
     PictureControlSet            *picture_control_set_ptr,
     EncDecContext                *context_ptr,

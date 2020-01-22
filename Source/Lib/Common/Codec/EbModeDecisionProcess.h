@@ -352,7 +352,7 @@ extern "C" {
 
     // full_loop_core signals
     EbBool                              md_staging_skip_full_pred; // 0: perform luma & chroma prediction + interpolation search, 2: nothing (use information from previous stages)
-#if TX_SIZE_ONLY_MD_STAGE_2
+#if LOSSLESS_TX_TYPE_OPT
     EbBool                              md_staging_tx_size_mode; // 0: Tx Size recon only, 1:Tx Size search and recon
 #else
     EbBool                              md_staging_skip_atb;

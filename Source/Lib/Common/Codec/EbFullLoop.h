@@ -80,12 +80,12 @@ extern "C" {
         const ScanOrder         *sc,
         const QuantParam        *qparam);
 #endif
-
+#if !LOSSLESS_TX_TYPE_OPT
     void product_full_loop_tx_search(
         ModeDecisionCandidateBuffer  *candidate_buffer,
         ModeDecisionContext          *context_ptr,
         PictureControlSet            *picture_control_set_ptr);
-
+#endif
     void inv_transform_recon_wrapper(
         uint8_t    *pred_buffer,
         uint32_t    pred_offset,

@@ -166,11 +166,10 @@ extern "C" {
 
 // Tx Size + Tx Type
 #define TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2           0     
-#define LIGHT_TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2     0  
 
 
 // RDOQ + Tx Type
-#define RDOQ_LIGHT_TX_TYPE_MD_STAGE_2           0     
+#define RDOQ_LIGHT_TX_TYPE_MD_STAGE_2           1     
 
 #endif
 #define TX_TYPE_ONLY_MD_STAGE_2      0
