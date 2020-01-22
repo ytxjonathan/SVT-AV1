@@ -160,20 +160,20 @@ extern "C" {
 
 
 
-#define DOUBLE_MD_STAGE_2_NIC        0
+#define DOUBLE_MD_STAGE_2_NIC        1
 
-#define ADD_4TH_MD_STAGE             0
+#define ADD_4TH_MD_STAGE             1
 #if ADD_4TH_MD_STAGE
 #define TX_SIZE_ONLY_MD_STAGE_2      1
 #if TX_SIZE_ONLY_MD_STAGE_2
 
 // Tx Size + Tx Type
-#define TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2           1     // Test_5 
+#define TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2           0     // Test_7 
 #define LIGHT_TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2     0  
 
 
 // RDOQ + Tx Type
-#define RDOQ_LIGHT_TX_TYPE_MD_STAGE_2           0     
+#define RDOQ_LIGHT_TX_TYPE_MD_STAGE_2           1     // Test_5 
 #if RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
 #define TEST_9   0
 #define TEST_10  0
