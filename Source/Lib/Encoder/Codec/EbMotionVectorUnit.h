@@ -1,7 +1,5 @@
-/*
-* Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
+/*!< Copyright(c) 2019 Intel Corporation
+ * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 #ifndef EbMotionVectorUnit_h
 #define EbMotionVectorUnit_h
@@ -41,4 +39,4 @@ typedef struct MvUnit {
 #ifdef __cplusplus
 }
 #endif
-#endif // EbMotionVectorUnit_h
+#endif /*!< EbMotionVectorUnit_h */

@@ -1,7 +1,5 @@
-/*
-* Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
+/*!< Copyright(c) 2019 Intel Corporation
+ * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 #include <stdlib.h>
 #include <string.h>
@@ -18,9 +16,9 @@ static void neighbor_array_unit_dctor32(EbPtr p) {
     EB_FREE(obj->top_array);
     EB_FREE(obj->top_left_array);
 }
-/*************************************************
- * Neighbor Array Unit Ctor
- *************************************************/
+/*************************************************/
+/*!< Neighbor Array Unit Ctor */
+/*************************************************/
 EbErrorType neighbor_array_unit_ctor32(NeighborArrayUnit32 *na_unit_ptr, uint32_t max_picture_width,
                                        uint32_t max_picture_height, uint32_t unit_size,
                                        uint32_t granularity_normal, uint32_t granularity_top_left,
@@ -102,9 +100,9 @@ EbErrorType neighbor_array_unit_ctor(NeighborArrayUnit *na_unit_ptr, uint32_t ma
     return EB_ErrorNone;
 }
 
-/*************************************************
- * Neighbor Array Unit Reset
- *************************************************/
+/*************************************************/
+/*!< Neighbor Array Unit Reset */
+/*************************************************/
 
 void neighbor_array_unit_reset32(NeighborArrayUnit32 *na_unit_ptr) {
     if (na_unit_ptr->left_array) {
@@ -143,9 +141,9 @@ void neighbor_array_unit_reset(NeighborArrayUnit *na_unit_ptr) {
     return;
 }
 
-/*************************************************
- * Neighbor Array Unit Get Top Index
- *************************************************/
+/*************************************************/
+/*!< Neighbor Array Unit Get Top Index */
+/*************************************************/
 uint32_t get_neighbor_array_unit_top_left_index_32(NeighborArrayUnit32 *na_unit_ptr, int32_t loc_x,
                                                    int32_t loc_y) {
     return na_unit_ptr->left_array_size + (loc_x >> na_unit_ptr->granularity_top_left_log2) -
@@ -175,24 +173,23 @@ void update_recon_neighbor_array(NeighborArrayUnit *na_unit_ptr, uint8_t *src_pt
 
     //na_unit_ptr->top_left_array[ (MAX_PICTURE_HEIGHT_SIZE>>is_chroma) + pic_origin_x - pic_origin_y] = srcPtr2[block_height-1];
 
-    /*
-        //   Top-left Neighbor Array
-        //
-        //    4-5--6--7--------------
-        //    3 \      \
-        //    2  \      \
-        //    1   \      \
-        //    |\   xxxxxx7
-        //    | \  x     6
-        //    |  \ x     5
-        //    |   \1x2x3x4
-        //    |
-        //
-        //  The top-left neighbor array is updated with the reversed samples
-        //    from the right column and bottom row of the source block
-        //
-        // Index = origin_x - origin_y
-        */
+    /*!<
+     *   Top-left Neighbor Array
+     *
+     *    4-5--6--7--------------
+     *    3 \      \
+     *    2  \      \
+     *    1   \      \
+     *    |\   xxxxxx7
+     *    | \  x     6
+     *    |  \ x     5
+     *    |   \1x2x3x4
+     *    |
+     *
+     *  The top-left neighbor array is updated with the reversed samples
+     *    from the right column and bottom row of the source block
+     *
+     * Index = origin_x - origin_y */
 
     uint32_t idx;
 
@@ -204,9 +201,9 @@ void update_recon_neighbor_array(NeighborArrayUnit *na_unit_ptr, uint8_t *src_pt
 
     read_ptr = src_ptr_top; //+ ((block_height - 1) * stride);
 
-    // Copy bottom row
+    // Copy bottom row */
     dst_ptr =
-        //    topLeftArray_chkn+
+        //    topLeftArray_chkn+ */
         na_unit_ptr->top_left_array +
         get_neighbor_array_unit_top_left_index(
             na_unit_ptr, pic_origin_x, pic_origin_y + (block_height - 1)) *
@@ -214,12 +211,12 @@ void update_recon_neighbor_array(NeighborArrayUnit *na_unit_ptr, uint8_t *src_pt
 
     EB_MEMCPY(dst_ptr, read_ptr, block_width);
 
-    // Reset read_ptr to the right-column
+    // Reset read_ptr to the right-column */
     read_ptr = src_ptr_left; // + (block_width - 1);
 
-    // Copy right column
+    // Copy right column */
     dst_ptr =
-        //  topLeftArray_chkn+
+        //  topLeftArray_chkn+ */
         na_unit_ptr->top_left_array +
         get_neighbor_array_unit_top_left_index(
             na_unit_ptr, pic_origin_x + (block_width - 1), pic_origin_y) *
@@ -254,24 +251,24 @@ void update_recon_neighbor_array16bit(NeighborArrayUnit *na_unit_ptr, uint16_t *
                                na_unit_ptr->unit_size);
     EB_MEMCPY(dst_ptr, src_ptr_left, block_height * sizeof(uint16_t));
 
-    //   Top-left Neighbor Array
+    //   Top-left Neighbor Array */
     uint32_t  idx;
     uint16_t *read_ptr = src_ptr_top;
     int32_t   dst_step;
     int32_t   read_step;
     uint32_t  count;
 
-    // Copy bottom row
+    // Copy bottom row */
     dst_ptr = (uint16_t *)(na_unit_ptr->top_left_array +
                            get_neighbor_array_unit_top_left_index(
                                na_unit_ptr, pic_origin_x, pic_origin_y + (block_height - 1)) *
                                na_unit_ptr->unit_size);
     EB_MEMCPY(dst_ptr, read_ptr, block_width * sizeof(uint16_t));
 
-    // Reset read_ptr to the right-column
+    // Reset read_ptr to the right-column */
     read_ptr = src_ptr_left;
 
-    // Copy right column
+    // Copy right column */
     dst_ptr = (uint16_t *)(na_unit_ptr->top_left_array +
                            get_neighbor_array_unit_top_left_index(
                                na_unit_ptr, pic_origin_x + (block_width - 1), pic_origin_y) *
@@ -289,9 +286,9 @@ void update_recon_neighbor_array16bit(NeighborArrayUnit *na_unit_ptr, uint16_t *
     return;
 }
 
-/*************************************************
- * Neighbor Array Sample Update
- *************************************************/
+/*************************************************/
+/*!< Neighbor Array Sample Update */
+/*************************************************/
 void neighbor_array_unit_sample_write(NeighborArrayUnit *na_unit_ptr, uint8_t *src_ptr,
                                       uint32_t stride, uint32_t src_origin_x, uint32_t src_origin_y,
                                       uint32_t pic_origin_x, uint32_t pic_origin_y,
@@ -305,24 +302,24 @@ void neighbor_array_unit_sample_write(NeighborArrayUnit *na_unit_ptr, uint8_t *s
     int32_t  read_step;
     uint32_t count;
 
-    // Adjust the Source ptr to start at the origin of the block being updated.
+    // Adjust the Source ptr to start at the origin of the block being updated. */
     src_ptr += ((src_origin_y * stride) + src_origin_x) * na_unit_ptr->unit_size;
 
     if (neighbor_array_type_mask & NEIGHBOR_ARRAY_UNIT_TOP_MASK) {
-        //
-        //     ----------12345678---------------------  Top Neighbor Array
-        //                ^    ^
-        //                |    |
-        //                |    |
-        //               xxxxxxxx
-        //               x      x
-        //               x      x
-        //               12345678
-        //
-        //  The top neighbor array is updated with the samples from the
-        //    bottom row of the source block
-        //
-        //  Index = origin_x
+        /*!<
+         * //     ----------12345678---------------------  Top Neighbor Array
+         * //                ^    ^
+         * //                |    |
+         * //                |    |
+         * //               xxxxxxxx
+         * //               x      x
+         * //               x      x
+         * //               12345678
+         * //
+         * //  The top neighbor array is updated with the samples from the
+         * //    bottom row of the source block
+         *
+         *  Index = origin_x */
 
         // Adjust read_ptr to the bottom-row
         read_ptr = src_ptr + ((block_height - 1) * stride);
