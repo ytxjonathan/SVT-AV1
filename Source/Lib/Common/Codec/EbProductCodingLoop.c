@@ -2812,6 +2812,9 @@ void md_stage_0(
         --fastLoopCandidateIndex;
     }
 
+
+
+
     // 2nd fast loop: src-to-recon
     highestCostIndex = candidate_buffer_start_index;
     fastLoopCandidateIndex = fast_candidate_end_index;
@@ -2850,6 +2853,20 @@ void md_stage_0(
                     use_ssd);
 
             }
+
+#if COMP_MID
+            candidate_ptr->fast_cost = *candidate_buffer->fast_cost_ptr;
+
+            uint8_t blk_comp = context_ptr->blk_geom->bwidth > 4 && context_ptr->blk_geom->bheight > 4;
+            uint8_t is_global_warp = candidate_ptr->pred_mode == GLOBAL_GLOBALMV && candidate_ptr->motion_mode == WARPED_CAUSAL;
+            uint8_t test_comp = blk_comp && candidate_ptr->type == INTER_MODE && candidate_ptr->is_compound == 1 &&
+                candidate_ptr->interinter_comp.type == COMPOUND_AVERAGE && candidate_ptr->merge_flag != 1 && is_global_warp != 1;
+          
+            if (test_comp) {
+                assert(fastLoopCandidateIndex == candidate_ptr->cand_num);
+                context_ptr->compound_generators_indices[context_ptr->tot_compound_generators++] = fastLoopCandidateIndex;
+            }
+#endif
 
             // Find the buffer with the highest cost
             if (fastLoopCandidateIndex || scratch_buffer_pesent_flag)
@@ -7132,7 +7149,7 @@ void full_loop_core(
         candidate_ptr->full_distortion = (uint32_t)(y_full_distortion[0]);
 }
 
-#if COMP_FEAT
+#if COMP_FEAT 
 
 MD_COMP_TYPE to_svt_compound_lut[] = {
     MD_COMP_AVG,
@@ -7489,7 +7506,7 @@ void md_stage_2(
 #endif
 
 
-#if COMP_FEAT
+#if 0//COMP_FEAT
         uint8_t blk_comp = context_ptr->blk_geom->bwidth > 4 && context_ptr->blk_geom->bheight >4;
         uint8_t is_global_warp = candidate_ptr->pred_mode==GLOBAL_GLOBALMV && candidate_ptr->motion_mode == WARPED_CAUSAL; 
         uint8_t test_comp = blk_comp && candidate_ptr->type == INTER_MODE && candidate_ptr->is_compound == 1 &&
@@ -7535,7 +7552,7 @@ void md_stage_2(
             ref_fast_cost);
 
         
-#if COMP_FEAT
+#if 0//COMP_FEAT
         //since pred with IFS is done uisng fast loop core
         context_ptr->md_staging_skip_full_pred = EB_TRUE;
         if (test_comp)
@@ -9885,6 +9902,10 @@ void md_encode_block(
                 context_ptr);
 #endif
 
+
+     //   if (context_ptr->pd_pass == PD_PASS_2 && picture_control_set_ptr->parent_pcs_ptr->compound_mode == 2 && picture_control_set_ptr->slice_type != I_SLICE)
+     //       printf("STOPCOM\n");
+
         generate_md_stage_0_cand(
             context_ptr->sb_ptr,
             context_ptr,
@@ -9898,6 +9919,10 @@ void md_encode_block(
             picture_control_set_ptr,
             context_ptr,
             fast_candidate_total_count);
+
+#if COMP_MID 
+        context_ptr->tot_compound_generators = 0;
+#endif
 
         CAND_CLASS  cand_class_it;
         uint32_t buffer_start_idx = 0;
@@ -9931,6 +9956,7 @@ void md_encode_block(
                 buffer_total_count += buffer_count_for_curr_class;
                 assert(buffer_total_count <= MAX_NFL_BUFF && "not enough cand buffers");
 
+                //CHKN
                 if (buffer_total_count + 10 > MAX_NFL_BUFF)
                     printf("not enough cand buffers");
 
@@ -10106,6 +10132,128 @@ void md_encode_block(
 
 #if COMP_MID
 
+        if (context_ptr->tot_compound_generators >0 && context_ptr->pd_pass == PD_PASS_2 && picture_control_set_ptr->parent_pcs_ptr->compound_mode==2 && picture_control_set_ptr->slice_type!=I_SLICE)
+        {
+          
+
+            uint8_t is_ref = picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag;
+            context_ptr->md_stage_1_count[CAND_CLASS_3] = is_ref ? 64 : 64;
+          
+            //context_ptr->md_stage_2_count[CAND_CLASS_3] = is_ref ? 16 : 8;
+
+
+            uint32_t i, j;
+            uint32_t num_of_cand_to_sort = context_ptr->tot_compound_generators;
+
+#if 0
+            printf("\n tot:%i\n", context_ptr->tot_compound_generators);
+            printf("\n before ", context_ptr->tot_compound_generators);
+            for (uint32_t li = 0; li < num_of_cand_to_sort; li++)              
+                    printf("%I64u ", fast_candidate_array[context_ptr->compound_generators_indices[li]].fast_cost);
+#endif
+
+#if 1
+            for (i = 0; i < num_of_cand_to_sort - 1; ++i) {
+                for (j = i + 1; j < num_of_cand_to_sort; ++j) {
+
+                    uint32_t candi = context_ptr->compound_generators_indices[i];
+                    uint32_t candj = context_ptr->compound_generators_indices[j];
+
+                    if (fast_candidate_array[candj].fast_cost < fast_candidate_array[candi].fast_cost) {
+                        uint32_t temp = context_ptr->compound_generators_indices[i];
+                        context_ptr->compound_generators_indices[i] = context_ptr->compound_generators_indices[j];
+                        context_ptr->compound_generators_indices[j] = temp;
+                    }
+                }
+            }
+#endif
+
+#if 0
+            printf("\n aftere ");
+            for (uint32_t li = 0; li < num_of_cand_to_sort; li++)
+                printf("%I64u ", fast_candidate_array[context_ptr->compound_generators_indices[li]].fast_cost);
+#endif
+            MD_COMP_TYPE  compound_types[] = {  MD_COMP_DIST,MD_COMP_DIFF0,MD_COMP_WEDGE };
+            uint8_t           enable_type[] = { 1,1,1 };
+            uint32_t comp_i = 0;
+            uint32_t cand_idx = 0;
+
+#if 0
+            if (context_ptr->pd_pass == PD_PASS_2 && picture_control_set_ptr->parent_pcs_ptr->compound_mode == 2 && 
+                picture_control_set_ptr->slice_type != I_SLICE && 
+                context_ptr->cu_origin_x==64 && context_ptr->cu_origin_y == 0 && context_ptr->blk_geom->bsize==BLOCK_64X64)
+                       printf("STOPCOM\n");
+#endif
+            for (uint32_t gen_i = 0; gen_i < context_ptr->tot_compound_generators; gen_i++) {
+     
+                uint32_t fast_geni = context_ptr->compound_generators_indices[gen_i];
+                ModeDecisionCandidate       *gen_cand = &fast_candidate_array[fast_geni];
+
+                for (comp_i = 0; comp_i < 3; comp_i++) {
+
+                    MD_COMP_TYPE cur_type = compound_types[comp_i];
+                    if (!enable_type[comp_i])
+                        continue;
+                    if (cur_type == MD_COMP_WEDGE && wedge_params_lookup[context_ptr->blk_geom->bsize].bits == 0)
+                        continue;
+
+                    uint32_t  new_can_idx     = fast_candidate_total_count + cand_idx;
+                    uint32_t  new_can_buf_idx = buffer_start_idx + cand_idx;
+
+                    assert(new_can_buf_idx+1 <= MAX_NFL_BUFF && "not enough cand buffers");
+                    if (new_can_buf_idx+1 > MAX_NFL_BUFF) printf("not enough cand buffers");
+                    if(new_can_idx+1 >= MODE_DECISION_CANDIDATE_MAX_COUNT_Y) printf(" ERROR: reaching limit for MODE_DECISION_CANDIDATE_MAX_COUNT %i\n", new_can_idx);
+
+                    ModeDecisionCandidate       *new_cand     = &fast_candidate_array[new_can_idx];
+                    ModeDecisionCandidateBuffer *new_cand_buff = context_ptr->candidate_buffer_ptr_array[new_can_buf_idx];
+                    new_cand_buff->candidate_ptr = new_cand;
+
+                    //fill candidate
+                    fill_comp_candidate(picture_control_set_ptr, context_ptr, gen_cand, new_cand, cur_type);
+                 
+
+                    /*context_ptr->md_staging_skip_interpolation_search = EB_FALSE;
+                    context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
+                    candidate_buffer->candidate_ptr->interp_filters = 0;*/
+
+                    fast_loop_core(
+                        new_cand_buff,
+                        picture_control_set_ptr,
+                        context_ptr,
+                        input_picture_ptr,
+                        inputOriginIndex,
+                        NOT_USED_VALUE,
+                        NOT_USED_VALUE,
+                        cu_ptr,
+                        cuOriginIndex,
+                        NOT_USED_VALUE,
+                        0);
+
+                    //new_cand->fast_luma_rate = gen_cand->fast_luma_rate;
+
+                    //store this buff index in class3
+                    context_ptr->cand_buff_indices[CAND_CLASS_3][cand_idx]= new_can_buf_idx;
+
+                    cand_idx++;
+                    if (cand_idx == context_ptr->md_stage_1_count[CAND_CLASS_3])
+                        break;
+
+                   
+                }
+
+                if (cand_idx == context_ptr->md_stage_1_count[CAND_CLASS_3])
+                    break;
+
+            }
+
+            //update count if we have less than what we need 
+            context_ptr->md_stage_1_count[CAND_CLASS_3] =  cand_idx;
+            context_ptr->md_stage_1_total_count = 0;
+            for (cand_class_it = CAND_CLASS_0; cand_class_it < CAND_CLASS_TOTAL; cand_class_it++)
+                context_ptr->md_stage_1_total_count += context_ptr->md_stage_1_count[cand_class_it];
+            
+          
+        }
 #endif
 
 

@@ -116,6 +116,11 @@ extern "C" {
         ModeDecisionCandidateBuffer **comp_cand_buffers;
         ModeDecisionCandidate         comp_cand[MD_COMP_TYPES];
 #endif
+#if COMP_MID      
+        uint32_t compound_generators_indices[500];
+        uint32_t tot_compound_generators ;       
+#endif
+
 
 #if ENHANCE_ATB
 #if ATB_INTRA_2_DEPTH

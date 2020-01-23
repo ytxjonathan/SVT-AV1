@@ -33,11 +33,13 @@
 extern "C" {
 #endif
 
+#define COMP_NSQ            1 
+
 
 #define STEST1           0
 #define STEST2           0
-#define COMP_MID            0  //start compound in mid way
-
+#define COMP_MID         0 //start compound in mid way
+#define SHUT_PRUNE       0
 #define SPLIT_C1C2           0
 #define COMP_FEAT            0//compound as feature
 #define INC_NIC              0//increase NICs 

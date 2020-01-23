@@ -67,7 +67,8 @@ extern "C" {
             uint64_t mvs;
         };
 
-#if STEST2
+   
+#if STEST2 || COMP_MID
         uint32_t  cand_num;
         uint32_t  knock;
 #endif
@@ -78,6 +79,10 @@ extern "C" {
         uint8_t                                type;
 #if PAL_SUP
         PaletteInfo                          palette_info;
+#endif
+
+#if COMP_MID
+        uint64_t                               fast_cost;
 #endif
         // MD Rate Estimation Ptr
         MdRateEstimationContext             *md_rate_estimation_ptr; // 64 bits

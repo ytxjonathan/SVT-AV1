@@ -219,6 +219,29 @@ EbErrorType mode_decision_context_ctor(
     }
 #endif
 
+#if 0//COMP_MID
+#define MAX_COMPOUND_BUFF   100
+
+    EB_ALLOC_PTR_ARRAY(context_ptr->tmp_cand_buffers, MAX_COMPOUND_BUFF);
+    for (bufferIndex = 0; bufferIndex < MAX_COMPOUND_BUFF; ++bufferIndex) {
+        EB_NEW(
+            context_ptr->tmp_cand_buffers[bufferIndex],
+            mode_decision_candidate_buffer_ctor,
+            context_ptr->hbd_mode_decision ? EB_10BIT : EB_8BIT,
+            0,
+            0,
+            0,
+            0);
+        context_ptr->tmp_cand_buffers[bufferIndex]->fast_cost_ptr = malloc(sizeof(uint64_t));
+        context_ptr->tmp_cand_buffers[bufferIndex]->full_cost_ptr = malloc(sizeof(uint64_t));
+        context_ptr->tmp_cand_buffers[bufferIndex]->full_cost_skip_ptr = malloc(sizeof(uint64_t));
+        context_ptr->tmp_cand_buffers[bufferIndex]->full_cost_merge_ptr = malloc(sizeof(uint64_t));
+    }
+#endif
+
+
+
+
 #if ENHANCE_ATB
 #if ATB_INTRA_2_DEPTH
     EB_NEW(

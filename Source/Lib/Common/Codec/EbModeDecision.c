@@ -6183,6 +6183,23 @@ EbErrorType generate_md_stage_0_cand(
 #endif
         }
 }
+
+
+
+#if COMP_NSQ
+
+    MD_COMP_TYPE  compound_types_to_try_save = context_ptr->compound_types_to_try;
+
+    if (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag) {
+        
+        PredictionMode mode =context_ptr->parent_sq_pred_mode[sq_index];
+        int32_t is_parent_inter = mode >= SINGLE_INTER_MODE_START;
+        int32_t is_parent_compound = mode >= NEAREST_NEARESTMV && context_ptr->parent_sq_pred_mode[sq_index] <= NEW_NEWMV;
+
+        if (!is_parent_inter || !is_parent_compound)
+            context_ptr->compound_types_to_try = MD_COMP_AVG;
+    }
+#endif
     //----------------------
     // Intra
     if (context_ptr->blk_geom->sq_size < 128) {
@@ -6280,7 +6297,7 @@ EbErrorType generate_md_stage_0_cand(
     {
         ModeDecisionCandidate * cand_ptr = &context_ptr->fast_candidate_array[cand_i];
 
-#if STEST2
+#if STEST2  || COMP_MID
         cand_ptr->cand_num = cand_i;
         cand_ptr->knock = 0;
 #endif
@@ -6413,6 +6430,13 @@ EbErrorType generate_md_stage_0_cand(
         fast_accum += context_ptr->md_stage_0_count[cand_class_it];
     }
     assert(fast_accum == canTotalCnt);
+
+
+#if COMP_NSQ
+    context_ptr->compound_types_to_try =  compound_types_to_try_save;    
+#endif
+
+
 
     return EB_ErrorNone;
 }
