@@ -864,7 +864,7 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
                         (me_results->me_mv_array[context_ptr->me_block_offset][list0_ref_index].y_mv
                          << 1) +
                         bipred_3x3_y_pos[bipred_index];
-                } 
+                }
                 else {
                     to_inject_mv_x =
                         (me_results->me_mv_array[context_ptr->me_block_offset][list0_ref_index]
@@ -881,7 +881,7 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
 #if ZZ_TEST
                 to_inject_mv_x = 0;
                 to_inject_mv_y = 0;
-#endif               
+#endif
                 uint8_t to_inject_ref_type = svt_get_ref_frame_type(REF_LIST_0, list0_ref_index);
                 uint8_t skip_cand          = check_ref_beackout(
                     context_ptr, to_inject_ref_type, context_ptr->blk_geom->shape);
@@ -1045,7 +1045,7 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
 #if ZZ_TEST
                     to_inject_mv_x = 0;
                     to_inject_mv_y = 0;
-#endif  
+#endif
                     uint8_t to_inject_ref_type =
                         svt_get_ref_frame_type(REF_LIST_1, list1_ref_index);
                     uint8_t skip_cand = check_ref_beackout(
