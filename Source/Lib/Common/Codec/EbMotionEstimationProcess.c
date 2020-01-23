@@ -583,7 +583,7 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
     if (picture_control_set_ptr->sc_content_detected)
         if (enc_mode <= ENC_M1)
 #if M0_OPT
-            context_ptr->me_context_ptr->fractional_search_method = (enc_mode == ENC_M0) ? FULL_SAD_SEARCH : SSD_SEARCH;
+            context_ptr->me_context_ptr->fractional_search_method = (enc_mode == ENC_M0) ? FULL_SAD_SEARCH : FULL_SAD_SEARCH;
 #else
             context_ptr->me_context_ptr->fractional_search_method = SSD_SEARCH;
 #endif
