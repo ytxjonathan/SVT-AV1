@@ -33,6 +33,7 @@
 extern "C" {
 #endif
 #define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip
+#define NIC_LEVEL_CLEANUP           1 // Temp nics level clean up
 #define ADOPT_SETTING_8_NIC_CHANGES 1 // Modify MD_STAGE_COUNT_candidates
 #define ADOPT_SETTING_9_NIC_CHANGES 0 // Modify MD_STAGE_COUNT candidates for enc-mode 0 only
 #define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip
