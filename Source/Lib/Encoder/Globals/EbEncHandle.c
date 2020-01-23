@@ -1929,7 +1929,11 @@ void set_param_based_on_input(SequenceControlSet *scs_ptr)
     // 1                            1: allowed
     if (scs_ptr->static_config.over_bndry_blk == DEFAULT)
         if (scs_ptr->static_config.enc_mode <= ENC_M5)
+#if DISABLE_OBOUND_BMODE
+            scs_ptr->over_boundary_block_mode = 0;
+#else
             scs_ptr->over_boundary_block_mode = 1;
+#endif
         else
             scs_ptr->over_boundary_block_mode = 0;
     else

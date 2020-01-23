@@ -35,7 +35,7 @@ extern "C" {
 
 // Causes of corruption / R2R
 #define USE_GM_TRAN_ONLY                       1
-
+#define DISABLE_OBOUND_BMODE                   1
 // DEBUG Tools
 #define DEBUG_TOOLS                             0
 
