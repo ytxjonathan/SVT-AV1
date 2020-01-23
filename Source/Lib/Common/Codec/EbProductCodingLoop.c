@@ -1869,6 +1869,17 @@ void set_md_stage_counts(
         context_ptr->md_stage_1_count[CAND_CLASS_7] = 1;
         context_ptr->md_stage_1_count[CAND_CLASS_8] = 1;
 
+        // Stage 2 Cand Count
+        context_ptr->md_stage_2_count[CAND_CLASS_0] = 1;
+        context_ptr->md_stage_2_count[CAND_CLASS_1] = 1;
+        context_ptr->md_stage_2_count[CAND_CLASS_2] = 1;
+        context_ptr->md_stage_2_count[CAND_CLASS_3] = 1;
+        context_ptr->md_stage_2_count[CAND_CLASS_4] = 1;
+        context_ptr->md_stage_2_count[CAND_CLASS_5] = 1;
+        context_ptr->md_stage_2_count[CAND_CLASS_6] = 1;
+        context_ptr->md_stage_2_count[CAND_CLASS_7] = 1;
+        context_ptr->md_stage_2_count[CAND_CLASS_8] = 1;
+
 #if ADD_4TH_MD_STAGE
         // Stage 3 Cand Count
         context_ptr->md_stage_3_count[CAND_CLASS_0] = 1;
@@ -1880,17 +1891,6 @@ void set_md_stage_counts(
         context_ptr->md_stage_3_count[CAND_CLASS_6] = 1;
         context_ptr->md_stage_3_count[CAND_CLASS_7] = 1;
         context_ptr->md_stage_3_count[CAND_CLASS_8] = 1;
-#else
-        // Stage 2 Cand Count
-        context_ptr->md_stage_2_count[CAND_CLASS_0] = 1;
-        context_ptr->md_stage_2_count[CAND_CLASS_1] = 1;
-        context_ptr->md_stage_2_count[CAND_CLASS_2] = 1;
-        context_ptr->md_stage_2_count[CAND_CLASS_3] = 1;
-        context_ptr->md_stage_2_count[CAND_CLASS_4] = 1;
-        context_ptr->md_stage_2_count[CAND_CLASS_5] = 1;
-        context_ptr->md_stage_2_count[CAND_CLASS_6] = 1;
-        context_ptr->md_stage_2_count[CAND_CLASS_7] = 1;
-        context_ptr->md_stage_2_count[CAND_CLASS_8] = 1;
 #endif
     }
     else  if (context_ptr->md_staging_count_level == 1) {
@@ -2579,6 +2579,48 @@ void set_md_stage_counts(
                 context_ptr->md_stage_2_count[CAND_CLASS_3] = context_ptr->md_stage_1_count[CAND_CLASS_3];
         }
     }
+
+
+#if ADD_4TH_MD_STAGE
+    // Set md_stage_3 NICs
+    context_ptr->md_stage_3_count[CAND_CLASS_0] = (context_ptr->md_stage_2_count[CAND_CLASS_0] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_1] = (context_ptr->md_stage_2_count[CAND_CLASS_1] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_2] = (context_ptr->md_stage_2_count[CAND_CLASS_2] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_3] = (context_ptr->md_stage_2_count[CAND_CLASS_3] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_4] = (context_ptr->md_stage_2_count[CAND_CLASS_4] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_5] = (context_ptr->md_stage_2_count[CAND_CLASS_5] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_6] = (context_ptr->md_stage_2_count[CAND_CLASS_6] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_7] = (context_ptr->md_stage_2_count[CAND_CLASS_7] + 1) >> 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_8] = (context_ptr->md_stage_2_count[CAND_CLASS_8] + 1) >> 1;
+
+#if NIC_TEST_0
+    context_ptr->md_stage_3_count[CAND_CLASS_0] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_1] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_2] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_3] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_4] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_5] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_6] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_7] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_8] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+#endif
+
+#if NIC_TEST_1
+    context_ptr->md_stage_3_count[CAND_CLASS_0] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 2;
+    context_ptr->md_stage_3_count[CAND_CLASS_1] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 2;
+    context_ptr->md_stage_3_count[CAND_CLASS_2] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 2;
+    context_ptr->md_stage_3_count[CAND_CLASS_3] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_4] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_5] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_6] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_7] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_8] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+#endif
+
+
+#endif
+
+
 #if MULTI_PASS_PD // Shut md-staging if 1st pass
     }
 #endif
@@ -2600,28 +2642,19 @@ void set_md_stage_counts(
 #endif
 
 #if ADD_4TH_MD_STAGE
-#if TX_SIZE_ONLY_MD_STAGE_2
-    context_ptr->md_stage_3_count[CAND_CLASS_0] =  (context_ptr->md_stage_2_count[CAND_CLASS_0] + 1) >> 1;
-    context_ptr->md_stage_3_count[CAND_CLASS_1] =  (context_ptr->md_stage_2_count[CAND_CLASS_1] + 1) >> 1;
-    context_ptr->md_stage_3_count[CAND_CLASS_2] =  (context_ptr->md_stage_2_count[CAND_CLASS_2] + 1) >> 1;
-    context_ptr->md_stage_3_count[CAND_CLASS_3] =  (context_ptr->md_stage_2_count[CAND_CLASS_3] + 1) >> 1;
-    context_ptr->md_stage_3_count[CAND_CLASS_4] =  (context_ptr->md_stage_2_count[CAND_CLASS_4] + 1) >> 1;
-    context_ptr->md_stage_3_count[CAND_CLASS_5] =  (context_ptr->md_stage_2_count[CAND_CLASS_5] + 1) >> 1;
-    context_ptr->md_stage_3_count[CAND_CLASS_6] =  (context_ptr->md_stage_2_count[CAND_CLASS_6] + 1) >> 1;
-    context_ptr->md_stage_3_count[CAND_CLASS_7] =  (context_ptr->md_stage_2_count[CAND_CLASS_7] + 1) >> 1;
-    context_ptr->md_stage_3_count[CAND_CLASS_8] =  (context_ptr->md_stage_2_count[CAND_CLASS_8] + 1) >> 1;
-#else
-    context_ptr->md_stage_3_count[CAND_CLASS_0] = context_ptr->md_stage_2_count[CAND_CLASS_0];
-    context_ptr->md_stage_3_count[CAND_CLASS_1] = context_ptr->md_stage_2_count[CAND_CLASS_1];
-    context_ptr->md_stage_3_count[CAND_CLASS_2] = context_ptr->md_stage_2_count[CAND_CLASS_2];
-    context_ptr->md_stage_3_count[CAND_CLASS_3] = context_ptr->md_stage_2_count[CAND_CLASS_3];
-    context_ptr->md_stage_3_count[CAND_CLASS_4] = context_ptr->md_stage_2_count[CAND_CLASS_4];
-    context_ptr->md_stage_3_count[CAND_CLASS_5] = context_ptr->md_stage_2_count[CAND_CLASS_5];
-    context_ptr->md_stage_3_count[CAND_CLASS_6] = context_ptr->md_stage_2_count[CAND_CLASS_6];
-    context_ptr->md_stage_3_count[CAND_CLASS_7] = context_ptr->md_stage_2_count[CAND_CLASS_7];
-    context_ptr->md_stage_3_count[CAND_CLASS_8] = context_ptr->md_stage_2_count[CAND_CLASS_8];
+    //  Update md_stage_3 NICs if md_stage_2 bypassed
+    context_ptr->md_stage_3_count[CAND_CLASS_0] = context_ptr->bypass_md_stage_2[CAND_CLASS_0] ? context_ptr->md_stage_2_count[CAND_CLASS_0] : context_ptr->md_stage_3_count[CAND_CLASS_0];
+    context_ptr->md_stage_3_count[CAND_CLASS_1] = context_ptr->bypass_md_stage_2[CAND_CLASS_1] ? context_ptr->md_stage_2_count[CAND_CLASS_1] : context_ptr->md_stage_3_count[CAND_CLASS_1];
+    context_ptr->md_stage_3_count[CAND_CLASS_2] = context_ptr->bypass_md_stage_2[CAND_CLASS_2] ? context_ptr->md_stage_2_count[CAND_CLASS_2] : context_ptr->md_stage_3_count[CAND_CLASS_2];
+    context_ptr->md_stage_3_count[CAND_CLASS_3] = context_ptr->bypass_md_stage_2[CAND_CLASS_3] ? context_ptr->md_stage_2_count[CAND_CLASS_3] : context_ptr->md_stage_3_count[CAND_CLASS_3];
+    context_ptr->md_stage_3_count[CAND_CLASS_4] = context_ptr->bypass_md_stage_2[CAND_CLASS_4] ? context_ptr->md_stage_2_count[CAND_CLASS_4] : context_ptr->md_stage_3_count[CAND_CLASS_4];
+    context_ptr->md_stage_3_count[CAND_CLASS_5] = context_ptr->bypass_md_stage_2[CAND_CLASS_5] ? context_ptr->md_stage_2_count[CAND_CLASS_5] : context_ptr->md_stage_3_count[CAND_CLASS_5];
+    context_ptr->md_stage_3_count[CAND_CLASS_6] = context_ptr->bypass_md_stage_2[CAND_CLASS_6] ? context_ptr->md_stage_2_count[CAND_CLASS_6] : context_ptr->md_stage_3_count[CAND_CLASS_6];
+    context_ptr->md_stage_3_count[CAND_CLASS_7] = context_ptr->bypass_md_stage_2[CAND_CLASS_7] ? context_ptr->md_stage_2_count[CAND_CLASS_7] : context_ptr->md_stage_3_count[CAND_CLASS_7];
+    context_ptr->md_stage_3_count[CAND_CLASS_8] = context_ptr->bypass_md_stage_2[CAND_CLASS_8] ? context_ptr->md_stage_2_count[CAND_CLASS_8] : context_ptr->md_stage_3_count[CAND_CLASS_8];
 #endif
-#endif
+
+
     // Step 4: zero-out count for CAND_CLASS_3 if CAND_CLASS_1 and CAND_CLASS_2 are merged (i.e. shift to the left)
     if (context_ptr->combine_class12)
         context_ptr->md_stage_1_count[CAND_CLASS_3] = context_ptr->md_stage_2_count[CAND_CLASS_3] = 0;
@@ -7526,13 +7559,16 @@ void full_loop_core(
     candidate_ptr->transform_type[2] = DCT_DCT;
     candidate_ptr->transform_type[3] = DCT_DCT;
 #endif
-#if LOSSLESS_TX_TYPE_OPT
+#if LOSSLESS_TX_TYPE_OPT || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
     uint8_t start_tx_depth = 0;
 #endif
     uint8_t end_tx_depth = 0;
 
-#if LOSSLESS_TX_TYPE_OPT
-    if (context_ptr->md_atb_mode == 0 || context_ptr->md_staging_tx_size_mode == 0 || candidate_buffer->candidate_ptr->use_intrabc) {
+#if LOSSLESS_TX_TYPE_OPT || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
+    if (context_ptr->md_atb_mode == 0 || candidate_buffer->candidate_ptr->use_intrabc) {
+        start_tx_depth = end_tx_depth = 0;
+    }
+    else if (context_ptr->md_staging_tx_size_mode == 0) {
         start_tx_depth = end_tx_depth = candidate_buffer->candidate_ptr->tx_depth;
      }
     else {
@@ -7547,14 +7583,18 @@ void full_loop_core(
 #endif
         else
             end_tx_depth = 0;
-#if LOSSLESS_TX_TYPE_OPT
+#if LOSSLESS_TX_TYPE_OPT || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
     }
 #endif
         // Transform partitioning path (INTRA Luma)
 #if ENHANCE_ATB
 #if MULTI_PASS_PD
 #if !LOSSLESS_TX_TYPE_OPT
+#if RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
+    if (end_tx_depth) {
+#else
         if (context_ptr->md_atb_mode && context_ptr->md_staging_skip_atb == EB_FALSE && end_tx_depth && candidate_buffer->candidate_ptr->use_intrabc == 0) {
+#endif
 #endif
 #else
         if (picture_control_set_ptr->parent_pcs_ptr->atb_mode && context_ptr->md_staging_skip_atb == EB_FALSE && end_tx_depth && candidate_buffer->candidate_ptr->use_intrabc == 0) {
@@ -8038,7 +8078,7 @@ void md_stage_2(
 #if !REMOVE_MD_STAGE_1
     context_ptr->md_staging_skip_full_pred = EB_TRUE;
 #endif
-#if LOSSLESS_TX_TYPE_OPT
+#if LOSSLESS_TX_TYPE_OPT || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
     context_ptr->md_staging_tx_size_mode = 0;
 #else
     context_ptr->md_staging_skip_atb = EB_TRUE;
@@ -8256,7 +8296,7 @@ void md_stage_3(
 #else
         context_ptr->md_staging_skip_full_pred = (context_ptr->md_staging_mode == MD_STAGING_MODE_3) ? EB_FALSE: EB_TRUE;
 #endif
-#if LOSSLESS_TX_TYPE_OPT
+#if LOSSLESS_TX_TYPE_OPT || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
         context_ptr->md_staging_tx_size_mode = !context_ptr->coeff_based_skip_atb;
 #else
         context_ptr->md_staging_skip_atb = context_ptr->coeff_based_skip_atb;

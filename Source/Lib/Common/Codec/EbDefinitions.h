@@ -150,8 +150,8 @@ extern "C" {
 #define FASTER_SQ_WEIGHT             0
 #define ENHANCED_SQ_WEIGHT           1
 
-#define LOSSLESS_TX_SIZE_OPT         0 
-#define LOSSLESS_TX_TYPE_OPT         0 
+#define LOSSLESS_TX_SIZE_OPT         1 
+#define LOSSLESS_TX_TYPE_OPT         1 
 #define LOSSY_TX_SIZE_OPT            0       
 #define ATB_INTRA_2_DEPTH            1 // ATB INTRA Depth 2
 #define SHUT_TX_WEIGHT               0
@@ -160,7 +160,7 @@ extern "C" {
 #define ENABLE_BC                    0 // ATB for BC
 #define FASTER_RDOQ                  1
 #define UPGRAGDE_TX_WEIGHT           0 
-#define ADD_4TH_MD_STAGE             0
+#define ADD_4TH_MD_STAGE             1
 #if ADD_4TH_MD_STAGE
 #define TX_SIZE_ONLY_MD_STAGE_2      1
 #if TX_SIZE_ONLY_MD_STAGE_2
@@ -171,6 +171,11 @@ extern "C" {
 
 // RDOQ + Tx Type
 #define RDOQ_LIGHT_TX_TYPE_MD_STAGE_2           1     
+#if RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
+#define MD_STAGE_4_DEBUG   1
+#define NIC_TEST_0 0
+#define NIC_TEST_1 0
+#endif
 
 #endif
 #define TX_TYPE_ONLY_MD_STAGE_2      0
