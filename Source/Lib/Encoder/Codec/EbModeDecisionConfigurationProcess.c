@@ -835,7 +835,50 @@ void sb_forward_sq_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *
             results_ptr->leaf_data_array[results_ptr->leaf_count].leaf_index =
                 0; //valid only for square 85 world. will be removed.
             results_ptr->leaf_data_array[results_ptr->leaf_count].mds_idx = blk_index;
-
+#if NO_4x4
+            if (blk_geom->sq_size > 8) {
+                results_ptr->leaf_data_array[results_ptr->leaf_count++].split_flag = EB_TRUE;
+                split_flag                                                        = EB_TRUE;
+            } else if (blk_geom->sq_size == 8) {
+                results_ptr->leaf_data_array[results_ptr->leaf_count++].split_flag = EB_FALSE;
+                split_flag                                                        = EB_FALSE;
+            }
+#elif ALL_4x4
+            if (blk_geom->sq_size == 4) {
+                results_ptr->leaf_data_array[results_ptr->leaf_count++].split_flag = EB_FALSE;
+                split_flag                                                        = EB_FALSE;
+            } else {
+                split_flag = EB_TRUE;
+            }
+#elif ALL_8x8
+            if (blk_geom->sq_size == 8) {
+                results_ptr->leaf_data_array[results_ptr->leaf_count++].split_flag = EB_FALSE;
+                split_flag                                                        = EB_FALSE;
+            } else {
+                split_flag = EB_TRUE;
+            }
+#elif ALL_16x16
+            if (blk_geom->sq_size == 16) {
+                results_ptr->leaf_data_array[results_ptr->leaf_count++].split_flag = EB_FALSE;
+                split_flag                                                        = EB_FALSE;
+            } else {
+                split_flag = EB_TRUE;
+            }
+#elif ALL_32x32
+            if (blk_geom->sq_size == 32) {
+                results_ptr->leaf_data_array[results_ptr->leaf_count++].split_flag = EB_FALSE;
+                split_flag                                                        = EB_FALSE;
+            } else {
+                split_flag = EB_TRUE;
+            }
+#elif ALL_64x64
+            if (blk_geom->sq_size == 64) {
+                resultsPtr->leaf_data_array[results_ptr->leaf_count++].split_flag = EB_FALSE;
+                split_flag                                                        = EB_FALSE;
+            } else {
+                split_flag = EB_TRUE;
+            }
+#else
             if (blk_geom->sq_size > 4) {
                 results_ptr->leaf_data_array[results_ptr->leaf_count++].split_flag = EB_TRUE;
                 split_flag                                                         = EB_TRUE;
@@ -843,6 +886,7 @@ void sb_forward_sq_blocks_to_md(SequenceControlSet *scs_ptr, PictureControlSet *
                 results_ptr->leaf_data_array[results_ptr->leaf_count++].split_flag = EB_FALSE;
                 split_flag                                                         = EB_FALSE;
             }
+#endif
         }
         blk_index +=
             split_flag

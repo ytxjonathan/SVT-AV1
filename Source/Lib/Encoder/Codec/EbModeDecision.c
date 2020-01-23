@@ -848,8 +848,8 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
         if (inter_direction == 0) {
             for (bipred_index = 0; bipred_index < BIPRED_3x3_REFINMENT_POSITIONS; ++bipred_index) {
                 /**************
-        NEWMV L0
-        ************* */
+                NEWMV L0
+                ************* */
                 if (context_ptr->unipred3x3_injection >= 2) {
                     if (allow_refinement_flag[bipred_index] == 0) continue;
                 }
@@ -864,7 +864,8 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
                         (me_results->me_mv_array[context_ptr->me_block_offset][list0_ref_index].y_mv
                          << 1) +
                         bipred_3x3_y_pos[bipred_index];
-                } else {
+                } 
+                else {
                     to_inject_mv_x =
                         (me_results->me_mv_array[context_ptr->me_block_offset][list0_ref_index]
                              .x_mv +
@@ -876,6 +877,11 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
                          bipred_3x3_y_pos[bipred_index])
                         << 1;
                 }
+
+#if ZZ_TEST
+                to_inject_mv_x = 0;
+                to_inject_mv_y = 0;
+#endif               
                 uint8_t to_inject_ref_type = svt_get_ref_frame_type(REF_LIST_0, list0_ref_index);
                 uint8_t skip_cand          = check_ref_beackout(
                     context_ptr, to_inject_ref_type, context_ptr->blk_geom->shape);
@@ -998,8 +1004,8 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
             for (bipred_index = 0; bipred_index < BIPRED_3x3_REFINMENT_POSITIONS; ++bipred_index) {
                 if (is_compound_enabled) {
                     /**************
-            NEWMV L1
-            ************* */
+                    NEWMV L1
+                    ************* */
                     if (context_ptr->unipred3x3_injection >= 2) {
                         if (allow_refinement_flag[bipred_index] == 0) continue;
                     }
@@ -1036,6 +1042,10 @@ void unipred_3x3_candidates_injection(const SequenceControlSet *scs_ptr, Picture
                              bipred_3x3_y_pos[bipred_index])
                             << 1;
                     }
+#if ZZ_TEST
+                    to_inject_mv_x = 0;
+                    to_inject_mv_y = 0;
+#endif  
                     uint8_t to_inject_ref_type =
                         svt_get_ref_frame_type(REF_LIST_1, list1_ref_index);
                     uint8_t skip_cand = check_ref_beackout(
@@ -1583,8 +1593,7 @@ BIPred     : NEARST_NEARST  + upto 3x NEAR_NEAR
 **********************************************************************
 **********************************************************************/
 void inject_mvp_candidates_ii(struct ModeDecisionContext *context_ptr, PictureControlSet *pcs_ptr,
-                              BlkStruct *blk_ptr, MvReferenceFrame ref_pair,
-                              uint32_t *candTotCnt) {
+                              BlkStruct *blk_ptr, MvReferenceFrame ref_pair, uint32_t *candTotCnt) {
     FrameHeader *frm_hdr = &pcs_ptr->parent_pcs_ptr->frm_hdr;
     EbBool       allow_compound =
         (frm_hdr->reference_mode == SINGLE_REFERENCE || context_ptr->blk_geom->bwidth == 4 ||
@@ -3291,7 +3300,11 @@ void inject_new_candidates(const SequenceControlSet *  scs_ptr,
             /**************
                NEW_NEWMV
             ************* */
+#if NO_BIPED
+            if (0) {
+#else
             if (allow_bipred) {
+#endif
                 if (list0_ref_index > context_ptr->md_max_ref_count - 1 ||
                     list1_ref_index > context_ptr->md_max_ref_count - 1)
                     continue;
@@ -3663,9 +3676,13 @@ void inject_predictive_me_candidates(
         }
     }
     /**************
-                NEW_NEWMV
-            ************* */
+        NEW_NEWMV
+    ************* */
+#if NO_BIPED
+    if (0) {
+#else
     if (allow_bipred) {
+#endif
         uint8_t ref_pic_index_l0;
         uint8_t ref_pic_index_l1;
         {
@@ -3828,10 +3845,10 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
             pcs_ptr, context_ptr, context_ptr->blk_geom->bsize, LAST_FRAME, -1, NEWMV) ==
         OBMC_CAUSAL;
     if (is_obmc_allowed) precompute_obmc_data(pcs_ptr, context_ptr);
-    /**************
+        /**************
          MVP
     ************* */
-
+#if !ONLY_ME
     uint32_t ref_it;
     if (context_ptr->new_nearest_injection)
         //all of ref pairs: (1)single-ref List0  (2)single-ref List1  (3)compound Bi-Dir List0-List1  (4)compound Uni-Dir List0-List0  (5)compound Uni-Dir List1-List1
@@ -3860,6 +3877,7 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
             }
         }
     }
+#endif
     inject_new_candidates(scs_ptr,
                           context_ptr,
                           pcs_ptr,
@@ -3915,6 +3933,7 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                                   &cand_total_cnt);
         }
     }
+#if !ONLY_ME
     if (context_ptr->global_mv_injection) {
 #if GLOBAL_WARPED_MOTION
         if (pcs_ptr->parent_pcs_ptr->gm_level <= GM_DOWN) {
@@ -4384,6 +4403,8 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
     if (context_ptr->predictive_me_level)
         inject_predictive_me_candidates(
             context_ptr, pcs_ptr, is_compound_enabled, allow_bipred, &cand_total_cnt);
+
+#endif
     // update the total number of candidates injected
     (*candidate_total_cnt) = cand_total_cnt;
 
@@ -4903,6 +4924,7 @@ void  inject_intra_candidates(
     SuperBlock                   *sb_ptr,
     EbBool                        dc_cand_only_flag,
     uint32_t                     *candidate_total_cnt){
+
     (void)scs_ptr;
     (void)sb_ptr;
     FrameHeader *frm_hdr = &pcs_ptr->parent_pcs_ptr->frm_hdr;
@@ -4983,6 +5005,10 @@ void  inject_intra_candidates(
     disable_z2_prediction       = 0;
     disable_angle_refinement    = 0;
     disable_angle_prediction    = 0;
+#endif
+#if SHUT_ANGULAR_INTRA
+    angle_delta_candidate_count = 0;
+    disable_angle_refinement = 1;
 #endif
     for (open_loop_intra_candidate = intra_mode_start; open_loop_intra_candidate <= intra_mode_end ; ++open_loop_intra_candidate) {
         if (av1_is_directional_mode((PredictionMode)open_loop_intra_candidate)) {

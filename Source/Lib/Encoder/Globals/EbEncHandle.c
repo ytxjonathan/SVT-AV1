@@ -1942,6 +1942,10 @@ void set_param_based_on_input(SequenceControlSet *scs_ptr)
     else
         scs_ptr->mfmv_enabled = scs_ptr->static_config.enable_mfmv;
 
+#if SHUT_MFMV
+    scs_ptr->mfmv_enabled = 0;
+#endif
+
     // Set hbd_mode_decision OFF for high encode modes or bitdepth < 10
     if (scs_ptr->static_config.encoder_bit_depth < 10)
         scs_ptr->static_config.enable_hbd_mode_decision = 0;
@@ -2006,8 +2010,12 @@ void copy_api_from_app(
     scs_ptr->use_input_stat_file = scs_ptr->static_config.input_stat_file ? 1 : 0;
     scs_ptr->use_output_stat_file = scs_ptr->static_config.output_stat_file ? 1 : 0;
     // Deblock Filter
-    scs_ptr->static_config.disable_dlf_flag = ((EbSvtAv1EncConfiguration*)config_struct)->disable_dlf_flag;
 
+#if SHUT_FILTERING
+    scs_ptr->static_config.disable_dlf_flag = 1;
+#else
+    scs_ptr->static_config.disable_dlf_flag = ((EbSvtAv1EncConfiguration*)config_struct)->disable_dlf_flag;
+#endif
     // Local Warped Motion
     scs_ptr->static_config.enable_warped_motion = EB_TRUE;
 

@@ -789,6 +789,10 @@ void *resource_coordination_kernel(void *input_ptr) {
             sb_geom_init(scs_ptr);
             scs_ptr->enable_altrefs = scs_ptr->static_config.enable_altrefs ? EB_TRUE : EB_FALSE;
 
+#if ALT_REF_OFF
+            scs_ptr->enable_altrefs = 0;
+#endif
+
             if (scs_ptr->static_config.inter_intra_compound == DEFAULT) {
                 // Set inter-intra mode      Settings
                 // 0                 OFF
@@ -818,6 +822,16 @@ void *resource_coordination_kernel(void *input_ptr) {
                 scs_ptr->compound_mode = (scs_ptr->static_config.enc_mode <= ENC_M4) ? 1 : 0;
             } else
                 scs_ptr->compound_mode = scs_ptr->static_config.compound_level;
+
+#if SHUT_II_COMP
+            scs_ptr->seq_header.enable_interintra_compound = 0;
+#endif
+#if SHUT_COMP
+            scs_ptr->compound_mode = 0;
+#endif
+#if SHUT_FI
+            scs_ptr->seq_header.enable_filter_intra = 0;
+#endif
 
             if (scs_ptr->compound_mode) {
                 scs_ptr->seq_header.order_hint_info.enable_jnt_comp = 1; //DISTANCE

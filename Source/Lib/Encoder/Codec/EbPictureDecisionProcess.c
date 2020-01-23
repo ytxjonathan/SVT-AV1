@@ -831,6 +831,10 @@ EbErrorType signal_derivation_multi_processes_oq(
         if (pcs_ptr->pic_depth_mode < PIC_SQ_DEPTH_MODE)
             assert(scs_ptr->nsq_present == 1 && "use nsq_present 1");
 
+#if ALL_64x64 || ALL_32x32 || ALL_16x16 || ALL_8x8 || ALL_4x4
+        pcs_ptr->pic_depth_mode = PIC_SQ_DEPTH_MODE;
+#endif
+
         pcs_ptr->max_number_of_pus_per_sb = (pcs_ptr->pic_depth_mode <= PIC_ALL_C_DEPTH_MODE) ? MAX_ME_PU_COUNT : SQUARE_PU_COUNT;
 
     // NSQ search Level                               Settings
@@ -878,6 +882,11 @@ EbErrorType signal_derivation_multi_processes_oq(
                 pcs_ptr->nsq_search_level = NSQ_SEARCH_LEVEL1;
         else
             pcs_ptr->nsq_search_level = NSQ_SEARCH_OFF;
+
+#if NSQ_OFF
+        pcs_ptr->nsq_search_level = NSQ_SEARCH_OFF;
+#endif
+
     if (pcs_ptr->nsq_search_level > NSQ_SEARCH_OFF)
         assert(scs_ptr->nsq_present == 1 && "use nsq_present 1");
 
@@ -1110,6 +1119,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         else
             pcs_ptr->tx_size_search_mode = 0;
 
+
+#if ATB_OFF
+        pcs_ptr->tx_size_search_mode = 0;
+#endif
+
         // Set skip atb                          Settings
         // 0                                     OFF
         // 1                                     ON
@@ -1178,6 +1192,9 @@ EbErrorType signal_derivation_multi_processes_oq(
         // GM_DOWN                                    Downsampled resolution with a downsampling factor of 2 in each dimension
         // GM_TRAN_ONLY                               Translation only using ME MV.
         pcs_ptr->gm_level = GM_FULL;
+#endif
+#if USE_GM_TRAN_ONLY
+        pcs_ptr->gm_level = GM_TRAN_ONLY;
 #endif
         //Exit TX size search when all coefficients are zero
         // 0: OFF

@@ -1468,6 +1468,16 @@ void set_md_stage_counts(PictureControlSet *pcs_ptr, ModeDecisionContext *contex
     if (context_ptr->combine_class12)
         context_ptr->md_stage_1_count[CAND_CLASS_3] = context_ptr->md_stage_2_count[CAND_CLASS_3] =
             0;
+#if ONLY_FAST_LOOP
+    for (CandClass cand_class_it = CAND_CLASS_0; cand_class_it < CAND_CLASS_TOTAL; cand_class_it++) {
+        context_ptr->md_stage_1_count[cand_class_it] = 1;
+        context_ptr->md_stage_2_count[cand_class_it] = 1;
+        //context_ptr->md_stage_3_count[cand_class_it] = 1;
+    }
+#endif
+
+
+
 }
 void sort_fast_candidates(
     struct ModeDecisionContext *context_ptr, uint32_t input_buffer_start_idx,

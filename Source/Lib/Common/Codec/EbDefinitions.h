@@ -32,6 +32,57 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+// Causes of corruption / R2R
+#define USE_GM_TRAN_ONLY                       1
+
+// DEBUG Tools
+#define DEBUG_TOOLS                             0
+
+#if DEBUG_TOOLS
+// Non-core / filter
+#define QPS_QPM_OFF                             0
+#define ALT_REF_OFF                             0
+#define SHUT_FILTERING                          0 // CDEF RESTORATION DLF
+
+// Partitions:
+#define NSQ_OFF                                 0
+#define NO_4x4                                  0
+#define ALL_4x4                                 0
+#define ALL_8x8                                 0
+#define ALL_16x16                               0
+#define ALL_32x32                               0
+#define ALL_64x64                               0
+
+// Simple modes
+#define SHUT_ANGULAR_INTRA                      0
+#define ONLY_DC_LUMA                            0
+#define ONLY_DC_CHROMA                          0
+#define ONLY_ME                                 0
+#define NO_BIPED                                0
+
+// Complex modes
+#define SHUT_OBMC                               0
+#define SHUT_II                                 0
+#define SHUT_COMP                               0
+#define SHUT_FI                                 0
+#define SHUT_II_COMP                            0
+#define SHUT_MFMV                               0
+
+// Precision features
+#define TX_TYPE_OFF                             0
+#define ATB_OFF                                 0
+#define SHUT_RDOQ                               0
+#define SHUT_QUANT_FP                           0
+
+#define ONLY_FAST_LOOP                          0
+#define ONLY_MD_STAGE_0_1                       0
+#define ZZ_TEST                                 0
+#endif
+
+
+
+
 #define GLOBAL_WARPED_MOTION 1 // Global warped motion detection and insertion
 #ifndef NON_AVX512_SUPPORT
 #define NON_AVX512_SUPPORT

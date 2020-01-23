@@ -4061,7 +4061,11 @@ enum {
 #define LOW_QPS_COMP_THRESHOLD 40
 #define HIGH_FILTERED_THRESHOLD (4 << 8) // 8 bit precision
 #define LOW_FILTERED_THRESHOLD (2 << 8) // 8 bit precision
-#define QPS_SW_THRESH 8 // 100 to shut QPS/QPM (i.e. CORE only)
+#if QPS_QPM_OFF
+#define QPS_SW_THRESH          100
+#else
+#define QPS_SW_THRESH          8
+#endif
 #define MAX_REF_AREA_I 50 // Max ref area for I slice
 #define MAX_REF_AREA_NONI 50 // Max ref area for Non I slice
 #define MAX_REF_AREA_NONI_LOW_RES 40 // Max ref area for Non I slice in low resolution

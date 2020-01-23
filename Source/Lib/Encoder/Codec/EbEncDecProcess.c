@@ -1257,6 +1257,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     } else
         context_ptr->tx_search_level = TX_SEARCH_ENC_DEC;
 
+#if TX_TYPE_OFF
+    context_ptr->tx_search_level = TX_SEARCH_OFF;
+#endif
+
     // Set tx search skip weights (MAX_MODE_COST: no skipping; 0: always skipping)
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->tx_weight = MAX_MODE_COST;
@@ -1364,6 +1368,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     } else // use specified level
         context_ptr->chroma_level = scs_ptr->static_config.set_chroma_mode;
 
+#if ONLY_DC_CHROMA
+    context_ptr->chroma_level = CHROMA_MODE_3;
+#endif
+
     // Set the full loop escape level
     // Level                Settings
     // 0                    Off
@@ -1400,7 +1408,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     } else
         context_ptr->global_mv_injection = 0;
 #else
-    if (scs_ptr->static_config.enable_global_warped_motion == EB_TRUE) {
+    if (scs_ptr->static_config.enable_global_motion == EB_TRUE) {
         if (pcs_ptr->parent_pcs_ptr->sc_content_detected) {
             if (pcs_ptr->enc_mode <= ENC_M1)
                 context_ptr->global_mv_injection = 1;
@@ -1672,6 +1680,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     else
         context_ptr->trellis_quant_coeff_optimization = scs_ptr->static_config.enable_trellis;
 
+#if SHUT_RDOQ
+    context_ptr->trellis_quant_coeff_optimization = EB_FALSE;
+#endif
+
     // Derive redundant block
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->redundant_blk = EB_FALSE;
@@ -1862,6 +1874,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     else
         context_ptr->rdoq_quantize_fp = (pcs_ptr->enc_mode <= ENC_M7) ? EB_TRUE : EB_FALSE;
 
+#if SHUT_QUANT_FP
+    context_ptr->rdoq_quantize_fp = EB_FALSE;
+#endif
+
     // Set pic_obmc_mode @ MD
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->md_pic_obmc_mode = 0;
@@ -1870,6 +1886,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
     else
         context_ptr->md_pic_obmc_mode = pcs_ptr->parent_pcs_ptr->pic_obmc_mode;
 
+#if SHUT_OBMC
+    context_ptr->md_pic_obmc_mode = 0;
+#endif
+
     // Set enable_inter_intra @ MD
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->md_enable_inter_intra = 0;
@@ -1877,6 +1897,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
         context_ptr->md_enable_inter_intra = 0;
     else
         context_ptr->md_enable_inter_intra = pcs_ptr->parent_pcs_ptr->enable_inter_intra;
+
+#if SHUT_II
+    context_ptr->md_enable_inter_intra = 0;
+#endif
 
     // Set md_atb_mode @ MD
     if (context_ptr->pd_pass == PD_PASS_0)
@@ -1917,6 +1941,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(SequenceControlSet * scs_ptr,
         context_ptr->dc_cand_only_flag = (pcs_ptr->slice_type == I_SLICE) ? EB_FALSE : EB_TRUE;
     else
         context_ptr->dc_cand_only_flag = EB_FALSE;
+
+#if ONLY_DC_LUMA
+        context_ptr->dc_cand_only_flag = EB_TRUE;
+#endif
 
     // Set disable_angle_z2_prediction_flag
     if (context_ptr->pd_pass == PD_PASS_0)
