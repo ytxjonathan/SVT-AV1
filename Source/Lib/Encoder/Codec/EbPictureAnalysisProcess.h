@@ -43,4 +43,4 @@ void noise_extract_chroma_weak_c(EbPictureBufferDesc *input_picture_ptr,
                                  EbPictureBufferDesc *denoised_picture_ptr, uint32_t sb_origin_y,
                                  uint32_t sb_origin_x);
 
-#endif /*!< EbPictureAnalysis_h */
+#endif // EbPictureAnalysis_h

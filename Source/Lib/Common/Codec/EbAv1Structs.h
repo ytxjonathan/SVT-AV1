@@ -569,4 +569,4 @@ typedef struct Dequant {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbAV1Structs_h */
+#endif // EbAV1Structs_h

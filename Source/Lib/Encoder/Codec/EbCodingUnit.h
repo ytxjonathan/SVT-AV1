@@ -575,4 +575,4 @@ extern EbErrorType largest_coding_unit_ctor(SuperBlock *larget_coding_unit_ptr, 
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbCodingUnit_h */
+#endif // EbCodingUnit_h

@@ -283,4 +283,4 @@ typedef enum MinigopIndex {
 }
 #endif
 
-#endif /*!< EbUtility_h */
+#endif // EbUtility_h

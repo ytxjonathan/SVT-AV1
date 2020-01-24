@@ -83,6 +83,6 @@ typedef void (*EbDctor)(void* pobj);
     } while (0)
 
 #undef EB_DELETE_UNCHECK /*!< do not use this outside */
-/*!< #undef EB_VA_ARGS */
+// #undef EB_VA_ARGS
 
-#endif /*!< EbObject_h */
+#endif // EbObject_h

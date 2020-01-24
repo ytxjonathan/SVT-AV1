@@ -85,7 +85,7 @@ int eb_av1_full_pixel_search(struct PictureControlSet *pcs, IntraBcContext /*!< 
                              int intra);
 
 #ifdef __cplusplus
-} /*!< extern "C" */
+} // extern "C"
 #endif
 
-#endif /*!< AOM_AV1_ENCODER_MCOMP_H_ */
+#endif // AOM_AV1_ENCODER_MCOMP_H_

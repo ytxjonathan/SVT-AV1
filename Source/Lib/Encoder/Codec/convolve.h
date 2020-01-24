@@ -102,7 +102,7 @@ void av1_highbd_convolve_2d_facade(const uint8_t *src8, int32_t src_stride, uint
                                    const struct scale_factors *sf, int32_t bd);
 
 #ifdef __cplusplus
-} /*!< extern "C" */
+} // extern "C"
 #endif
 
-#endif /*!< AV1_COMMON_AV1_CONVOLVE_H_ */
+#endif // AV1_COMMON_AV1_CONVOLVE_H_

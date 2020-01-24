@@ -290,4 +290,4 @@ static INLINE void aom_write_symbol(AomWriter *w, int32_t symb, AomCdfProb *cdf,
 }
 #endif
 
-#endif /*!< EbBitstreamUnit_h */
+#endif // EbBitstreamUnit_h

@@ -168,4 +168,4 @@ EbErrorType parse_tile(EbDecHandle *dec_handle_ptr, ParseCtxt *parse_ctx, TilesI
 }
 #endif
 
-#endif /*!< EbDecParseFrame_h */
+#endif // EbDecParseFrame_h

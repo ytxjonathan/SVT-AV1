@@ -324,4 +324,4 @@ int32_t eb_aom_count_primitive_refsubexpfin(uint16_t n, uint16_t k, uint16_t ref
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbEntropyCoding_h */
+#endif // EbEntropyCoding_h

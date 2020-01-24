@@ -16,4 +16,4 @@ EbErrorType initial_rate_control_context_ctor(EbThreadContext *  thread_context_
 
 extern void *initial_rate_control_kernel(void *input_ptr);
 
-#endif /*!< EbInitialRateControl_h */
+#endif // EbInitialRateControl_h

@@ -45,4 +45,4 @@ void svt_set_frame_refs(EbDecHandle *dec_handle_ptr, int32_t lst_map_idx, int32_
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDecPicMgr_h */
+#endif // EbDecPicMgr_h

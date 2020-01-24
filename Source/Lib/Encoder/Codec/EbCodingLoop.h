@@ -45,4 +45,4 @@ void residual_kernel(uint8_t *input, uint32_t input_offset, uint32_t input_strid
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbCodingLoop_h */
+#endif // EbCodingLoop_h

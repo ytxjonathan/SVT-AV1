@@ -27,4 +27,4 @@ typedef struct PictureAnalysisResultInitData {
 extern EbErrorType picture_analysis_result_creator(EbPtr *object_dbl_ptr,
                                                    EbPtr  object_init_data_ptr);
 
-#endif /*!< EbPictureAnalysisResults_h */
+#endif // EbPictureAnalysisResults_h

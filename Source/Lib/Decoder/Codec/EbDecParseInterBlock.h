@@ -55,4 +55,4 @@ void palette_tokens(EbDecHandle *dec_handle, ParseCtxt *parse_ctx, PartitionInfo
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDecParseInterBlock_h */
+#endif // EbDecParseInterBlock_h

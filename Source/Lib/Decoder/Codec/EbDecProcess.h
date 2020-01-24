@@ -185,4 +185,4 @@ typedef struct DecMtFrameData {
 }
 #endif
 
-#endif /*!< EbDecProcess_h */
+#endif // EbDecProcess_h

@@ -57,4 +57,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbSyntaxElements_h */
+#endif // EbSyntaxElements_h

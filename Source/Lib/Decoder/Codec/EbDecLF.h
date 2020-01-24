@@ -58,4 +58,4 @@ void dec_av1_loop_filter_frame(EbDecHandle *dec_handle_ptr, EbPictureBufferDesc 
 void set_lbd_lf_filter_tap_functions(void);
 void set_hbd_lf_filter_tap_functions(void);
 
-#endif /*!< EbDecLF_h */
+#endif // EbDecLF_h

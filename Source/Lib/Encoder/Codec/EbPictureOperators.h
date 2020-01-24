@@ -23,7 +23,7 @@ extern EbErrorType picture_full_distortion32_bits(
     uint64_t cr_distortion[DIST_CALC_TOTAL], uint32_t y_count_non_zero_coeffs,
     uint32_t cb_count_non_zero_coeffs, uint32_t cr_count_non_zero_coeffs,
     COMPONENT_TYPE component_type);
-//Residual Data
+/*!< Residual Data */
 
 void compressed_pack_sb(uint8_t *in8_bit_buffer, uint32_t in8_stride, uint8_t *inn_bit_buffer,
                         uint32_t inn_stride, uint16_t *out16_bit_buffer, uint32_t out_stride,
@@ -92,4 +92,4 @@ EbErrorType picture_copy(EbPictureBufferDesc *src, uint32_t src_luma_origin_inde
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbPictureOperators_h */
+#endif // EbPictureOperators_h

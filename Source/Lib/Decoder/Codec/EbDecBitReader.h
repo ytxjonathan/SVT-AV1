@@ -94,4 +94,4 @@ static INLINE int aom_read_ns_ae_(SvtReader *r, int nsymbs ACCT_STR_PARAM) {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDecBitReader_h */
+#endif // EbDecBitReader_h

@@ -18,4 +18,4 @@ void decode_block(DecModCtxt *dec_mod_ctxt, int32_t mi_row, int32_t mi_col, Bloc
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDecProcessBlock_h */
+#endif // EbDecProcessBlock_h

@@ -39,4 +39,4 @@ typedef struct MvUnit {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbMotionVectorUnit_h */
+#endif // EbMotionVectorUnit_h

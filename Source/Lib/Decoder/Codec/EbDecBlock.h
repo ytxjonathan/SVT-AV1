@@ -185,4 +185,4 @@ typedef struct PartitionInfo {
     int32_t is_chroma_ref;
 } PartitionInfo;
 
-#endif /*!< EbDecBlock_h */
+#endif // EbDecBlock_h

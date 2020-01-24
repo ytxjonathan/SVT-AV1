@@ -84,4 +84,4 @@ EbErrorType init_dec_mod_ctxt(EbDecHandle *dec_handle_ptr, void **dec_mod_ctxt);
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDecMemInit_h */
+#endif // EbDecMemInit_h

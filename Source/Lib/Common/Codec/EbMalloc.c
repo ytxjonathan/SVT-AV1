@@ -40,7 +40,7 @@ static EbHandle get_malloc_mutex() {
     pthread_once(&g_malloc_once, create_malloc_mutex);
     return g_malloc_mutex;
 }
-#endif /*!< _WIN32 */
+#endif // _WIN32
 
 /*!< hash function to speedup etnry search */
 uint32_t hash(void* p) {
@@ -269,11 +269,11 @@ static void print_top_10_locations() {
     free(g_profile_entry);
     eb_release_mutex(m);
 }
-#endif /*!< PROFILE_MEMORY_USAGE */
+#endif // PROFILE_MEMORY_USAGE
 
 static int g_component_count;
 
-#endif /*!< DEBUG_MEMORY_USAGE */
+#endif // DEBUG_MEMORY_USAGE
 
 void eb_print_memory_usage() {
 #ifdef DEBUG_MEMORY_USAGE

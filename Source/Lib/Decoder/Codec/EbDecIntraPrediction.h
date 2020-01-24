@@ -30,4 +30,4 @@ void cfl_store_tx(PartitionInfo *xd, CflCtx *cfl_ctx, int row, int col, TxSize t
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDecIntraPrediction_h */
+#endif // EbDecIntraPrediction_h

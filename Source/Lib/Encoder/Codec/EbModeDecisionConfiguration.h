@@ -57,4 +57,4 @@ static const uint8_t ndp_level_1[4] = {Pred + Predp1, Pred + Predp1, Pred + Pred
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbModeDecisionConfiguration_h */
+#endif // EbModeDecisionConfiguration_h

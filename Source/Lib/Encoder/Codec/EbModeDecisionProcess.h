@@ -408,4 +408,4 @@ extern void cfl_rd_pick_alpha(PictureControlSet *          pcs_ptr,
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbModeDecisionProcess_h */
+#endif // EbModeDecisionProcess_h

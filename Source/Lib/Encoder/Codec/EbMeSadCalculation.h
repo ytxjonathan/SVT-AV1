@@ -17,4 +17,4 @@ void initialize_buffer_32bits_c(uint32_t* pointer, uint32_t count128, uint32_t c
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbMeSadCalculation_h */
+#endif // EbMeSadCalculation_h

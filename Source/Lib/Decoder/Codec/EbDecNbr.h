@@ -15,4 +15,4 @@ BlockModeInfo *get_left_mode_info(EbDecHandle *dec_handle, int mi_row, int mi_co
 
 BlockModeInfo *get_top_mode_info(EbDecHandle *dec_handle, int mi_row, int mi_col, SBInfo *sb_info);
 
-#endif /*!< EbDecNbr_h */
+#endif // EbDecNbr_h

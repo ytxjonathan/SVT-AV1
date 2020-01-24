@@ -36,4 +36,4 @@ void gathering_picture_statistics(SequenceControlSet *scs_ptr, PictureParentCont
 void down_sample_chroma(EbPictureBufferDesc *input_picture_ptr,
                         EbPictureBufferDesc *outputPicturePtr);
 
-#endif /*!< EbPictureDecision_h */
+#endif // EbPictureDecision_h

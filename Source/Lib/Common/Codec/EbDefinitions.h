@@ -277,7 +277,7 @@ extern void RunEmms();
 #define EB_EXTERN extern "C"
 #else
 #define EB_EXTERN
-#endif /*!< __cplusplus */
+#endif // __cplusplus
 
 #define INLINE __inline
 #define RESTRICT
@@ -359,8 +359,8 @@ static __inline void mem_put_le32(void *vmem, MEM_VALUE_T val) {
     mem[3] = (MAU_T)((val >> 24) & 0xff);
 }
 
-/*!< clang-format on */
-/*!< #endif  // AOM_PORTS_MEM_OPS_H_ */
+/* clang-format on */
+// #endif  // AOM_PORTS_MEM_OPS_H_
 
 typedef uint16_t ConvBufType;
 
@@ -427,7 +427,7 @@ static INLINE int av1_num_planes(EbColorConfig *color_info) {
 #else
 #define ATTRIBUTE_PACKED
 #endif
-#endif /*!< ATTRIBUTE_PACKED */
+#endif // ATTRIBUTE_PACKED
 typedef enum PdPass {
     PD_PASS_0,
     PD_PASS_1,
@@ -1148,7 +1148,7 @@ typedef enum ATTRIBUTE_PACKED {
 
 #define MAX_NUM_TEMPORAL_LAYERS 8
 #define MAX_NUM_SPATIAL_LAYERS 4
-/*!< clang-format off */
+/* clang-format off */
 /*!< clang-format seems to think this is a pointer dereference and not a multiplication. */
 #define MAX_NUM_OPERATING_POINTS \
 MAX_NUM_TEMPORAL_LAYERS * MAX_NUM_SPATIAL_LAYERS
@@ -1282,7 +1282,7 @@ typedef struct PartitionContext
 /*!< Generates 5 bit field in which each bit set to 1 represents
  *   a BlockSize partition  11111 means we split 128x128, 64x64, 32x32, 16x16
  *   and 8x8.  10000 means we just split the 128x128 to 64x64 */
-/*!< clang-format off */
+/* clang-format off */
 static const struct
 {
     PartitionContextType above;
@@ -1311,7 +1311,7 @@ static const struct
 { 28, 16 },  /*!< 16X64 - {0b11100, 0b10000} */
 { 16, 28 },  /*!< 64X16 - {0b10000, 0b11100} */
 };
-/*!< clang-format on */
+/* clang-format on */
 
 /*!< Width/height lookup tables in units of various block sizes */
 static const uint8_t block_size_wide[BlockSizeS_ALL] = {
@@ -1709,7 +1709,7 @@ typedef struct LoopFilterInfoN {
 #define GM_TRANS_MIN -GM_TRANS_MAX
 #define GM_ALPHA_MIN -GM_ALPHA_MAX
 #define GM_ROW3HOMO_MIN -GM_ROW3HOMO_MAX
-/*!< clang-format off */
+/* clang-format off */
 typedef enum TransformationType
 {
     IDENTITY = 0,      /*!< identity transformation, 0-parameter */
@@ -1742,7 +1742,7 @@ typedef struct ScaleFactors {
     int32_t(*scale_value_y)(int32_t val, const struct ScaleFactors *sf);
 } ScaleFactors;
 
-/*!< clang-format off */
+/* clang-format off */
 static const EbWarpedMotionParams default_warp_params = {
     IDENTITY,
 { 0, 0, (1 << WARPEDMODEL_PREC_BITS), 0, 0, (1 << WARPEDMODEL_PREC_BITS), 0,
@@ -3663,5 +3663,5 @@ typedef struct _EbThreadContext EbThreadContext;
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDefinitions_h */
+#endif // EbDefinitions_h
 /*!< File EOF */

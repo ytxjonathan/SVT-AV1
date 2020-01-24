@@ -112,4 +112,4 @@ extern cpu_set_t group_affinity;
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbThreads_h */
+#endif // EbThreads_h

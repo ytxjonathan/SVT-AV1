@@ -56,4 +56,4 @@ typedef struct MeSbResults {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbMotionEstimationLcuResults_h */
+#endif // EbMotionEstimationLcuResults_h

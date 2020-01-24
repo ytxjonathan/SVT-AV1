@@ -44,4 +44,4 @@ extern EbErrorType packetization_reorder_entry_ctor(PacketizationReorderEntry *e
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbPacketizationReorderQueue_h */
+#endif // EbPacketizationReorderQueue_h

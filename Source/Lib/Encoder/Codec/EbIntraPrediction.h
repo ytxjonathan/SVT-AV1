@@ -421,4 +421,4 @@ void eb_av1_predict_intra_block_16bit(
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbIntraPrediction_h */
+#endif // EbIntraPrediction_h

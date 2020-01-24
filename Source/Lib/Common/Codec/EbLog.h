@@ -50,9 +50,9 @@ typedef enum {
     do {                       \
     } while (0)
 
-#endif /*!< SVT_LOG_QUIET */
+#endif // SVT_LOG_QUIET
 
 void svt_log_init();
 void svt_log(SvtLogLevel level, const char* tag, const char* format, ...);
 
-#endif /*!< EbLog_h */
+#endif // EbLog_h

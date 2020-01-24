@@ -153,4 +153,4 @@ typedef struct EncodeContextInitData {
 /**************************************/
 extern EbErrorType encode_context_ctor(EncodeContext *encode_context_ptr,
                                        EbPtr          object_init_data_ptr);
-#endif /*!< EbEncodeContext_h */
+#endif // EbEncodeContext_h

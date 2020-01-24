@@ -452,4 +452,4 @@ EbErrorType dec_mem_init(EbDecHandle  *dec_handle_ptr) {
 
     return return_error;
 }
-/*!< clang-format on */
+// clang-format on

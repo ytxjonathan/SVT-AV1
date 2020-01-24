@@ -453,4 +453,4 @@ static AOM_FORCE_INLINE int get_lower_levels_ctx(const uint8_t *levels, int coef
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbFullLoop_h */
+#endif // EbFullLoop_h

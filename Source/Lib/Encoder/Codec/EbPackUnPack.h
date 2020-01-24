@@ -14,4 +14,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbPackUnPack_h */
+#endif // EbPackUnPack_h

@@ -17,4 +17,4 @@ int32_t inverse_quantize(DecModCtxt *dec_mod_ctxt, PartitionInfo *part, BlockMod
                          int32_t *level, int32_t *qcoeffs, TxType tx_type, TxSize tx_size,
                          int plane);
 
-#endif /*!< EbDecInverseQuantize_h */
+#endif // EbDecInverseQuantize_h

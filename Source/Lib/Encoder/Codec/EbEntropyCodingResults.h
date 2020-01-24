@@ -32,4 +32,4 @@ extern EbErrorType entropy_coding_results_creator(EbPtr *object_dbl_ptr,
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbEntropyCodingResults_h */
+#endif // EbEntropyCodingResults_h

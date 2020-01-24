@@ -92,4 +92,4 @@ extern EbErrorType reference_queue_entry_ctor(ReferenceQueueEntry *entry_dbl_ptr
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbPictureManagerQueue_h */
+#endif // EbPictureManagerQueue_h

@@ -20,4 +20,4 @@ extern void *packetization_kernel(void *input_ptr);
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbPacketization_h */
+#endif // EbPacketization_h

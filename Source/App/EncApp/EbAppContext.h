@@ -35,4 +35,4 @@ extern EbErrorType init_encoder(EbConfig *config, EbAppContext *callback_data,
                                 uint32_t instance_idx);
 extern EbErrorType de_init_encoder(EbAppContext *callback_data_ptr, uint32_t instance_index);
 
-#endif /*!< EbAppContext_h */
+#endif // EbAppContext_h

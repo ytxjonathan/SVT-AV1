@@ -83,4 +83,4 @@ extern void *mode_decision_configuration_kernel(void *input_ptr);
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbModeDecisionConfigurationProcess_h */
+#endif // EbModeDecisionConfigurationProcess_h

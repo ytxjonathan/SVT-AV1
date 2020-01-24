@@ -27,4 +27,4 @@ typedef struct CabacEncodeContext {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbEntropyCodingUtil_h */
+#endif // EbEntropyCodingUtil_h

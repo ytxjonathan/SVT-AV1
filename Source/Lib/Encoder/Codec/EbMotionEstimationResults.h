@@ -32,4 +32,4 @@ extern EbErrorType motion_estimation_results_creator(EbPtr *object_dbl_ptr,
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbMotionEstimationResults_h */
+#endif // EbMotionEstimationResults_h

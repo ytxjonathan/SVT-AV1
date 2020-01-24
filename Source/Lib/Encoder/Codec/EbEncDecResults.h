@@ -51,4 +51,4 @@ extern EbErrorType enc_dec_results_creator(EbPtr *object_dbl_ptr, EbPtr object_i
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbEncDecResults_h */
+#endif // EbEncDecResults_h

@@ -50,17 +50,17 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif /*!< __cplusplus */
+#endif // __cplusplus
 
 #ifndef _RSIZE_T_DEFINED
 typedef size_t rsize_t;
 #define _RSIZE_T_DEFINED
-#endif /*!< _RSIZE_T_DEFINED */
+#endif // _RSIZE_T_DEFINED
 
 #ifndef _ERRNO_T_DEFINED
 #define _ERRNO_T_DEFINED
 typedef int32_t errno_t;
-#endif /*!< _ERRNO_T_DEFINED */
+#endif // _ERRNO_T_DEFINED
 
 #ifndef EOK
 #define EOK (0)
@@ -150,7 +150,7 @@ rsize_t strnlen_ss(const char *s, rsize_t smax);
 
 #ifdef __cplusplus
 }
-#endif /*!< __cplusplus */
+#endif // __cplusplus
 
-#endif /*!< EbAppString_h */
-/*!< File EOF */
+#endif // EbAppString_h
+// File EOF

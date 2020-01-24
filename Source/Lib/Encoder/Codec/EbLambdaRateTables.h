@@ -369,4 +369,4 @@ static const uint32_t av1lambda_mode_decision12_bit_sad[QINDEX_RANGE /*!< 256 */
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbLambdaRateTables_h */
+#endif // EbLambdaRateTables_h

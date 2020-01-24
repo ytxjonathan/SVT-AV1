@@ -21,4 +21,4 @@ void svtav1_predict_inter_block_plane(DecModCtxt *dec_mod_ctx, EbDecHandle *dec_
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDecInterPrediction_h */
+#endif // EbDecInterPrediction_h

@@ -256,4 +256,4 @@ EbErrorType av1_inter_prediction_hbd(
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbInterPrediction_h */
+#endif // EbInterPrediction_h

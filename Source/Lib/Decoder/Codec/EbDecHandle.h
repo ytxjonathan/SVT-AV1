@@ -253,4 +253,4 @@ typedef struct DecThreadCtxt {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbEncHandle_h */
+#endif // EbEncHandle_h

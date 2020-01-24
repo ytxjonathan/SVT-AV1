@@ -281,4 +281,4 @@ static INLINE int daala_read_symbol(DaalaReader_t *r, const AomCdfProb *cdf, int
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDecBitstreamUnit_h */
+#endif // EbDecBitstreamUnit_h

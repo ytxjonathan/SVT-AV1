@@ -99,4 +99,4 @@ extern void *enc_dec_kernel(void *input_ptr);
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbEncDecProcess_h */
+#endif // EbEncDecProcess_h

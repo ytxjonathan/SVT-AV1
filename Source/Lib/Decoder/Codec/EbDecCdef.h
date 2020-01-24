@@ -29,4 +29,4 @@ void svt_cdef_sb_row_mt(EbDecHandle *dec_handle, int32_t *mi_wide_l2, int32_t *m
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDecCdef_h_ */
+#endif // EbDecCdef_h_

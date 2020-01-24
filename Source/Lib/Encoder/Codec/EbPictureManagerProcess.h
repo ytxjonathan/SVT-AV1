@@ -22,4 +22,4 @@ extern void *picture_manager_kernel(void *input_ptr);
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbPictureManager_h */
+#endif // EbPictureManager_h

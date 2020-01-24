@@ -151,4 +151,4 @@ static INLINE int32_t is_chroma_reference(int32_t mi_row, int32_t mi_col, BlockS
                       ((mi_col & 0x01) || !(bw & 0x01) || !subsampling_x);
     return ref_pos;
 }
-#endif /*!< EbCommonUtils_h */
+#endif // EbCommonUtils_h

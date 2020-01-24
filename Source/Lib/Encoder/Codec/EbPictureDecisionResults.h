@@ -28,4 +28,4 @@ typedef struct PictureDecisionResultInitData {
 extern EbErrorType picture_decision_result_creator(EbPtr *object_dbl_ptr,
                                                    EbPtr  object_init_data_ptr);
 
-#endif /*!< EbPictureDecisionResults_h */
+#endif // EbPictureDecisionResults_h

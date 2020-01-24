@@ -35,4 +35,4 @@ typedef struct MvMergeCandidate {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbMvMerge_h */
+#endif // EbMvMerge_h

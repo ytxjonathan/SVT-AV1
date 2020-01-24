@@ -62,4 +62,4 @@ static INLINE int has_second_ref(const BlockModeInfo *mbmi) {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDecUtils_h */
+#endif // EbDecUtils_h

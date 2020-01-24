@@ -42,4 +42,4 @@ typedef struct PictureResultInitData {
 /**************************************/
 extern EbErrorType picture_results_creator(EbPtr *object_dbl_ptr, EbPtr object_init_data_ptr);
 
-#endif /*!< EbPictureResults_h */
+#endif // EbPictureResults_h

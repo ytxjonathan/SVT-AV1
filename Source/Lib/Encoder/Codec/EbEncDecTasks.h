@@ -36,4 +36,4 @@ extern EbErrorType enc_dec_tasks_creator(EbPtr *object_dbl_ptr, EbPtr object_ini
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbEncDecTasks_h */
+#endif // EbEncDecTasks_h

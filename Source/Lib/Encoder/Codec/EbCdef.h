@@ -72,4 +72,4 @@ void copy_sb16_16(uint16_t *dst, int32_t dstride, const uint16_t *src, int32_t s
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< AV1_COMMON_CDEF_H_ */
+#endif // AV1_COMMON_CDEF_H_

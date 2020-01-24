@@ -1446,7 +1446,7 @@ static void shift_copy(const uint8_t *src, uint8_t *dst, int shift, int width) {
         memset(dst + width - shift, src[width - 1], shift);
     }
 }
-#endif /*!< USE_PRECOMPUTED_WEDGE_MASK */
+#endif // USE_PRECOMPUTED_WEDGE_MASK
 
 /*!< [negative][direction] */
 DECLARE_ALIGNED(16, static uint8_t,
@@ -1497,7 +1497,7 @@ static void init_wedge_master_masks() {
             wedge_mask_obl[0][WEDGE_VERTICAL][i * stride + j] = mskx;
         }
     }
-#endif /*!< USE_PRECOMPUTED_WEDGE_MASK */
+#endif // USE_PRECOMPUTED_WEDGE_MASK
     for (i = 0; i < h; ++i) {
         for (j = 0; j < w; ++j) {
             const int msk = wedge_mask_obl[0][WEDGE_OBLIQUE63][i * stride + j];
@@ -1554,7 +1554,7 @@ static void init_wedge_signs() {
         }
     }
 }
-#endif /*!< !USE_PRECOMPUTED_WEDGE_SIGN */
+#endif // !USE_PRECOMPUTED_WEDGE_SIGN
 
 static INLINE int get_wedge_bits_lookup(BlockSize sb_type) {
     return wedge_params_lookup[sb_type].bits;
@@ -1609,7 +1609,7 @@ void av1_init_wedge_masks() {
     init_wedge_master_masks();
 #if !USE_PRECOMPUTED_WEDGE_SIGN
     init_wedge_signs();
-#endif /*!< !USE_PRECOMPUTED_WEDGE_SIGN */
+#endif // !USE_PRECOMPUTED_WEDGE_SIGN
     init_wedge_masks();
 }
 
@@ -1645,7 +1645,7 @@ void av1_build_compound_diffwtd_mask_d16_c(uint8_t *mask, DIFFWTD_MASK_TYPE mask
 
 int is_masked_compound_type(COMPOUND_TYPE type);
 
-/*!< clang-format off */
+// clang-format off
 static const uint8_t ii_weights1d[MAX_SB_SIZE] = {
   60, 58, 56, 54, 52, 50, 48, 47, 45, 44, 42, 41, 39, 38, 37, 35, 34, 33, 32,
   31, 30, 29, 28, 27, 26, 25, 24, 23, 22, 22, 21, 20, 19, 19, 18, 18, 17, 16,
@@ -1660,7 +1660,7 @@ static uint8_t ii_size_scales[BlockSizeS_ALL] = {
     4,  4,  2,  2,  2, 1, 1, 1,
     8,  8,  4,  4,  2, 2
 };
-/*!< clang-format on */
+// clang-format on
 
 static void build_smooth_interintra_mask(uint8_t *mask, int stride, BlockSize plane_bsize,
                                          InterIntraMode mode) {

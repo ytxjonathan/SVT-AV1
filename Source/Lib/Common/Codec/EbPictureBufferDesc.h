@@ -287,4 +287,4 @@ extern EbErrorType eb_recon_picture_buffer_desc_ctor(EbPictureBufferDesc *object
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbPictureBuffer_h */
+#endif // EbPictureBuffer_h

@@ -1,4 +1,4 @@
-// clang-format off
+/* clang-format off */
 /*!< Copyright(c) 2019 Intel Corporation
  * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
@@ -2936,8 +2936,8 @@ extern "C" {
 
 
 #ifdef __cplusplus
-}  /*!< extern "C" */
+}  // extern "C"
 #endif
 
 #endif
-// clang-format on
+/* clang-format on */

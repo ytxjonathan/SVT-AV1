@@ -34,4 +34,4 @@ extern EbPtr entropy_coder_get_bitstream_ptr(EntropyCoder *entropy_coder_ptr);
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbEntropyCodingObject_h */
+#endif // EbEntropyCodingObject_h

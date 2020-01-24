@@ -69,4 +69,4 @@ extern EbErrorType entropy_coding_context_ctor(EbThreadContext *  thread_context
 
 extern void *entropy_coding_kernel(void *input_ptr);
 
-#endif /*!< EbEntropyCodingProcess_h */
+#endif // EbEntropyCodingProcess_h

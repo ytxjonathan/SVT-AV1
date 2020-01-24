@@ -242,4 +242,4 @@ IntMv gm_get_motion_vector_enc(const EbWarpedMotionParams *gm, int32_t allow_hp,
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbAdaptiveMotionVectorPrediction_h */
+#endif // EbAdaptiveMotionVectorPrediction_h

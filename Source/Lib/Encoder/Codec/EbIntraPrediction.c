@@ -1,4 +1,4 @@
-/*!< clang-format off */
+// clang-format off
 /*!< Copyright(c) 2019 Intel Corporation
  * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
@@ -353,7 +353,7 @@ void eb_av1_dr_prediction_z2_c(uint8_t *dst, ptrdiff_t stride, int32_t bw, int32
     }
 }
 
-/*!< clang-format on */
+// clang-format on
 
 void cfl_luma_subsampling_420_lbd_c(
     const uint8_t *input,
@@ -4046,4 +4046,4 @@ EbErrorType intra_prediction_open_loop(
     }
     return return_error;
 }
-/*!< clang-format on */
+// clang-format on

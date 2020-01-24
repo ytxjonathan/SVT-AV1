@@ -81,4 +81,4 @@ extern void enc_dec_segments_init(EncDecSegments *segments_ptr, uint32_t col_cou
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbEncDecResults_h */
+#endif // EbEncDecResults_h

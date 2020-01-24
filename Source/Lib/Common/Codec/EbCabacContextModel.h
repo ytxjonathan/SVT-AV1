@@ -870,4 +870,4 @@ static INLINE int32_t av1_ceil_log2(int32_t n) {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbCabacContextModel_h */
+#endif // EbCabacContextModel_h

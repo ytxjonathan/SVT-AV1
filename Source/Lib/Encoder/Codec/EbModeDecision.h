@@ -260,4 +260,4 @@ uint8_t                 get_list_idx(uint8_t ref_type);
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbModeDecision_h */
+#endif // EbModeDecision_h

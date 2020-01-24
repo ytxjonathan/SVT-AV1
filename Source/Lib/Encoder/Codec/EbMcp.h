@@ -61,4 +61,4 @@ extern void pad_input_picture(EbByte src_pic, uint32_t src_stride, uint32_t orig
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EBMCP_H */
+#endif // EBMCP_H

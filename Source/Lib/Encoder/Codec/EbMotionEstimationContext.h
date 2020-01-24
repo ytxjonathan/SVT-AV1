@@ -458,4 +458,4 @@ extern EbErrorType me_context_ctor(MeContext *object_ptr, uint16_t max_input_lum
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbMotionEstimationContext_h */
+#endif // EbMotionEstimationContext_h

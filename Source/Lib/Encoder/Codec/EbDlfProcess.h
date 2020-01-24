@@ -27,4 +27,4 @@ extern EbErrorType dlf_context_ctor(EbThreadContext *  thread_context_ptr,
 
 extern void *dlf_kernel(void *input_ptr);
 
-#endif /*!< EbEntropyCodingProcess_h */
+#endif // EbEntropyCodingProcess_h

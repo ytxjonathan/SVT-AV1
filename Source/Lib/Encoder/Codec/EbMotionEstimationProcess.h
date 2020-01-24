@@ -32,4 +32,4 @@ EbErrorType signal_derivation_me_kernel_oq(SequenceControlSet *       scs_ptr,
                                            PictureParentControlSet *  pcs_ptr,
                                            MotionEstimationContext_t *context_ptr);
 
-#endif /*!< EbMotionEstimationProcess_h */
+#endif // EbMotionEstimationProcess_h

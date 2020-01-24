@@ -20,4 +20,4 @@ typedef struct PictureDecisionReorderEntry {
 extern EbErrorType picture_decision_reorder_entry_ctor(PictureDecisionReorderEntry *entry_dbl_ptr,
                                                        uint32_t                     picture_number);
 
-#endif /*!< EbPictureDecisionReorderQueue_h */
+#endif // EbPictureDecisionReorderQueue_h

@@ -20,4 +20,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbDecStruct_h */
+#endif // EbDecStruct_h

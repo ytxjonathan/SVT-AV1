@@ -46,4 +46,4 @@ typedef struct HlRateControlHistogramEntry {
 extern EbErrorType hl_rate_control_histogram_entry_ctor(HlRateControlHistogramEntry *entry_ptr,
                                                         uint32_t picture_number);
 
-#endif /*!< EbInitialRateControlReorderQueue_h */
+#endif // EbInitialRateControlReorderQueue_h

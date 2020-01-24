@@ -28,4 +28,4 @@ typedef struct PaReferenceQueueEntry {
 
 extern EbErrorType pa_reference_queue_entry_ctor(PaReferenceQueueEntry *entry_dbl_ptr);
 
-#endif /*!< EbPictureDecisionQueue_h */
+#endif // EbPictureDecisionQueue_h

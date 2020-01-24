@@ -27,4 +27,4 @@ int av1_determine_correspondence(unsigned char *frm, int *frm_corners, int num_f
                                  int width, int height, int frm_stride, int ref_stride,
                                  int *correspondence_pts);
 
-#endif /*!< AOM_AV1_ENCODER_CORNER_MATCH_H_ */
+#endif // AOM_AV1_ENCODER_CORNER_MATCH_H_

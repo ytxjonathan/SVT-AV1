@@ -154,4 +154,4 @@ extern void neighbor_array_unit_mode_write(NeighborArrayUnit *na_unit_ptr, uint8
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbNeighborArrays_h */
+#endif // EbNeighborArrays_h

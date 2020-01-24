@@ -95,7 +95,7 @@ static INLINE const int16_t *av1_get_interp_filter_subpel_kernel(
 }
 
 #ifdef __cplusplus
-} /*!< extern "C" */
+} // extern "C"
 #endif
 
-#endif /*!< AV1_COMMON_FILTER_H_ */
+#endif // AV1_COMMON_FILTER_H_

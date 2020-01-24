@@ -867,4 +867,4 @@ extern EbErrorType me_sb_results_ctor(MeSbResults *obj_ptr, uint32_t max_number_
 #ifdef __cplusplus
 }
 #endif
-#endif /*!< EbPictureControlSet_h */
+#endif // EbPictureControlSet_h

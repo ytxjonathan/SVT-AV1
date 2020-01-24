@@ -121,7 +121,7 @@ void fgn_copy_rect(uint8_t *src, int32_t src_stride, uint8_t *dst, int32_t dst_s
                    int32_t width, int32_t height, int32_t use_high_bit_depth);
 
 #ifdef __cplusplus
-} /*!< extern "C" */
+} // extern "C"
 #endif
 
-#endif /*!< AOM_AOM_GRAIN_SYNTHESIS_H_ */
+#endif // AOM_AOM_GRAIN_SYNTHESIS_H_
