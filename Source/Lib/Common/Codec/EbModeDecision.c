@@ -2155,6 +2155,19 @@ void inject_mvp_candidates_II(
 #if OBMC_OPT3
             is_obmc_allowed = 0;
 #endif
+#if 0//OBMC_OPT5
+            if (context_ptr->blk_geom->shape != PART_N) {
+                CodingUnit *  sq_cu_ptr = &context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds];
+                if (sq_cu_ptr->prediction_mode_flag == INTER_MODE) {
+                    if (sq_cu_ptr->block_has_coeff == 0) {
+                        PredictionUnit       *pu_ptr;
+                        pu_ptr = sq_cu_ptr->prediction_unit_array;
+                        if (pu_ptr->motion_mode == SIMPLE_TRANSLATION)
+                            is_obmc_allowed = 0;
+                    }
+                }
+            }
+#endif
 #else
             uint8_t is_obmc_allowed = obmc_motion_mode_allowed(picture_control_set_ptr, context_ptr->cu_ptr, bsize, rf[0], rf[1], NEARESTMV) == OBMC_CAUSAL;
 #endif
@@ -2276,6 +2289,19 @@ void inject_mvp_candidates_II(
             uint8_t is_obmc_allowed = obmc_motion_mode_allowed(picture_control_set_ptr, context_ptr, bsize, rf[0], rf[1], NEARMV) == OBMC_CAUSAL;
             #if OBMC_OPT3
             is_obmc_allowed = 0;
+#endif
+#if 0//OBMC_OPT5
+            if (context_ptr->blk_geom->shape != PART_N) {
+                CodingUnit *  sq_cu_ptr = &context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds];
+                if (sq_cu_ptr->prediction_mode_flag == INTER_MODE) {
+                    if (sq_cu_ptr->block_has_coeff == 0) {
+                        PredictionUnit       *pu_ptr;
+                        pu_ptr = sq_cu_ptr->prediction_unit_array;
+                        if (pu_ptr->motion_mode == SIMPLE_TRANSLATION)
+                            is_obmc_allowed = 0;
+                    }
+                }
+            }
 #endif
 #else
             uint8_t is_obmc_allowed = obmc_motion_mode_allowed(picture_control_set_ptr, context_ptr->cu_ptr, bsize, rf[0], rf[1], NEARMV) == OBMC_CAUSAL;
@@ -4017,7 +4043,24 @@ void inject_new_candidates(
 #if OBMC_OPT3
             is_obmc_allowed = 0;
 #endif
+#if OBMC_OPT5
+            if (context_ptr->blk_geom->shape != PART_N) {
+                CodingUnit *  sq_cu_ptr = &context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds];
+                if (sq_cu_ptr->prediction_mode_flag == INTER_MODE) {
+                    if (sq_cu_ptr->block_has_coeff == 0) {
+                        PredictionUnit       *pu_ptr;
+                        pu_ptr = sq_cu_ptr->prediction_unit_array;
+                        if (pu_ptr->motion_mode == SIMPLE_TRANSLATION)
+                            is_obmc_allowed = 0;
+                    }
+                }
+            }
+#endif
+#if OBMC_OPT4
+            tot_inter_types = is_obmc_allowed && context_ptr->md_pic_obmc_mode <= 2 ? tot_inter_types + 2 : tot_inter_types;
+#else
             tot_inter_types = is_obmc_allowed && context_ptr->md_pic_obmc_mode <= 2 ? tot_inter_types + 1 : tot_inter_types;
+#endif
 #else
              uint8_t is_obmc_allowed =  obmc_motion_mode_allowed(picture_control_set_ptr, context_ptr->cu_ptr, bsize, rf[0], rf[1], NEWMV) == OBMC_CAUSAL;
              tot_inter_types = is_obmc_allowed && picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode <= 2 ? tot_inter_types + 1 : tot_inter_types;
@@ -4094,16 +4137,32 @@ void inject_new_candidates(
                     }
                 }
  #if OBMC_FLAG
-                if (is_obmc_allowed && inter_type == tot_inter_types-1){
-                        candidateArray[canTotalCnt].is_interintra_used = 0;
-                        candidateArray[canTotalCnt].motion_mode = OBMC_CAUSAL;
+#if OBMC_OPT4
+                if (is_obmc_allowed && inter_type == tot_inter_types - 2) {
+#else
+                if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
+#endif
+                    candidateArray[canTotalCnt].is_interintra_used = 0;
+                    candidateArray[canTotalCnt].motion_mode = OBMC_CAUSAL;
 
-                        obmc_motion_refinement(
-                            picture_control_set_ptr,
-                            context_ptr,
-                            &candidateArray[canTotalCnt],
-                            REF_LIST_0);
-                    }
+                    obmc_motion_refinement(
+                        picture_control_set_ptr,
+                        context_ptr,
+                        &candidateArray[canTotalCnt],
+                        REF_LIST_0);
+                }
+#if OBMC_OPT4
+                if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
+                    uint32_t cand_i = canTotalCnt - 1;
+                    candidateArray[canTotalCnt].is_interintra_used = 0;
+                    candidateArray[canTotalCnt].motion_mode = SIMPLE_TRANSLATION;
+                    // Set the MV to ME result
+                    candidateArray[canTotalCnt].motion_vector_xl0 =  candidateArray[cand_i].motion_vector_xl0;
+                    candidateArray[canTotalCnt].motion_vector_yl0 =  candidateArray[cand_i].motion_vector_yl0;
+                    candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_0] = candidateArray[cand_i].motion_vector_pred_x[REF_LIST_0];
+                    candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_0] = candidateArray[cand_i].motion_vector_pred_y[REF_LIST_0];
+                }
+#endif
 #endif
             }
 #endif
@@ -4165,10 +4224,27 @@ void inject_new_candidates(
 #if OBMC_OPT3
             is_obmc_allowed = 0;
 #endif
+#if OBMC_OPT5
+            if (context_ptr->blk_geom->shape != PART_N) {
+                CodingUnit *  sq_cu_ptr = &context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds];
+                if (sq_cu_ptr->prediction_mode_flag == INTER_MODE) {
+                    if (sq_cu_ptr->block_has_coeff == 0) {
+                        PredictionUnit       *pu_ptr;
+                        pu_ptr = sq_cu_ptr->prediction_unit_array;
+                        if (pu_ptr->motion_mode == SIMPLE_TRANSLATION)
+                            is_obmc_allowed = 0;
+                    }
+                }
+            }
+#endif
 #else
             uint8_t is_obmc_allowed = obmc_motion_mode_allowed(picture_control_set_ptr, context_ptr->cu_ptr, bsize, rf[0], rf[1], NEWMV) == OBMC_CAUSAL;
 #endif
+#if OBMC_OPT4
+            tot_inter_types = is_obmc_allowed  && picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode <= 2 ? tot_inter_types + 2 : tot_inter_types;
+#else
             tot_inter_types = is_obmc_allowed  && picture_control_set_ptr->parent_pcs_ptr->pic_obmc_mode <= 2 ? tot_inter_types + 1 : tot_inter_types;
+#endif
 #endif
             for (inter_type = 0; inter_type < tot_inter_types; inter_type++)
             {
@@ -4241,7 +4317,11 @@ void inject_new_candidates(
                     }
                 }
 #if OBMC_FLAG
+#if OBMC_OPT4
+                if (is_obmc_allowed && inter_type == tot_inter_types - 2) {
+#else
                 if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
+#endif
                     candidateArray[canTotalCnt].is_interintra_used = 0;
                     candidateArray[canTotalCnt].motion_mode = OBMC_CAUSAL;
 
@@ -4251,6 +4331,18 @@ void inject_new_candidates(
                         &candidateArray[canTotalCnt],
                         REF_LIST_1);
                 }
+#if OBMC_OPT4
+                if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
+                    uint32_t cand_i = canTotalCnt - 1;
+                    candidateArray[canTotalCnt].is_interintra_used = 0;
+                    candidateArray[canTotalCnt].motion_mode = SIMPLE_TRANSLATION;
+                    // Set the MV to ME result
+                    candidateArray[canTotalCnt].motion_vector_xl1 =  candidateArray[cand_i].motion_vector_xl1;
+                    candidateArray[canTotalCnt].motion_vector_yl1 =  candidateArray[cand_i].motion_vector_yl1;
+                    candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_1] = candidateArray[cand_i].motion_vector_pred_x[REF_LIST_1];
+                    candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_1] = candidateArray[cand_i].motion_vector_pred_y[REF_LIST_1];
+                }
+#endif
 #endif
 
             }
@@ -4457,10 +4549,27 @@ void inject_new_candidates(
 #if OBMC_OPT3
             is_obmc_allowed = 0;
 #endif
+#if OBMC_OPT5
+            if (context_ptr->blk_geom->shape != PART_N) {
+                CodingUnit *  sq_cu_ptr = &context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds];
+                if (sq_cu_ptr->prediction_mode_flag == INTER_MODE) {
+                    if (sq_cu_ptr->block_has_coeff == 0) {
+                        PredictionUnit       *pu_ptr;
+                        pu_ptr = sq_cu_ptr->prediction_unit_array;
+                        if (pu_ptr->motion_mode == SIMPLE_TRANSLATION)
+                            is_obmc_allowed = 0;
+                    }
+                }
+            }
+#endif
 #else
                             uint8_t is_obmc_allowed = obmc_motion_mode_allowed(picture_control_set_ptr, context_ptr->cu_ptr, bsize, rf[0], rf[1], NEWMV) == OBMC_CAUSAL;
 #endif
+#if OBMC_OPT4
+                            tot_inter_types = is_obmc_allowed ? tot_inter_types + 2 : tot_inter_types;
+#else
                             tot_inter_types = is_obmc_allowed ? tot_inter_types + 1 : tot_inter_types;
+#endif
                             for (inter_type = 0; inter_type < tot_inter_types; inter_type++)
                             {
 #endif
@@ -4510,7 +4619,11 @@ void inject_new_candidates(
                                 candidateArray[canTotalCnt].motion_mode = SIMPLE_TRANSLATION;
                             }
                             else {
+#if OBMC_OPT4
+                                if (is_obmc_allowed && inter_type == tot_inter_types - 2) {
+#else
                                 if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
+#endif
                                     candidateArray[canTotalCnt].is_interintra_used = 0;
                                     candidateArray[canTotalCnt].motion_mode = OBMC_CAUSAL;
 
@@ -4520,6 +4633,18 @@ void inject_new_candidates(
                                         &candidateArray[canTotalCnt],
                                         REF_LIST_0);
                                 }
+#if OBMC_OPT4
+                            if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
+                                uint32_t cand_i = canTotalCnt - 1;
+                                candidateArray[canTotalCnt].is_interintra_used = 0;
+                                candidateArray[canTotalCnt].motion_mode = SIMPLE_TRANSLATION;
+                                // Set the MV to ME result
+                                candidateArray[canTotalCnt].motion_vector_xl0 =  candidateArray[cand_i].motion_vector_xl0;
+                                candidateArray[canTotalCnt].motion_vector_yl0 =  candidateArray[cand_i].motion_vector_yl0;
+                                candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_0] = candidateArray[cand_i].motion_vector_pred_x[REF_LIST_0];
+                                candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_0] = candidateArray[cand_i].motion_vector_pred_y[REF_LIST_0];
+                            }
+#endif
                             }
 #endif
                             INCRMENT_CAND_TOTAL_COUNT(canTotalCnt);
@@ -4559,10 +4684,27 @@ void inject_new_candidates(
      #if OBMC_OPT3
             is_obmc_allowed = 0;
 #endif
+#if OBMC_OPT5
+            if (context_ptr->blk_geom->shape != PART_N) {
+                CodingUnit *  sq_cu_ptr = &context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds];
+                if (sq_cu_ptr->prediction_mode_flag == INTER_MODE) {
+                    if (sq_cu_ptr->block_has_coeff == 0) {
+                        PredictionUnit       *pu_ptr;
+                        pu_ptr = sq_cu_ptr->prediction_unit_array;
+                        if (pu_ptr->motion_mode == SIMPLE_TRANSLATION)
+                            is_obmc_allowed = 0;
+                    }
+                }
+            }
+#endif
 #else
                                 uint8_t is_obmc_allowed = obmc_motion_mode_allowed(picture_control_set_ptr, context_ptr->cu_ptr, bsize, rf[0], rf[1], NEWMV) == OBMC_CAUSAL;
 #endif
+#if OBMC_OPT4
+                                tot_inter_types = is_obmc_allowed ? tot_inter_types + 2 : tot_inter_types;
+#else
                                 tot_inter_types = is_obmc_allowed ? tot_inter_types + 1 : tot_inter_types;
+#endif
                                 for (inter_type = 0; inter_type < tot_inter_types; inter_type++)
                                 {
 #endif
@@ -4612,7 +4754,11 @@ void inject_new_candidates(
                                     candidateArray[canTotalCnt].motion_mode = SIMPLE_TRANSLATION;
                                 }
                                 else {
+#if OBMC_OPT4
+                                    if (is_obmc_allowed && inter_type == tot_inter_types - 2) {
+#else
                                     if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
+#endif
                                         candidateArray[canTotalCnt].is_interintra_used = 0;
                                         candidateArray[canTotalCnt].motion_mode = OBMC_CAUSAL;
 
@@ -4622,6 +4768,18 @@ void inject_new_candidates(
                                             &candidateArray[canTotalCnt],
                                             REF_LIST_1);
                                     }
+#if OBMC_OPT4
+                            if (is_obmc_allowed && inter_type == tot_inter_types - 1) {
+                                uint32_t cand_i = canTotalCnt - 1;
+                                candidateArray[canTotalCnt].is_interintra_used = 0;
+                                candidateArray[canTotalCnt].motion_mode = SIMPLE_TRANSLATION;
+                                // Set the MV to ME result
+                                candidateArray[canTotalCnt].motion_vector_xl1 =  candidateArray[cand_i].motion_vector_xl1;
+                                candidateArray[canTotalCnt].motion_vector_yl1 =  candidateArray[cand_i].motion_vector_yl1;
+                                candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_1] = candidateArray[cand_i].motion_vector_pred_x[REF_LIST_1];
+                                candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_1] = candidateArray[cand_i].motion_vector_pred_y[REF_LIST_1];
+                            }
+#endif
                                 }
 #endif
                                 INCRMENT_CAND_TOTAL_COUNT(canTotalCnt);
@@ -4911,6 +5069,19 @@ void  inject_inter_candidates(
 
 #if OBMC_OPT3
             is_obmc_allowed = 0;
+#endif
+#if OBMC_OPT5
+            if (context_ptr->blk_geom->shape != PART_N) {
+                CodingUnit *  sq_cu_ptr = &context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds];
+                if (sq_cu_ptr->prediction_mode_flag == INTER_MODE) {
+                    if (sq_cu_ptr->block_has_coeff == 0) {
+                        PredictionUnit       *pu_ptr;
+                        pu_ptr = sq_cu_ptr->prediction_unit_array;
+                        if (pu_ptr->motion_mode == SIMPLE_TRANSLATION)
+                            is_obmc_allowed = 0;
+                    }
+                }
+            }
 #endif
 #endif
     /**************

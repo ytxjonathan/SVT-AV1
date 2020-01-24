@@ -64,6 +64,8 @@ extern "C" {
 #define TUNE_REDUCE_ME_OUTPUT    1
 #define OBMC_OPT2                0
 #define OBMC_OPT3                0
+#define OBMC_OPT4                0
+#define OBMC_OPT5                0
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 
 
