@@ -5751,7 +5751,11 @@ void tx_type_search(
             context_ptr->luma_txb_skip_context,
             context_ptr->luma_dc_sign_context,
             candidate_buffer->candidate_ptr->pred_mode,
+#if LOSSLESS_TX_TYPE_OPT
+            candidate_buffer->candidate_ptr->use_intrabc,
+#else
             EB_FALSE,
+#endif
 #if OMARK_HBD0_RDOQ
 #if NEW_MD_LAMBDA
             full_lambda,
