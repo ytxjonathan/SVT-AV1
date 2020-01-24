@@ -8684,6 +8684,20 @@ void check_redundant_block(const BlockGeom * blk_geom, ModeDecisionContext *cont
     }
 }
 
+void check_similar_block(const BlockGeom * blk_geom, ModeDecisionContext *context_ptr, uint8_t * similar_blk_avail, uint16_t *similar_blk_mds)
+{
+    if (blk_geom->similar) {
+        for (int it = 0; it < blk_geom->similar_list.list_size; it++) {
+            if (context_ptr->md_local_cu_unit[blk_geom->similar_list.blk_mds_table[it]].avail_blk_flag)
+            {
+                *similar_blk_mds = blk_geom->similar_list.blk_mds_table[it];
+                *similar_blk_avail = 1;
+                break;
+            }
+        }
+    }
+}
+
 /*******************************************
 * ModeDecision LCU
 *   performs CL (LCU)
@@ -11768,6 +11782,12 @@ EB_EXTERN EbErrorType mode_decision_sb(
         uint16_t redundant_blk_mds;
         if (all_cu_init)
             check_redundant_block(blk_geom, context_ptr, &redundant_blk_avail, &redundant_blk_mds);
+
+#if COMP_NSQ
+        context_ptr->similar_blk_avail = 0;
+        if (all_cu_init)
+            check_similar_block(blk_geom, context_ptr, &context_ptr->similar_blk_avail, &context_ptr->similar_blk_mds);
+#endif
 
         if (redundant_blk_avail && context_ptr->redundant_blk)
         {

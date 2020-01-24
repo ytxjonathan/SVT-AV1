@@ -6773,6 +6773,7 @@ EbErrorType generate_md_stage_0_cand(
 
     MD_COMP_TYPE  compound_types_to_try_save = context_ptr->compound_types_to_try;
 
+#if 0
     if (context_ptr->md_local_cu_unit[context_ptr->blk_geom->sqi_mds].avail_blk_flag) {
 
         PredictionMode mode = context_ptr->parent_sq_pred_mode[sq_index];
@@ -6780,9 +6781,30 @@ EbErrorType generate_md_stage_0_cand(
         int32_t is_parent_compound = mode >= NEAREST_NEARESTMV && context_ptr->parent_sq_pred_mode[sq_index] <= NEW_NEWMV;
 
         if (!is_parent_inter || !is_parent_compound)
-            context_ptr->compound_types_to_try = MD_COMP_DIFF0;
+            context_ptr->compound_types_to_try = MD_COMP_DIST;
     }
 #endif
+   
+
+    if (context_ptr->compound_types_to_try>MD_COMP_AVG && context_ptr->similar_blk_avail)
+    {
+        CodingUnit *src_cu = &context_ptr->md_cu_arr_nsq[context_ptr->similar_blk_mds];
+        PredictionMode mode = src_cu->pred_mode;
+        int32_t is_src_compound = mode >= NEAREST_NEARESTMV && context_ptr->parent_sq_pred_mode[sq_index] <= NEW_NEWMV;
+        if (is_src_compound) {
+            context_ptr->compound_types_to_try = src_cu->interinter_comp.type;
+        }
+        else {
+            context_ptr->compound_types_to_try = MD_COMP_AVG;
+        }
+
+    }
+
+
+#endif
+
+   
+
 
     //----------------------
     // Intra
