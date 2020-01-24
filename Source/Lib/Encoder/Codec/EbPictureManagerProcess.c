@@ -981,30 +981,32 @@ void *picture_manager_kernel(void *input_ptr) {
 
                         child_pcs_ptr->sb_total_count_pix = pic_width_in_sb * picture_height_in_sb;
 
-                        // Modify sb_prt_array in child pcs
-                        uint16_t    sb_index;
-                        uint16_t    sb_origin_x = 0;
-                        uint16_t    sb_origin_y = 0;
-                        for (sb_index = 0; sb_index < child_pcs_ptr->sb_total_count_pix; ++sb_index) {
-                            largest_coding_unit_dctor(child_pcs_ptr->sb_ptr_array[sb_index]);
-                            largest_coding_unit_ctor(child_pcs_ptr->sb_ptr_array[sb_index],
-                                                     (uint8_t)scs_ptr->sb_size_pix,
-                                                     (uint16_t)(sb_origin_x * scs_ptr->sb_size_pix),
-                                                     (uint16_t)(sb_origin_y * scs_ptr->max_blk_size),
-                                                     (uint16_t)sb_index,
-                                                     child_pcs_ptr);
-                            // Increment the Order in coding order (Raster Scan Order)
-                            sb_origin_y = (sb_origin_x == pic_width_in_sb - 1) ? sb_origin_y + 1 : sb_origin_y;
-                            sb_origin_x = (sb_origin_x == pic_width_in_sb - 1) ? 0 : sb_origin_x + 1;
-                        }
+                        if(entry_pcs_ptr->frame_superres_enabled){
+                            // Modify sb_prt_array in child pcs
+                            uint16_t    sb_index;
+                            uint16_t    sb_origin_x = 0;
+                            uint16_t    sb_origin_y = 0;
+                            for (sb_index = 0; sb_index < child_pcs_ptr->sb_total_count_pix; ++sb_index) {
+                                largest_coding_unit_dctor(child_pcs_ptr->sb_ptr_array[sb_index]);
+                                largest_coding_unit_ctor(child_pcs_ptr->sb_ptr_array[sb_index],
+                                                         (uint8_t)scs_ptr->sb_size_pix,
+                                                         (uint16_t)(sb_origin_x * scs_ptr->sb_size_pix),
+                                                         (uint16_t)(sb_origin_y * scs_ptr->sb_size_pix),
+                                                         (uint16_t)sb_index,
+                                                         child_pcs_ptr);
+                                // Increment the Order in coding order (Raster Scan Order)
+                                sb_origin_y = (sb_origin_x == pic_width_in_sb - 1) ? sb_origin_y + 1 : sb_origin_y;
+                                sb_origin_x = (sb_origin_x == pic_width_in_sb - 1) ? 0 : sb_origin_x + 1;
+                            }
 
-                        // Update pcs_ptr->mi_stride
-                        child_pcs_ptr->mi_stride = pic_width_in_sb * (scs_ptr->sb_size_pix >> MI_SIZE_LOG2);
-                        assert(child_pcs_ptr->mi_stride == entry_pcs_ptr->av1_cm->mi_stride);
+                            // Update pcs_ptr->mi_stride
+                            child_pcs_ptr->mi_stride = pic_width_in_sb * (scs_ptr->sb_size_pix >> MI_SIZE_LOG2);
+                            assert(child_pcs_ptr->mi_stride == entry_pcs_ptr->av1_cm->mi_stride);
 
-                        // copy buffer info from the downsampled picture to the input frame 16 bit buffer
-                        if(entry_pcs_ptr->frame_superres_enabled && scs_ptr->static_config.encoder_bit_depth > EB_8BIT){
-                            copy_buffer_info(entry_pcs_ptr->enhanced_downscaled_picture_ptr, child_pcs_ptr->input_frame16bit);
+                            // copy buffer info from the downsampled picture to the input frame 16 bit buffer
+                            if(scs_ptr->static_config.encoder_bit_depth > EB_8BIT){
+                                copy_buffer_info(entry_pcs_ptr->enhanced_downscaled_picture_ptr, child_pcs_ptr->input_frame16bit);
+                            }
                         }
 
 #else
