@@ -114,11 +114,6 @@ void mode_decision_update_neighbor_arrays(
     context_ptr->mv_unit.mv[REF_LIST_1].mv_union = context_ptr->md_cu_arr_nsq[index_mds].prediction_unit_array[0].mv[REF_LIST_1].mv_union;
     uint8_t                    inter_pred_direction_index = (uint8_t)context_ptr->cu_ptr->prediction_unit_array->inter_pred_direction_index;
     uint8_t                    ref_frame_type = (uint8_t)context_ptr->cu_ptr->prediction_unit_array[0].ref_frame_type;
-
-#if TX_ORG_INTERINTRA
-    int32_t is_inter = (context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE || context_ptr->cu_ptr->av1xd->use_intrabc) ? EB_TRUE : EB_FALSE;
-#endif
-
 #if MULTI_PASS_PD
     if (context_ptr->interpolation_search_level != IT_SEARCH_OFF)
 #else
@@ -185,8 +180,8 @@ void mode_decision_update_neighbor_arrays(
                 context_ptr->luma_dc_sign_level_coeff_neighbor_array,
                 (uint8_t*)&dc_sign_level_coeff,
 #if TX_ORG_INTERINTRA
-                context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[is_inter][context_ptr->cu_ptr->tx_depth][txb_itr],
-                context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[is_inter][context_ptr->cu_ptr->tx_depth][txb_itr],
+                context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
+                context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
 #else
                 context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->tx_depth][txb_itr],
                 context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->tx_depth][txb_itr],
@@ -199,8 +194,8 @@ void mode_decision_update_neighbor_arrays(
                 picture_control_set_ptr->md_tx_depth_1_luma_dc_sign_level_coeff_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
                 (uint8_t*)&dc_sign_level_coeff,
 #if TX_ORG_INTERINTRA
-                context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[is_inter][context_ptr->cu_ptr->tx_depth][txb_itr],
-                context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[is_inter][context_ptr->cu_ptr->tx_depth][txb_itr],
+                context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
+                context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
 #else
                 context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->tx_depth][txb_itr],
                 context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->tx_depth][txb_itr],
@@ -1854,21 +1849,7 @@ void set_md_stage_counts(
 
 #if ADD_4TH_MD_STAGE
     if (context_ptr->md_staging_mode == MD_STAGING_MODE_2)
-#if MD_STAGE_4_DEBUG
-    {
-        context_ptr->bypass_md_stage_2[CAND_CLASS_0] = EB_FALSE;
-        context_ptr->bypass_md_stage_2[CAND_CLASS_1] = EB_TRUE;
-        context_ptr->bypass_md_stage_2[CAND_CLASS_2] = EB_TRUE;
-        context_ptr->bypass_md_stage_2[CAND_CLASS_3] = EB_TRUE;
-        context_ptr->bypass_md_stage_2[CAND_CLASS_4] = EB_TRUE;
-        context_ptr->bypass_md_stage_2[CAND_CLASS_5] = EB_TRUE;
-        context_ptr->bypass_md_stage_2[CAND_CLASS_6] = EB_FALSE;
-        context_ptr->bypass_md_stage_2[CAND_CLASS_7] = EB_FALSE;
-        context_ptr->bypass_md_stage_2[CAND_CLASS_8] = EB_TRUE;
-    }
-#else
         memset(context_ptr->bypass_md_stage_2, EB_FALSE, CAND_CLASS_TOTAL);
-#endif
     else
         memset(context_ptr->bypass_md_stage_2, EB_TRUE, CAND_CLASS_TOTAL);
 #endif
@@ -2611,6 +2592,32 @@ void set_md_stage_counts(
     context_ptr->md_stage_3_count[CAND_CLASS_6] = (context_ptr->md_stage_2_count[CAND_CLASS_6] + 1) >> 1;
     context_ptr->md_stage_3_count[CAND_CLASS_7] = (context_ptr->md_stage_2_count[CAND_CLASS_7] + 1) >> 1;
     context_ptr->md_stage_3_count[CAND_CLASS_8] = (context_ptr->md_stage_2_count[CAND_CLASS_8] + 1) >> 1;
+
+#if NIC_TEST_0
+    context_ptr->md_stage_3_count[CAND_CLASS_0] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_1] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_2] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_3] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_4] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_5] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_6] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_7] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_8] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+#endif
+
+#if NIC_TEST_1
+    context_ptr->md_stage_3_count[CAND_CLASS_0] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 2;
+    context_ptr->md_stage_3_count[CAND_CLASS_1] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 2;
+    context_ptr->md_stage_3_count[CAND_CLASS_2] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 4 : 2;
+    context_ptr->md_stage_3_count[CAND_CLASS_3] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_4] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_5] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_6] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_7] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+    context_ptr->md_stage_3_count[CAND_CLASS_8] = (picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag) ? 2 : 1;
+#endif
+
+
 #endif
 
 
@@ -3398,11 +3405,7 @@ void md_stage_0(
 #if REMOVE_MD_STAGE_1
 #if MULTI_PASS_PD
 #if ADD_4TH_MD_STAGE
-#if IFS_MD_STAGE_0
-    context_ptr->md_staging_skip_interpolation_search = EB_FALSE;
-#else
     context_ptr->md_staging_skip_interpolation_search = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 || context_ptr->md_staging_mode == MD_STAGING_MODE_2) ? EB_TRUE : context_ptr->interpolation_search_level >= IT_SEARCH_FAST_LOOP_UV_BLIND ? EB_FALSE : EB_TRUE;
-#endif
 #else
     context_ptr->md_staging_skip_interpolation_search = (context_ptr->md_staging_mode == MD_STAGING_MODE_1) ? EB_TRUE : context_ptr->interpolation_search_level >= IT_SEARCH_FAST_LOOP_UV_BLIND ? EB_FALSE : EB_TRUE;
 #endif
@@ -3432,11 +3435,7 @@ void md_stage_0(
 #endif
 #if REMOVE_MD_STAGE_1
 #if ADD_4TH_MD_STAGE
-#if IFS_MD_STAGE_0
-    context_ptr->md_staging_use_bilinear = EB_FALSE;
-#else
     context_ptr->md_staging_use_bilinear = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 || context_ptr->md_staging_mode == MD_STAGING_MODE_2) ? EB_TRUE : EB_FALSE;
-#endif
 #else
     context_ptr->md_staging_use_bilinear = (context_ptr->md_staging_mode == MD_STAGING_MODE_1) ? EB_TRUE : EB_FALSE;
 #endif
@@ -5258,11 +5257,16 @@ static void tx_search_update_recon_sample_neighbor_array(
 
     return;
 }
-
+#if ENABLE_BC
+uint8_t get_end_tx_depth(BlockSize bsize, EbBool is_inter) {
+#else
 uint8_t get_end_tx_depth(BlockSize bsize, uint8_t btype) {
-
+#endif
     uint8_t tx_depth = 0;
 #if 0//ATB_INTER_2_DEPTH
+    if (bsize == BLOCK_128X128)
+        printf("");
+
     if (bsize == BLOCK_128X128 ||
         bsize == BLOCK_64X64 ||
 #else
@@ -5295,7 +5299,7 @@ uint8_t get_end_tx_depth(BlockSize bsize, uint8_t btype) {
         bsize == BLOCK_16X4 ||
         bsize == BLOCK_4X16)
 #if ENABLE_BC
-        tx_depth = 1;
+        tx_depth = is_inter ? 1 : 1;
 #else
         tx_depth = (btype == INTRA_MODE) ? 1 : 1;
 #endif
@@ -6232,7 +6236,7 @@ void tx_partitioning_path(
     ModeDecisionContext          *context_ptr,
     PictureControlSet            *picture_control_set_ptr,
     uint64_t                      ref_fast_cost,
-#if ADD_4TH_MD_STAGE
+#if TX_SIZE_ONLY_MD_STAGE_2
     uint8_t                       start_tx_depth,
 #endif
     uint8_t                       end_tx_depth,
@@ -6496,7 +6500,7 @@ void tx_partitioning_path(
 #endif
 
     // Transform Depth Loop
-#if ADD_4TH_MD_STAGE
+#if TX_SIZE_ONLY_MD_STAGE_2
     for (context_ptr->tx_depth = start_tx_depth; context_ptr->tx_depth <= end_tx_depth; context_ptr->tx_depth++) {
 #else
     for (context_ptr->tx_depth = 0; context_ptr->tx_depth <= end_tx_depth; context_ptr->tx_depth++) {
@@ -7561,11 +7565,7 @@ void full_loop_core(
     uint8_t end_tx_depth = 0;
 
 #if LOSSLESS_TX_TYPE_OPT || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
-#if ENABLE_BC
-    if (context_ptr->md_atb_mode == 0) {
-#else
     if (context_ptr->md_atb_mode == 0 || candidate_buffer->candidate_ptr->use_intrabc) {
-#endif
         start_tx_depth = end_tx_depth = 0;
     }
     else if (context_ptr->md_staging_tx_size_mode == 0) {
@@ -7576,7 +7576,11 @@ void full_loop_core(
         // end_tx_depth set to zero for blocks which go beyond the picture boundaries
         if ((context_ptr->sb_origin_x + context_ptr->blk_geom->origin_x + context_ptr->blk_geom->bwidth < picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->seq_header.max_frame_width &&
             context_ptr->sb_origin_y + context_ptr->blk_geom->origin_y + context_ptr->blk_geom->bheight < picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->seq_header.max_frame_height))
+#if ENABLE_BC
+            end_tx_depth = get_end_tx_depth(context_ptr->blk_geom->bsize, is_inter);
+#else
             end_tx_depth = get_end_tx_depth(context_ptr->blk_geom->bsize, candidate_buffer->candidate_ptr->type);
+#endif
         else
             end_tx_depth = 0;
 #if LOSSLESS_TX_TYPE_OPT || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
@@ -7595,9 +7599,9 @@ void full_loop_core(
 #else
         if (picture_control_set_ptr->parent_pcs_ptr->atb_mode && context_ptr->md_staging_skip_atb == EB_FALSE && end_tx_depth && candidate_buffer->candidate_ptr->use_intrabc == 0) {
 #endif
-
+#if !ENABLE_BC
             int32_t is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE || candidate_buffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
-
+#endif
             //Y Residual: residual for INTRA is computed inside the TU loop
             if (is_inter)
                 //Y Residual
@@ -7627,7 +7631,7 @@ void full_loop_core(
                 context_ptr,
                 picture_control_set_ptr,
                 ref_fast_cost,
-#if ADD_4TH_MD_STAGE
+#if TX_SIZE_ONLY_MD_STAGE_2
                 start_tx_depth,
 #endif
                 end_tx_depth,
@@ -8102,21 +8106,10 @@ void md_stage_2(
         candidate_ptr = candidate_buffer->candidate_ptr;
 
 #if REMOVE_MD_STAGE_1
-#if IFS_MD_STAGE_0
-        context_ptr->md_staging_skip_full_pred = EB_TRUE;
-        context_ptr->md_staging_skip_interpolation_search = EB_TRUE;
-        context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
-#elif IFS_MD_STAGE_3
-        context_ptr->md_staging_skip_full_pred = EB_FALSE;
-        context_ptr->md_staging_skip_interpolation_search = EB_TRUE;
-        context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
-        candidate_buffer->candidate_ptr->interp_filters = 0;
-#else
         context_ptr->md_staging_skip_full_pred = EB_FALSE;
         context_ptr->md_staging_skip_interpolation_search = EB_FALSE;
         context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
         candidate_buffer->candidate_ptr->interp_filters = 0;
-#endif
 #endif
 #if OBMC_OPT2
         uint8_t perform_normal_path = 1;
@@ -8175,7 +8168,7 @@ void md_stage_2(
         uint32_t candidateIndex;
 
         // Set MD Staging full_loop_core settings
-#if !ADD_4TH_MD_STAGE
+#if !TX_SIZE_ONLY_MD_STAGE_2
         context_ptr->md_staging_skip_atb = EB_TRUE;
         context_ptr->md_staging_tx_search = 0;
 
@@ -8190,7 +8183,19 @@ void md_stage_2(
             candidate_ptr = candidate_buffer->candidate_ptr;
 
 
-#if ADD_4TH_MD_STAGE
+#if TX_TYPE_ONLY_MD_STAGE_2
+            context_ptr->md_staging_tx_size_mode = 0;
+            context_ptr->md_staging_tx_search =
+                (candidate_ptr->cand_class == CAND_CLASS_0 || candidate_ptr->cand_class == CAND_CLASS_6 || candidate_ptr->cand_class == CAND_CLASS_7)
+                ? 2 : 1;
+            context_ptr->md_staging_skip_rdoq = EB_TRUE;
+            context_ptr->md_staging_skip_full_chroma = EB_TRUE;
+#elif RDOQ_ONLY_MD_STAGE_2
+            context_ptr->md_staging_tx_size_mode = 0;
+            context_ptr->md_staging_tx_search = 0;
+            context_ptr->md_staging_skip_rdoq = EB_FALSE;
+            context_ptr->md_staging_skip_full_chroma = EB_TRUE;
+#elif TX_SIZE_ONLY_MD_STAGE_2
 #if TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2
             context_ptr->md_staging_tx_size_mode = !context_ptr->coeff_based_skip_atb;
             context_ptr->md_staging_tx_search =
@@ -8211,7 +8216,7 @@ void md_stage_2(
             context_ptr->md_staging_skip_full_chroma = EB_TRUE;
 #endif
 
-#if ADD_4TH_MD_STAGE
+#if TX_SIZE_ONLY_MD_STAGE_2
             context_ptr->md_staging_skip_full_pred = EB_TRUE;
             context_ptr->md_staging_skip_interpolation_search = EB_TRUE;
             context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
@@ -8279,11 +8284,7 @@ void md_stage_3(
 #if MULTI_PASS_PD // Shut pred @ full loop if 1st pass
         context_ptr->md_staging_skip_full_pred = context_ptr->md_staging_mode == MD_STAGING_MODE_0;
 #if ADD_4TH_MD_STAGE
-#if IFS_MD_STAGE_3
-        context_ptr->md_staging_skip_interpolation_search = EB_FALSE;
-#else
         context_ptr->md_staging_skip_interpolation_search = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 || context_ptr->md_staging_mode == MD_STAGING_MODE_2);
-#endif
 #else
         context_ptr->md_staging_skip_interpolation_search = context_ptr->md_staging_mode == MD_STAGING_MODE_1;
 #endif

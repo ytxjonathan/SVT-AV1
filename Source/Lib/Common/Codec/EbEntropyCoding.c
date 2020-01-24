@@ -759,9 +759,6 @@ static EbErrorType av1_encode_tx_coef_y(
 {
     EbErrorType return_error = EB_ErrorNone;
 
-#if TX_ORG_INTERINTRA
-    int32_t is_inter = (cu_ptr->prediction_mode_flag == INTER_MODE || cu_ptr->av1xd->use_intrabc) ? EB_TRUE : EB_FALSE;
-#endif
     const BlockGeom *blk_geom = get_blk_geom_mds(cu_ptr->mds_idx);
     int32_t cul_level_y = 0;
 
@@ -790,8 +787,8 @@ static EbErrorType av1_encode_tx_coef_y(
                 COMPONENT_LUMA,
                 luma_dc_sign_level_coeff_neighbor_array,
 #if TX_ORG_INTERINTRA
-                cu_origin_x + blk_geom->tx_org_x[is_inter][tx_depth][txb_itr] - blk_geom->origin_x,
-                cu_origin_y + blk_geom->tx_org_y[is_inter][tx_depth][txb_itr] - blk_geom->origin_y,
+                cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_x,
+                cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_y,
 #else
                 cu_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] - blk_geom->origin_x,
                 cu_origin_y + blk_geom->tx_org_y[tx_depth][txb_itr] - blk_geom->origin_y,
@@ -827,8 +824,8 @@ static EbErrorType av1_encode_tx_coef_y(
                 luma_dc_sign_level_coeff_neighbor_array,
                 (uint8_t*)&dc_sign_level_coeff,
 #if TX_ORG_INTERINTRA
-                cu_origin_x + blk_geom->tx_org_x[is_inter][tx_depth][txb_itr] - blk_geom->origin_x,
-                cu_origin_y + blk_geom->tx_org_y[is_inter][tx_depth][txb_itr] - blk_geom->origin_y,
+                cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_x,
+                cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_y,
 #else
                 cu_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] - blk_geom->origin_x,
                 cu_origin_y + blk_geom->tx_org_y[tx_depth][txb_itr] - blk_geom->origin_y,
@@ -857,10 +854,6 @@ static EbErrorType av1_encode_tx_coef_uv(
     NeighborArrayUnit     *cb_dc_sign_level_coeff_neighbor_array)
 {
     EbErrorType return_error = EB_ErrorNone;
-
-#if TX_ORG_INTERINTRA
-    int32_t is_inter = (cu_ptr->prediction_mode_flag == INTER_MODE || cu_ptr->av1xd->use_intrabc) ? EB_TRUE : EB_FALSE;
-#endif
 
     const BlockGeom *blk_geom = get_blk_geom_mds(cu_ptr->mds_idx);
 
@@ -897,8 +890,8 @@ static EbErrorType av1_encode_tx_coef_uv(
                     COMPONENT_CHROMA,
                     cb_dc_sign_level_coeff_neighbor_array,
 #if TX_ORG_INTERINTRA
-                    ROUND_UV(cu_origin_x + blk_geom->tx_org_x[is_inter][tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
-                    ROUND_UV(cu_origin_y + blk_geom->tx_org_y[is_inter][tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
+                    ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
+                    ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
 #else
                     ROUND_UV(cu_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
                     ROUND_UV(cu_origin_y + blk_geom->tx_org_y[tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
@@ -937,8 +930,8 @@ static EbErrorType av1_encode_tx_coef_uv(
                     COMPONENT_CHROMA,
                     cr_dc_sign_level_coeff_neighbor_array,
 #if TX_ORG_INTERINTRA
-                    ROUND_UV(cu_origin_x + blk_geom->tx_org_x[is_inter][tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
-                    ROUND_UV(cu_origin_y + blk_geom->tx_org_y[is_inter][tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
+                    ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
+                    ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
 #else
                     ROUND_UV(cu_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
                     ROUND_UV(cu_origin_y + blk_geom->tx_org_y[tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
@@ -976,8 +969,8 @@ static EbErrorType av1_encode_tx_coef_uv(
                 cb_dc_sign_level_coeff_neighbor_array,
                 (uint8_t*)&dc_sign_level_coeff,
 #if TX_ORG_INTERINTRA
-                ROUND_UV(cu_origin_x + blk_geom->tx_org_x[is_inter][tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
-                ROUND_UV(cu_origin_y + blk_geom->tx_org_y[is_inter][tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
+                ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
+                ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
 #else
                 ROUND_UV(cu_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
                 ROUND_UV(cu_origin_y + blk_geom->tx_org_y[tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
@@ -995,8 +988,8 @@ static EbErrorType av1_encode_tx_coef_uv(
                 cr_dc_sign_level_coeff_neighbor_array,
                 (uint8_t*)&dc_sign_level_coeff,
 #if TX_ORG_INTERINTRA
-                ROUND_UV(cu_origin_x + blk_geom->tx_org_x[is_inter][tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
-                ROUND_UV(cu_origin_y + blk_geom->tx_org_y[is_inter][tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
+                ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
+                ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
 #else
                 ROUND_UV(cu_origin_x + blk_geom->tx_org_x[tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
                 ROUND_UV(cu_origin_y + blk_geom->tx_org_y[tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
@@ -1030,11 +1023,6 @@ static EbErrorType Av1EncodeCoeff1D(
     NeighborArrayUnit     *cb_dc_sign_level_coeff_neighbor_array)
 {
     EbErrorType return_error = EB_ErrorNone;
-
-#if TX_ORG_INTERINTRA
-    int32_t is_inter = (cu_ptr->prediction_mode_flag == INTER_MODE || cu_ptr->av1xd->use_intrabc) ? EB_TRUE : EB_FALSE;
-#endif
-
 #if ENHANCE_ATB
     if (cu_ptr->tx_depth) {
 #else
@@ -1091,8 +1079,8 @@ static EbErrorType Av1EncodeCoeff1D(
                     COMPONENT_LUMA,
                     luma_dc_sign_level_coeff_neighbor_array,
 #if TX_ORG_INTERINTRA
-                    cu_origin_x + blk_geom->tx_org_x[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x,
-                    cu_origin_y + blk_geom->tx_org_y[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y,
+                    cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x,
+                    cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y,
 #else
                     cu_origin_x + blk_geom->tx_org_x[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x,
                     cu_origin_y + blk_geom->tx_org_y[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y,
@@ -1132,8 +1120,8 @@ static EbErrorType Av1EncodeCoeff1D(
                         COMPONENT_CHROMA,
                         cb_dc_sign_level_coeff_neighbor_array,
 #if TX_ORG_INTERINTRA
-                        ROUND_UV(cu_origin_x + blk_geom->tx_org_x[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
-                        ROUND_UV(cu_origin_y + blk_geom->tx_org_y[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
+                        ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
+                        ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
 #else
                         ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
                         ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
@@ -1172,8 +1160,8 @@ static EbErrorType Av1EncodeCoeff1D(
                         COMPONENT_CHROMA,
                         cr_dc_sign_level_coeff_neighbor_array,
 #if TX_ORG_INTERINTRA
-                        ROUND_UV(cu_origin_x + blk_geom->tx_org_x[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
-                        ROUND_UV(cu_origin_y + blk_geom->tx_org_y[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
+                        ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
+                        ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
 #else
                         ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
                         ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
@@ -1211,8 +1199,8 @@ static EbErrorType Av1EncodeCoeff1D(
                     luma_dc_sign_level_coeff_neighbor_array,
                     (uint8_t*)&dc_sign_level_coeff,
 #if TX_ORG_INTERINTRA
-                    cu_origin_x + blk_geom->tx_org_x[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x,
-                    cu_origin_y + blk_geom->tx_org_y[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y,
+                    cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x,
+                    cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y,
 #else
                     cu_origin_x + blk_geom->tx_org_x[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x,
                     cu_origin_y + blk_geom->tx_org_y[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y,
@@ -1231,8 +1219,8 @@ static EbErrorType Av1EncodeCoeff1D(
                     cb_dc_sign_level_coeff_neighbor_array,
                     (uint8_t*)&dc_sign_level_coeff,
 #if TX_ORG_INTERINTRA
-                    ROUND_UV(cu_origin_x + blk_geom->tx_org_x[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
-                    ROUND_UV(cu_origin_y + blk_geom->tx_org_y[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
+                    ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
+                    ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
 #else
                     ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
                     ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
@@ -1250,8 +1238,8 @@ static EbErrorType Av1EncodeCoeff1D(
                     cr_dc_sign_level_coeff_neighbor_array,
                     (uint8_t*)&dc_sign_level_coeff,
 #if TX_ORG_INTERINTRA
-                    ROUND_UV(cu_origin_x + blk_geom->tx_org_x[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
-                    ROUND_UV(cu_origin_y + blk_geom->tx_org_y[is_inter][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
+                    ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
+                    ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->prediction_mode_flag == INTER_MODE][cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,
 #else
                     ROUND_UV(cu_origin_x + blk_geom->tx_org_x[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_x) >> 1,
                     ROUND_UV(cu_origin_y + blk_geom->tx_org_y[cu_ptr->tx_depth][txb_itr] - blk_geom->origin_y) >> 1,

@@ -144,7 +144,7 @@ extern "C" {
 #define ENABLE_WARPED_SC             1 // SC ONLY
 #define ENABLE_NEW_NN_SC             1 // SC ONLY
 
-/*****************************************/
+
 #define DIST_BASED_PME_SEARCH_AREA   0
 #define FIXED_PME_LARGE_SEARCH_AREA  1
 #define FP_QUANT_BOTH_INTRA_INTER    1
@@ -159,25 +159,37 @@ extern "C" {
 #define SHUT_TX_WEIGHT               0
 #define ATB_INTER_2_DEPTH            1 // ATB INTRA Depth 2
 #define TX_ORG_INTERINTRA            1
-#define SUPPORT_BC                   1   
 #define ENABLE_BC                    0 // ATB for BC
 #define FASTER_RDOQ                  1
 #define UPGRAGDE_TX_WEIGHT           0 
 #define ADD_4TH_MD_STAGE             1
 #if ADD_4TH_MD_STAGE
-#define TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2  0 // Tx Size + Tx Type                    
-#define RDOQ_LIGHT_TX_TYPE_MD_STAGE_2     1 // RDOQ + Tx Type  
-#define MD_STAGE_4_DEBUG                  0
+#define TX_SIZE_ONLY_MD_STAGE_2      1
+#if TX_SIZE_ONLY_MD_STAGE_2
+
+// Tx Size + Tx Type
+#define TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2           0     
+
+
+// RDOQ + Tx Type
+#define RDOQ_LIGHT_TX_TYPE_MD_STAGE_2           1     
+#if RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
+#define MD_STAGE_4_DEBUG   1
+#define NIC_TEST_0 0
+#define NIC_TEST_1 0
 #endif
+
+#endif
+#define TX_TYPE_ONLY_MD_STAGE_2      0
+#define RDOQ_ONLY_MD_STAGE_2         0
+#endif
+
 #define IMPROVED_MULTI_PASS_PD       0
 #if IMPROVED_MULTI_PASS_PD
 #define ADD_SUPPORT_TO_SKIP_PART_N   1
 #define POST_PD2_INTER_DEPTH         1
 #endif
-#define IFS_MD_STAGE_0               0
-#define IFS_MD_STAGE_3               0
 
-/*****************************************/
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements
 #define HBD_CLEAN_UP                 1
 
