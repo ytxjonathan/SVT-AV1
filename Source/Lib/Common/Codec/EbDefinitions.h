@@ -192,6 +192,12 @@ extern "C" {
 #define IFS_MD_STAGE_0               0
 #define IFS_MD_STAGE_3               0
 
+#define FREQUENCY_SPATIAL_DOMAIN     1
+#if FREQUENCY_SPATIAL_DOMAIN
+#define FREQUENCY_DOMAIN_TX_TYPE_SEARCH 0
+#define SPATIAL_DOMAIN_ONLY_LAST_STAGE  0
+#define SPATIAL_DOMAIN_ONLY_PD2         0
+#endif
 /*****************************************/
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements
 #define HBD_CLEAN_UP                 1

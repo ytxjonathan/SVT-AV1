@@ -1958,8 +1958,11 @@ void product_full_loop(
 #endif
 #endif
             EB_FALSE);
-
+#if FREQUENCY_SPATIAL_DOMAIN
+        if (context_ptr->md_staging_spatial_sse_full_loop) {
+#else
         if (context_ptr->spatial_sse_full_loop) {
+#endif
             uint32_t input_tu_origin_index = (context_ptr->sb_origin_x + tx_org_x + input_picture_ptr->origin_x) + ((context_ptr->sb_origin_y + tx_org_y + input_picture_ptr->origin_y) * input_picture_ptr->stride_y);
             uint32_t y_has_coeff           = y_count_non_zero_coeffs[txb_itr] > 0;
 
@@ -3063,8 +3066,11 @@ void full_loop_r(
 #endif
 #endif
                 EB_FALSE);
-
+#if FREQUENCY_SPATIAL_DOMAIN
+            if (context_ptr->md_staging_spatial_sse_full_loop) {
+#else
             if (context_ptr->spatial_sse_full_loop) {
+#endif
                 uint32_t cb_has_coeff = cb_count_non_zero_coeffs[txb_itr] > 0;
 
                 if (cb_has_coeff)
@@ -3158,8 +3164,11 @@ void full_loop_r(
 #endif
 #endif
                 EB_FALSE);
-
+#if FREQUENCY_SPATIAL_DOMAIN
+            if (context_ptr->md_staging_spatial_sse_full_loop) {
+#else
             if (context_ptr->spatial_sse_full_loop) {
+#endif
                 uint32_t cr_has_coeff = cr_count_non_zero_coeffs[txb_itr] > 0;
 
                 if (cr_has_coeff)
@@ -3272,8 +3281,11 @@ void cu_full_distortion_fast_tu_mode_r(
             countNonZeroCoeffsAll[0] = count_non_zero_coeffs[0][currentTuIndex];
             countNonZeroCoeffsAll[1] = count_non_zero_coeffs[1][currentTuIndex];
             countNonZeroCoeffsAll[2] = count_non_zero_coeffs[2][currentTuIndex];
-
+#if FREQUENCY_SPATIAL_DOMAIN
+            if (is_full_loop && context_ptr->md_staging_spatial_sse_full_loop) {
+#else
             if (is_full_loop && context_ptr->spatial_sse_full_loop) {
+#endif
                 uint32_t input_chroma_tu_origin_index = (((context_ptr->sb_origin_y + ((txb_origin_y >> 3) << 3)) >> 1) + (input_picture_ptr->origin_y >> 1)) * input_picture_ptr->stride_cb + (((context_ptr->sb_origin_x + ((txb_origin_x >> 3) << 3)) >> 1) + (input_picture_ptr->origin_x >> 1));
                 uint32_t tu_uv_origin_index = (((txb_origin_x >> 3) << 3) + (((txb_origin_y >> 3) << 3) * candidate_buffer->residual_quant_coeff_ptr->stride_cb)) >> 1;
 

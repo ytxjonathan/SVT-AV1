@@ -5677,7 +5677,12 @@ void tx_type_search(
         if (context_ptr->md_stage <= MD_STAGE_2 && tx_type != DCT_DCT && tx_type != V_DCT && tx_type != H_DCT)
             continue;
 #endif
+
+#if FREQUENCY_SPATIAL_DOMAIN
+        context_ptr->three_quad_energy = 0;
+#else
         //context_ptr->three_quad_energy = 0;
+#endif
         if (tx_type != DCT_DCT) {
             if (is_inter) {
                 TxSize max_tx_size = context_ptr->blk_geom->txsize[0][0];
@@ -5772,7 +5777,9 @@ void tx_type_search(
         if (y_has_coeff == 0 && tx_type != DCT_DCT)
             continue;
 
-
+#if FREQUENCY_SPATIAL_DOMAIN
+        if (context_ptr->md_staging_spatial_sse_full_loop) {
+#endif
         if (y_has_coeff)
             inv_transform_recon_wrapper(
                 candidate_buffer->prediction_ptr->buffer_y,
@@ -5828,7 +5835,40 @@ void tx_type_search(
 
         tuFullDistortion[0][DIST_CALC_PREDICTION] <<= 4;
         tuFullDistortion[0][DIST_CALC_RESIDUAL] <<= 4;
+#if FREQUENCY_SPATIAL_DOMAIN
+    }
+    else {
+        // LUMA DISTORTION
+        picture_full_distortion32_bits(
+            context_ptr->trans_quant_buffers_ptr->tu_trans_coeff2_nx2_n_ptr,
+            context_ptr->txb_1d_offset,
+            0,
+            candidate_buffer->recon_coeff_ptr,
+            context_ptr->txb_1d_offset,
+            0,
+            context_ptr->blk_geom->tx_width[context_ptr->tx_depth][context_ptr->txb_itr],
+            context_ptr->blk_geom->tx_height[context_ptr->tx_depth][context_ptr->txb_itr],
+            NOT_USED_VALUE,
+            NOT_USED_VALUE,
+            tuFullDistortion[0],
+            NOT_USED_VALUE,
+            NOT_USED_VALUE,
+            y_count_non_zero_coeffs,
+            0,
+            0,
+            COMPONENT_LUMA);
 
+
+
+        tuFullDistortion[0][DIST_CALC_RESIDUAL] += context_ptr->three_quad_energy;
+        tuFullDistortion[0][DIST_CALC_PREDICTION] += context_ptr->three_quad_energy;
+        //assert(context_ptr->three_quad_energy == 0 && context_ptr->cu_stats->size < 64);
+        TxSize tx_size = context_ptr->blk_geom->txsize[context_ptr->tx_depth][context_ptr->txb_itr];
+        int32_t shift = (MAX_TX_SCALE - av1_get_tx_scale(tx_size)) * 2;
+        tuFullDistortion[0][DIST_CALC_RESIDUAL] = RIGHT_SIGNED_SHIFT(tuFullDistortion[0][DIST_CALC_RESIDUAL], shift);
+        tuFullDistortion[0][DIST_CALC_PREDICTION] = RIGHT_SIGNED_SHIFT(tuFullDistortion[0][DIST_CALC_PREDICTION], shift);
+    }
+#endif
         //LUMA-ONLY
         av1_tu_estimate_coeff_bits(
             context_ptr,
@@ -6625,12 +6665,20 @@ void tx_partitioning_path(
 #endif
                 if (!tx_search_skip_flag) {
 
+#if FREQUENCY_DOMAIN_TX_TYPE_SEARCH
+                    EbBool default_md_staging_spatial_sse_full_loop = context_ptr->md_staging_spatial_sse_full_loop;
+                    // Shut spatial SSE for only the Tx Type search
+                    context_ptr->md_staging_spatial_sse_full_loop = EB_FALSE;
+#endif
                     tx_type_search(
                         sequence_control_set_ptr,
                         picture_control_set_ptr,
                         context_ptr,
                         tx_candidate_buffer,
                         qp);
+#if FREQUENCY_DOMAIN_TX_TYPE_SEARCH
+                    context_ptr->md_staging_spatial_sse_full_loop = default_md_staging_spatial_sse_full_loop;
+#endif
                 }
 
             product_full_loop(
@@ -8112,6 +8160,16 @@ void md_stage_2(
 
 #if REMOVE_MD_STAGE_1
     context_ptr->md_staging_skip_rdoq = EB_TRUE;
+
+
+#if FREQUENCY_SPATIAL_DOMAIN
+#if SPATIAL_DOMAIN_ONLY_LAST_STAGE
+    context_ptr->md_staging_spatial_sse_full_loop = EB_FALSE;
+#else
+    context_ptr->md_staging_spatial_sse_full_loop = context_ptr->spatial_sse_full_loop;
+#endif
+#endif
+
     for (fullLoopCandidateIndex = 0; fullLoopCandidateIndex < context_ptr->md_stage_1_count[context_ptr->target_class]; ++fullLoopCandidateIndex) {
 #else
     context_ptr->md_staging_skip_rdoq = (context_ptr->md_staging_mode == MD_STAGING_MODE_2 || context_ptr->md_staging_mode == MD_STAGING_MODE_3);
@@ -8253,6 +8311,14 @@ void md_stage_2(
             context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
             candidate_buffer->candidate_ptr->interp_filters = 0;
 #endif
+#if FREQUENCY_SPATIAL_DOMAIN
+#if SPATIAL_DOMAIN_ONLY_LAST_STAGE
+            context_ptr->md_staging_spatial_sse_full_loop = EB_FALSE;
+#else
+            context_ptr->md_staging_spatial_sse_full_loop = context_ptr->spatial_sse_full_loop;
+#endif
+#endif
+
                 full_loop_core(
                     picture_control_set_ptr,
                     sb_ptr,
@@ -8346,6 +8412,11 @@ void md_stage_3(
         context_ptr->md_staging_skip_full_chroma = EB_FALSE;
 
         context_ptr->md_staging_skip_rdoq = EB_FALSE;
+
+#if FREQUENCY_SPATIAL_DOMAIN
+        context_ptr->md_staging_spatial_sse_full_loop = context_ptr->spatial_sse_full_loop;
+#endif
+
 
         if (picture_control_set_ptr->slice_type != I_SLICE) {
             if ((candidate_ptr->type == INTRA_MODE || context_ptr->full_loop_escape == 2) && best_inter_luma_zero_coeff == 0) {
