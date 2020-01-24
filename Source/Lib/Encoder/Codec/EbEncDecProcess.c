@@ -1240,7 +1240,7 @@ void pad_ref_and_set_flags(PictureControlSet *pcs_ptr, SequenceControlSet *scs_p
 void copy_statistics_to_ref_obj_ect(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) {
     pcs_ptr->intra_coded_area =
         (100 * pcs_ptr->intra_coded_area) /
-        (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width * pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height);
+        (pcs_ptr->parent_pcs_ptr->aligned_width * pcs_ptr->parent_pcs_ptr->aligned_height);
     if (pcs_ptr->slice_type == I_SLICE) pcs_ptr->intra_coded_area = 0;
 
     ((EbReferenceObject *)pcs_ptr->parent_pcs_ptr->reference_picture_wrapper_ptr->object_ptr)
@@ -2607,7 +2607,7 @@ void *enc_dec_kernel(void *input_ptr) {
         sb_sz              = (uint8_t)scs_ptr->sb_size_pix;
         sb_size_log2       = (uint8_t)Log2f(sb_sz);
         context_ptr->sb_sz = sb_sz;
-        pic_width_in_sb    = (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + sb_sz - 1) >> sb_size_log2;
+		pic_width_in_sb    = (pcs_ptr->parent_pcs_ptr->aligned_width + sb_sz - 1) >> sb_size_log2;
 #if TILES_PARALLEL
         tile_group_width_in_sb =
             pcs_ptr->parent_pcs_ptr->tile_group_info[context_ptr->tile_group_index]
@@ -2963,7 +2963,7 @@ void *enc_dec_kernel(void *input_ptr) {
             //CHKN these are not needed for DLF
             enc_dec_results_ptr->completed_sb_row_index_start = 0;
             enc_dec_results_ptr->completed_sb_row_count =
-                ((pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height + scs_ptr->sb_size_pix - 1) >> sb_size_log2);
+                ((pcs_ptr->parent_pcs_ptr->aligned_height + scs_ptr->sb_size_pix - 1) >> sb_size_log2);
             // Post EncDec Results
             eb_post_full_object(enc_dec_results_wrapper_ptr);
         }

@@ -931,24 +931,39 @@ EbErrorType scale_pcs_params(SequenceControlSet* scs_ptr,
     cm->frm_size.render_height = source_height;
     cm->frm_size.superres_denominator = spr_params.superres_denom;
 
+    // align width and height to be a multiple of 8
+    uint16_t aligned_width = (uint16_t)ALIGN_POWER_OF_TWO(spr_params.encoding_width, 3);
+    uint16_t aligned_height = (uint16_t)ALIGN_POWER_OF_TWO(spr_params.encoding_height, 3);
+
+    assert((aligned_width == spr_params.encoding_width) && "Downscaled width needs to be a multiple of 8 "
+                                                           "(otherwise not yet implemented)");
+
+    // change frame width and height params in pcs
+    pcs_ptr->frame_width = spr_params.encoding_width;
+    pcs_ptr->frame_height = spr_params.encoding_height;
+
+    pcs_ptr->aligned_width = aligned_width;
+    pcs_ptr->aligned_height = aligned_height;
+
     // number of SBs
     const uint16_t picture_sb_width = (uint16_t)(
-            (spr_params.encoding_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
+            (aligned_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
     const uint16_t picture_sb_height = (uint16_t)(
-            (spr_params.encoding_height + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
+            (aligned_height + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
+
+    pcs_ptr->picture_sb_width = picture_sb_width; // TODO: use this instead of re-computing
+    pcs_ptr->picture_sb_height = picture_sb_height;
 
     pcs_ptr->sb_total_count = picture_sb_width * picture_sb_height;
 
-    // mi sizes
+    // mi params
     cm->mi_stride = picture_sb_width * (BLOCK_SIZE_64 / 4);
-    cm->mi_cols = spr_params.encoding_width >> MI_SIZE_LOG2;
-    cm->mi_rows = spr_params.encoding_height >> MI_SIZE_LOG2;
-
-    pcs_ptr->picture_sb_width = picture_sb_width; // TODO: use this instead of re-computing
-    pcs_ptr->picture_sb_height = picture_sb_height; // TODO: use this instead of re-computing
+    cm->mi_cols = aligned_width >> MI_SIZE_LOG2;
+    cm->mi_rows = aligned_height >> MI_SIZE_LOG2;
 
     if(cm->frm_size.superres_denominator != SCALE_NUMERATOR){
-        derive_input_resolution(&pcs_ptr->input_resolution, spr_params.encoding_width * spr_params.encoding_height);
+        derive_input_resolution(&pcs_ptr->input_resolution,
+                                spr_params.encoding_width * spr_params.encoding_height);
 
         // create new picture level sb_params and sb_geom
         sb_params_init_pcs(scs_ptr, pcs_ptr);

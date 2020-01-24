@@ -1838,10 +1838,10 @@ void product_full_loop(ModeDecisionCandidateBuffer *candidate_buffer,
     uint16_t tx_org_y              = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
     int32_t  cropped_tx_width =
         MIN(context_ptr->blk_geom->tx_width[tx_depth][txb_itr],
-            pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - (context_ptr->sb_origin_x + tx_org_x));
+            pcs_ptr->parent_pcs_ptr->aligned_width - (context_ptr->sb_origin_x + tx_org_x));
     int32_t cropped_tx_height =
         MIN(context_ptr->blk_geom->tx_height[tx_depth][txb_itr],
-            pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - (context_ptr->sb_origin_y + tx_org_y));
+            pcs_ptr->parent_pcs_ptr->aligned_height - (context_ptr->sb_origin_y + tx_org_y));
     context_ptr->luma_txb_skip_context = 0;
     context_ptr->luma_dc_sign_context  = 0;
     get_txb_ctx(pcs_ptr,
@@ -3053,11 +3053,11 @@ void cu_full_distortion_fast_txb_mode_r(
         txb_origin_y = context_ptr->blk_geom->tx_org_y[tx_depth][txb_itr];
         int32_t cropped_tx_width_uv =
             MIN(context_ptr->blk_geom->tx_width_uv[tx_depth][txb_itr],
-                pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width / 2 -
+                pcs_ptr->parent_pcs_ptr->aligned_width / 2 -
                     ((context_ptr->sb_origin_x + ((txb_origin_x >> 3) << 3)) >> 1));
         int32_t cropped_tx_height_uv =
             MIN(context_ptr->blk_geom->tx_height_uv[tx_depth][txb_itr],
-                pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height / 2 -
+                pcs_ptr->parent_pcs_ptr->aligned_height / 2 -
                     ((context_ptr->sb_origin_y + ((txb_origin_y >> 3) << 3)) >> 1));
         txb_origin_index =
             txb_origin_x + txb_origin_y * candidate_buffer->residual_quant_coeff_ptr->stride_y;

@@ -2055,6 +2055,10 @@ EbErrorType picture_parent_control_set_ctor(PictureParentControlSet *object_ptr,
 #endif
 
     object_ptr->frame_superres_enabled = EB_FALSE;
+    object_ptr->aligned_width = init_data_ptr->picture_width;
+    object_ptr->aligned_height = init_data_ptr->picture_height;
+    object_ptr->frame_width = init_data_ptr->picture_width;
+    object_ptr->frame_height = init_data_ptr->picture_height;
 
     return return_error;
 }
@@ -2064,8 +2068,8 @@ EbErrorType sb_params_init_pcs(SequenceControlSet *scs_ptr,
     EbErrorType return_error = EB_ErrorNone;
     uint16_t sb_index;
     uint16_t raster_scan_blk_index;
-    uint16_t encoding_width = pcs_ptr->av1_cm->frm_size.frame_width;
-    uint16_t encoding_height = pcs_ptr->av1_cm->frm_size.frame_height;
+    uint16_t encoding_width = pcs_ptr->aligned_width;
+    uint16_t encoding_height = pcs_ptr->aligned_height;
 
     uint8_t picture_sb_width =
             (uint8_t)((encoding_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz);
@@ -2135,8 +2139,8 @@ EbErrorType sb_geom_init_pcs(SequenceControlSet *scs_ptr, PictureParentControlSe
     uint16_t sb_index;
     uint16_t md_scan_block_index;
 
-    uint16_t encoding_width = pcs_ptr->av1_cm->frm_size.frame_width;
-    uint16_t encoding_height = pcs_ptr->av1_cm->frm_size.frame_height;
+    uint16_t encoding_width = pcs_ptr->aligned_width;
+    uint16_t encoding_height = pcs_ptr->aligned_height;
 
     uint16_t picture_sb_width =
             (encoding_width + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;

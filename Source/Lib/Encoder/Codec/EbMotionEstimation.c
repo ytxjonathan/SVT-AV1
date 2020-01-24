@@ -11165,8 +11165,8 @@ EbErrorType motion_estimate_sb(
     int16_t  y_top_left_search_region;
     uint32_t search_region_index;
 
-    int16_t picture_width = pcs_ptr->av1_cm->frm_size.frame_width;
-    int16_t picture_height = pcs_ptr->av1_cm->frm_size.frame_height;
+    int16_t picture_width = pcs_ptr->aligned_width;
+    int16_t picture_height = pcs_ptr->aligned_height;
     uint32_t sb_width = (input_ptr->width - sb_origin_x) < BLOCK_SIZE_64
                             ? input_ptr->width - sb_origin_x
                             : BLOCK_SIZE_64;
