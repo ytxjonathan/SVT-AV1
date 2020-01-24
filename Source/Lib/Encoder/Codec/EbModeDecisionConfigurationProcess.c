@@ -1839,8 +1839,8 @@ void *mode_decision_configuration_kernel(void *input_ptr) {
 
             {
                 // add to hash table
-                const int pic_width = pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width;
-                const int pic_height = pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height;
+                const int pic_width = pcs_ptr->parent_pcs_ptr->aligned_width;
+                const int pic_height = pcs_ptr->parent_pcs_ptr->aligned_height;
 
                 uint32_t *block_hash_values[2][2];
                 int8_t *  is_block_same[2][3];

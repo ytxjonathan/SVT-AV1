@@ -60,9 +60,9 @@ void largest_coding_unit_dctor(EbPtr p);
 static void configure_picture_edges(SequenceControlSet *scs_ptr, PictureControlSet *ppsPtr) {
     // Tiles Initialisation
     const uint16_t pic_width_in_sb =
-        (ppsPtr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
+        (ppsPtr->parent_pcs_ptr->aligned_width + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
     const uint16_t picture_height_in_sb =
-        (ppsPtr->parent_pcs_ptr->av1_cm->frm_size.frame_height + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
+        (ppsPtr->parent_pcs_ptr->aligned_height + scs_ptr->sb_size_pix - 1) / scs_ptr->sb_size_pix;
     unsigned x_sb_index, y_sb_index, sb_index;
 
     // SB-loops
@@ -846,11 +846,11 @@ void *picture_manager_kernel(void *input_ptr) {
 #endif
 
                         //3.make all  init for ChildPCS
-                        pic_width_in_sb = (uint8_t)((child_pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width +
+                        pic_width_in_sb = (uint8_t)((entry_pcs_ptr->aligned_width +
                                                      entry_scs_ptr->sb_size_pix - 1) /
                                                     entry_scs_ptr->sb_size_pix);
                         picture_height_in_sb =
-                            (uint8_t)((child_pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height +
+                            (uint8_t)((entry_pcs_ptr->aligned_height +
                                        entry_scs_ptr->sb_size_pix - 1) /
                                       entry_scs_ptr->sb_size_pix);
 
@@ -1000,6 +1000,7 @@ void *picture_manager_kernel(void *input_ptr) {
 
                         // Update pcs_ptr->mi_stride
                         child_pcs_ptr->mi_stride = pic_width_in_sb * (scs_ptr->sb_size_pix >> MI_SIZE_LOG2);
+                        assert(child_pcs_ptr->mi_stride == entry_pcs_ptr->av1_cm->mi_stride);
 
                         // copy buffer info from the downsampled picture to the input frame 16 bit buffer
                         if(entry_pcs_ptr->frame_superres_enabled && scs_ptr->static_config.encoder_bit_depth > EB_8BIT){
@@ -1035,8 +1036,8 @@ void *picture_manager_kernel(void *input_ptr) {
                         }
 
                         uint32_t enc_dec_seg_w = (scs_ptr->static_config.super_block_size == 128) ?
-                                                 ((child_pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + 64) / 128) :
-                                                 ((child_pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + 32) / 64);
+                                                 ((entry_pcs_ptr->aligned_width + 64) / 128) :
+                                                 ((entry_pcs_ptr->aligned_width + 32) / 64);
 
                         // EncDec Segments
                         enc_dec_segments_init(child_pcs_ptr->enc_dec_segment_ctrl,

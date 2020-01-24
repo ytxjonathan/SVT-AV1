@@ -2546,8 +2546,8 @@ EbErrorType av1_split_flag_rate(PictureParentControlSet *pcs_ptr, ModeDecisionCo
 
     if (is_partition_point) {
         const int32_t hbs      = (mi_size_wide[bsize] << 2) >> 1;
-        const int32_t has_rows = (blk_origin_y + hbs) < pcs_ptr->av1_cm->frm_size.frame_height;
-        const int32_t has_cols = (blk_origin_x + hbs) < pcs_ptr->av1_cm->frm_size.frame_width;
+        const int32_t has_rows = (blk_origin_y + hbs) < pcs_ptr->aligned_height;
+        const int32_t has_cols = (blk_origin_x + hbs) < pcs_ptr->aligned_width;
 
         uint32_t context_index = 0;
 

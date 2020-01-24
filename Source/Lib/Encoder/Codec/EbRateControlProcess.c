@@ -526,7 +526,7 @@ void high_level_rc_input_picture_vbr(PictureParentControlSet *pcs_ptr, SequenceC
         pcs_ptr->bits_per_sw_per_layer[temporal_layer_index] = 0;
     pcs_ptr->total_bits_per_gop = 0;
 
-    area_in_pixel = pcs_ptr->av1_cm->frm_size.frame_width * pcs_ptr->av1_cm->frm_size.frame_height;
+    area_in_pixel = pcs_ptr->aligned_width * pcs_ptr->aligned_height;
     ;
 
     eb_block_on_mutex(scs_ptr->encode_context_ptr->rate_table_update_mutex);
@@ -1061,7 +1061,7 @@ void frame_level_rc_input_picture_vbr(PictureControlSet *pcs_ptr, SequenceContro
     uint32_t  area_in_sbs;
 
     picture_area_in_pixel =
-            pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height * pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width;
+            pcs_ptr->parent_pcs_ptr->aligned_height * pcs_ptr->parent_pcs_ptr->aligned_width;
 
     if (rate_control_layer_ptr->first_frame == 1) {
         rate_control_layer_ptr->first_frame                    = 0;
@@ -2160,7 +2160,7 @@ void high_level_rc_input_picture_cvbr(PictureParentControlSet *pcs_ptr, Sequence
         pcs_ptr->bits_per_sw_per_layer[temporal_layer_index] = 0;
     pcs_ptr->total_bits_per_gop = 0;
 
-    area_in_pixel = pcs_ptr->av1_cm->frm_size.frame_width * pcs_ptr->av1_cm->frm_size.frame_height;
+    area_in_pixel = pcs_ptr->aligned_width * pcs_ptr->aligned_height;
     ;
 
     eb_block_on_mutex(scs_ptr->encode_context_ptr->rate_table_update_mutex);
@@ -2702,7 +2702,7 @@ void frame_level_rc_input_picture_cvbr(PictureControlSet *pcs_ptr, SequenceContr
     uint32_t  area_in_sbs;
 
     picture_area_in_pixel =
-            pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height * pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width;
+            pcs_ptr->parent_pcs_ptr->aligned_height * pcs_ptr->parent_pcs_ptr->aligned_width;
 
     if (rate_control_layer_ptr->first_frame == 1) {
         rate_control_layer_ptr->first_frame                    = 0;
@@ -4727,9 +4727,9 @@ static void sb_qp_derivation_two_pass(PictureControlSet *pcs_ptr) {
 
         uint32_t me_sb_size = scs_ptr->sb_sz;
         uint32_t me_pic_width_in_sb =
-            (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
+            (pcs_ptr->parent_pcs_ptr->aligned_width + scs_ptr->sb_sz - 1) / me_sb_size;
         uint32_t me_pic_height_in_sb =
-            (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height + me_sb_size - 1) / me_sb_size;
+            (pcs_ptr->parent_pcs_ptr->aligned_height + me_sb_size - 1) / me_sb_size;
 
         int *arfgf_low_motion_minq;
         int *arfgf_high_motion_minq;
@@ -4875,9 +4875,9 @@ static void sb_qp_derivation(PictureControlSet *pcs_ptr) {
         double   q_val, picture_q_val;
         uint32_t me_sb_size = scs_ptr->sb_sz;
         uint32_t me_pic_width_in_sb =
-            (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
+            (pcs_ptr->parent_pcs_ptr->aligned_width + scs_ptr->sb_sz - 1) / me_sb_size;
         uint32_t me_pic_height_in_sb =
-            (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height + me_sb_size - 1) / me_sb_size;
+            (pcs_ptr->parent_pcs_ptr->aligned_height + me_sb_size - 1) / me_sb_size;
         int max_qp_scaling_avg_comp =
             MAX(1,
                 pcs_ptr->parent_pcs_ptr->non_moving_index_min_distance +

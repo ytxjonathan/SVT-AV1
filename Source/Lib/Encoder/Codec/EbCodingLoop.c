@@ -2144,9 +2144,9 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
         (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr;
     // SB Stats
     uint32_t sb_width =
-        MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x);
+        MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->aligned_width - sb_origin_x);
     uint32_t sb_height =
-        MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - sb_origin_y);
+        MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->aligned_height - sb_origin_y);
     // MV merge mode
     uint32_t              y_has_coeff;
     uint32_t              u_has_coeff;
@@ -3755,16 +3755,16 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                                 (context_ptr->mv_unit.mv[REF_LIST_0].y >> 3));
                                     origin_x =
                                         MIN(origin_x,
-                                            pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - blk_geom->bwidth);
+                                            pcs_ptr->parent_pcs_ptr->aligned_width - blk_geom->bwidth);
                                     origin_y = MIN(
                                         origin_y,
-                                        pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - blk_geom->bheight);
+                                        pcs_ptr->parent_pcs_ptr->aligned_height - blk_geom->bheight);
                                     uint16_t sb_origin_x =
                                         origin_x / context_ptr->sb_sz * context_ptr->sb_sz;
                                     uint16_t sb_origin_y =
                                         origin_y / context_ptr->sb_sz * context_ptr->sb_sz;
                                     uint32_t pic_width_in_sb =
-                                        (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) /
+                                        (pcs_ptr->parent_pcs_ptr->aligned_width + scs_ptr->sb_sz - 1) /
                                         scs_ptr->sb_sz;
                                     uint16_t sb_index =
                                         sb_origin_x / context_ptr->sb_sz +
@@ -3854,16 +3854,16 @@ EB_EXTERN void av1_encode_pass(SequenceControlSet *scs_ptr, PictureControlSet *p
                                             (context_ptr->mv_unit.mv[REF_LIST_1].y >> 3));
                                 origin_x =
                                     MIN(origin_x,
-                                        pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - blk_geom->bwidth);
+                                        pcs_ptr->parent_pcs_ptr->aligned_width - blk_geom->bwidth);
                                 origin_y =
                                     MIN(origin_y,
-                                        pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - blk_geom->bheight);
+                                        pcs_ptr->parent_pcs_ptr->aligned_height - blk_geom->bheight);
                                 uint16_t sb_origin_x =
                                     origin_x / context_ptr->sb_sz * context_ptr->sb_sz;
                                 uint16_t sb_origin_y =
                                     origin_y / context_ptr->sb_sz * context_ptr->sb_sz;
                                 uint32_t pic_width_in_sb =
-                                    (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) /
+                                    (pcs_ptr->parent_pcs_ptr->aligned_width + scs_ptr->sb_sz - 1) /
                                     scs_ptr->sb_sz;
                                 uint16_t sb_index =
                                     sb_origin_x / context_ptr->sb_sz +
@@ -4025,7 +4025,7 @@ if (dlf_enable_flag && pcs_ptr->parent_pcs_ptr->loop_filter_mode == 1) {
     if (pcs_ptr->parent_pcs_ptr->frm_hdr.loop_filter_params.filter_level[0] ||
         pcs_ptr->parent_pcs_ptr->frm_hdr.loop_filter_params.filter_level[1]) {
         uint8_t last_col =
-            ((sb_origin_x) + sb_width == pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width) ? 1 : 0;
+            ((sb_origin_x) + sb_width == pcs_ptr->parent_pcs_ptr->aligned_width) ? 1 : 0;
         loop_filter_sb(
             recon_buffer, pcs_ptr, NULL, sb_origin_y >> 2, sb_origin_x >> 2, 0, 3, last_col);
     }

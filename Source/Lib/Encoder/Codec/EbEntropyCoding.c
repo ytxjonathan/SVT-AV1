@@ -385,14 +385,14 @@ void get_txb_ctx(PictureControlSet *pcs_ptr, const int32_t plane,
     int32_t             txb_h_unit;
     if (plane) {
         txb_w_unit = MIN(tx_size_wide_unit[tx_size],
-                         (int32_t)(pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width / 2 - blk_origin_x) >> 2);
+                         (int32_t)(pcs_ptr->parent_pcs_ptr->aligned_width / 2 - blk_origin_x) >> 2);
         txb_h_unit = MIN(tx_size_high_unit[tx_size],
-                         (int32_t)(pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height / 2 - blk_origin_y) >> 2);
+                         (int32_t)(pcs_ptr->parent_pcs_ptr->aligned_height / 2 - blk_origin_y) >> 2);
     } else {
         txb_w_unit = MIN(tx_size_wide_unit[tx_size],
-                         (int32_t)(pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - blk_origin_x) >> 2);
+                         (int32_t)(pcs_ptr->parent_pcs_ptr->aligned_width - blk_origin_x) >> 2);
         txb_h_unit = MIN(tx_size_high_unit[tx_size],
-                         (int32_t)(pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - blk_origin_y) >> 2);
+                         (int32_t)(pcs_ptr->parent_pcs_ptr->aligned_height - blk_origin_y) >> 2);
     }
     int16_t  dc_sign = 0;
     uint16_t k       = 0;
@@ -1196,8 +1196,8 @@ static void encode_partition_av1(PictureControlSet *pcs_ptr, FRAME_CONTEXT *fram
     if (!is_partition_point) return;
 
     const int32_t hbs      = (mi_size_wide[bsize] << 2) >> 1;
-    const int32_t has_rows = (blk_origin_y + hbs) < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height;
-    const int32_t has_cols = (blk_origin_x + hbs) < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width;
+    const int32_t has_rows = (blk_origin_y + hbs) < pcs_ptr->parent_pcs_ptr->aligned_height;
+    const int32_t has_cols = (blk_origin_x + hbs) < pcs_ptr->parent_pcs_ptr->aligned_width;
 
     uint32_t partition_context_left_neighbor_index =
         get_neighbor_array_unit_left_index(partition_context_neighbor_array, blk_origin_y);
@@ -6406,10 +6406,10 @@ EB_EXTERN EbErrorType write_sb(EntropyCodingContext *context_ptr, SuperBlock *tb
         if (check_blk_out_of_bound) {
             if (blk_geom->shape != PART_N) blk_geom = get_blk_geom_mds(blk_geom->sqi_mds);
             code_blk_cond = EB_FALSE;
-            if (((blk_origin_x + blk_geom->bwidth / 2 < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width) ||
-                 (blk_origin_y + blk_geom->bheight / 2 < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height)) &&
-                blk_origin_x < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width &&
-                blk_origin_y < pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height)
+            if (((blk_origin_x + blk_geom->bwidth / 2 < pcs_ptr->parent_pcs_ptr->aligned_width) ||
+                 (blk_origin_y + blk_geom->bheight / 2 < pcs_ptr->parent_pcs_ptr->aligned_height)) &&
+                blk_origin_x < pcs_ptr->parent_pcs_ptr->aligned_width &&
+                blk_origin_y < pcs_ptr->parent_pcs_ptr->aligned_height)
                 code_blk_cond = EB_TRUE;
         }
 

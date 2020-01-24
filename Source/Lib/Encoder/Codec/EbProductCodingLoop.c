@@ -4552,10 +4552,10 @@ void full_loop_core(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, BlkStruct *b
     // end_tx_depth set to zero for blocks which go beyond the picture boundaries
     if ((context_ptr->sb_origin_x + context_ptr->blk_geom->origin_x +
                  context_ptr->blk_geom->bwidth <
-             pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width &&
+             pcs_ptr->parent_pcs_ptr->aligned_width &&
          context_ptr->sb_origin_y + context_ptr->blk_geom->origin_y +
                  context_ptr->blk_geom->bheight <
-                 pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height))
+                 pcs_ptr->parent_pcs_ptr->aligned_height))
         end_tx_depth =
             get_end_tx_depth(context_ptr->blk_geom->bsize, candidate_buffer->candidate_ptr->type);
     else
@@ -5213,7 +5213,7 @@ void order_nsq_table(PictureControlSet *pcs_ptr, ModeDecisionContext *context_pt
     if (scs_ptr->seq_header.sb_size == BLOCK_128X128) {
         uint32_t me_sb_size = scs_ptr->sb_sz;
         uint32_t me_pic_width_in_sb =
-            (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
+            (pcs_ptr->parent_pcs_ptr->aligned_width + scs_ptr->sb_sz - 1) / me_sb_size;
         uint32_t me_sb_x = (context_ptr->blk_origin_x / me_sb_size);
         uint32_t me_sb_y = (context_ptr->blk_origin_y / me_sb_size);
         me_sb_addr       = me_sb_x + me_sb_y * me_pic_width_in_sb;
@@ -5869,7 +5869,7 @@ void md_encode_block(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
         if (scs_ptr->seq_header.sb_size == BLOCK_128X128) {
             uint32_t me_sb_size = scs_ptr->sb_sz;
             uint32_t me_pic_width_in_sb =
-                (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
+                (pcs_ptr->parent_pcs_ptr->aligned_width + scs_ptr->sb_sz - 1) / me_sb_size;
             uint32_t me_sb_x           = (context_ptr->blk_origin_x / me_sb_size);
             uint32_t me_sb_y           = (context_ptr->blk_origin_y / me_sb_size);
             context_ptr->me_sb_addr    = me_sb_x + me_sb_y * me_pic_width_in_sb;
@@ -6377,7 +6377,7 @@ void av1_get_max_min_partition_features(SequenceControlSet *scs_ptr, PictureCont
 
         uint32_t me_sb_size = scs_ptr->sb_sz;
         uint32_t me_pic_width_in_sb =
-            (pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width + scs_ptr->sb_sz - 1) / me_sb_size;
+            (pcs_ptr->parent_pcs_ptr->aligned_width + scs_ptr->sb_sz - 1) / me_sb_size;
 
         const uint32_t blk_origin_x = sb_origin_x + blk_geom->origin_x;
         const uint32_t blk_origin_y = sb_origin_y + blk_geom->origin_y;
@@ -6738,9 +6738,9 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
             ((sb_origin_x + input_picture_ptr->origin_x) >> 1);
 
         uint32_t sb_width =
-            MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width - sb_origin_x);
+            MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->aligned_width - sb_origin_x);
         uint32_t sb_height =
-            MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height - sb_origin_y);
+            MIN(scs_ptr->sb_size_pix, pcs_ptr->parent_pcs_ptr->aligned_height - sb_origin_y);
 
         pack2d_src(input_picture_ptr->buffer_y + input_luma_offset,
                    input_picture_ptr->stride_y,
@@ -6784,9 +6784,9 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
     if (context_ptr->enable_auto_max_partition == 1)
         if (pcs_ptr->slice_type != I_SLICE && scs_ptr->static_config.super_block_size == 128) {
             if ((sb_origin_x + scs_ptr->static_config.super_block_size) <
-                    pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_width &&
+                 pcs_ptr->parent_pcs_ptr->aligned_width &&
                 (sb_origin_y + scs_ptr->static_config.super_block_size) <
-                    pcs_ptr->parent_pcs_ptr->av1_cm->frm_size.frame_height) {
+                 pcs_ptr->parent_pcs_ptr->aligned_height) {
                 float features[FEATURE_SIZE_MAX_MIN_PART_PRED] = {0.0f};
 
                 av1_get_max_min_partition_features(scs_ptr,
