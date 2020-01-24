@@ -1,7 +1,5 @@
-/*
-* Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
+/*!< Copyright(c) 2019 Intel Corporation
+ * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 #ifndef EbPackUnPack_h
 #define EbPackUnPack_h
@@ -16,4 +14,4 @@ extern "C" {
 #ifdef __cplusplus
 }
 #endif
-#endif // EbPackUnPack_h
+#endif /*!< EbPackUnPack_h */

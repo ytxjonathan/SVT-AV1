@@ -1,7 +1,5 @@
-/*
-* Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
+/*!< Copyright(c) 2019 Intel Corporation
+ * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 #ifndef EbPictureOperators_h
 #define EbPictureOperators_h
@@ -94,4 +92,4 @@ EbErrorType picture_copy(EbPictureBufferDesc *src, uint32_t src_luma_origin_inde
 #ifdef __cplusplus
 }
 #endif
-#endif // EbPictureOperators_h
+#endif /*!< EbPictureOperators_h */

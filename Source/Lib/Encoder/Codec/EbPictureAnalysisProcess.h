@@ -1,7 +1,5 @@
-/*
-* Copyright(c) 2019 Intel Corporation
-* SPDX - License - Identifier: BSD - 2 - Clause - Patent
-*/
+/*!< Copyright(c) 2019 Intel Corporation
+ * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 #ifndef EbPictureAnalysis_h
 #define EbPictureAnalysis_h
@@ -11,8 +9,8 @@
 #include "EbPictureControlSet.h"
 
 /***************************************
- * Extern Function Declaration
- ***************************************/
+/*!< Extern Function Declaration */
+/***************************************/
 EbErrorType picture_analysis_context_ctor(EbThreadContext *  thread_context_ptr,
                                           const EbEncHandle *enc_handle_ptr, int index);
 
@@ -45,4 +43,4 @@ void noise_extract_chroma_weak_c(EbPictureBufferDesc *input_picture_ptr,
                                  EbPictureBufferDesc *denoised_picture_ptr, uint32_t sb_origin_y,
                                  uint32_t sb_origin_x);
 
-#endif // EbPictureAnalysis_h
+#endif /*!< EbPictureAnalysis_h */
