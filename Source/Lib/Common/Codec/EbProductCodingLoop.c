@@ -3409,7 +3409,11 @@ void md_stage_0(
 #if REMOVE_MD_STAGE_1
 #if MULTI_PASS_PD
 #if ADD_4TH_MD_STAGE
+#if IFS_MD_STAGE_0
+    context_ptr->md_staging_skip_interpolation_search = EB_FALSE;
+#else
     context_ptr->md_staging_skip_interpolation_search = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 || context_ptr->md_staging_mode == MD_STAGING_MODE_2) ? EB_TRUE : context_ptr->interpolation_search_level >= IT_SEARCH_FAST_LOOP_UV_BLIND ? EB_FALSE : EB_TRUE;
+#endif
 #else
     context_ptr->md_staging_skip_interpolation_search = (context_ptr->md_staging_mode == MD_STAGING_MODE_1) ? EB_TRUE : context_ptr->interpolation_search_level >= IT_SEARCH_FAST_LOOP_UV_BLIND ? EB_FALSE : EB_TRUE;
 #endif
@@ -3439,7 +3443,11 @@ void md_stage_0(
 #endif
 #if REMOVE_MD_STAGE_1
 #if ADD_4TH_MD_STAGE
+#if IFS_MD_STAGE_0
+    context_ptr->md_staging_use_bilinear = EB_FALSE;
+#else
     context_ptr->md_staging_use_bilinear = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 || context_ptr->md_staging_mode == MD_STAGING_MODE_2) ? EB_TRUE : EB_FALSE;
+#endif
 #else
     context_ptr->md_staging_use_bilinear = (context_ptr->md_staging_mode == MD_STAGING_MODE_1) ? EB_TRUE : EB_FALSE;
 #endif
@@ -8110,10 +8118,21 @@ void md_stage_2(
         candidate_ptr = candidate_buffer->candidate_ptr;
 
 #if REMOVE_MD_STAGE_1
+#if IFS_MD_STAGE_0
+        context_ptr->md_staging_skip_full_pred = EB_TRUE;
+        context_ptr->md_staging_skip_interpolation_search = EB_TRUE;
+        context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
+#elif IFS_MD_STAGE_3
+        context_ptr->md_staging_skip_full_pred = EB_FALSE;
+        context_ptr->md_staging_skip_interpolation_search = EB_TRUE;
+        context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
+        candidate_buffer->candidate_ptr->interp_filters = 0;
+#else
         context_ptr->md_staging_skip_full_pred = EB_FALSE;
         context_ptr->md_staging_skip_interpolation_search = EB_FALSE;
         context_ptr->md_staging_skip_inter_chroma_pred = EB_TRUE;
         candidate_buffer->candidate_ptr->interp_filters = 0;
+#endif
 #endif
 #if OBMC_OPT2
         uint8_t perform_normal_path = 1;
@@ -8288,7 +8307,11 @@ void md_stage_3(
 #if MULTI_PASS_PD // Shut pred @ full loop if 1st pass
         context_ptr->md_staging_skip_full_pred = context_ptr->md_staging_mode == MD_STAGING_MODE_0;
 #if ADD_4TH_MD_STAGE
+#if IFS_MD_STAGE_3
+        context_ptr->md_staging_skip_interpolation_search = EB_FALSE;
+#else
         context_ptr->md_staging_skip_interpolation_search = (context_ptr->md_staging_mode == MD_STAGING_MODE_1 || context_ptr->md_staging_mode == MD_STAGING_MODE_2);
+#endif
 #else
         context_ptr->md_staging_skip_interpolation_search = context_ptr->md_staging_mode == MD_STAGING_MODE_1;
 #endif

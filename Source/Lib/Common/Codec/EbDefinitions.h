@@ -144,7 +144,7 @@ extern "C" {
 #define ENABLE_WARPED_SC             1 // SC ONLY
 #define ENABLE_NEW_NN_SC             1 // SC ONLY
 
-
+/*****************************************/
 #define DIST_BASED_PME_SEARCH_AREA   0
 #define FIXED_PME_LARGE_SEARCH_AREA  1
 #define FP_QUANT_BOTH_INTRA_INTER    1
@@ -189,7 +189,10 @@ extern "C" {
 #define ADD_SUPPORT_TO_SKIP_PART_N   1
 #define POST_PD2_INTER_DEPTH         1
 #endif
+#define IFS_MD_STAGE_0               0
+#define IFS_MD_STAGE_3               0
 
+/*****************************************/
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements
 #define HBD_CLEAN_UP                 1
 
