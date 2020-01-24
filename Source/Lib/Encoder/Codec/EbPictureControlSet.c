@@ -1856,7 +1856,7 @@ static void picture_parent_control_set_dctor(EbPtr p) {
 #if TILES_PARALLEL
     EB_FREE_ARRAY(obj->tile_group_info);
 #endif
-	if(obj->frame_superres_enabled){
+    if(obj->frame_superres_enabled){
         eb_pcs_sb_structs_dctor(obj);
         EB_DELETE(obj->enhanced_picture_ptr);
     }

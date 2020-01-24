@@ -551,7 +551,7 @@ typedef struct PictureControlSet {
     uint16_t tile_row_count;
     uint16_t tile_column_count;
 #endif
-	uint16_t sb_total_count_pix;
+    uint16_t sb_total_count_pix;
     uint16_t sb_total_count_unscaled;
 } PictureControlSet;
 

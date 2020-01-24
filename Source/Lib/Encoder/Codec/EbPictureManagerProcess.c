@@ -1010,7 +1010,7 @@ void *picture_manager_kernel(void *input_ptr) {
                         }
 
 #else
-						child_pcs_ptr->sb_total_count_pix = pic_width_in_sb * picture_height_in_sb;
+                        child_pcs_ptr->sb_total_count_pix = pic_width_in_sb * picture_height_in_sb;
 
                         // Modify sb_prt_array in child pcs
                         uint16_t    sb_index;
