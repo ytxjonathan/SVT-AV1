@@ -2501,6 +2501,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->enable_auto_max_partition = sequence_control_set_ptr->static_config.enable_auto_max_partition;
 #endif
+#if MOVE_OPT
+    context_ptr->chroma_search_opt = picture_control_set_ptr->enc_mode <= ENC_M0 ? 0 : 1;
+#endif
 
     return return_error;
 }

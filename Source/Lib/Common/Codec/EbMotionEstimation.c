@@ -14423,8 +14423,9 @@ void prune_references_fp(
             if ((context_ptr->hme_results[li][ri].hme_sad - best) * 100  > BIGGER_THAN_TH*best)
                 context_ptr->hme_results[li][ri].do_ref = 0;
 #if SWITCHED_HALF_PEL_MODE
-            if (context_ptr->hme_results[li][ri].hme_sad > sorted[0][1].hme_sad)
-                context_ptr->local_hp_mode[li][ri] = REFINMENT_HP_MODE;
+            if (context_ptr->switched_half_pel_mode)
+                if (context_ptr->hme_results[li][ri].hme_sad > sorted[0][1].hme_sad)
+                    context_ptr->local_hp_mode[li][ri] = REFINMENT_HP_MODE;
 #endif
         }
     }

@@ -1949,7 +1949,7 @@ void set_md_stage_counts(
 #define NIC_S10      3
 #define NIC_S11      4
 
-        uint8_t nics_level = picture_control_set_ptr->enc_mode == ENC_M0 ? NIC_S8 : picture_control_set_ptr->enc_mode <= ENC_M3 ? NIC_S8 : NIC_S_OLD;
+        uint8_t nics_level = picture_control_set_ptr->enc_mode == ENC_M0 ? NIC_S8 : picture_control_set_ptr->enc_mode <= ENC_M3 ? NIC_S11 : NIC_S_OLD;
 
         if (nics_level == NIC_S_OLD){
                 // Step 2: set md_stage count
@@ -3296,7 +3296,8 @@ void construct_best_sorted_arrays_md_stage_3(
     uint32_t id_inter = 0;
     uint32_t id_intra = fullReconCandidateCount - 1;
 #if COMP_OPT
-    context_ptr->md_stage_3_total_intra_count = 0;
+    if (context_ptr->chroma_search_opt)
+        context_ptr->md_stage_3_total_intra_count = 0;
 #endif
     for (i = 0; i < fullReconCandidateCount; ++i) {
         id = sorted_candidate_index_array[i];
@@ -3308,7 +3309,8 @@ void construct_best_sorted_arrays_md_stage_3(
             best_candidate_index_array[id_intra--] = id;
         }
 #if COMP_OPT
-        context_ptr->md_stage_3_total_intra_count += buffer_ptr_array[id]->candidate_ptr->type == INTRA_MODE ? 1 : 0;
+        if (context_ptr->chroma_search_opt)
+            context_ptr->md_stage_3_total_intra_count += buffer_ptr_array[id]->candidate_ptr->type == INTRA_MODE ? 1 : 0;
 #endif
     }
 
@@ -3350,7 +3352,8 @@ void construct_best_sorted_arrays_md_stage_3(
     uint32_t id_inter = 0;
     uint32_t id_intra = fullReconCandidateCount - 1;
 #if COMP_OPT
-    context_ptr->md_stage_3_total_intra_count = 0;
+    if (context_ptr->chroma_search_opt)
+        context_ptr->md_stage_3_total_intra_count = 0;
 #endif
     for (i = 0; i < fullReconCandidateCount; ++i) {
         id = sorted_candidate_index_array[i];
@@ -3362,7 +3365,8 @@ void construct_best_sorted_arrays_md_stage_3(
             best_candidate_index_array[id_intra--] = id;
         }
 #if COMP_OPT
-        context_ptr->md_stage_3_total_intra_count += buffer_ptr_array[id]->candidate_ptr->type == INTRA_MODE ? 1 : 0;
+        if (context_ptr->chroma_search_opt)
+            context_ptr->md_stage_3_total_intra_count += buffer_ptr_array[id]->candidate_ptr->type == INTRA_MODE ? 1 : 0;
 #endif
     }
 
@@ -8331,7 +8335,7 @@ void md_stage_3(
             }
         }
 #if MOVE_OPT
-        if (context_ptr->chroma_level == CHROMA_MODE_0) {
+        if (context_ptr->chroma_level == CHROMA_MODE_0 && context_ptr->chroma_search_opt) {
             if (context_ptr->blk_geom->sq_size < 128) {
                 if (context_ptr->blk_geom->has_uv) {
                     if (candidate_ptr->type == INTRA_MODE) {
@@ -9557,9 +9561,6 @@ void search_best_independent_uv_mode(
     uint32_t               input_cb_origin_index,
     uint32_t               input_cr_origin_index,
     uint32_t               cu_chroma_origin_index,
-#if MOVE_OPT
-    uint32_t               pass,
-#endif
     ModeDecisionContext   *context_ptr)
 {
     FrameHeader *frm_hdr = &picture_control_set_ptr->parent_pcs_ptr->frm_hdr;
@@ -9585,7 +9586,7 @@ void search_best_independent_uv_mode(
 #endif
 #if MOVE_OPT
     EbBool tem_md_staging_skip_rdoq = context_ptr->md_staging_skip_rdoq;
-    if (pass == 1) {
+    if (context_ptr->chroma_search_opt) {
         context_ptr->md_staging_skip_rdoq = 0;
     }
 #endif
@@ -9880,7 +9881,7 @@ void search_best_independent_uv_mode(
             }
         }
 #if MOVE_OPT
-    if (pass == 1) {
+    if (context_ptr->chroma_search_opt) {
         context_ptr->md_staging_skip_rdoq = tem_md_staging_skip_rdoq;
     }
 #endif
@@ -10405,7 +10406,7 @@ void md_encode_block(
                                                   is_complete_sb,
                                                   lcuAddr);
 #if MOVE_OPT
-        if (context_ptr->chroma_level == CHROMA_MODE_0) {
+        if (context_ptr->chroma_level == CHROMA_MODE_0 && context_ptr->chroma_search_opt) {
             if (context_ptr->blk_geom->sq_size < 128) {
                 if (context_ptr->blk_geom->has_uv) {
                     init_chroma_to_dc(
@@ -10415,6 +10416,33 @@ void md_encode_block(
                         inputCbOriginIndex,
                         cuChromaOriginIndex,
                         context_ptr);
+                }
+            }
+        }
+        else {
+            // Initialize uv_search_path
+            context_ptr->uv_search_path = EB_FALSE;
+            // Search the best independent intra chroma mode
+            if (context_ptr->chroma_level == CHROMA_MODE_0) {
+                if (context_ptr->blk_geom->sq_size < 128) {
+                    if (context_ptr->blk_geom->has_uv) {
+#if ENHANCED_M0_SETTINGS
+                        search_best_independent_uv_mode(
+                            picture_control_set_ptr,
+                            input_picture_ptr,
+                            inputCbOriginIndex,
+                            inputCbOriginIndex,
+                            cuChromaOriginIndex,
+                            context_ptr);
+#else
+                        search_best_independent_uv_mode(
+                            picture_control_set_ptr,
+                            input_picture_ptr,
+                            inputCbOriginIndex,
+                            cuChromaOriginIndex,
+                            context_ptr);
+#endif
+                    }
                 }
             }
         }
@@ -10432,9 +10460,6 @@ void md_encode_block(
                         inputCbOriginIndex,
                         inputCbOriginIndex,
                         cuChromaOriginIndex,
-#if MOVE_OPT
-                        0,
-#endif
                         context_ptr);
 #else
                     search_best_independent_uv_mode(
@@ -10839,28 +10864,27 @@ void md_encode_block(
             context_ptr->sorted_candidate_index_array);
 #endif
 #if MOVE_OPT
-        // Initialize uv_search_path
-        context_ptr->uv_search_path = EB_FALSE;
-        // Search the best independent intra chroma mode
-        if (context_ptr->chroma_level == CHROMA_MODE_0) {
-            if (context_ptr->blk_geom->sq_size < 128) {
-                if (context_ptr->blk_geom->has_uv) {
+        if (context_ptr->chroma_search_opt) {
+            // Initialize uv_search_path
+            context_ptr->uv_search_path = EB_FALSE;
+            // Search the best independent intra chroma mode
+            if (context_ptr->chroma_level == CHROMA_MODE_0) {
+                if (context_ptr->blk_geom->sq_size < 128) {
+                    if (context_ptr->blk_geom->has_uv) {
 #if COMP_OPT
-                    if (context_ptr->md_stage_3_total_intra_count) {
+                        if (context_ptr->md_stage_3_total_intra_count && context_ptr->chroma_search_opt) {
 #endif
-                        search_best_independent_uv_mode(
-                            picture_control_set_ptr,
-                            input_picture_ptr,
-                            inputCbOriginIndex,
-                            inputCbOriginIndex,
-                            cuChromaOriginIndex,
-#if MOVE_OPT
-                            1,
-#endif
-                            context_ptr);
+                            search_best_independent_uv_mode(
+                                picture_control_set_ptr,
+                                input_picture_ptr,
+                                inputCbOriginIndex,
+                                inputCbOriginIndex,
+                                cuChromaOriginIndex,
+                                context_ptr);
 #if COMP_OPT
+                        }
+#endif
                     }
-#endif
                 }
             }
         }

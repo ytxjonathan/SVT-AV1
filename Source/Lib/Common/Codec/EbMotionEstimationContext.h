@@ -445,6 +445,9 @@ extern "C" {
         EbBool                        fractional_search64x64;
 
         uint8_t                       fractional_search_model;
+#if SWITCHED_HALF_PEL_MODE
+        uint8_t                       switched_half_pel_mode;
+#endif
         uint8_t                       hme_search_method;
         uint8_t                       me_search_method;
 #if OPT_REC_ME

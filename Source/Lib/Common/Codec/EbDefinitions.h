@@ -49,12 +49,12 @@ extern "C" {
 #define MUS_ME_FP_SB           1 //MUlti-Stage ME - Full-pel pruning
 #define SKIP_ME_BASED_ON_HME   1 //MUlti-Stage ME - Reduce SR based on HME distortion
 #define REDUCE_ME_FOR_LOW_M_SB   1 //MUlti-Stage ME - Reduce SR based on HME distortion and HME MV
-#define SWITCHED_HALF_PEL_MODE   0 //MUlti-Stage ME - Swich between half_pel mode based on fulpel distortion
+#define SWITCHED_HALF_PEL_MODE   1 //MUlti-Stage ME - Swich between half_pel mode based on fulpel distortion
 #define OPT_REC_ME              1
 #define OPT_REC_SUBP            1
 #define SC_HME_PRUNING          1
 #endif
-#define CHROMA_SEARCH_OPT         0
+#define CHROMA_SEARCH_OPT         1
 #if CHROMA_SEARCH_OPT
 #define INFR_OPT                 1 // lossless
 #define MOVE_OPT                 1 // semi-lossless
@@ -215,7 +215,7 @@ extern "C" {
 #define M0_ME_ADOPT                     1
 #define M0_ADOPT_M1_CHROMA_LEVEL        1
 #define M0_ADOPT_M1_INTER_INTER_WEDGE   1
-#define M1_ADOPT_M0_INTERP_SEARCH_PD1   1
+#define M1_ADOPT_M0_INTERP_SEARCH_PD1   0
 #define M1_ADOPT_M0_MD_EXIT_TH          1
 #define M1_ADOPT_M0_DIST_ME             1
 #define REMOVE_MR_NSQ_SEARCH            1

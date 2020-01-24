@@ -273,6 +273,9 @@ extern "C" {
 #if MULTI_PASS_PD
         uint8_t                         new_nearest_injection;
 #endif
+#if MOVE_OPT
+        uint8_t                         chroma_search_opt;
+#endif
         uint8_t                         new_nearest_near_comb_injection;
         uint8_t                         warped_motion_injection;
         uint8_t                         unipred3x3_injection;

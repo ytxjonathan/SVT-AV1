@@ -277,6 +277,10 @@ EbErrorType signal_derivation_me_kernel_oq(
         context_ptr->me_context_ptr->quarter_pel_mode =
             REFINMENT_QP_MODE;
     }
+
+#if SWITCHED_HALF_PEL_MODE
+    context_ptr->me_context_ptr->switched_half_pel_mode = enc_mode <= ENC_M0 ? 0 : 1;
+#endif
 #if TUNE_SUBPEL_SEARCH
     context_ptr->me_context_ptr->h_pel_search_wind =  sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?
                                                     H_PEL_SEARCH_WIND_2 : H_PEL_SEARCH_WIND_1;
@@ -555,7 +559,7 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
     uint8_t  hmeMeLevel = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
 
 #if M1_ADOPT_M0_DIST_ME
-    if (hmeMeLevel <= ENC_M1)
+    if (hmeMeLevel <= ENC_M1 && picture_control_set_ptr->sc_content_detected == 0)
         hmeMeLevel = ENC_M0;
 #endif
 
@@ -653,6 +657,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
         context_ptr->me_context_ptr->quarter_pel_mode =
             REFINMENT_QP_MODE;
     }
+
+#if SWITCHED_HALF_PEL_MODE
+    context_ptr->me_context_ptr->switched_half_pel_mode = enc_mode <= ENC_M0 ? 0 : 1;
+#endif
+
     // Set fractional search model
     // 0: search all blocks
     // 1: selective based on Full-Search SAD & MV.
