@@ -4747,12 +4747,12 @@ EbErrorType update_neighbor_samples_array_open_loop(
         uint32_t                            src_origin_y,
         uint8_t                             bwidth,
         uint8_t                             bheight,
-        PictureParentControlSet            *picture_control_set_ptr)
+        uint8_t                            *src_ptr)
 {
     EbErrorType    return_error = EB_ErrorNone;
 
     uint32_t idx;
-    uint8_t  *src_ptr;
+//    uint8_t  *src_ptr;
     uint8_t  *read_ptr;
     uint32_t count;
 
@@ -4760,11 +4760,13 @@ EbErrorType update_neighbor_samples_array_open_loop(
     uint32_t height = input_ptr->height;
     uint32_t block_size_half = bwidth << 1;
 
+#if 0
     // Adjust the Source ptr to start at the origin of the block being updated
     src_ptr = input_ptr->buffer_y + (((src_origin_y + input_ptr->origin_y) * stride) + (src_origin_x + input_ptr->origin_x));
 #if USE_ORIGIN_YUV
     if(picture_control_set_ptr->temporal_layer_index == 0)
         src_ptr =  picture_control_set_ptr->save_enhanced_picture_ptr[0] + (((src_origin_y + input_ptr->origin_y) * stride) + (src_origin_x + input_ptr->origin_x));
+#endif
 #endif
 
     //Initialise the Luma Intra Reference Array to the mid range value 128 (for CUs at the picture boundaries)

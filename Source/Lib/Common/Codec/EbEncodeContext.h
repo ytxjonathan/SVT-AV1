@@ -150,6 +150,10 @@ typedef struct EncodeContext
 #if TWO_PASS
     EbHandle                                          stat_file_mutex;
 #endif
+#if CUTREE_LA
+    int32_t                                           poc_map_idx[60];
+    EbByte                                            mc_flow_rec_picture_buffer[60];
+#endif
 } EncodeContext;
 
 typedef struct EncodeContextInitData {

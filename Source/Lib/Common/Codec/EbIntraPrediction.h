@@ -193,7 +193,7 @@ void highbd_filter_intra_predictor(uint16_t *dst, ptrdiff_t stride,
         uint32_t                            srcOriginY,
         uint8_t                             bwidth,
         uint8_t                             bheight,
-        PictureParentControlSet            *picture_control_set_ptr);
+        uint8_t                           *src_ptr);
     extern EbErrorType intra_prediction_open_loop(
          int32_t  p_angle ,
         uint8_t                          ois_intra_mode,

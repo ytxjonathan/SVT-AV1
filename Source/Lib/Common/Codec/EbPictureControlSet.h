@@ -14138,6 +14138,8 @@ extern "C" {
         OisSbResults                    **ois_sb_results;
 #if CUTREE_LA
         OisMbResults                    **ois_mb_results;
+        int32_t                              base_rdmult;
+        double                               r0;
 #endif
         OisCandidate                    **ois_candicate;
         // Dynamic GOP

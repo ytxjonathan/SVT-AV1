@@ -15490,9 +15490,10 @@ EbErrorType open_loop_intra_search_sb(
             cu_origin_y = sb_params->origin_y + blk_stats_ptr->origin_y;
             above_row = above_data + 16;
             left_col = left_data + 16;
+            uint8_t src_ptr = input_ptr->buffer_y + (((cu_origin_y + input_ptr->origin_y) * input_ptr->stride_y) + (cu_origin_x + input_ptr->origin_x));
 
             // Fill Neighbor Arrays
-            update_neighbor_samples_array_open_loop(above_row - 1, left_col - 1, input_ptr, input_ptr->stride_y, cu_origin_x, cu_origin_y, bsize, bsize, picture_control_set_ptr);
+            update_neighbor_samples_array_open_loop(above_row - 1, left_col - 1, input_ptr, input_ptr->stride_y, cu_origin_x, cu_origin_y, bsize, bsize, src_ptr);
             uint8_t ois_intra_mode;
             uint8_t ois_intra_count = 0;
             uint8_t best_intra_ois_index = 0;
@@ -15711,6 +15712,7 @@ EbErrorType open_loop_intra_search_mb(
             above_row = above_data + 16;
             left_col = left_data + 16;
             ois_mb_results_ptr = picture_control_set_ptr->ois_mb_results[(cu_origin_y >> 4) * mb_stride + (cu_origin_x >> 4)];
+            memset(ois_mb_results_ptr, 0, sizeof(*ois_mb_results_ptr));
             uint8_t *src = input_ptr->buffer_y + picture_control_set_ptr->enhanced_picture_ptr->origin_x + cu_origin_x +
                            (picture_control_set_ptr->enhanced_picture_ptr->origin_y + cu_origin_y) * input_ptr->stride_y;
 #if USE_ORIGIN_YUV
@@ -15721,9 +15723,8 @@ EbErrorType open_loop_intra_search_mb(
                     printf("kelvin ---> using original src yuv, src[0~3]=%d %d %d %d, poc=%d\n", src[0], src[1], src[2], src[3], picture_control_set_ptr->picture_number);
             }
 #endif
-
             // Fill Neighbor Arrays
-            update_neighbor_samples_array_open_loop(above0_row - 1, left0_col - 1, input_ptr, input_ptr->stride_y, cu_origin_x, cu_origin_y, bsize, bsize, picture_control_set_ptr);
+            update_neighbor_samples_array_open_loop(above0_row - 1, left0_col - 1, input_ptr, input_ptr->stride_y, cu_origin_x, cu_origin_y, bsize, bsize, src);
             uint8_t ois_intra_mode;
             uint8_t ois_intra_count = 0;
             uint8_t best_intra_ois_index = 0;
@@ -15769,8 +15770,8 @@ EbErrorType open_loop_intra_search_mb(
             // store intra_cost to pcs
             ois_mb_results_ptr->intra_mode = best_mode;
             ois_mb_results_ptr->intra_cost = best_intra_cost;
-if(picture_control_set_ptr->picture_number == 16 && cu_origin_x <= 15 && cu_origin_y == 0)
-    printf("kelvincost0 poc%d sb_index=%d, mb_origin_xy=%d %d, best_mode=%d, best_intra_cost=%d, offset=%d, src[0~3]= %d %d %d %d\n", picture_control_set_ptr->picture_number, sb_index, cu_origin_x, cu_origin_y, best_mode, best_intra_cost, (cu_origin_y >> 4) * mb_stride + (cu_origin_x >> 4), src[0], src[1], src[2], src[3]);
+//if(picture_control_set_ptr->picture_number == 16 && cu_origin_x <= 15 && cu_origin_y == 0)
+//    printf("kelvincost0 poc%d sb_index=%d, mb_origin_xy=%d %d, best_mode=%d, best_intra_cost=%d, offset=%d, src[0~3]= %d %d %d %d\n", picture_control_set_ptr->picture_number, sb_index, cu_origin_x, cu_origin_y, best_mode, best_intra_cost, (cu_origin_y >> 4) * mb_stride + (cu_origin_x >> 4), src[0], src[1], src[2], src[3]);
         }
         pa_blk_index++;
     }

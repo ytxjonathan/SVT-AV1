@@ -1742,7 +1742,11 @@ EbErrorType prediction_structure_group_ctor(
 
     predictionStructureGroupPtr->dctor = prediction_structure_group_dctor;
 
+#if CUTREE_LA
+    if (enc_mode > ENC_M2/*kelvinhack ENC_M0*/) {
+#else
     if (enc_mode > ENC_M0) {
+#endif
         for (int gop_i = 1; gop_i < 8; ++gop_i) {
             for (int i = 1; i < 4; ++i) {
                 four_level_hierarchical_pred_struct[gop_i].ref_list0[i] = 0;
