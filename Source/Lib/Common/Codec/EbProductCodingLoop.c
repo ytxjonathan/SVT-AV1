@@ -4008,7 +4008,12 @@ void predictive_me_search(
             }
 #endif
 
+#if PRED_ME_OPT1
+            uint64_t th = 10;
+            if (pa_me_distortion >= (context_ptr->blk_geom->bheight * context_ptr->blk_geom->bwidth * th)  && context_ptr->predictive_me_level >= 5) {
+#else
             if (pa_me_distortion != 0 || context_ptr->predictive_me_level >= 5) {
+#endif
 
                 //NEAREST
                 mvp_x_array[mvp_count] = (context_ptr->cu_ptr->ref_mvs[frame_type][0].as_mv.col + 4)&~0x07;

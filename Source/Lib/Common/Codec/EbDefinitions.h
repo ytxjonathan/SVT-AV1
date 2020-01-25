@@ -66,6 +66,7 @@ extern "C" {
 #define OBMC_OPT3                0
 #define OBMC_OPT4                0
 #define OBMC_OPT5                0
+#define PRED_ME_OPT1             0
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 
 
