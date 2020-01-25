@@ -1963,7 +1963,11 @@ static void adjust_filter_strength(
             noiselevel_adj = 1;
 #if TWO_PASS
         if (picture_control_set_ptr_central->sequence_control_set_ptr->use_input_stat_file &&
+#if NON_SC_noiselevel_adj
+			picture_control_set_ptr_central->temporal_layer_index == 0) {
+#else
             picture_control_set_ptr_central->temporal_layer_index == 0 && picture_control_set_ptr_central->sc_content_detected == 0) {
+#endif
             if (noiselevel_adj < 0) {
                 if ((picture_control_set_ptr_central->referenced_area_avg < 20 && picture_control_set_ptr_central->slice_type == 2) ||
                     (picture_control_set_ptr_central->referenced_area_avg < 30 && picture_control_set_ptr_central->slice_type != 2)) {

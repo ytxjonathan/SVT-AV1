@@ -109,6 +109,9 @@ void* set_me_hme_params_oq(
     me_context_ptr->number_hme_search_region_in_height = 2;
 
     uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
+#if NON_SC_HME
+	sc_content_detected = 0;
+#endif
 
 #if ENABLE_FRAME_RATE_ME
     uint8_t  low_frame_rate_flag = sc_content_detected ? 0 : (sequence_control_set_ptr->static_config.frame_rate >> 16) < 50 ? 1 : 0;
@@ -200,12 +203,21 @@ EbErrorType signal_derivation_me_kernel_oq(
 
 #if DIST_BASED_ME_SEARCH_AREA // ME
     if (picture_control_set_ptr->distance_me_flag) {
+#if NON_SC_HME
+        context_ptr->me_context_ptr->max_search_area_width = max_search_area_width[0][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+        context_ptr->me_context_ptr->max_search_area_height = max_search_area_height[0][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+#else
         context_ptr->me_context_ptr->max_search_area_width = max_search_area_width[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
         context_ptr->me_context_ptr->max_search_area_height = max_search_area_height[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+#endif
     }
 #endif
 
+#if NON_SC_fractional_search_method
+    if (0)
+#else
     if (picture_control_set_ptr->sc_content_detected)
+#endif
 #if PRESETS_TUNE
         context_ptr->me_context_ptr->fractional_search_method = (enc_mode == ENC_M0) ? FULL_SAD_SEARCH : SUB_SAD_SEARCH;
 #else
@@ -217,7 +229,11 @@ EbErrorType signal_derivation_me_kernel_oq(
         else
             context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
     if (sequence_control_set_ptr->static_config.fract_search_64 == DEFAULT)
+#if NON_SC_fractional_search64x64
+        if (0)
+#else
         if (picture_control_set_ptr->sc_content_detected)
+#endif
             context_ptr->me_context_ptr->fractional_search64x64 = EB_FALSE;
         else
             context_ptr->me_context_ptr->fractional_search64x64 = EB_TRUE;
@@ -263,7 +279,11 @@ EbErrorType signal_derivation_me_kernel_oq(
 #endif
         context_ptr->me_context_ptr->half_pel_mode =
 #if M0_OPT
+#if NON_SC_half_pel_mode
+            EX_HP_MODE;
+#else
             picture_control_set_ptr->sc_content_detected ? REFINMENT_HP_MODE : EX_HP_MODE;
+#endif
 #else
             EX_HP_MODE;
 #endif
@@ -502,6 +522,9 @@ void* tf_set_me_hme_params_oq(
     me_context_ptr->number_hme_search_region_in_height = 2;
 
     uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
+#if NON_SC_HME
+    sc_content_detected = 0;
+#endif
 
     // HME Level0
     me_context_ptr->hme_level0_total_search_area_width = tf_hme_level0_total_search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
@@ -579,12 +602,20 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
 #if DIST_BASED_ME_SEARCH_AREA // TF
 
     if (picture_control_set_ptr->distance_me_flag) {
+#if NON_SC_HME
+        context_ptr->me_context_ptr->max_search_area_width = max_tf_search_area_width[0][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+        context_ptr->me_context_ptr->max_search_area_height = max_tf_search_area_height[0][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+#else
         context_ptr->me_context_ptr->max_search_area_width = max_tf_search_area_width[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
         context_ptr->me_context_ptr->max_search_area_height = max_tf_search_area_height[picture_control_set_ptr->sc_content_detected][sequence_control_set_ptr->input_resolution][hmeMeLevel];
+#endif
     }
 #endif
-
+#if NON_SC_fractional_search_method
+    if (0)
+#else
     if (picture_control_set_ptr->sc_content_detected)
+#endif
         if (enc_mode <= ENC_M1)
 #if M0_OPT
             context_ptr->me_context_ptr->fractional_search_method = (enc_mode == ENC_M0) ? FULL_SAD_SEARCH : FULL_SAD_SEARCH;
@@ -644,7 +675,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
 #endif
         context_ptr->me_context_ptr->half_pel_mode =
 #if M0_OPT
+#if NON_SC_half_pel_mode
+            EX_HP_MODE;
+#else
             picture_control_set_ptr->sc_content_detected ? REFINMENT_HP_MODE : EX_HP_MODE;
+#endif
 #else
             EX_HP_MODE;
 #endif

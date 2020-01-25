@@ -3836,7 +3836,11 @@ static int adaptive_qindex_calc(
         rc->worst_quality = MAXQ;
         rc->best_quality = MINQ;
         int max_qp_scaling_avg_comp_I = sequence_control_set_ptr->input_resolution < 2 ? MAX_QPS_COMP_I_LR :
+#if NON_SC_max_qp_scaling_avg_comp_I
+			(MAX_QPS_COMP_I);
+#else
             picture_control_set_ptr->parent_pcs_ptr->sc_content_detected ? (MAX_QPS_COMP_I >> 1) : (MAX_QPS_COMP_I);
+#endif
 
         // Clip the complexity of highly complex pictures to maximum.
         if (picture_control_set_ptr->parent_pcs_ptr->qp_scaling_average_complexity > HIGH_QPS_COMP_THRESHOLD)
@@ -4283,7 +4287,11 @@ void* rate_control_kernel(void *input_ptr)
                     int32_t new_qindex;
                     if (!sequence_control_set_ptr->use_output_stat_file && picture_control_set_ptr->parent_pcs_ptr->frames_in_sw >= QPS_SW_THRESH) {
                         // Content adaptive qp assignment
+#if NON_SC
+                        if (sequence_control_set_ptr->use_input_stat_file &&
+#else
                         if(sequence_control_set_ptr->use_input_stat_file && !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected &&
+#endif
                             picture_control_set_ptr->parent_pcs_ptr->referenced_area_has_non_zero)
                             new_qindex = adaptive_qindex_calc_two_pass(
                                 picture_control_set_ptr,
@@ -4470,7 +4478,11 @@ void* rate_control_kernel(void *input_ptr)
             }
 #if TWO_PASS
             if (sequence_control_set_ptr->static_config.enable_adaptive_quantization == 2 && picture_control_set_ptr->parent_pcs_ptr->frames_in_sw >= QPS_SW_THRESH &&
+#if NON_SC
+                !sequence_control_set_ptr->use_output_stat_file)
+#else
                 !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected && !sequence_control_set_ptr->use_output_stat_file)
+#endif
                 if(sequence_control_set_ptr->use_input_stat_file && picture_control_set_ptr->parent_pcs_ptr->referenced_area_has_non_zero)
                     sb_qp_derivation_two_pass(picture_control_set_ptr);
                 else
