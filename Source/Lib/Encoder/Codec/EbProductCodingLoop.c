@@ -624,17 +624,6 @@ void init_sq_nsq_block(SequenceControlSet *scs_ptr, ModeDecisionContext *context
         ++blk_idx;
     } while (blk_idx < scs_ptr->max_block_cnt);
 }
-void init_sq_non4_block(SequenceControlSet *scs_ptr, ModeDecisionContext *context_ptr) {
-    for (uint32_t blk_idx = 0; blk_idx < TOTAL_SQ_BLOCK_COUNT; blk_idx++) {
-        context_ptr->md_blk_arr_nsq[sq_block_index[blk_idx]].part               = PARTITION_SPLIT;
-        context_ptr->md_local_blk_unit[sq_block_index[blk_idx]].tested_blk_flag = EB_FALSE;
-    }
-    for (uint32_t blk_idx = 0; blk_idx < scs_ptr->max_block_cnt; ++blk_idx) {
-        context_ptr->md_local_blk_unit[blk_idx].avail_blk_flag = EB_FALSE;
-        context_ptr->md_local_blk_unit[blk_idx].left_neighbor_partition = INVALID_NEIGHBOR_DATA;
-        context_ptr->md_local_blk_unit[blk_idx].above_neighbor_partition = INVALID_NEIGHBOR_DATA;
-    }
-}
 static INLINE TranHigh check_range(TranHigh input, int32_t bd) {
     // AV1 TX case
     // - 8 bit: signed 16 bit integer
@@ -6434,11 +6423,9 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
     context_ptr->sb_ptr                        = sb_ptr;
     context_ptr->coeff_based_skip_atb          = 0;
     EbBool all_blk_init = (pcs_ptr->parent_pcs_ptr->pic_depth_mode <= PIC_SQ_DEPTH_MODE);
-    if (all_blk_init) {
-        init_sq_nsq_block(scs_ptr, context_ptr);
-    } else {
-        init_sq_non4_block(scs_ptr, context_ptr);
-    }
+    
+    init_sq_nsq_block(scs_ptr, context_ptr);
+
     // Mode Decision Neighbor Arrays
     context_ptr->intra_luma_mode_neighbor_array =
         pcs_ptr->md_intra_luma_mode_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX];
