@@ -33,61 +33,61 @@
 extern "C" {
 #endif
 
-#define	NON_SC_intepolation_search					1
-#define NON_SC_chroma_mode							1
-#define NON_SC_unipred3x3_injection					1
-#define NON_SC_predictive_me_level					1
-#define NON_SC_spatial_sse_full_loop				1 // to remove
-#define NON_SC_md_exit_th							1
-#define NON_SC_md_stage_2_class_prune_th			1
-#define NON_SC_sq_weight							1
-#define NON_SC_pic_filter_intra_mode				1 // to redo
-#define NON_SC_enable_wm							1
-#define NON_SC_pic_obmc_mode						1// to remove
-#define NON_SC_NSQ_SEARCH							1
-#define NON_SC_allow_intrabc						1
-#define NON_SC_loop_filter_mode						1
-#define NON_SC_cdef_filter_mode						1
-#define NON_SC_cu8x8_mode							1
-#define NON_SC_compound_mode						1
-#define NON_SC_prune_unipred_at_me					1
-#define NON_SC_gm_level								1
-#define NON_SC_prune_ref_based_me					1
-#define NON_SC_last_i_picture_sc_detection			1 // remove
-#define NON_SC_noiselevel_adj						1//2pass
-#define NON_SC_max_qp_scaling_avg_comp_I			1//qpm
-#define NON_SC_altref_nframes						1
-#define NON_SC_md_stage_count_nfc					1
-#define NON_SC_mfmv_enabled							1
+#define	NON_SC_intepolation_search                  0
+#define NON_SC_chroma_mode                          0
+#define NON_SC_unipred3x3_injection                 0
+#define NON_SC_predictive_me_level                  0
+#define NON_SC_spatial_sse_full_loop                0 // to remove
+#define NON_SC_md_exit_th                           0
+#define NON_SC_md_stage_2_class_prune_th            0
+#define NON_SC_sq_weight                            0
+#define NON_SC_pic_filter_intra_mode                0 // to redo
+#define NON_SC_enable_wm                            0
+#define NON_SC_pic_obmc_mode                        0// to remove
+#define NON_SC_NSQ_SEARCH                           0
+#define NON_SC_allow_intrabc                        0
+#define NON_SC_loop_filter_mode                     0
+#define NON_SC_cdef_filter_mode                     0
+#define NON_SC_cu8x8_mode                           0
+#define NON_SC_compound_mode                        0
+#define NON_SC_prune_unipred_at_me                  0
+#define NON_SC_gm_level                             0
+#define NON_SC_prune_ref_based_me                   0
+#define NON_SC_last_i_picture_sc_detection          0 // remove
+#define NON_SC_noiselevel_adj                       0//2pass
+#define NON_SC_max_qp_scaling_avg_comp_I            0//qpm
+#define NON_SC_altref_nframes                       0
+#define NON_SC_md_stage_count_nfc                   0
+#define NON_SC_mfmv_enabled                         0
 
-#define NON_SC_DISTANCE_ME_FACTOR					1//
-#define NON_SC_prune_references_sc					1//
-#define NON_SC_HME									1//
-#define NON_SC_HME_ENABLE                           1
-#define NON_SC_edge_based_skip_angle_intra			1// to remove
-#define NON_SC_prune_ref_frame_for_rec_partitions	1//
-#define NON_SC_full_pel_ref_window_width_th			1//
-#define NON_SC_MTH_PTH								1//
-#define NON_SC_tx_search_reduced_set                1
-#define NON_SC_tx_search_level                      1
-#define NON_SC_full_loop_escape                     1
-#define NON_SC_nx4_4xn_parent_mv_injection          1
-#define NON_SC_trellis                              1 //to remove
-#define NON_SC_redundant_blk                        1 // to remove
-#define NON_SC_md_stage_1_cand_prune_th             1
-#define NON_SC_allow_screen_content_tools           1
-#define NON_SC_sg_filter_mode                       1
-#define NON_SC_wn_filter_mode                       1
-#define NON_SC_intra_pred_mode                      1
-#define NON_SC_atb_mode                             1
-#define NON_SC_fractional_search_method             1
-#define NON_SC_enable_interintra                    1
-#define NON_SC_pic_depth_mode                       1
-#define NON_SC                                      1
-#define NON_SC_half_pel_mode                        1
-#define NON_SC_sb_size                              1
-#define NON_SC_bipred3x3_injection                  1 // to remove
-#define NON_SC_fractional_search64x64               1
+#define NON_SC_DISTANCE_ME_FACTOR                   0//
+#define NON_SC_prune_references_sc                  0//
+#define NON_SC_HME                                  0//
+#define NON_SC_HME_ENABLE                           0
+#define NON_SC_edge_based_skip_angle_intra          0// to remove
+#define NON_SC_prune_ref_frame_for_rec_partitions   0//
+#define NON_SC_full_pel_ref_window_width_th         0//
+#define NON_SC_MTH_PTH                              0//
+#define NON_SC_tx_search_reduced_set                0
+#define NON_SC_tx_search_level                      0
+#define NON_SC_full_loop_escape                     0
+#define NON_SC_nx4_4xn_parent_mv_injection          0
+#define NON_SC_trellis                              0 //to remove
+#define NON_SC_redundant_blk                        0 // to remove
+#define NON_SC_md_stage_1_cand_prune_th             0
+#define NON_SC_allow_screen_content_tools           0
+#define NON_SC_sg_filter_mode                       0
+#define NON_SC_wn_filter_mode                       0
+#define NON_SC_intra_pred_mode                      0
+#define NON_SC_atb_mode                             0
+#define NON_SC_fractional_search_method             0
+#define NON_SC_enable_interintra                    0
+#define NON_SC_pic_depth_mode                       0
+#define NON_SC                                      0
+#define NON_SC_half_pel_mode                        0
+#define NON_SC_sb_size                              0
+#define NON_SC_bipred3x3_injection                  0 // to remove
+#define NON_SC_fractional_search64x64               0
 
 
 
