@@ -6423,7 +6423,6 @@ EB_EXTERN EbErrorType mode_decision_sb(SequenceControlSet *scs_ptr, PictureContr
     context_ptr->sb_ptr                        = sb_ptr;
     context_ptr->coeff_based_skip_atb          = 0;
     EbBool all_blk_init = (pcs_ptr->parent_pcs_ptr->pic_depth_mode <= PIC_SQ_DEPTH_MODE);
-    
     init_sq_nsq_block(scs_ptr, context_ptr);
 
     // Mode Decision Neighbor Arrays
