@@ -32,6 +32,8 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define PRED_DEBUG              0 //WIP
+#define PRED_DEBUG_L5           0
 #define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip
 #define NIC_LEVEL_CLEANUP           1 // Temp nics level clean up
 #define ADOPT_SETTING_8_NIC_CHANGES 1 // Modify MD_STAGE_COUNT_candidates
