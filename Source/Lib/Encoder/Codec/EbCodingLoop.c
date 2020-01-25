@@ -1554,7 +1554,8 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
                 context_ptr->blk_origin_y,
                 0,
                 0,
-                pcs_ptr->mi_grid_base);
+                pcs_ptr->mi_grid_base,
+                &((SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr)->seq_header);
         } else {
             uint8_t        top_neigh_array[64 * 2 + 1];
             uint8_t        left_neigh_array[64 * 2 + 1];
@@ -1609,7 +1610,8 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
                 context_ptr->blk_origin_y,
                 0,
                 0,
-                pcs_ptr->mi_grid_base);
+                pcs_ptr->mi_grid_base,
+                &((SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr)->seq_header );
         }
         // Encode Transform Unit -INTRA-
 
@@ -1845,7 +1847,8 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
                     plane ? context_ptr->blk_origin_y : context_ptr->blk_origin_y,
                     0,
                     0,
-                    pcs_ptr->mi_grid_base);
+                    pcs_ptr->mi_grid_base,
+                    &((SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr)->seq_header);
             }
         } else {
             uint8_t        top_neigh_array[64 * 2 + 1];
@@ -1933,7 +1936,8 @@ void perform_intra_coding_loop(PictureControlSet *pcs_ptr, SuperBlock *sb_ptr, u
                     plane ? context_ptr->blk_origin_y : context_ptr->blk_origin_y,
                     0,
                     0,
-                    pcs_ptr->mi_grid_base);
+                    pcs_ptr->mi_grid_base,
+                    &((SequenceControlSet *)pcs_ptr->scs_wrapper_ptr->object_ptr)->seq_header);
             }
         }
 
