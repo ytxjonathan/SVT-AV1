@@ -1196,11 +1196,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->tx_search_level = TX_SEARCH_OFF;
     else if (context_ptr->pd_pass == PD_PASS_1)
         context_ptr->tx_search_level = TX_SEARCH_FULL_LOOP;
-#if NON_SC_tx_search_level
-    else if (0)
-#else
     else if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
-#endif
 
         if (picture_control_set_ptr->enc_mode <= ENC_M6)
             context_ptr->tx_search_level = TX_SEARCH_FULL_LOOP;
@@ -1263,11 +1259,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->tx_search_reduced_set = 0;
     else if (context_ptr->pd_pass == PD_PASS_1)
         context_ptr->tx_search_reduced_set = 0;
-#if NON_SC_tx_search_reduced_set
-	else if (0)
-#else
+
     else if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
-#endif 
 #if PRESETS_TUNE
         if (picture_control_set_ptr->enc_mode <= ENC_M5)
             context_ptr->tx_search_reduced_set = 0;
@@ -1466,11 +1459,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 
-#if NON_SC_full_loop_escape
-    if (0)
-#else
+
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
-#endif
 #if PRESETS_TUNE
         if (picture_control_set_ptr->enc_mode <= ENC_M5)
 #else
@@ -1579,11 +1569,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
     if (sequence_control_set_ptr->static_config.nx4_4xn_parent_mv_inject == DEFAULT)
 #if PRESETS_TUNE
-#if NON_SC_nx4_4xn_parent_mv_injection
-        if (0)
-#else
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
-#endif
             if (picture_control_set_ptr->enc_mode <= ENC_M2)
                 context_ptr->nx4_4xn_parent_mv_injection = 1;
             else
@@ -1687,11 +1673,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
     if (sequence_control_set_ptr->static_config.bipred_3x3_inject == DEFAULT)
 #if PRESETS_TUNE
-#if NON_SC_bipred3x3_injection
-        if (0)
-#else
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
-#endif
             if (picture_control_set_ptr->enc_mode <= ENC_M4)
                 context_ptr->bipred3x3_injection = 1;
             else
@@ -2029,11 +2011,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
     if (sequence_control_set_ptr->static_config.enable_trellis == DEFAULT)
 #if PRESETS_TUNE
-#if NON_SC_trellis
-        if (0)
-#else
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
-#endif
             if (picture_control_set_ptr->enc_mode <= ENC_M2)
                 context_ptr->trellis_quant_coeff_optimization = EB_TRUE;
             else
@@ -2062,11 +2040,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
     if (sequence_control_set_ptr->static_config.enable_redundant_blk == DEFAULT)
 #if PRESETS_TUNE
-#if NON_SC_redundant_blk
-        if (0)
-#else
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
-#endif
             if (picture_control_set_ptr->enc_mode <= ENC_M8)
                 context_ptr->redundant_blk = EB_TRUE;
             else
@@ -2107,11 +2081,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
             context_ptr->edge_based_skip_angle_intra = 0;
 #if SC_PRESETS_OPT
-#if NON_SC_edge_based_skip_angle_intra
-		else if (0)
-#else
         else if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
-#endif
             if (picture_control_set_ptr->enc_mode <= ENC_M0)
                 context_ptr->edge_based_skip_angle_intra = 0;
             else
@@ -2120,11 +2090,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if M0_OPT
 #if PRESETS_TUNE
 #if PRESETS_OPT
-#if NON_SC_edge_based_skip_angle_intra
-		else if (1)
-#else
         else if (picture_control_set_ptr->enc_mode <= ENC_M7 && !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
-#endif
+
 #else
         else if (picture_control_set_ptr->enc_mode <= ENC_M1 && !picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #endif
@@ -2157,11 +2124,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
     if (sequence_control_set_ptr->static_config.prune_ref_rec_part == DEFAULT)
 #if PRESETS_TUNE
-#if NON_SC_prune_ref_frame_for_rec_partitions
-		if (0)
-#else
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M1)
-#endif
 #else
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
@@ -2246,7 +2209,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if M0_OPT
 #if M1_OPT
 #if NON_SC_md_stage_1_cand_prune_th
-    if (1)
+    if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1 && (1)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #else
     if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif

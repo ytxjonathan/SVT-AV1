@@ -1303,11 +1303,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     // 4                                            16 step refinement
 
     Av1Common* cm = picture_control_set_ptr->av1_cm;
-#if NON_SC_sg_filter_mode
-    if (0)
-#else
     if (sc_content_detected)
-#endif
 #if PRESETS_TUNE
         if (picture_control_set_ptr->enc_mode <= ENC_M5)
 #else
@@ -1333,11 +1329,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     // 1                                            3-Tap luma/ 3-Tap chroma
     // 2                                            5-Tap luma/ 5-Tap chroma
     // 3                                            7-Tap luma/ 5-Tap chroma
-#if NON_SC_wn_filter_mode
-    if (0)
-#else
     if (sc_content_detected)
-#endif
 #if PRESETS_TUNE
         if (picture_control_set_ptr->enc_mode <= ENC_M5)
 #else
@@ -1429,11 +1421,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 
     if (picture_control_set_ptr->slice_type == I_SLICE)
 
-#if NON_SC_intra_pred_mode
-    if (0)
-#else
     if (sc_content_detected)
-#endif
         if (picture_control_set_ptr->enc_mode <= ENC_M6)
             picture_control_set_ptr->intra_pred_mode = 0;
         else
@@ -1448,11 +1436,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         else
             picture_control_set_ptr->intra_pred_mode = 4;
     else {
-#if NON_SC_intra_pred_mode
-        if (0)
-#else
     if (sc_content_detected)
-#endif
 #if M0_OPT
 #if SC_PRESETS_OPT
         if (picture_control_set_ptr->enc_mode <= ENC_M0)
@@ -1744,11 +1728,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 0: OFF
         // 1: ON
 #if M0_ADOPT_PRUNE_REF_BASED_ME
-#if NON_SC_prune_ref_based_me
-    if (0 || picture_control_set_ptr->enc_mode <= ENC_M0)
-#else
         if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M0)
-#endif
 #else
         if (picture_control_set_ptr->sc_content_detected || MR_MODE)
 #endif
