@@ -34,8 +34,9 @@ extern "C" {
 #endif
 
 
-#define COMP_NSQ            1 
-
+#define COMP_NSQ        1
+#define WARPED_SIMILAR  1
+#define OBMC_SIMILAR    1
 
 #define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip
 #define NIC_LEVEL_CLEANUP           1 // Temp nics level clean up

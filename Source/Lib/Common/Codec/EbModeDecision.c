@@ -6792,10 +6792,14 @@ EbErrorType generate_md_stage_0_cand(
         PredictionMode mode = src_cu->pred_mode;
         int32_t is_src_compound = mode >= NEAREST_NEARESTMV && context_ptr->parent_sq_pred_mode[sq_index] <= NEW_NEWMV;
         if (is_src_compound) {
-            context_ptr->compound_types_to_try = src_cu->interinter_comp.type;
+#if 0
+            context_ptr->compound_types_to_try = src_cu->interinter_comp.type; //M1 or M2
+#endif
         }
         else {
-            context_ptr->compound_types_to_try = MD_COMP_AVG;
+#if 0
+            context_ptr->compound_types_to_try = MD_COMP_AVG;  //M0
+#endif
         }
 
     }
@@ -6803,8 +6807,53 @@ EbErrorType generate_md_stage_0_cand(
 
 #endif
 
-   
+#if WARPED_SIMILAR  
+    uint8_t warped_motion_injection_save = context_ptr->warped_motion_injection;
+    if (context_ptr->warped_motion_injection && context_ptr->similar_blk_avail)
+    {
+        CodingUnit *src_cu = &context_ptr->md_cu_arr_nsq[context_ptr->similar_blk_mds];
+        PredictionMode mode = src_cu->pred_mode;
+        int32_t is_src_unipred = mode >= NEARESTMV && context_ptr->parent_sq_pred_mode[sq_index] <= NEWMV;
+        //do we have to illiminate GLB_GLB?
+        if (is_src_unipred) {
+#if 0
+            if(src_cu->prediction_unit_array[0].motion_mode!= WARPED_CAUSAL)
+               context_ptr->warped_motion_injection = 0;
+#endif
+        }
+        else {
+#if 0
+            context_ptr->warped_motion_injection = 0;
+#endif
+        }
 
+    }
+#endif
+
+    
+
+#if OBMC_SIMILAR  
+    uint8_t md_pic_obmc_mode_save = context_ptr->md_pic_obmc_mode;
+    if (context_ptr->md_pic_obmc_mode && context_ptr->similar_blk_avail)
+    {
+        CodingUnit *src_cu = &context_ptr->md_cu_arr_nsq[context_ptr->similar_blk_mds];
+        PredictionMode mode = src_cu->pred_mode;
+        int32_t is_src_unipred = mode >= NEARESTMV && context_ptr->parent_sq_pred_mode[sq_index] <= NEWMV;
+     
+        if (is_src_unipred) {
+#if 0
+            if (src_cu->prediction_unit_array[0].motion_mode == OBMC_CAUSAL)
+                context_ptr->md_pic_obmc_mode = 0;
+#endif
+        }
+        else {
+#if 0
+            context_ptr->md_pic_obmc_mode = 0; 
+#endif
+        }
+
+    }
+#endif
 
     //----------------------
     // Intra
@@ -7000,8 +7049,13 @@ EbErrorType generate_md_stage_0_cand(
 #if COMP_NSQ
     context_ptr->compound_types_to_try = compound_types_to_try_save;
 #endif
+#if WARPED_SIMILAR  
+   context_ptr->warped_motion_injection = warped_motion_injection_save ;
+#endif
 
-
+#if OBMC_SIMILAR  
+    context_ptr->md_pic_obmc_mode = md_pic_obmc_mode_save ;
+#endif
     return EB_ErrorNone;
 }
 
