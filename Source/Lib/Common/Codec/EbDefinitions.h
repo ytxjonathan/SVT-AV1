@@ -198,7 +198,6 @@ extern "C" {
 #if FREQUENCY_SPATIAL_DOMAIN
 #define FREQUENCY_DOMAIN_TX_TYPE_SEARCH 0
 #define SPATIAL_DOMAIN_ONLY_LAST_STAGE  1
-#define SPATIAL_DOMAIN_ONLY_PD2         1
 #endif
 /*****************************************/
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements

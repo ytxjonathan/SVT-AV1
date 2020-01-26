@@ -1944,13 +1944,13 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     // Derive Spatial SSE Flag
 #if MULTI_PASS_PD // Shut spatial SSE @ full loop
     if (context_ptr->pd_pass == PD_PASS_0)
-#if SPATIAL_DOMAIN_ONLY_PD2
+#if SPATIAL_DOMAIN_ONLY_LAST_STAGE
         context_ptr->spatial_sse_full_loop = EB_FALSE;
 #else
         context_ptr->spatial_sse_full_loop = EB_TRUE;
 #endif
     else if (context_ptr->pd_pass == PD_PASS_1)
-#if SPATIAL_DOMAIN_ONLY_PD2
+#if SPATIAL_DOMAIN_ONLY_LAST_STAGE
         context_ptr->spatial_sse_full_loop = EB_FALSE;
 #else
         context_ptr->spatial_sse_full_loop = EB_TRUE;
