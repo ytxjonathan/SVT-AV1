@@ -283,6 +283,11 @@ extern "C" {
         uint8_t                         predictive_me_level;
         uint8_t                         interpolation_filter_search_blk_size;
         uint8_t                         redundant_blk;
+#if COMP_SIMILAR
+        uint8_t                         similar_blk_avail;
+        uint16_t                        similar_blk_mds;
+        uint8_t                         comp_similar_mode;
+#endif
         uint8_t                         *cfl_temp_luma_recon;
         uint16_t                        *cfl_temp_luma_recon16bit;
         EbBool                          spatial_sse_full_loop;
