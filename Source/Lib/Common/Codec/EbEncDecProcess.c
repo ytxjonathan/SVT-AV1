@@ -1979,11 +1979,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
     if (sequence_control_set_ptr->static_config.spatial_sse_fl == DEFAULT)
-#if NON_SC_spatial_sse_full_loop
-        if (0)
-#else
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
-#endif
             if (picture_control_set_ptr->enc_mode <= ENC_M6)
                 context_ptr->spatial_sse_full_loop = EB_TRUE;
             else

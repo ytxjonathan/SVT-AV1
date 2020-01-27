@@ -37,7 +37,6 @@ extern "C" {
 #define NON_SC_chroma_mode                          0 //crash
 #define NON_SC_unipred3x3_injection                 0
 #define NON_SC_predictive_me_level                  0
-#define NON_SC_spatial_sse_full_loop                0 // to remove
 #define NON_SC_md_exit_th                           0
 #define NON_SC_md_stage_2_class_prune_th            0
 #define NON_SC_sq_weight                            0

@@ -582,7 +582,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
     uint8_t  hmeMeLevel = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
 
 #if M1_ADOPT_M0_DIST_ME
+#if NON_SC_HME
+    if (hmeMeLevel <= ENC_M1 )
+#else
     if (hmeMeLevel <= ENC_M1 && picture_control_set_ptr->sc_content_detected == 0)
+#endif
         hmeMeLevel = ENC_M0;
 #endif
 
