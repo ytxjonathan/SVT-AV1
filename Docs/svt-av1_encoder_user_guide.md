@@ -93,7 +93,7 @@ The intra period defines the interval of frames after which you insert an Intra 
 
 `--rc integer` **[Optional]**
 
-This token sets the bitrate control encoding mode [1: Variable Bitrate, 0: Constant QP]. When `--rc` is set to 1, it is best to match the `–lad` (lookahead distance described in the next section) parameter to the `--keyint`. When `–-rc` is set to 0, a qp value is expected with the use of the `–q` command line option otherwise a default value is assigned (25).
+This token sets the bitrate control encoding mode [1: Variable Bitrate, 0: Constant QP]. When `--rc` is set to 1, it is best to match the `--lookahead` (lookahead distance described in the next section) parameter to the `--keyint`. When `–-rc` is set to 0, a qp value is expected with the use of the `–q` command line option otherwise a default value is assigned (25).
 
 For example, the following command encodes 100 frames of the YUV video sequence into the bin bit stream file. The picture is 1920 luma pixels wide and 1080 pixels high using the `Sample.cfg` configuration. The QP equals 30 and the md5 checksum is not included in the bit stream.
 
@@ -123,7 +123,7 @@ The encoder parameters present in the `Sample.cfg` file are listed in this table
 | **StreamFile** | -o | any string | null | output bitstream file path |
 | **ErrorFile** | --errlog | any string | stderr | error log displaying configuration or encode errors |
 | **UseQpFile** | --use-q-file | [0 - 1] | 0 | When set to 1, overwrite the picture qp assignment using qp values in QpFile |
-| **QpFile** | --qp-file | any string | Null | Path to qp file |
+| **QpFile** | --qpfile | any string | Null | Path to qp file |
 | **StatReport** | --enable-stat-report | [0 - 1] | 0 | When set to 1, calculate and display PSNR values |
 | **StatFile** | --stat-file | any string | Null | Path to statistics file if specified and StatReport is set to 1, per picture statistics are outputted in the file|
 | **EncoderMode2p** | --enc-mode-2p | [0 - 8] | 8 | Encoder Preset [0,1,2,3,4,5,6,7,8] 0 = highest quality, 8 = highest speed. Passed to encoder's first pass to use the ME settings of the second pass to achieve better bdRate|
