@@ -41,7 +41,7 @@
 #define BASE_LAYER_SWITCH_MODE_TOKEN "--base-layer-switch-mode" // no Eval
 #define QP_TOKEN "--qp"
 #define USE_QP_FILE_TOKEN "--use-q-file"
-#define STAT_REPORT_TOKEN "--stat-report"
+#define STAT_REPORT_TOKEN "--enable-stat-report"
 #define FRAME_RATE_TOKEN "--fps"
 #define FRAME_RATE_NUMERATOR_TOKEN "--fps-num"
 #define FRAME_RATE_DENOMINATOR_TOKEN "--fps-denom"
@@ -60,31 +60,31 @@
 #define FILM_GRAIN_TOKEN "--film-grain"
 #define INTRA_REFRESH_TYPE_TOKEN "--irefresh-type" // no Eval
 #define LOOP_FILTER_DISABLE_TOKEN "--dlf"
-#define RESTORATION_ENABLE_TOKEN "--restoration-filtering"
+#define RESTORATION_ENABLE_TOKEN "--enable-restoration-filtering"
 #define CLASS_12_TOKEN "--class-12"
-#define EDGE_SKIP_ANGLE_INTRA_TOKEN "--intra-edge-skp"
-#define INTER_INTRA_COMPOUND_TOKEN "--interintra-comp"
-#define FRAC_SEARCH_64_TOKEN "--frac-search-64"
-#define MFMV_ENABLE_TOKEN "--mfmv"
-#define REDUNDANT_BLK_TOKEN "--redundant-blk"
+#define EDGE_SKIP_ANGLE_INTRA_TOKEN "--enable-intra-edge-skp"
+#define INTER_INTRA_COMPOUND_TOKEN "--enable-interintra-comp"
+#define FRAC_SEARCH_64_TOKEN "--enable-frac-search-64"
+#define MFMV_ENABLE_TOKEN "--enable-mfmv"
+#define REDUNDANT_BLK_TOKEN "--enable-redundant-blk"
 #define TRELLIS_ENABLE_TOKEN "--trellis"
-#define SPATIAL_SSE_FL_TOKEN "--spatial-sse-fl"
+#define SPATIAL_SSE_FL_TOKEN "--enable-spatial-sse-fl"
 #define SUBPEL_TOKEN "--subpel"
-#define OVR_BNDRY_BLK_TOKEN "--over-bndry-blk"
-#define NEW_NEAREST_COMB_INJECT_TOKEN "--new-nrst-near-comb"
-#define NX4_4XN_MV_INJECT_TOKEN "--nx4-4xn-mv-inject"
-#define PRUNE_UNIPRED_ME_TOKEN "--prune-unipred-me"
-#define PRUNE_REF_REC_PART_TOKEN "--prune-ref-rec-part"
-#define NSQ_TABLE_TOKEN "--nsq-table-use"
-#define FRAME_END_CDF_UPDATE_TOKEN "--framend-cdf-upd-mode"
-#define LOCAL_WARPED_ENABLE_TOKEN "--local-warp"
-#define GLOBAL_MOTION_ENABLE_TOKEN "--global-motion"
+#define OVR_BNDRY_BLK_TOKEN "--enable-over-bndry-blk"
+#define NEW_NEAREST_COMB_INJECT_TOKEN "--enable-new-nrst-near-comb"
+#define NX4_4XN_MV_INJECT_TOKEN "--enable-nx4-4xn-mv-inject"
+#define PRUNE_UNIPRED_ME_TOKEN "--enable-prune-unipred-me"
+#define PRUNE_REF_REC_PART_TOKEN "--enable-prune-ref-rec-part"
+#define NSQ_TABLE_TOKEN "--enable-nsq-table-use"
+#define FRAME_END_CDF_UPDATE_TOKEN "--enable-framend-cdf-upd-mode"
+#define LOCAL_WARPED_ENABLE_TOKEN "--enable-local-warp"
+#define GLOBAL_MOTION_ENABLE_TOKEN "--enable-global-motion"
 #define OBMC_TOKEN "--obmc"
-#define RDOQ_TOKEN "--rdoq"
+#define RDOQ_TOKEN "--enable-rdoq"
 #define PRED_ME_TOKEN "--pred-me"
 #define BIPRED_3x3_TOKEN "--bipred-3x3"
 #define COMPOUND_LEVEL_TOKEN "--compound"
-#define FILTER_INTRA_TOKEN "--filter-intra"
+#define FILTER_INTRA_TOKEN "--enable-filter-intra"
 #define USE_DEFAULT_ME_HME_TOKEN "--use-default-me-hme"
 #define HME_ENABLE_TOKEN "--hme"
 #define HME_L0_ENABLE_TOKEN "--hme-l0"
@@ -113,13 +113,13 @@
 #define HBD_MD_ENABLE_TOKEN "--hbd-md"
 #define PALETTE_TOKEN "--palette"
 #define OLPD_REFINEMENT_TOKEN "--olpd-refinement"
-#define HDR_INPUT_TOKEN "--hdr"
+#define HDR_INPUT_TOKEN "--enable-hdr"
 #define RATE_CONTROL_ENABLE_TOKEN "--rc"
 #define TARGET_BIT_RATE_TOKEN "--tbr"
 #define MAX_QP_TOKEN "--max-qp"
 #define VBV_BUFSIZE_TOKEN "--vbv-bufsize"
 #define MIN_QP_TOKEN "--min-qp"
-#define ADAPTIVE_QP_ENABLE_TOKEN "--adaptive-quantization"
+#define ADAPTIVE_QP_ENABLE_TOKEN "--aq-mode"
 #define LOOK_AHEAD_DIST_TOKEN "--lookahead"
 #define SUPER_BLOCK_SIZE_TOKEN "--sb-size"
 #define TILE_ROW_TOKEN "--tile-rows"
@@ -669,6 +669,7 @@ ConfigEntry config_entry_rc[] = {
      "Rate control mode(0 = CQP , 1 = VBR , 2 = CVBR)",
      set_rate_control_mode},
     {SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "Target Bitrate (kbps)", set_target_bit_rate},
+    {SINGLE_INPUT, QP_FILE_TOKEN, "Qp filename", set_cfg_qp_file},
     {SINGLE_INPUT, MAX_QP_TOKEN, "Maximum (worst) quantizer", set_max_qp_allowed},
     {SINGLE_INPUT, MIN_QP_TOKEN, "Minimum (best) quantizer", set_min_qp_allowed},
     {SINGLE_INPUT, VBV_BUFSIZE_TOKEN, "VBV buffer size", set_vbv_buf_size},
@@ -700,9 +701,6 @@ ConfigEntry config_entry_specific[] = {
     // Prediction Structure
     {SINGLE_INPUT, BASE_LAYER_SWITCH_MODE_TOKEN, "BaseLayerSwitchMode", set_base_layer_switch_mode},
     {SINGLE_INPUT, ENCMODE_TOKEN, "Encoder mode/Preset used", set_enc_mode},
-    {SINGLE_INPUT, ENCODER_BIT_DEPTH, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
-    {SINGLE_INPUT, ENCODER_COLOR_FORMAT, "EncoderColorFormat", set_encoder_color_format},
-    {SINGLE_INPUT, QP_FILE_TOKEN, "Qp filename", set_cfg_qp_file},
     {SINGLE_INPUT,
      INPUT_COMPRESSED_TEN_BIT_FORMAT,
      "Offline packing of the 2bits: requires two bits packed input (0: OFF, 1: ON)",
@@ -804,7 +802,7 @@ ConfigEntry config_entry_specific[] = {
      set_fractional_search_64_flag},
 
     // OBMC
-    {SINGLE_INPUT, OBMC_TOKEN, "Enable OBMC (0: false, 1: true (default))", set_enable_obmc_flag},
+    {SINGLE_INPUT, OBMC_TOKEN, "set OBMC Level", set_enable_obmc_flag},
     // RDOQ
     {SINGLE_INPUT, RDOQ_TOKEN, "Enable RDOQ (0 = OFF, 1 = ON, -1 = DEFAULT)", set_enable_rdoq_flag},
 
@@ -875,7 +873,7 @@ ConfigEntry config_entry_specific[] = {
     // MD Parameters
     {SINGLE_INPUT,
      SCREEN_CONTENT_TOKEN,
-     "ENable screen content detection",
+     "Set screen content detection level",
      set_screen_content_mode},
     {SINGLE_INPUT,
      HBD_MD_ENABLE_TOKEN,
@@ -883,7 +881,7 @@ ConfigEntry config_entry_specific[] = {
      set_enable_hbd_mode_decision},
     {SINGLE_INPUT,
      PALETTE_TOKEN,
-     "Enable palette prediction mode (0: false, 1: true (default))",
+     "Set palette prediction mode",
      set_enable_palette},
     {SINGLE_INPUT,
      OLPD_REFINEMENT_TOKEN,
@@ -902,7 +900,6 @@ ConfigEntry config_entry_specific[] = {
     {SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "Set injector frame rate", set_injector_frame_rate},
     {SINGLE_INPUT, SPEED_CONTROL_TOKEN, "Enable speed control", speed_control_flag},
     // Annex A parameters
-    {SINGLE_INPUT, PROFILE_TOKEN, "Bitstream profile number to use", set_profile},
     {SINGLE_INPUT, FILM_GRAIN_TOKEN, "Enable film grain", set_cfg_film_grain},
     // HME
     {ARRAY_INPUT,

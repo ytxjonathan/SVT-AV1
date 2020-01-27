@@ -85,8 +85,8 @@ build:
   project: Build\svt-av1.sln
 
 test_script:
-  - Bin\%CONFIGURATION%\SvtAv1EncApp -enc-mode 0 -i akiyo_cif.y4m -n 3
-  - Bin\%CONFIGURATION%\SvtAv1EncApp -enc-mode 8 -i akiyo_cif.y4m -n 150
+  - Bin\%CONFIGURATION%\SvtAv1EncApp --preset 0 -i akiyo_cif.y4m --frames 3
+  - Bin\%CONFIGURATION%\SvtAv1EncApp --preset 8 -i akiyo_cif.y4m --frames 150
 
 cache:
   - 'C:\msys64\home\appveyor\.ccache'
