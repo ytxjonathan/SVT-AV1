@@ -1642,9 +1642,9 @@ EbErrorType signal_derivation_multi_processes_oq(
         if (picture_control_set_ptr->sc_content_detected)
             picture_control_set_ptr->gm_level = GM_TRAN_ONLY;
         else if (picture_control_set_ptr->enc_mode <= ENC_M0)
-            picture_control_set_ptr->gm_level = GM_FULL;
+            picture_control_set_ptr->gm_level = GM_TRAN_ONLY;
         else
-            picture_control_set_ptr->gm_level = GM_DOWN;
+            picture_control_set_ptr->gm_level = GM_TRAN_ONLY;
 #else
         picture_control_set_ptr->gm_level = picture_control_set_ptr->sc_content_detected ? GM_TRAN_ONLY : GM_DOWN;
 #endif
