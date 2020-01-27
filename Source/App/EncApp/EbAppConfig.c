@@ -27,32 +27,32 @@
 #define COMMAND_LINE_MAX_SIZE 2048
 #define CONFIG_FILE_TOKEN "-c"
 #define INPUT_FILE_TOKEN "-i"
-#define OUTPUT_BITSTREAM_TOKEN "-b"
-#define OUTPUT_RECON_TOKEN "-o"
+#define OUTPUT_BITSTREAM_TOKEN "-o"
+#define OUTPUT_RECON_TOKEN "--reckon"
 #define ERROR_FILE_TOKEN "--errlog"
-#define QP_FILE_TOKEN "--qp-file"
+#define QP_FILE_TOKEN "--qpfile"
 #define INPUT_STAT_FILE_TOKEN "--input-stat-file"
 #define OUTPUT_STAT_FILE_TOKEN "--output-stat-file"
 #define STAT_FILE_TOKEN "--stat-file"
 #define WIDTH_TOKEN "-w"
 #define HEIGHT_TOKEN "-h"
-#define NUMBER_OF_PICTURES_TOKEN "-n"
+#define NUMBER_OF_PICTURES_TOKEN "--frames"
 #define BUFFERED_INPUT_TOKEN "--nb"
 #define BASE_LAYER_SWITCH_MODE_TOKEN "--base-layer-switch-mode" // no Eval
-#define QP_TOKEN "-q"
+#define QP_TOKEN "--qp"
 #define USE_QP_FILE_TOKEN "--use-q-file"
 #define STAT_REPORT_TOKEN "--stat-report"
 #define FRAME_RATE_TOKEN "--fps"
 #define FRAME_RATE_NUMERATOR_TOKEN "--fps-num"
 #define FRAME_RATE_DENOMINATOR_TOKEN "--fps-denom"
-#define ENCODER_BIT_DEPTH "--bit-depth"
+#define ENCODER_BIT_DEPTH "--input-depth"
 #define ENCODER_COLOR_FORMAT "--color-format"
 #define INPUT_COMPRESSED_TEN_BIT_FORMAT "--compressed-ten-bit-format"
-#define ENCMODE_TOKEN "--enc-mode"
+#define ENCMODE_TOKEN "--preset"
 #define ENCMODE2P_TOKEN "--enc-mode-2p"
 #define HIERARCHICAL_LEVELS_TOKEN "--hierarchical-levels" // no Eval
 #define PRED_STRUCT_TOKEN "--pred-struct"
-#define INTRA_PERIOD_TOKEN "--intra-period"
+#define INTRA_PERIOD_TOKEN "--keyint"
 #define PROFILE_TOKEN "--profile"
 #define TIER_TOKEN "--tier"
 #define LEVEL_TOKEN "--level"
@@ -120,7 +120,7 @@
 #define VBV_BUFSIZE_TOKEN "--vbv-bufsize"
 #define MIN_QP_TOKEN "--min-qp"
 #define ADAPTIVE_QP_ENABLE_TOKEN "--adaptive-quantization"
-#define LOOK_AHEAD_DIST_TOKEN "--lad"
+#define LOOK_AHEAD_DIST_TOKEN "--lookahead"
 #define SUPER_BLOCK_SIZE_TOKEN "--sb-size"
 #define TILE_ROW_TOKEN "--tile-rows"
 #define TILE_COL_TOKEN "--tile-columns"
@@ -1643,7 +1643,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         //fprintf(stderr, "%-25s\t%-25s\n", "-nch", "NumberOfChannels");
         const char *empty_string = "";
         const char *token_options_format = "\t%-5s\t%-25s\t%-25s\n";
-        fprintf(stderr, "\n%-25s\n", "Usage: SvtAv1EncApp.exe <options> -b dst_filename -i src_filename");
+        fprintf(stderr, "\n%-25s\n", "Usage: SvtAv1EncApp.exe <options> -o dst_filename -i src_filename");
         fprintf(stderr, "\n%-25s\n", "Options:");
         while (config_entry_options[++options_token_index].token != NULL) {
             uint32_t second_position =
