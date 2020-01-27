@@ -52,8 +52,8 @@ extern "C" {
 #define SKIP_ME_BASED_ON_HME   1 //MUlti-Stage ME - Reduce SR based on HME distortion
 #define REDUCE_ME_FOR_LOW_M_SB   1 //MUlti-Stage ME - Reduce SR based on HME distortion and HME MV
 #define SWITCHED_HALF_PEL_MODE   1 //MUlti-Stage ME - Swich between half_pel mode based on fulpel distortion
-#define OPT_REC_ME              1
-#define OPT_REC_SUBP            1
+#define OPT_REC_ME              0
+#define OPT_REC_SUBP            0
 #define SC_HME_PRUNING          1
 #endif
 #define CHROMA_SEARCH_OPT         1
