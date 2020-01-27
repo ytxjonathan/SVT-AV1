@@ -2934,6 +2934,11 @@ static void perform_pred_depth_refinement(
                                 s_depth = 0;
                                 e_depth = 1;
                             }
+
+#if TEST_PIC_MULTI_PASS_PD_MODE_4
+                        s_depth = 0;
+                        e_depth = 0;
+#endif
                     }
 
                     // Add current pred depth block(s)

@@ -199,6 +199,13 @@ extern "C" {
 #define FREQUENCY_DOMAIN_TX_TYPE_SEARCH 0
 #define SPATIAL_DOMAIN_ONLY_LAST_STAGE  1
 #endif
+
+#define TEST_PIC_MULTI_PASS_PD_MODE_0   0
+#define TEST_PIC_MULTI_PASS_PD_MODE_1   0
+#define TEST_PIC_MULTI_PASS_PD_MODE_2   0
+#define TEST_PIC_MULTI_PASS_PD_MODE_3   0
+#define TEST_PIC_MULTI_PASS_PD_MODE_4   0
+
 /*****************************************/
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements
 #define HBD_CLEAN_UP                 1
