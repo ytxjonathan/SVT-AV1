@@ -245,7 +245,7 @@ EbErrorType signal_derivation_me_kernel_oq(
             context_ptr->me_context_ptr->use_subpel_flag = 1;
     else
         context_ptr->me_context_ptr->use_subpel_flag = sequence_control_set_ptr->static_config.enable_subpel;
-
+#if !MR_MODE_CLEAN_UP
 #if SC_PRESETS_OPT
     if (MR_MODE && !picture_control_set_ptr->sc_content_detected) {
 #else
@@ -256,8 +256,12 @@ EbErrorType signal_derivation_me_kernel_oq(
         context_ptr->me_context_ptr->quarter_pel_mode =
             EX_QP_MODE;
     }
+#endif
 #if M1_OPT
-    else if (enc_mode <= ENC_M1) {
+#if !MR_MODE_CLEAN_UP
+    else 
+#endif
+        if (enc_mode <= ENC_M1) {
 #else
     else if (enc_mode == ENC_M0) {
 #endif
@@ -630,15 +634,19 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
             context_ptr->me_context_ptr->use_subpel_flag = 1;
     else
         context_ptr->me_context_ptr->use_subpel_flag = sequence_control_set_ptr->static_config.enable_subpel;
-
+#if !MR_MODE_CLEAN_UP
     if (MR_MODE) {
         context_ptr->me_context_ptr->half_pel_mode =
             EX_HP_MODE;
         context_ptr->me_context_ptr->quarter_pel_mode =
             EX_QP_MODE;
     }
+#endif
 #if M1_OPT
-    else if (enc_mode <= ENC_M1) {
+#if !MR_MODE_CLEAN_UP
+    else
+#endif
+        if (enc_mode <= ENC_M1) {
 #else
     else if (enc_mode == ENC_M0) {
 #endif

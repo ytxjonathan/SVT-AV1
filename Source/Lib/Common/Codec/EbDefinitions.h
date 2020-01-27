@@ -212,6 +212,7 @@ extern "C" {
 #define TEST_PIC_MULTI_PASS_PD_MODE_3   0
 #define TEST_PIC_MULTI_PASS_PD_MODE_4   0
 
+#define MR_MODE_CLEAN_UP                1 
 /*****************************************/
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements
 #define HBD_CLEAN_UP                 1

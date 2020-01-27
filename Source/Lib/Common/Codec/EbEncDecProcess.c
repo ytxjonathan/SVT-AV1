@@ -1329,9 +1329,12 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->interpolation_search_level = IT_SEARCH_OFF;
     }
     else
+#if !MR_MODE_CLEAN_UP
     if (MR_MODE)
         context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP;
-    else if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+    else 
+#endif
+        if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #if SC_PRESETS_OPT
         if (picture_control_set_ptr->enc_mode <= ENC_M0)
             context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP;
