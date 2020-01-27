@@ -93,7 +93,7 @@ The intra period defines the interval of frames after which you insert an Intra 
 
 `--rc integer` **[Optional]**
 
-This token sets the bitrate control encoding mode [1: Variable Bitrate, 0: Constant QP]. When `--rc` is set to 1, it is best to match the `--lookahead` (lookahead distance described in the next section) parameter to the `--keyint`. When `–-rc` is set to 0, a qp value is expected with the use of the `–q` command line option otherwise a default value is assigned (25).
+This token sets the bitrate control encoding mode [1: Variable Bitrate, 0: Constant QP]. When `--rc` is set to 1, it is best to match the `--lookahead` (lookahead distance described in the next section) parameter to the `--keyint`. When `--rc` is set to 0, a qp value is expected with the use of the `–-qp` command line option otherwise a default value is assigned (25).
 
 For example, the following command encodes 100 frames of the YUV video sequence into the bin bit stream file. The picture is 1920 luma pixels wide and 1080 pixels high using the `Sample.cfg` configuration. The QP equals 30 and the md5 checksum is not included in the bit stream.
 
@@ -216,17 +216,17 @@ LogicalProcessorNumber (`--lp`) and TargetSocket (`--ss`) parameters are used to
 
 If LogicalProcessorNumber and TargetSocket are not set, threads are managed by OS thread scheduler.
 
-`SvtAv1EncApp.exe -i in.yuv -w 3840 -h 2160 –-lp 40`
+`SvtAv1EncApp.exe -i in.yuv -w 3840 -h 2160 --lp 40`
 
 If only LogicalProcessorNumber is set, threads run on 40 logical processors. Threads may run on dual sockets if 40 is larger than logical processor number of a socket.
 
 NOTE: On Windows, thread affinity can be set only by group on system with more than 64 logical processors. So, if 40 is larger than logical processor number of a single socket, threads run on all logical processors of both sockets.
 
-`SvtAv1EncApp.exe -i in.yuv -w 3840 -h 2160 –-ss 1`
+`SvtAv1EncApp.exe -i in.yuv -w 3840 -h 2160 --ss 1`
 
 If only TargetSocket is set, threads run on all the logical processors of socket 1.
 
-`SvtAv1EncApp.exe -i in.yuv -w 3840 -h 2160 -–lp 20 –-ss 0`
+`SvtAv1EncApp.exe -i in.yuv -w 3840 -h 2160 -–lp 20 --ss 0`
 
 If both LogicalProcessorNumber and TargetSocket are set, threads run on 20 logical processors of socket 0. Threads guaranteed to run only on socket 0 if 20 is larger than logical processor number of socket 0.
 
