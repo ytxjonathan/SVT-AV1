@@ -200,6 +200,8 @@ extern "C" {
 #define SPATIAL_DOMAIN_ONLY_LAST_STAGE  1
 #endif
 
+#define MULTI_PASS_PD_TILL_M7           1
+
 #define TEST_PIC_MULTI_PASS_PD_MODE_0   0
 #define TEST_PIC_MULTI_PASS_PD_MODE_1   0
 #define TEST_PIC_MULTI_PASS_PD_MODE_2   0
