@@ -185,8 +185,6 @@ typedef struct EbConfig {
     int32_t   buffered_input;
     uint8_t **sequence_buffer;
 
-    uint8_t latency_mode;
-
     /*****************************************
      * Coding Structure
      *****************************************/
@@ -373,7 +371,6 @@ typedef struct EbConfig {
     int32_t enable_palette;
     int32_t tile_columns;
     int32_t tile_rows;
-    int32_t olpd_refinement; // Open Loop Partitioning Decision Refinement
 
     /****************************************
      * Rate Control

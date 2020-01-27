@@ -40,7 +40,7 @@
 #define BUFFERED_INPUT_TOKEN "--nb"
 #define BASE_LAYER_SWITCH_MODE_TOKEN "--base-layer-switch-mode" // no Eval
 #define QP_TOKEN "--qp"
-#define USE_QP_FILE_TOKEN "--use-q-file"
+#define USE_QP_FILE_TOKEN "--use-qpfile"
 #define STAT_REPORT_TOKEN "--enable-stat-report"
 #define FRAME_RATE_TOKEN "--fps"
 #define FRAME_RATE_NUMERATOR_TOKEN "--fps-num"
@@ -56,12 +56,11 @@
 #define PROFILE_TOKEN "--profile"
 #define TIER_TOKEN "--tier"
 #define LEVEL_TOKEN "--level"
-#define LATENCY_MODE "--latency-mode" // no Eval
-#define FILM_GRAIN_TOKEN "--film-grain"
+#define FILM_GRAIN_TOKEN "--enable-film-grain"
 #define INTRA_REFRESH_TYPE_TOKEN "--irefresh-type" // no Eval
-#define LOOP_FILTER_DISABLE_TOKEN "--dlf"
+#define LOOP_FILTER_DISABLE_TOKEN "--disable-deblocking-loop-filter"
 #define RESTORATION_ENABLE_TOKEN "--enable-restoration-filtering"
-#define CLASS_12_TOKEN "--class-12"
+#define CLASS_12_TOKEN "--enable-comb-class-12"
 #define EDGE_SKIP_ANGLE_INTRA_TOKEN "--enable-intra-edge-skp"
 #define INTER_INTRA_COMPOUND_TOKEN "--enable-interintra-comp"
 #define FRAC_SEARCH_64_TOKEN "--enable-frac-search-64"
@@ -69,7 +68,7 @@
 #define REDUNDANT_BLK_TOKEN "--enable-redundant-blk"
 #define TRELLIS_ENABLE_TOKEN "--trellis"
 #define SPATIAL_SSE_FL_TOKEN "--enable-spatial-sse-fl"
-#define SUBPEL_TOKEN "--subpel"
+#define SUBPEL_TOKEN "--enable-subpel"
 #define OVR_BNDRY_BLK_TOKEN "--enable-over-bndry-blk"
 #define NEW_NEAREST_COMB_INJECT_TOKEN "--enable-new-nrst-near-comb"
 #define NX4_4XN_MV_INJECT_TOKEN "--enable-nx4-4xn-mv-inject"
@@ -79,18 +78,18 @@
 #define FRAME_END_CDF_UPDATE_TOKEN "--enable-framend-cdf-upd-mode"
 #define LOCAL_WARPED_ENABLE_TOKEN "--enable-local-warp"
 #define GLOBAL_MOTION_ENABLE_TOKEN "--enable-global-motion"
-#define OBMC_TOKEN "--obmc"
+#define OBMC_TOKEN "--enable-obmc"
 #define RDOQ_TOKEN "--enable-rdoq"
 #define PRED_ME_TOKEN "--pred-me"
-#define BIPRED_3x3_TOKEN "--bipred-3x3"
-#define COMPOUND_LEVEL_TOKEN "--compound"
+#define BIPRED_3x3_TOKEN "--enable-bipred-3x3"
+#define COMPOUND_LEVEL_TOKEN "--enable-compound"
 #define FILTER_INTRA_TOKEN "--enable-filter-intra"
-#define USE_DEFAULT_ME_HME_TOKEN "--use-default-me-hme"
-#define HME_ENABLE_TOKEN "--hme"
+#define USE_DEFAULT_ME_HME_TOKEN "--enable-default-me-hme"
+#define HME_ENABLE_TOKEN "--enable-hme"
 #define HME_L0_ENABLE_TOKEN "--hme-l0"
 #define HME_L1_ENABLE_TOKEN "--hme-l1"
 #define HME_L2_ENABLE_TOKEN "--hme-l2"
-#define EXT_BLOCK "--ext-block"
+#define EXT_BLOCK "--enable-ext-block"
 #define SEARCH_AREA_WIDTH_TOKEN "--search-w"
 #define SEARCH_AREA_HEIGHT_TOKEN "--search-h"
 #define NUM_HME_SEARCH_WIDTH_TOKEN "--num-hme-w"
@@ -110,9 +109,8 @@
 #define ALTREF_NFRAMES "--altref-nframes"
 #define ENABLE_OVERLAYS "--enable-overlays"
 // --- end: ALTREF_FILTERING_SUPPORT
-#define HBD_MD_ENABLE_TOKEN "--hbd-md"
+#define HBD_MD_ENABLE_TOKEN "--enable-hbd-md"
 #define PALETTE_TOKEN "--palette"
-#define OLPD_REFINEMENT_TOKEN "--olpd-refinement"
 #define HDR_INPUT_TOKEN "--enable-hdr"
 #define RATE_CONTROL_ENABLE_TOKEN "--rc"
 #define TARGET_BIT_RATE_TOKEN "--tbr"
@@ -127,17 +125,17 @@
 
 #define SQ_WEIGHT_TOKEN "--sqw"
 #define ENABLE_AMP_TOKEN "--enable-amp"
-#define CHROMA_MODE_TOKEN "--chroma-mode"
+#define CHROMA_MODE_TOKEN "--set-chroma-mode"
 
 #define SCENE_CHANGE_DETECTION_TOKEN "--scd"
-#define INJECTOR_TOKEN "--inj" // no Eval
+#define INJECTOR_TOKEN "--enable-inj" // no Eval
 #define INJECTOR_FRAMERATE_TOKEN "--inj-frm-rt" // no Eval
-#define SPEED_CONTROL_TOKEN "--speed-ctrl"
+#define SPEED_CONTROL_TOKEN "--enable-speed-ctrl"
 #define ASM_TYPE_TOKEN "--asm"
 #define THREAD_MGMNT "--lp"
-#define UNPIN_LP1_TOKEN "--unpin-lp1"
+#define UNPIN_LP1_TOKEN "--enable-unpin-lp1"
 #define TARGET_SOCKET "--ss"
-#define UNRESTRICTED_MOTION_VECTOR "--umv"
+#define UNRESTRICTED_MOTION_VECTOR "--enable-umv"
 #define CONFIG_FILE_COMMENT_CHAR '#'
 #define CONFIG_FILE_NEWLINE_CHAR '\n'
 #define CONFIG_FILE_RETURN_CHAR '\r'
@@ -178,8 +176,7 @@ static void set_cfg_input_file(const char *filename, EbConfig *cfg) {
 
 #ifdef _WIN32
     HANDLE handle = (HANDLE)_get_osfhandle(_fileno(cfg->input_file));
-    if (handle == INVALID_HANDLE_VALUE)
-        return;
+    if (handle == INVALID_HANDLE_VALUE) return;
     cfg->input_file_is_fifo = GetFileType(handle) == FILE_TYPE_PIPE;
 #else
     int         fd = fileno(cfg->input_file);
@@ -479,9 +476,6 @@ static void set_enable_hbd_mode_decision(const char *value, EbConfig *cfg) {
 static void set_enable_palette(const char *value, EbConfig *cfg) {
     cfg->enable_palette = (int32_t)strtoul(value, NULL, 0);
 };
-static void set_enable_olpd_refinement(const char *value, EbConfig *cfg) {
-    cfg->olpd_refinement = (int32_t)strtoul(value, NULL, 0);
-};
 static void set_high_dynamic_range_input(const char *value, EbConfig *cfg) {
     cfg->high_dynamic_range_input = strtol(value, NULL, 0);
 };
@@ -508,9 +502,6 @@ static void set_injector_frame_rate(const char *value, EbConfig *cfg) {
     else
         cfg->injector_frame_rate = cfg->injector_frame_rate << 16;
 }
-static void set_latency_mode(const char *value, EbConfig *cfg) {
-    cfg->latency_mode = (uint8_t)strtol(value, NULL, 0);
-};
 static void set_asm_type(const char *value, EbConfig *cfg) {
     const struct {
         const char *name;
@@ -629,8 +620,15 @@ ConfigEntry config_entry_global_options[] = {
      "Stop encoding after n input frames",
      set_cfg_frames_to_be_encoded},
     {SINGLE_INPUT, BUFFERED_INPUT_TOKEN, "buffer n input frames", set_buffered_input},
-    {SINGLE_INPUT, ENCODER_COLOR_FORMAT, "Encoder color format", set_encoder_color_format},
-    {SINGLE_INPUT, PROFILE_TOKEN, "Bitstream profile number to use", set_profile},
+    {SINGLE_INPUT,
+     ENCODER_COLOR_FORMAT,
+     "Set encoder color format(EB_YUV400, EB_YUV420, EB_YUV422, EB_YUV444)",
+     set_encoder_color_format},
+    {SINGLE_INPUT,
+     PROFILE_TOKEN,
+     "Bitstream profile number to use(0: main profile[default], 1: high profile, 2: professional "
+     "profile) ",
+     set_profile},
     {SINGLE_INPUT, FRAME_RATE_TOKEN, "Stream frame rate (rate/scale)", set_frame_rate},
     {SINGLE_INPUT,
      FRAME_RATE_NUMERATOR_TOKEN,
@@ -643,9 +641,12 @@ ConfigEntry config_entry_global_options[] = {
     {SINGLE_INPUT, ENCODER_BIT_DEPTH, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
     {SINGLE_INPUT, TIER_TOKEN, "Tier", set_tier},
     {SINGLE_INPUT, LEVEL_TOKEN, "Level", set_level},
-    {SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "Hierarchical levels", set_hierarchical_levels},
-    {SINGLE_INPUT, PRED_STRUCT_TOKEN, "Prediction structure", set_cfg_pred_structure},
-    {SINGLE_INPUT, LATENCY_MODE, "Latency mode", set_latency_mode},
+    {SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "Set hierarchical levels", set_hierarchical_levels},
+    {SINGLE_INPUT,
+     PRED_STRUCT_TOKEN,
+     "Set prediction structure( 0: low delay P, 1: low delay B, 2: random access [default]",
+     set_cfg_pred_structure},
+    {SINGLE_INPUT, HDR_INPUT_TOKEN, "Enable high dynamic range", set_high_dynamic_range_input},
     // Asm Type
     {SINGLE_INPUT,
      ASM_TYPE_TOKEN,
@@ -655,7 +656,8 @@ ConfigEntry config_entry_global_options[] = {
     {SINGLE_INPUT, THREAD_MGMNT, "number of logical processors to be used", set_logical_processors},
     {SINGLE_INPUT,
      UNPIN_LP1_TOKEN,
-     "allows the execution of multiple encodes on the CPU without having to pin them to a specific "
+     "allows the execution of multiple encodes on the CPU without having to pin them to a "
+     "specific( 0: OFF ,1: ON[default]) "
      "mask",
      set_unpin_single_core_execution},
     {SINGLE_INPUT, TARGET_SOCKET, "Specify  which socket the encoder runs on", set_target_socket},
@@ -669,9 +671,17 @@ ConfigEntry config_entry_rc[] = {
      "Rate control mode(0 = CQP , 1 = VBR , 2 = CVBR)",
      set_rate_control_mode},
     {SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "Target Bitrate (kbps)", set_target_bit_rate},
-    {SINGLE_INPUT, QP_FILE_TOKEN, "Qp filename", set_cfg_qp_file},
-    {SINGLE_INPUT, MAX_QP_TOKEN, "Maximum (worst) quantizer", set_max_qp_allowed},
-    {SINGLE_INPUT, MIN_QP_TOKEN, "Minimum (best) quantizer", set_min_qp_allowed},
+    {SINGLE_INPUT,
+     USE_QP_FILE_TOKEN,
+     "Overwrite QP assignment using qp values in QP file",
+     set_cfg_use_qp_file},
+    {SINGLE_INPUT, QP_FILE_TOKEN, "path to Qp file", set_cfg_qp_file},
+    {SINGLE_INPUT, MAX_QP_TOKEN, "Maximum (worst) quantizer[0-63]", set_max_qp_allowed},
+    {SINGLE_INPUT, MIN_QP_TOKEN, "Minimum (best) quantizer[0-63]", set_min_qp_allowed},
+    {SINGLE_INPUT,
+     ADAPTIVE_QP_ENABLE_TOKEN,
+     "set adaptive QP level(0: OFF ,1: variance base using segments ,2: Deltaq pred efficiency)",
+     set_adaptive_quantization},
     {SINGLE_INPUT, VBV_BUFSIZE_TOKEN, "VBV buffer size", set_vbv_buf_size},
     // Termination
     {SINGLE_INPUT, NULL, NULL, NULL}};
@@ -690,7 +700,10 @@ ConfigEntry config_entry_2p[] = {
     {SINGLE_INPUT, NULL, NULL, NULL}};
 ConfigEntry config_entry_intra_refresh[] = {
     // File I/O
-    {SINGLE_INPUT, INTRA_PERIOD_TOKEN, "Intra period interval(frames)", set_cfg_intra_period},
+    {SINGLE_INPUT,
+     INTRA_PERIOD_TOKEN,
+     "Intra period interval(frames) (-2: No intra update, -1: default intra period or [0-255])",
+     set_cfg_intra_period},
     {SINGLE_INPUT,
      INTRA_REFRESH_TYPE_TOKEN,
      "intra refresh type (1: CRA (Open GOP)2: IDR (Closed GOP))",
@@ -705,20 +718,22 @@ ConfigEntry config_entry_specific[] = {
      INPUT_COMPRESSED_TEN_BIT_FORMAT,
      "Offline packing of the 2bits: requires two bits packed input (0: OFF, 1: ON)",
      set_compressed_ten_bit_format},
-    {SINGLE_INPUT, TILE_ROW_TOKEN, "Number of tile rows to use, log2", set_tile_row},
-    {SINGLE_INPUT, TILE_COL_TOKEN, "Number of tile columns to use, log2", set_tile_col},
+    {SINGLE_INPUT, TILE_ROW_TOKEN, "Number of tile rows to use, log2[0-6]", set_tile_row},
+    {SINGLE_INPUT, TILE_COL_TOKEN, "Number of tile columns to use, log2[0-6]", set_tile_col},
     {SINGLE_INPUT, QP_TOKEN, "Constant/Constrained Quality level", set_cfg_qp},
-    {SINGLE_INPUT, LOOK_AHEAD_DIST_TOKEN, "LookAheadDistance", set_look_ahead_distance},
     {SINGLE_INPUT,
-     ADAPTIVE_QP_ENABLE_TOKEN,
-     "(0 = OFF , 1 = variance base using segments , 2 = Deltaq pred efficiency)",
-     set_adaptive_quantization},
+     LOOK_AHEAD_DIST_TOKEN,
+     "when RC is ON , it is best to set this parameter to be equal to the intra period value",
+     set_look_ahead_distance},
     // DLF
-    {SINGLE_INPUT, LOOP_FILTER_DISABLE_TOKEN, "Disable loop filter", set_disable_dlf_flag},
+    {SINGLE_INPUT,
+     LOOP_FILTER_DISABLE_TOKEN,
+     "Disable loop filter(0: loop filter enabled[default] ,1: loop filter disabled)",
+     set_disable_dlf_flag},
     // RESTORATION
     {SINGLE_INPUT,
      RESTORATION_ENABLE_TOKEN,
-     "Enable the loop restoration filter",
+     "Enable the loop restoration filter(0: OFF ,1: ON ,-1:DEFAULT)",
      set_enable_restoration_filter_flag},
     {SINGLE_INPUT,
      MFMV_ENABLE_TOKEN,
@@ -726,18 +741,22 @@ ConfigEntry config_entry_specific[] = {
      set_enable_mfmv_flag},
     {SINGLE_INPUT,
      REDUNDANT_BLK_TOKEN,
-     "Enable redundant block(0 = OFF, 1 = ON, -1 = DEFAULT)",
+     "use the same md results(mode, residual , cost…)as the previously processed identical block(0 "
+     "= OFF, 1 = ON, -1 = DEFAULT)",
      set_enable_redundant_blk_flag},
     {SINGLE_INPUT,
      TRELLIS_ENABLE_TOKEN,
-     "Disable trellis optimization of quantized coefficients (0: false 1: true  2: true for rd "
-     "search 3: true for estimate yrd serch (default))",
+     "Disable trellis optimization of quantized coefficients (0: OFF 1: ON  2: ON for rd "
+     "search 3: ON for estimate yrd serch (default))",
      set_enable_trellis_flag},
     {SINGLE_INPUT,
      SPATIAL_SSE_FL_TOKEN,
      "Enable spatial sse full loop(0 = OFF, 1 = ON, -1 = DEFAULT)",
      set_spatial_sse_fl_flag},
-    {SINGLE_INPUT, SUBPEL_TOKEN, "Subpel", set_enable_sub_pel_flag},
+    {SINGLE_INPUT,
+     SUBPEL_TOKEN,
+     "Enable subpel(0 = OFF, 1 = ON, -1 = DEFAULT)",
+     set_enable_sub_pel_flag},
     {SINGLE_INPUT,
      OVR_BNDRY_BLK_TOKEN,
      "Enable over boundary block mode (0 = OFF, 1 = ON, -1 = DEFAULT)",
@@ -772,12 +791,12 @@ ConfigEntry config_entry_specific[] = {
     // LOCAL WARPED MOTION
     {SINGLE_INPUT,
      LOCAL_WARPED_ENABLE_TOKEN,
-     "Enable local warped motion (0: false, 1: true (default))",
+     "Enable local warped motion (0: OFF, 1: ON (default))",
      set_enable_local_warped_motion_flag},
     // GLOBAL MOTION
     {SINGLE_INPUT,
      GLOBAL_MOTION_ENABLE_TOKEN,
-     "Enable global motion (0: false, 1: true (default))",
+     "Enable global motion (0: OFF, 1: ON (default))",
      set_enable_global_motion_flag},
 
     // CLASS 12
@@ -788,12 +807,12 @@ ConfigEntry config_entry_specific[] = {
     // EDGE SKIP ANGLE INTRA
     {SINGLE_INPUT,
      EDGE_SKIP_ANGLE_INTRA_TOKEN,
-     "Enable intra edge filtering (0: false, 1: true (default))",
+     "Enable intra edge filtering (0: OFF, 1: ON (default))",
      set_edge_skip_angle_intra_flag},
     // INTER INTRA COMPOUND
     {SINGLE_INPUT,
      INTER_INTRA_COMPOUND_TOKEN,
-     "Enable interintra compound (0: false, 1: true (default))",
+     "Enable interintra compound (0: OFF, 1: ON (default))",
      set_interintra_compound_flag},
     // FRACTIONAL SEARCH 64x64
     {SINGLE_INPUT,
@@ -802,52 +821,61 @@ ConfigEntry config_entry_specific[] = {
      set_fractional_search_64_flag},
 
     // OBMC
-    {SINGLE_INPUT, OBMC_TOKEN, "set OBMC Level", set_enable_obmc_flag},
+    {SINGLE_INPUT, OBMC_TOKEN, "Enable OBMC(0 = OFF, 1 = ON[default]) ", set_enable_obmc_flag},
     // RDOQ
     {SINGLE_INPUT, RDOQ_TOKEN, "Enable RDOQ (0 = OFF, 1 = ON, -1 = DEFAULT)", set_enable_rdoq_flag},
 
     // Filter Intra
     {SINGLE_INPUT,
      FILTER_INTRA_TOKEN,
-     "Enable filter intra prediction mode (0: false, 1: true (default))",
+     "Enable filter intra prediction mode (0: OFF, 1: ON [default])",
      set_enable_filter_intra_flag},
 
     // PREDICTIVE ME
-    {SINGLE_INPUT, PRED_ME_TOKEN, "Set predictive me level", set_predictive_me_flag},
+    {SINGLE_INPUT,
+     PRED_ME_TOKEN,
+     "Set predictive motion estimation level(-1: default, [0-5])",
+     set_predictive_me_flag},
     // BIPRED 3x3 INJECTION
     {SINGLE_INPUT,
      BIPRED_3x3_TOKEN,
      "Set bipred3x3 injection (0 = OFF, 1 = ON FULL, 2 = Reduced set, -1 = DEFAULT)",
      set_bipred3x3inject_flag},
     // COMPOUND MODE
-    {SINGLE_INPUT, COMPOUND_LEVEL_TOKEN, "Set compound mode", set_compound_level_flag},
-
+    {SINGLE_INPUT,
+     COMPOUND_LEVEL_TOKEN,
+     "Enable compound mode(0: OFF, 1:ON[AVG/DIST/DIFF], 2: ON[AVG/DIST/DIFF/WEDGE], -1: default)",
+     set_compound_level_flag},
     // ME Tools
     {SINGLE_INPUT,
      USE_DEFAULT_ME_HME_TOKEN,
-     "Use default Me/Hme settings",
+     "Use default motion estimation/hierarchical motion estimation settings(0: OFF, 1: "
+     "ON[default])",
      set_cfg_use_default_me_hme},
-    {SINGLE_INPUT, HME_ENABLE_TOKEN, "Enable HME (0 = OFF, 1 = ON)", set_enable_hme_flag},
+    {SINGLE_INPUT,
+     HME_ENABLE_TOKEN,
+     "Enable hierarchical motion estimation(0 = OFF, 1 = ON)",
+     set_enable_hme_flag},
     {SINGLE_INPUT,
      HME_L0_ENABLE_TOKEN,
-     "Enable HME Level 0 (0 = OFF, 1 = ON)",
+     "Enable hierarchical motion estimation Level 0 (0 = OFF, 1 = ON)",
      set_enable_hme_level_0_flag},
     {SINGLE_INPUT,
      HME_L1_ENABLE_TOKEN,
-     "Enable HME Level 1 (0 = OFF, 1 = ON)",
+     "Enable hierarchical motion estimation Level 1 (0 = OFF, 1 = ON)",
      set_enable_hme_level_1_flag},
     {SINGLE_INPUT,
      HME_L2_ENABLE_TOKEN,
-     "Enable HME Level 2 (0 = OFF, 1 = ON)",
+     "Enable hierarchical motion estimation Level 2 (0 = OFF, 1 = ON)",
      set_enable_hme_level_2_flag},
     {SINGLE_INPUT,
      EXT_BLOCK,
-     "Enable the non-square block (0=OFF, 1= ON)",
+     "Enable the rectangular and asymetric block (0=OFF, 1= ON)",
      set_enable_ext_block_flag},
     // ME Parameters
     {SINGLE_INPUT,
      SEARCH_AREA_WIDTH_TOKEN,
-     "Set search area in Width[1-256]",
+     "Set search area in width[1-256]",
      set_cfg_search_area_width},
     {SINGLE_INPUT,
      SEARCH_AREA_HEIGHT_TOKEN,
@@ -856,7 +884,7 @@ ConfigEntry config_entry_specific[] = {
     // HME Parameters
     {SINGLE_INPUT,
      NUM_HME_SEARCH_WIDTH_TOKEN,
-     "Set Hme search region in Width",
+     "Set hierarchical motion estimation search region in Width",
      set_cfg_number_hme_search_region_in_width},
     {SINGLE_INPUT,
      NUM_HME_SEARCH_HEIGHT_TOKEN,
@@ -864,7 +892,7 @@ ConfigEntry config_entry_specific[] = {
      set_cfg_number_hme_search_region_in_height},
     {SINGLE_INPUT,
      HME_SRCH_T_L0_WIDTH_TOKEN,
-     "Set Hme level0 total search area in Width",
+     "Set hierarchical motion estimation level0 total search area in Width",
      set_cfg_hme_level_0_total_search_area_width},
     {SINGLE_INPUT,
      HME_SRCH_T_L0_HEIGHT_TOKEN,
@@ -877,34 +905,38 @@ ConfigEntry config_entry_specific[] = {
      set_screen_content_mode},
     {SINGLE_INPUT,
      HBD_MD_ENABLE_TOKEN,
-     "Enable high bit depth mode decision",
+     "Enable high bit depth mode decision(0: OFF, 1: ON partially[default],2: fully ON)",
      set_enable_hbd_mode_decision},
     {SINGLE_INPUT,
      PALETTE_TOKEN,
-     "Set palette prediction mode",
+     "Set palette prediction mode(-1: default or [0-6])",
      set_enable_palette},
-    {SINGLE_INPUT,
-     OLPD_REFINEMENT_TOKEN,
-     "Enable olpd refinement",
-     set_enable_olpd_refinement}, //omran
     // Optional Features
     {SINGLE_INPUT,
      UNRESTRICTED_MOTION_VECTOR,
-     "Enable unrestriced motion vectors",
+     "allow motion vectors to reach outside of the picture boundary",
      set_unrestricted_motion_vector},
 
     //    { SINGLE_INPUT, BITRATE_REDUCTION_TOKEN, "bit_rate_reduction", SetBitRateReduction },
-    {SINGLE_INPUT, HDR_INPUT_TOKEN, "Enable high dynamic range", set_high_dynamic_range_input},
     // Latency
-    {SINGLE_INPUT, INJECTOR_TOKEN, "Enable injector", set_injector},
+    {SINGLE_INPUT,
+     INJECTOR_TOKEN,
+     "Inject pictures at defined frame rate(0: OFF[default],1: ON)",
+     set_injector},
     {SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "Set injector frame rate", set_injector_frame_rate},
-    {SINGLE_INPUT, SPEED_CONTROL_TOKEN, "Enable speed control", speed_control_flag},
+    {SINGLE_INPUT,
+     SPEED_CONTROL_TOKEN,
+     "Enable speed control(0: OFF[default], 1: ON",
+     speed_control_flag},
     // Annex A parameters
-    {SINGLE_INPUT, FILM_GRAIN_TOKEN, "Enable film grain", set_cfg_film_grain},
+    {SINGLE_INPUT,
+     FILM_GRAIN_TOKEN,
+     "Enable film grain(0: OFF[default], 1: ON)",
+     set_cfg_film_grain},
     // HME
     {ARRAY_INPUT,
      HME_LEVEL0_WIDTH,
-     "Set Hme level0 search area in Width",
+     "Set hierarchical motion estimation level0 search area in Width",
      set_hme_level_0_search_area_in_width_array},
     {ARRAY_INPUT,
      HME_LEVEL0_HEIGHT,
@@ -1096,7 +1128,6 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, SCREEN_CONTENT_TOKEN, "ScreenContentMode", set_screen_content_mode},
     {SINGLE_INPUT, HBD_MD_ENABLE_TOKEN, "HighBitDepthModeDecision", set_enable_hbd_mode_decision},
     {SINGLE_INPUT, PALETTE_TOKEN, "PaletteMode", set_enable_palette},
-    {SINGLE_INPUT, OLPD_REFINEMENT_TOKEN, "OlpdRefinement", set_enable_olpd_refinement},
     // Thread Management
     {SINGLE_INPUT, THREAD_MGMNT, "LogicalProcessors", set_logical_processors},
     {SINGLE_INPUT, UNPIN_LP1_TOKEN, "UnpinSingleCoreExecution", set_unpin_single_core_execution},
@@ -1117,7 +1148,6 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, PROFILE_TOKEN, "Profile", set_profile},
     {SINGLE_INPUT, TIER_TOKEN, "Tier", set_tier},
     {SINGLE_INPUT, LEVEL_TOKEN, "Level", set_level},
-    {SINGLE_INPUT, LATENCY_MODE, "LatencyMode", set_latency_mode},
     {SINGLE_INPUT, FILM_GRAIN_TOKEN, "FilmGrain", set_cfg_film_grain},
     // Asm Type
     {SINGLE_INPUT, ASM_TYPE_TOKEN, "Asm", set_asm_type},
@@ -1238,7 +1268,6 @@ void eb_config_ctor(EbConfig *config_ptr) {
     config_ptr->screen_content_mode                       = 2;
     config_ptr->enable_hbd_mode_decision                  = 2;
     config_ptr->enable_palette                            = -1;
-    config_ptr->olpd_refinement                           = -1;
     config_ptr->injector_frame_rate                       = 60 << 16;
 
     // ASM Type
@@ -1638,9 +1667,11 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         int32_t sp_token_index             = -1;
         //fprintf(stderr, "\n%-25s\t%-25s\n", "TOKEN", "DESCRIPTION");
         //fprintf(stderr, "%-25s\t%-25s\n", "-nch", "NumberOfChannels");
-        const char *empty_string = "";
+        const char *empty_string         = "";
         const char *token_options_format = "\t%-5s\t%-25s\t%-25s\n";
-        fprintf(stderr, "\n%-25s\n", "Usage: SvtAv1EncApp.exe <options> -o dst_filename -i src_filename");
+        fprintf(stderr,
+                "\n%-25s\n",
+                "Usage: SvtAv1EncApp.exe <options> -o dst_filename -i src_filename");
         fprintf(stderr, "\n%-25s\n", "Options:");
         while (config_entry_options[++options_token_index].token != NULL) {
             uint32_t second_position =
@@ -1679,17 +1710,17 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         while (config_entry_rc[++rc_token_index].token != NULL) {
             uint32_t second_position = *(config_entry_rc[rc_token_index].token + 1) == '-' ? 1 : 0;
             if (second_position)
-            fprintf(stderr,
+                fprintf(stderr,
                         token_options_format,
                         empty_string,
                         config_entry_rc[rc_token_index].token,
                         config_entry_rc[rc_token_index].name);
             else
                 fprintf(stderr,
-                       token_options_format,
-                       config_entry_rc[rc_token_index].token,
-                       empty_string,
-                       config_entry_rc[rc_token_index].name);
+                        token_options_format,
+                        config_entry_rc[rc_token_index].token,
+                        empty_string,
+                        config_entry_rc[rc_token_index].name);
         }
         fprintf(stderr, "\n%-25s\n", "Twopass Options:");
         while (config_entry_2p[++two_p_token_index].token != NULL) {
@@ -1726,8 +1757,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         config_entry_intra_refresh[kf_token_index].name);
         }
         fprintf(stderr, "\n%-25s\n", "AV1 Specific Options:");
-        while (config_entry_specific[++sp_token_index].token != NULL)
-        {
+        while (config_entry_specific[++sp_token_index].token != NULL) {
             uint32_t second_position =
                 *(config_entry_specific[sp_token_index].token + 1) == '-' ? 1 : 0;
             if (second_position)

@@ -374,11 +374,6 @@ typedef struct EbSvtAv1EncConfiguration {
     * Default is -1. */
     int32_t enable_palette;
 
-    /* Open Loop Partitioning Decision refinement
-    *
-    * Default is -1. */
-    int32_t olpd_refinement;
-
     // Rate Control
 
     /* Rate control mode.
@@ -590,9 +585,9 @@ typedef struct EbSvtAv1EncConfiguration {
      * @ *config_ptr     Pointer passed back to the client during callbacks, it will be
      *                  loaded with default params from the library. */
 EB_API EbErrorType
-eb_init_handle(EbComponentType **p_handle, void *p_app_data,
-               EbSvtAv1EncConfiguration
-                   *config_ptr); // config_ptr will be loaded with default params from the library
+       eb_init_handle(EbComponentType **p_handle, void *p_app_data,
+                      EbSvtAv1EncConfiguration
+                          *config_ptr); // config_ptr will be loaded with default params from the library
 
 /* STEP 2: Set all configuration parameters.
      *
@@ -623,7 +618,6 @@ EB_API EbErrorType eb_svt_enc_stream_header(EbComponentType *    svt_enc_compone
      * Parameter:
      * @ *stream_header_ptr  stream header buffer. */
 EB_API EbErrorType eb_svt_release_enc_stream_header(EbBufferHeaderType *stream_header_ptr);
-
 
 /* OPTIONAL: Get the end of sequence Network Abstraction Layer.
      *
