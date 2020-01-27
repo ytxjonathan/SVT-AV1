@@ -184,8 +184,7 @@ void log_error_output(FILE *error_log_file, uint32_t error_code) {
         break;
 
     case EB_ENC_EC_ERROR2:
-        fprintf(error_log_file,
-                "Error: copy_payload: output buffer too small!\n");
+        fprintf(error_log_file, "Error: copy_payload: output buffer too small!\n");
         break;
 
     case EB_ENC_EC_ERROR3: fprintf(error_log_file, "Error: encode_sb: Unknown mode type!\n"); break;
@@ -1278,8 +1277,7 @@ AppExitConditionType process_output_stream_buffer(EbConfig *config, EbAppContext
             ++frame_count;
 #else
             //++frame_count;
-            if (!(header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF))
-            {
+            if (!(header_ptr->flags & EB_BUFFERFLAG_IS_ALT_REF)) {
 #if FRAME_OUTPUT
                 fprintf(stderr, "\b\b\b\b\b\b\b\b\b%9d", ++frame_count);
 #else
@@ -1287,12 +1285,9 @@ AppExitConditionType process_output_stream_buffer(EbConfig *config, EbAppContext
                 ++frame_count;
                 progress = ((double)frame_count / config->processed_frame_count) * 100;
                 // if statement used for formatting
-                if (progress < 10)
-                {
+                if (progress < 10) {
                     fprintf(stderr, "\b\b\b\b\b%.2f%%", progress);
-                }
-                else
-                {
+                } else {
                     fprintf(stderr, "\b\b\b\b\b\b%.2f%%", progress);
                 }
 #endif
@@ -1324,7 +1319,6 @@ AppExitConditionType process_output_stream_buffer(EbConfig *config, EbAppContext
     return return_value;
 }
 AppExitConditionType process_output_recon_buffer(EbConfig *config, EbAppContext *app_call_back) {
-
     EbBufferHeaderType *header_ptr =
         app_call_back->recon_buffer; // needs to change for buffered input
     EbComponentType *    component_handle = (EbComponentType *)app_call_back->svt_encoder_handle;

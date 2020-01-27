@@ -27,32 +27,32 @@
 #define COMMAND_LINE_MAX_SIZE 2048
 #define CONFIG_FILE_TOKEN "-c"
 #define INPUT_FILE_TOKEN "-i"
-#define OUTPUT_BITSTREAM_TOKEN "-b"
-#define OUTPUT_RECON_TOKEN "-o"
+#define OUTPUT_BITSTREAM_TOKEN "-o"
+#define OUTPUT_RECON_TOKEN "--reckon"
 #define ERROR_FILE_TOKEN "--errlog"
-#define QP_FILE_TOKEN "--qp-file"
+#define QP_FILE_TOKEN "--qpfile"
 #define INPUT_STAT_FILE_TOKEN "--input-stat-file"
 #define OUTPUT_STAT_FILE_TOKEN "--output-stat-file"
 #define STAT_FILE_TOKEN "--stat-file"
 #define WIDTH_TOKEN "-w"
 #define HEIGHT_TOKEN "-h"
-#define NUMBER_OF_PICTURES_TOKEN "-n"
+#define NUMBER_OF_PICTURES_TOKEN "--frames"
 #define BUFFERED_INPUT_TOKEN "--nb"
 #define BASE_LAYER_SWITCH_MODE_TOKEN "--base-layer-switch-mode" // no Eval
-#define QP_TOKEN "-q"
+#define QP_TOKEN "--qp"
 #define USE_QP_FILE_TOKEN "--use-q-file"
-#define STAT_REPORT_TOKEN "--stat-report"
+#define STAT_REPORT_TOKEN "--enable-stat-report"
 #define FRAME_RATE_TOKEN "--fps"
 #define FRAME_RATE_NUMERATOR_TOKEN "--fps-num"
 #define FRAME_RATE_DENOMINATOR_TOKEN "--fps-denom"
-#define ENCODER_BIT_DEPTH "--bit-depth"
+#define ENCODER_BIT_DEPTH "--input-depth"
 #define ENCODER_COLOR_FORMAT "--color-format"
 #define INPUT_COMPRESSED_TEN_BIT_FORMAT "--compressed-ten-bit-format"
-#define ENCMODE_TOKEN "--enc-mode"
+#define ENCMODE_TOKEN "--preset"
 #define ENCMODE2P_TOKEN "--enc-mode-2p"
 #define HIERARCHICAL_LEVELS_TOKEN "--hierarchical-levels" // no Eval
 #define PRED_STRUCT_TOKEN "--pred-struct"
-#define INTRA_PERIOD_TOKEN "--intra-period"
+#define INTRA_PERIOD_TOKEN "--keyint"
 #define PROFILE_TOKEN "--profile"
 #define TIER_TOKEN "--tier"
 #define LEVEL_TOKEN "--level"
@@ -60,31 +60,31 @@
 #define FILM_GRAIN_TOKEN "--film-grain"
 #define INTRA_REFRESH_TYPE_TOKEN "--irefresh-type" // no Eval
 #define LOOP_FILTER_DISABLE_TOKEN "--dlf"
-#define RESTORATION_ENABLE_TOKEN "--restoration-filtering"
+#define RESTORATION_ENABLE_TOKEN "--enable-restoration-filtering"
 #define CLASS_12_TOKEN "--class-12"
-#define EDGE_SKIP_ANGLE_INTRA_TOKEN "--intra-edge-skp"
-#define INTER_INTRA_COMPOUND_TOKEN "--interintra-comp"
-#define FRAC_SEARCH_64_TOKEN "--frac-search-64"
-#define MFMV_ENABLE_TOKEN "--mfmv"
-#define REDUNDANT_BLK_TOKEN "--redundant-blk"
+#define EDGE_SKIP_ANGLE_INTRA_TOKEN "--enable-intra-edge-skp"
+#define INTER_INTRA_COMPOUND_TOKEN "--enable-interintra-comp"
+#define FRAC_SEARCH_64_TOKEN "--enable-frac-search-64"
+#define MFMV_ENABLE_TOKEN "--enable-mfmv"
+#define REDUNDANT_BLK_TOKEN "--enable-redundant-blk"
 #define TRELLIS_ENABLE_TOKEN "--trellis"
-#define SPATIAL_SSE_FL_TOKEN "--spatial-sse-fl"
+#define SPATIAL_SSE_FL_TOKEN "--enable-spatial-sse-fl"
 #define SUBPEL_TOKEN "--subpel"
-#define OVR_BNDRY_BLK_TOKEN "--over-bndry-blk"
-#define NEW_NEAREST_COMB_INJECT_TOKEN "--new-nrst-near-comb"
-#define NX4_4XN_MV_INJECT_TOKEN "--nx4-4xn-mv-inject"
-#define PRUNE_UNIPRED_ME_TOKEN "--prune-unipred-me"
-#define PRUNE_REF_REC_PART_TOKEN "--prune-ref-rec-part"
-#define NSQ_TABLE_TOKEN "--nsq-table-use"
-#define FRAME_END_CDF_UPDATE_TOKEN "--framend-cdf-upd-mode"
-#define LOCAL_WARPED_ENABLE_TOKEN "--local-warp"
-#define GLOBAL_MOTION_ENABLE_TOKEN "--global-motion"
+#define OVR_BNDRY_BLK_TOKEN "--enable-over-bndry-blk"
+#define NEW_NEAREST_COMB_INJECT_TOKEN "--enable-new-nrst-near-comb"
+#define NX4_4XN_MV_INJECT_TOKEN "--enable-nx4-4xn-mv-inject"
+#define PRUNE_UNIPRED_ME_TOKEN "--enable-prune-unipred-me"
+#define PRUNE_REF_REC_PART_TOKEN "--enable-prune-ref-rec-part"
+#define NSQ_TABLE_TOKEN "--enable-nsq-table-use"
+#define FRAME_END_CDF_UPDATE_TOKEN "--enable-framend-cdf-upd-mode"
+#define LOCAL_WARPED_ENABLE_TOKEN "--enable-local-warp"
+#define GLOBAL_MOTION_ENABLE_TOKEN "--enable-global-motion"
 #define OBMC_TOKEN "--obmc"
-#define RDOQ_TOKEN "--rdoq"
+#define RDOQ_TOKEN "--enable-rdoq"
 #define PRED_ME_TOKEN "--pred-me"
 #define BIPRED_3x3_TOKEN "--bipred-3x3"
 #define COMPOUND_LEVEL_TOKEN "--compound"
-#define FILTER_INTRA_TOKEN "--filter-intra"
+#define FILTER_INTRA_TOKEN "--enable-filter-intra"
 #define USE_DEFAULT_ME_HME_TOKEN "--use-default-me-hme"
 #define HME_ENABLE_TOKEN "--hme"
 #define HME_L0_ENABLE_TOKEN "--hme-l0"
@@ -113,14 +113,14 @@
 #define HBD_MD_ENABLE_TOKEN "--hbd-md"
 #define PALETTE_TOKEN "--palette"
 #define OLPD_REFINEMENT_TOKEN "--olpd-refinement"
-#define HDR_INPUT_TOKEN "--hdr"
+#define HDR_INPUT_TOKEN "--enable-hdr"
 #define RATE_CONTROL_ENABLE_TOKEN "--rc"
 #define TARGET_BIT_RATE_TOKEN "--tbr"
 #define MAX_QP_TOKEN "--max-qp"
 #define VBV_BUFSIZE_TOKEN "--vbv-bufsize"
 #define MIN_QP_TOKEN "--min-qp"
-#define ADAPTIVE_QP_ENABLE_TOKEN "--adaptive-quantization"
-#define LOOK_AHEAD_DIST_TOKEN "--lad"
+#define ADAPTIVE_QP_ENABLE_TOKEN "--aq-mode"
+#define LOOK_AHEAD_DIST_TOKEN "--lookahead"
 #define SUPER_BLOCK_SIZE_TOKEN "--sb-size"
 #define TILE_ROW_TOKEN "--tile-rows"
 #define TILE_COL_TOKEN "--tile-columns"
@@ -178,8 +178,7 @@ static void set_cfg_input_file(const char *filename, EbConfig *cfg) {
 
 #ifdef _WIN32
     HANDLE handle = (HANDLE)_get_osfhandle(_fileno(cfg->input_file));
-    if (handle == INVALID_HANDLE_VALUE)
-        return;
+    if (handle == INVALID_HANDLE_VALUE) return;
     cfg->input_file_is_fifo = GetFileType(handle) == FILE_TYPE_PIPE;
 #else
     int         fd = fileno(cfg->input_file);
@@ -669,6 +668,7 @@ ConfigEntry config_entry_rc[] = {
      "Rate control mode(0 = CQP , 1 = VBR , 2 = CVBR)",
      set_rate_control_mode},
     {SINGLE_INPUT, TARGET_BIT_RATE_TOKEN, "Target Bitrate (kbps)", set_target_bit_rate},
+    {SINGLE_INPUT, QP_FILE_TOKEN, "Qp filename", set_cfg_qp_file},
     {SINGLE_INPUT, MAX_QP_TOKEN, "Maximum (worst) quantizer", set_max_qp_allowed},
     {SINGLE_INPUT, MIN_QP_TOKEN, "Minimum (best) quantizer", set_min_qp_allowed},
     {SINGLE_INPUT, VBV_BUFSIZE_TOKEN, "VBV buffer size", set_vbv_buf_size},
@@ -700,9 +700,6 @@ ConfigEntry config_entry_specific[] = {
     // Prediction Structure
     {SINGLE_INPUT, BASE_LAYER_SWITCH_MODE_TOKEN, "BaseLayerSwitchMode", set_base_layer_switch_mode},
     {SINGLE_INPUT, ENCMODE_TOKEN, "Encoder mode/Preset used", set_enc_mode},
-    {SINGLE_INPUT, ENCODER_BIT_DEPTH, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
-    {SINGLE_INPUT, ENCODER_COLOR_FORMAT, "EncoderColorFormat", set_encoder_color_format},
-    {SINGLE_INPUT, QP_FILE_TOKEN, "Qp filename", set_cfg_qp_file},
     {SINGLE_INPUT,
      INPUT_COMPRESSED_TEN_BIT_FORMAT,
      "Offline packing of the 2bits: requires two bits packed input (0: OFF, 1: ON)",
@@ -804,7 +801,7 @@ ConfigEntry config_entry_specific[] = {
      set_fractional_search_64_flag},
 
     // OBMC
-    {SINGLE_INPUT, OBMC_TOKEN, "Enable OBMC (0: false, 1: true (default))", set_enable_obmc_flag},
+    {SINGLE_INPUT, OBMC_TOKEN, "set OBMC Level", set_enable_obmc_flag},
     // RDOQ
     {SINGLE_INPUT, RDOQ_TOKEN, "Enable RDOQ (0 = OFF, 1 = ON, -1 = DEFAULT)", set_enable_rdoq_flag},
 
@@ -875,16 +872,13 @@ ConfigEntry config_entry_specific[] = {
     // MD Parameters
     {SINGLE_INPUT,
      SCREEN_CONTENT_TOKEN,
-     "ENable screen content detection",
+     "Set screen content detection level",
      set_screen_content_mode},
     {SINGLE_INPUT,
      HBD_MD_ENABLE_TOKEN,
      "Enable high bit depth mode decision",
      set_enable_hbd_mode_decision},
-    {SINGLE_INPUT,
-     PALETTE_TOKEN,
-     "Enable palette prediction mode (0: false, 1: true (default))",
-     set_enable_palette},
+    {SINGLE_INPUT, PALETTE_TOKEN, "Set palette prediction mode", set_enable_palette},
     {SINGLE_INPUT,
      OLPD_REFINEMENT_TOKEN,
      "Enable olpd refinement",
@@ -902,7 +896,6 @@ ConfigEntry config_entry_specific[] = {
     {SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "Set injector frame rate", set_injector_frame_rate},
     {SINGLE_INPUT, SPEED_CONTROL_TOKEN, "Enable speed control", speed_control_flag},
     // Annex A parameters
-    {SINGLE_INPUT, PROFILE_TOKEN, "Bitstream profile number to use", set_profile},
     {SINGLE_INPUT, FILM_GRAIN_TOKEN, "Enable film grain", set_cfg_film_grain},
     // HME
     {ARRAY_INPUT,
@@ -1641,17 +1634,17 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
         int32_t sp_token_index             = -1;
         //fprintf(stderr, "\n%-25s\t%-25s\n", "TOKEN", "DESCRIPTION");
         //fprintf(stderr, "%-25s\t%-25s\n", "-nch", "NumberOfChannels");
-        const char *empty_string = "";
+        const char *empty_string         = "";
         const char *token_options_format = "\t%-5s\t%-25s\t%-25s\n";
-        fprintf(stderr, "\n%-25s\n", "Usage: SvtAv1EncApp.exe <options> -b dst_filename -i src_filename");
+        fprintf(stderr,
+                "\n%-25s\n",
+                "Usage: SvtAv1EncApp.exe <options> -o dst_filename -i src_filename");
         fprintf(stderr, "\n%-25s\n", "Options:");
         while (config_entry_options[++options_token_index].token != NULL) {
             uint32_t second_position =
                 *(config_entry_options[options_token_index].token + 1) == '-' ? 1 : 0;
-            //fprintf(stderr, "second position: %d\n", second_position);
             if (second_position)
                 fprintf(stderr,
-                        //"\t%-5s\t%-25s\t%-25s\n",
                         token_options_format,
                         empty_string,
                         config_entry_options[options_token_index].token,
@@ -1691,10 +1684,10 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         config_entry_rc[rc_token_index].name);
             else
                 fprintf(stderr,
-                       token_options_format,
-                       config_entry_rc[rc_token_index].token,
-                       empty_string,
-                       config_entry_rc[rc_token_index].name);
+                        token_options_format,
+                        config_entry_rc[rc_token_index].token,
+                        empty_string,
+                        config_entry_rc[rc_token_index].name);
         }
         fprintf(stderr, "\n%-25s\n", "Twopass Options:");
         while (config_entry_2p[++two_p_token_index].token != NULL) {
@@ -1731,8 +1724,7 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         config_entry_intra_refresh[kf_token_index].name);
         }
         fprintf(stderr, "\n%-25s\n", "AV1 Specific Options:");
-        while (config_entry_specific[++sp_token_index].token != NULL)
-        {
+        while (config_entry_specific[++sp_token_index].token != NULL) {
             uint32_t second_position =
                 *(config_entry_specific[sp_token_index].token + 1) == '-' ? 1 : 0;
             if (second_position)
@@ -1748,7 +1740,6 @@ uint32_t get_help(int32_t argc, char *const argv[]) {
                         empty_string,
                         config_entry_specific[sp_token_index].name);
         }
-
         return 1;
     } else
         return 0;
