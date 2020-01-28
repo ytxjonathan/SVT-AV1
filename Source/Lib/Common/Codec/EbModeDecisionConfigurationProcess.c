@@ -2638,7 +2638,11 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #if WARP_UPDATE
 #if ENHANCED_M0_SETTINGS
 #if M1_OPT
+#if M2_ADOPTIONS
+        enable_wm = (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M2 ||
+#else
         enable_wm = (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M1 ||
+#endif
 #else
         enable_wm = (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0 ||
 #endif

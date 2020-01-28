@@ -832,7 +832,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         else if (MR_MODE)
             picture_control_set_ptr->pic_depth_mode = PIC_ALL_DEPTH_MODE;
 #if M1_OPT
+#if M2_ADOPTIONS
+        else if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#else
         else if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #else
         else if (picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
@@ -1441,7 +1445,11 @@ EbErrorType signal_derivation_multi_processes_oq(
             picture_control_set_ptr->intra_pred_mode = 4;
     else
 #if PRESETS_TUNE
+#if M2_ADOPTIONS
+        if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#else
         if ((picture_control_set_ptr->enc_mode <= ENC_M1) || (picture_control_set_ptr->enc_mode <= ENC_M2 && picture_control_set_ptr->temporal_layer_index == 0))
+#endif
             picture_control_set_ptr->intra_pred_mode = 0;
 #else
         if (picture_control_set_ptr->enc_mode == ENC_M0)

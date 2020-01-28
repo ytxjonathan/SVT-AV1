@@ -256,6 +256,7 @@ extern "C" {
 #define REMOVE_INNJ_INTRA_MR_CHECK      1
 #define REMOVE_PIC_OBMC_MR_CHECK        1
 #define SHUT_AUTO_MAX_PARTITION         1
+#define M2_ADOPTIONS                    0
 
 /* Note: shutting the macro PAL_SUP will not give SS as pcs->palette_mode = 0
    rate estimation is changed for I frame + enabled sc for P (rate estimation

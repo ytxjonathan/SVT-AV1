@@ -10407,7 +10407,7 @@ EbErrorType signal_derivation_block(
             context_ptr->compound_types_to_try = !is_src_compound ? MD_COMP_AVG : similar_cu->interinter_comp.type;
         }
     }
-
+    return return_error;
 }
 #endif
 void md_encode_block(

@@ -101,7 +101,11 @@ void* set_me_hme_params_oq(
     uint8_t  hmeMeLevel =  picture_control_set_ptr->enc_mode; // OMK to be revised after new presets
 #endif
 #if PRESETS_OPT
+#if M2_ADOPTIONS
+    if (hmeMeLevel <= ENC_M2)
+#else
     if (hmeMeLevel <= ENC_M1)
+#endif
         hmeMeLevel = ENC_M0;
 #endif
     // HME/ME default settings
@@ -178,7 +182,11 @@ EbErrorType signal_derivation_me_kernel_oq(
 #if DIST_BASED_ME_SEARCH_AREA
     uint8_t  hmeMeLevel = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
 
+#if M2_ADOPTIONS
+    if (hmeMeLevel <= ENC_M2)
+#else
     if (hmeMeLevel <= ENC_M1)
+#endif
         hmeMeLevel = ENC_M0;
 
     picture_control_set_ptr->distance_me_flag = 0;
@@ -507,6 +515,11 @@ void* tf_set_me_hme_params_oq(
 
     uint8_t sc_content_detected = picture_control_set_ptr->sc_content_detected;
 
+#if M2_ADOPTIONS
+    if (picture_control_set_ptr->enc_mode == ENC_M2)
+        hmeMeLevel = ENC_M1;
+#endif
+
     // HME Level0
     me_context_ptr->hme_level0_total_search_area_width = tf_hme_level0_total_search_area_width[sc_content_detected][input_resolution][hmeMeLevel];
     me_context_ptr->hme_level0_total_search_area_height = tf_hme_level0_total_search_area_height[sc_content_detected][input_resolution][hmeMeLevel];
@@ -563,7 +576,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
     uint8_t  hmeMeLevel = sequence_control_set_ptr->use_output_stat_file ? picture_control_set_ptr->snd_pass_enc_mode : picture_control_set_ptr->enc_mode;
 
 #if M1_ADOPT_M0_DIST_ME
+#if M2_ADOPTIONS
+    if (hmeMeLevel <= ENC_M2 && picture_control_set_ptr->sc_content_detected == 0)
+#else
     if (hmeMeLevel <= ENC_M1 && picture_control_set_ptr->sc_content_detected == 0)
+#endif
         hmeMeLevel = ENC_M0;
 #endif
 

@@ -712,7 +712,11 @@ void* resource_coordination_kernel(void *input_ptr)
 #if INTERINTRA_HBD
 #if M0_OPT
 #if PRESETS_TUNE
+#if M2_ADOPTIONS
+                sequence_control_set_ptr->seq_header.enable_interintra_compound = MR_MODE || (sequence_control_set_ptr->static_config.enc_mode <= ENC_M2 && sequence_control_set_ptr->static_config.screen_content_mode != 1) ? 1 : 0;
+#else
                 sequence_control_set_ptr->seq_header.enable_interintra_compound = MR_MODE || (sequence_control_set_ptr->static_config.enc_mode <= ENC_M1 && sequence_control_set_ptr->static_config.screen_content_mode != 1) ? 1 : 0;
+#endif
 #else
                 sequence_control_set_ptr->seq_header.enable_interintra_compound = MR_MODE || (sequence_control_set_ptr->static_config.enc_mode == ENC_M0 && sequence_control_set_ptr->static_config.screen_content_mode != 1) ? 1 : 0;
 #endif
