@@ -9839,10 +9839,8 @@ void search_best_independent_uv_mode(
     SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
     if (picture_control_set_ptr->slice_type == I_SLICE)
         uv_mode_nfl_count = uv_mode_total_count;
-    else if (sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER)
-        uv_mode_nfl_count = 32;
     else
-        uv_mode_nfl_count = 8;
+        uv_mode_nfl_count = 32;
 #endif
 #else
     if (picture_control_set_ptr->temporal_layer_index == 0)
