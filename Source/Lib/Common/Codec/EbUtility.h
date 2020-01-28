@@ -30,6 +30,9 @@ extern "C" {
 
         uint8_t    d1i;                         // index of the block in d1 dimension 0..24  (0 is parent square, 1 top half of H , ...., 24:last quarter of V4)
         uint16_t   sqi_mds;                     // index of the parent square in md  scan.
+#if ADD_PARENT_IDX
+        uint16_t   pi_mds;                      // index of the parent block in md  scan.
+#endif
         uint8_t    totns;                       // max number of ns blocks within one partition 1..4 (N:1,H:2,V:2,HA:3,HB:3,VA:3,VB:3,H4:4,V4:4)
         uint8_t    nsi;                         // non square index within a partition  0..totns-1
         uint8_t        similar;                 // 1: means that this block is similar (same shape/location) to another

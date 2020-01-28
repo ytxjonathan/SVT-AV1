@@ -5624,7 +5624,26 @@ void tx_type_search(
 #endif
     int32_t seg_qp = picture_control_set_ptr->parent_pcs_ptr->frm_hdr.segmentation_params.segmentation_enabled ?
         picture_control_set_ptr->parent_pcs_ptr->frm_hdr.segmentation_params.feature_data[context_ptr->cu_ptr->segment_id][SEG_LVL_ALT_Q] : 0;
+#if DISABLE_TXT_FOR_NON_S_V_H
+    TxType tx_type_pred[5]; 
+    if (context_ptr->blk_geom->shape > PART_V) {
+        uint16_t parent_blk_mds = context_ptr->blk_geom->pi_mds;
+        uint16_t sq_blk_mds = context_ptr->blk_geom->sqi_mds;
+        CodingUnit *parent_cu = &context_ptr->md_cu_arr_nsq[parent_blk_mds];
 
+        tx_type_pred[0] = DCT_DCT;
+
+        TransformUnit *txb_ptr;
+        uint32_t txb_itr = 0;
+        uint32_t tuTotalCount;
+        tuTotalCount = context_ptr->blk_geom->txb_count[parent_cu->tx_depth];
+        do {
+            txb_ptr = &parent_cu->transform_unit_array[txb_itr];
+            tx_type_pred[txb_itr + 1] = txb_ptr->transform_type[PLANE_TYPE_Y];
+            ++txb_itr;
+        } while (txb_itr < tuTotalCount);
+    }
+#endif
     TxType txk_start = DCT_DCT;
     TxType txk_end = TX_TYPES;
     uint64_t best_cost_tx_search = (uint64_t)~0;
@@ -5717,6 +5736,16 @@ void tx_type_search(
 #endif
             if (!allowed_tx_set_a[context_ptr->blk_geom->txsize[context_ptr->tx_depth][context_ptr->txb_itr]][tx_type]) continue;
 
+#if DISABLE_TXT_FOR_NON_S_V_H
+        if (context_ptr->blk_geom->shape > PART_V) {
+            uint8_t check_tx_type = 0;
+            for (uint8_t fetch_tx_idx = 0; fetch_tx_idx < 5; fetch_tx_idx++)
+                if (tx_type == tx_type_pred[fetch_tx_idx])
+                    check_tx_type++;
+            if (!check_tx_type)
+                continue;
+        }
+#endif
         // For Inter blocks, transform type of chroma follows luma transfrom type
         if (is_inter)
             candidate_buffer->candidate_ptr->transform_type_uv = (context_ptr->txb_itr == 0) ? candidate_buffer->candidate_ptr->transform_type[context_ptr->txb_itr] : candidate_buffer->candidate_ptr->transform_type_uv;
@@ -6533,7 +6562,7 @@ void tx_partitioning_path(
             context_ptr->tx_weight) : EB_TRUE;
     else
         tx_search_skip_flag = context_ptr->tx_search_level == TX_SEARCH_FULL_LOOP ? EB_FALSE : EB_TRUE;
-#if DISABLE_TXT_FOR_NON_S_V_H
+#if 0// DISABLE_TXT_FOR_NON_S_V_H
     if (context_ptr->blk_geom->shape > PART_V)
         tx_search_skip_flag = 1;
 #endif
@@ -6559,8 +6588,11 @@ void tx_partitioning_path(
         end_tx_depth);
 #endif
 #if DISABLE_TXS_FOR_NON_S_V_H
- if (context_ptr->blk_geom->shape > PART_V)
-        end_tx_depth = 0;
+ if (context_ptr->blk_geom->shape > PART_V) {
+    uint16_t parent_blk_mds = context_ptr->blk_geom->pi_mds;
+    uint16_t sq_blk_mds = context_ptr->blk_geom->sqi_mds;
+    end_tx_depth = end_tx_depth ? MAX(context_ptr->md_cu_arr_nsq[sq_blk_mds].tx_depth,context_ptr->md_cu_arr_nsq[parent_blk_mds].tx_depth) : end_tx_depth;
+ }
 #endif
     // Transform Depth Loop
 #if TX_SIZE_ONLY_MD_STAGE_2
@@ -10418,8 +10450,12 @@ EbErrorType signal_derivation_block(
     }
 
  #if DISABLE_COMPOUND_FOR_NON_S_V_H
-    if (context_ptr->blk_geom->shape > PART_V)
-        context_ptr->compound_types_to_try = MD_COMP_AVG;
+    if (context_ptr->blk_geom->shape > PART_V && !context_ptr->similar_blk_avail) {
+        uint16_t parent_blk_mds = context_ptr->blk_geom->pi_mds;
+        CodingUnit *parent_cu = &context_ptr->md_cu_arr_nsq[parent_blk_mds];
+        int32_t is_parent_compound = parent_cu->pred_mode >= NEAREST_NEARESTMV;
+        context_ptr->compound_types_to_try = !is_parent_compound ? MD_COMP_AVG : context_ptr->compound_types_to_try;
+    }
 #endif
 }
 #endif
