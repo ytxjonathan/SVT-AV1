@@ -2740,13 +2740,13 @@ static EbErrorType verify_settings(
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->superres_mode > SUPERRES_RANDOM) {
+    if (config->superres_mode > 2) {
         SVT_LOG("Error instance %u: invalid superres-mode %d, should be in the range [%d - %d], "
-                "only SUPERRES_NONE (0), SUPERRES_FIXED (1) and SUPERRES_RANDOM (2) are currently implemented \n", channel_number + 1, 0, 2);
+                "only SUPERRES_NONE (0), SUPERRES_FIXED (1) and SUPERRES_RANDOM (2) are currently implemented \n", channel_number + 1, config->superres_mode, 0, 2);
         return_error = EB_ErrorBadParameter;
     }
 
-    if (config->superres_mode > SUPERRES_NONE && (config->input_stat_file || config->output_stat_file)){
+    if (config->superres_mode > 0 && (config->input_stat_file || config->output_stat_file)){
         SVT_LOG("Error instance %u: superres cannot be enabled in 2-pass mode yet \n", channel_number + 1);
         return_error = EB_ErrorBadParameter;
     }
