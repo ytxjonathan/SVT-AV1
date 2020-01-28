@@ -2231,7 +2231,6 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #else
     if (MR_MODE ||( picture_control_set_ptr->enc_mode == ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0))
 #endif
-#endif
 #else
     if (MR_MODE)
 #endif
@@ -2521,7 +2520,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     //2: If previous similar block is not compound, do not inject compound else consider the compound modes up the similar’s one
     context_ptr->comp_similar_mode = 0;
     if (!MR_MODE)
+#if M1_COMP_SIMILAR
+        if (0)
+#else
         if( picture_control_set_ptr->enc_mode == ENC_M0)
+#endif
             context_ptr->comp_similar_mode = 1;
         else 
             context_ptr->comp_similar_mode = 2;

@@ -76,6 +76,7 @@ extern "C" {
 #define M1_SWITCHED_HALF_PEL                1
 #define M1_CHROMA_SEARCH_OPT                1
 #define M1_NICS_LEVEL                       1
+#define M1_COMP_SIMILAR                     1
 
 // Old M1 to M0 - non-SC only - no longer relevant
 #define M1_MD_EXIT_TH                       0 // Adopted M0 setting in M1
