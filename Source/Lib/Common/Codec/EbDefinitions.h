@@ -32,6 +32,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define QPS_CHANGE              1 //QPS changes for 4L pictures
 #define PRED_DEBUG              0 //WIP
 #define PRED_DEBUG_L5           0
 

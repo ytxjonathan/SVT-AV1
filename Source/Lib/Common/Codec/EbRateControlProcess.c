@@ -4311,7 +4311,11 @@ void* rate_control_kernel(void *input_ptr)
                             { 1.0, 1.0, 1.0, 1.0, 1.0, 1.0 }, // 1L
                             { 0.35, 1.0, 1.0, 1.0, 1.0, 1.0 }, // 2L
                             { 0.35, 0.8, 1.0, 1.0, 1.0, 1.0 }, // 3L
+#if QPS_CHANGE
+                            { 0.6, 0.8,  0.9, 1.0, 1.0  }, // 4L
+#else
                             { 0.40, 0.7, 0.85, 1.0, 1.0, 1.0 }, // 4L
+#endif
                             { 0.35, 0.6, 0.8,  0.9, 1.0, 1.0 }  //5L
                         };
                         const int32_t delta_qindex = eb_av1_compute_qdelta(
