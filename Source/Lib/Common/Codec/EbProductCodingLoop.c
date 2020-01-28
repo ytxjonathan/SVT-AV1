@@ -6533,6 +6533,10 @@ void tx_partitioning_path(
             context_ptr->tx_weight) : EB_TRUE;
     else
         tx_search_skip_flag = context_ptr->tx_search_level == TX_SEARCH_FULL_LOOP ? EB_FALSE : EB_TRUE;
+#if DISABLE_TXT_FOR_NON_S_V_H
+    if (context_ptr->blk_geom->shape > PART_V)
+        tx_search_skip_flag = 1;
+#endif
 #endif
 #else
     if (context_ptr->md_staging_tx_search == 0)
@@ -6554,7 +6558,10 @@ void tx_partitioning_path(
         is_inter,
         end_tx_depth);
 #endif
-
+#if DISABLE_TXS_FOR_NON_S_V_H
+ if (context_ptr->blk_geom->shape > PART_V)
+        end_tx_depth = 0;
+#endif
     // Transform Depth Loop
 #if TX_SIZE_ONLY_MD_STAGE_2
     for (context_ptr->tx_depth = start_tx_depth; context_ptr->tx_depth <= end_tx_depth; context_ptr->tx_depth++) {
@@ -10410,6 +10417,10 @@ EbErrorType signal_derivation_block(
         }
     }
 
+ #if DISABLE_COMPOUND_FOR_NON_S_V_H
+    if (context_ptr->blk_geom->shape > PART_V)
+        context_ptr->compound_types_to_try = MD_COMP_AVG;
+#endif
 }
 #endif
 void md_encode_block(

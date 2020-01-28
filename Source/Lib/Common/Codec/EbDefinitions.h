@@ -37,6 +37,14 @@ extern "C" {
 
 #define COMP_SIMILAR     1
 
+#define MRP_OPT0 0
+#define MRP_OPT1 0
+#define TXT_OPT0 0
+#define DISABLE_COMPOUND_FOR_NON_S_V_H 0
+#define DISABLE_OBMC_FOR_NON_S_V_H     0
+#define DISABLE_TXT_FOR_NON_S_V_H      0
+#define DISABLE_TXS_FOR_NON_S_V_H      0
+#define DISABLE_RDOQ_FOR_NON_S_V_H     0
 
 #define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip
 #define NIC_LEVEL_CLEANUP           1 // Temp nics level clean up

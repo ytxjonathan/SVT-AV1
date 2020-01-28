@@ -2846,6 +2846,10 @@ void search_compound_diff_wedge(
         else
             ref_pic_list1 = (EbPictureBufferDesc*)EB_NULL;
 #endif
+#if MRP_OPT0
+        if (ref_idx_l0 > 2) return;
+        if (ref_idx_l1 > 2) return;
+#endif
         //CHKN get seperate prediction of each ref(Luma only)
         //ref0 prediction
         mv_unit.pred_direction = UNI_PRED_LIST_0;
@@ -2887,6 +2891,7 @@ void search_compound_diff_wedge(
             0,          //output origin_y,
             0,//do chroma
              hbd_mode_decision ? EB_10BIT : EB_8BIT);
+
 
         //ref1 prediction
         mv_unit.pred_direction = UNI_PRED_LIST_1;

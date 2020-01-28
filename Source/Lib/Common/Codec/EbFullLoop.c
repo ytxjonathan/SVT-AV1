@@ -1727,7 +1727,10 @@ int32_t av1_quantize_inv_quantize(
 #else
     EbBool perform_rdoq = ((md_context->md_staging_skip_rdoq == EB_FALSE || is_encode_pass) && md_context->trellis_quant_coeff_optimization && component_type == COMPONENT_LUMA && !is_intra_bc);
 #endif
-
+#if DISABLE_RDOQ_FOR_NON_S_V_H
+    if (md_context->blk_geom->shape > PART_V)
+        perform_rdoq = EB_FALSE;
+#endif
     SequenceControlSet *sequence_control_set_ptr = (SequenceControlSet*)picture_control_set_ptr->sequence_control_set_wrapper_ptr->object_ptr;
     if (sequence_control_set_ptr->static_config.enable_rdoq == DEFAULT) {
         perform_rdoq = perform_rdoq && (EbBool) sequence_control_set_ptr->static_config.enable_rdoq;

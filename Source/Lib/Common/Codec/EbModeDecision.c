@@ -1384,6 +1384,7 @@ void Bipred3x3CandidatesInjection(
                 context_ptr->compound_types_to_try :
                     context_ptr->compound_types_to_try == MD_COMP_WEDGE ? MD_COMP_DIFF0 :
                     context_ptr->compound_types_to_try;
+
 #else
     MD_COMP_TYPE compound_types_to_try = picture_control_set_ptr->parent_pcs_ptr->compound_types_to_try;
     MD_COMP_TYPE tot_comp_types = picture_control_set_ptr->parent_pcs_ptr->compound_mode == 1 ? MD_COMP_AVG:
@@ -2155,6 +2156,10 @@ void inject_mvp_candidates_II(
 #if OBMC_OPT3
             is_obmc_allowed = 0;
 #endif
+ #if DISABLE_OBMC_FOR_NON_S_V_H
+    if (context_ptr->blk_geom->shape > PART_V)
+        is_obmc_allowed = 0;
+#endif
 #if 0//OBMC_OPT5
             if (context_ptr->blk_geom->shape != PART_N) {
                 CodingUnit *  sq_cu_ptr = &context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds];
@@ -2289,6 +2294,10 @@ void inject_mvp_candidates_II(
             uint8_t is_obmc_allowed = obmc_motion_mode_allowed(picture_control_set_ptr, context_ptr, bsize, rf[0], rf[1], NEARMV) == OBMC_CAUSAL;
             #if OBMC_OPT3
             is_obmc_allowed = 0;
+#endif
+ #if DISABLE_OBMC_FOR_NON_S_V_H
+    if (context_ptr->blk_geom->shape > PART_V)
+        is_obmc_allowed = 0;
 #endif
 #if 0//OBMC_OPT5
             if (context_ptr->blk_geom->shape != PART_N) {
@@ -3860,6 +3869,9 @@ void obmc_motion_refinement(
 
     {
         uint8_t ref_idx = get_ref_frame_idx(candidate->ref_frame_type);
+#if MRP_OPT1
+        if (ref_idx > 2) return;
+#endif
         uint8_t list_idx = get_list_idx(candidate->ref_frame_type);
         EbPictureBufferDesc  *reference_picture = ((EbReferenceObject*)picture_control_set_ptr->ref_pic_ptr_array[list_idx][ref_idx]->object_ptr)->reference_picture;
         Yv12BufferConfig ref_buf;
@@ -4043,6 +4055,10 @@ void inject_new_candidates(
 #if OBMC_OPT3
             is_obmc_allowed = 0;
 #endif
+ #if DISABLE_OBMC_FOR_NON_S_V_H
+    if (context_ptr->blk_geom->shape > PART_V)
+        is_obmc_allowed = 0;
+#endif
 #if OBMC_OPT5
             if (context_ptr->blk_geom->shape != PART_N) {
                 CodingUnit *  sq_cu_ptr = &context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds];
@@ -4223,6 +4239,10 @@ void inject_new_candidates(
             uint8_t is_obmc_allowed = obmc_motion_mode_allowed(picture_control_set_ptr, context_ptr, bsize, rf[0], rf[1], NEWMV) == OBMC_CAUSAL;
 #if OBMC_OPT3
             is_obmc_allowed = 0;
+#endif
+ #if DISABLE_OBMC_FOR_NON_S_V_H
+    if (context_ptr->blk_geom->shape > PART_V)
+        is_obmc_allowed = 0;
 #endif
 #if OBMC_OPT5
             if (context_ptr->blk_geom->shape != PART_N) {
@@ -4549,6 +4569,10 @@ void inject_new_candidates(
 #if OBMC_OPT3
             is_obmc_allowed = 0;
 #endif
+ #if DISABLE_OBMC_FOR_NON_S_V_H
+    if (context_ptr->blk_geom->shape > PART_V)
+        is_obmc_allowed = 0;
+#endif
 #if OBMC_OPT5
             if (context_ptr->blk_geom->shape != PART_N) {
                 CodingUnit *  sq_cu_ptr = &context_ptr->md_cu_arr_nsq[context_ptr->blk_geom->sqi_mds];
@@ -4683,6 +4707,10 @@ void inject_new_candidates(
                                 uint8_t is_obmc_allowed = obmc_motion_mode_allowed(picture_control_set_ptr, context_ptr, bsize, rf[0], rf[1], NEWMV) == OBMC_CAUSAL;
      #if OBMC_OPT3
             is_obmc_allowed = 0;
+#endif
+ #if DISABLE_OBMC_FOR_NON_S_V_H
+    if (context_ptr->blk_geom->shape > PART_V)
+        is_obmc_allowed = 0;
 #endif
 #if OBMC_OPT5
             if (context_ptr->blk_geom->shape != PART_N) {
@@ -5069,6 +5097,10 @@ void  inject_inter_candidates(
 
 #if OBMC_OPT3
             is_obmc_allowed = 0;
+#endif
+ #if DISABLE_OBMC_FOR_NON_S_V_H
+    if (context_ptr->blk_geom->shape > PART_V)
+        is_obmc_allowed = 0;
 #endif
 #if OBMC_OPT5
             if (context_ptr->blk_geom->shape != PART_N) {
