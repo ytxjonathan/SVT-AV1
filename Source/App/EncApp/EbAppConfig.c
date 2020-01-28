@@ -54,7 +54,6 @@
 #define PRED_STRUCT_TOKEN "--pred-struct"
 #define INTRA_PERIOD_TOKEN "--keyint"
 #define PROFILE_TOKEN "--profile"
-#define TIER_TOKEN "--tier"
 #define LEVEL_TOKEN "--level"
 #define FILM_GRAIN_TOKEN "--enable-film-grain"
 #define INTRA_REFRESH_TYPE_TOKEN "--irefresh-type" // no Eval
@@ -482,7 +481,6 @@ static void set_high_dynamic_range_input(const char *value, EbConfig *cfg) {
 static void set_profile(const char *value, EbConfig *cfg) {
     cfg->profile = strtol(value, NULL, 0);
 };
-static void set_tier(const char *value, EbConfig *cfg) { cfg->tier = strtol(value, NULL, 0); };
 static void set_level(const char *value, EbConfig *cfg) {
     if (strtoul(value, NULL, 0) != 0 || EB_STRCMP(value, "0") == 0)
         cfg->level = (uint32_t)(10 * strtod(value, NULL));
@@ -639,7 +637,6 @@ ConfigEntry config_entry_global_options[] = {
      "Stream frame rate denominator",
      set_frame_rate_denominator},
     {SINGLE_INPUT, ENCODER_BIT_DEPTH, "Bit depth for codec(8 or 10)", set_encoder_bit_depth},
-    {SINGLE_INPUT, TIER_TOKEN, "Tier", set_tier},
     {SINGLE_INPUT, LEVEL_TOKEN, "Level", set_level},
     {SINGLE_INPUT, HIERARCHICAL_LEVELS_TOKEN, "Set hierarchical levels", set_hierarchical_levels},
     {SINGLE_INPUT,
@@ -741,7 +738,7 @@ ConfigEntry config_entry_specific[] = {
      set_enable_mfmv_flag},
     {SINGLE_INPUT,
      REDUNDANT_BLK_TOKEN,
-     "use the same md results(mode, residual , cost…)as the previously processed identical block(0 "
+     "use the same md results(mode, residual , costï¿½)as the previously processed identical block(0 "
      "= OFF, 1 = ON, -1 = DEFAULT)",
      set_enable_redundant_blk_flag},
     {SINGLE_INPUT,
@@ -986,8 +983,8 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, OUTPUT_RECON_TOKEN, "ReconFile", set_cfg_recon_file},
     {SINGLE_INPUT, QP_FILE_TOKEN, "QpFile", set_cfg_qp_file},
     {SINGLE_INPUT, STAT_FILE_TOKEN, "StatFile", set_cfg_stat_file},
-    {SINGLE_INPUT, INPUT_STAT_FILE_TOKEN, "input_stat_file", set_input_stat_file},
-    {SINGLE_INPUT, OUTPUT_STAT_FILE_TOKEN, "output_stat_file", set_output_stat_file},
+    {SINGLE_INPUT, INPUT_STAT_FILE_TOKEN, "InputStatFile", set_input_stat_file},
+    {SINGLE_INPUT, OUTPUT_STAT_FILE_TOKEN, "OutputStatFile", set_output_stat_file},
     // Picture Dimensions
     {SINGLE_INPUT, WIDTH_TOKEN, "SourceWidth", set_cfg_source_width},
     {SINGLE_INPUT, HEIGHT_TOKEN, "SourceHeight", set_cfg_source_height},
@@ -1143,10 +1140,9 @@ ConfigEntry config_entry[] = {
     // Latency
     {SINGLE_INPUT, INJECTOR_TOKEN, "Injector", set_injector},
     {SINGLE_INPUT, INJECTOR_FRAMERATE_TOKEN, "InjectorFrameRate", set_injector_frame_rate},
-    {SINGLE_INPUT, SPEED_CONTROL_TOKEN, "speed_control_flag", speed_control_flag},
+    {SINGLE_INPUT, SPEED_CONTROL_TOKEN, "SpeedControlFlag", speed_control_flag},
     // Annex A parameters
     {SINGLE_INPUT, PROFILE_TOKEN, "Profile", set_profile},
-    {SINGLE_INPUT, TIER_TOKEN, "Tier", set_tier},
     {SINGLE_INPUT, LEVEL_TOKEN, "Level", set_level},
     {SINGLE_INPUT, FILM_GRAIN_TOKEN, "FilmGrain", set_cfg_film_grain},
     // Asm Type
