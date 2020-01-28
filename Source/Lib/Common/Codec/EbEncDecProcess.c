@@ -2173,7 +2173,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #if M0_OPT
 #if M1_OPT
+#if MD_STAGE_1_CAND_PRUNNING_TH
+    if (picture_control_set_ptr->enc_mode <= ENC_M1 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#else
     if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#endif
 #else
     if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
@@ -2181,10 +2185,15 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (MR_MODE || picture_control_set_ptr->enc_mode == ENC_M0 || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
         context_ptr->md_stage_1_cand_prune_th = (uint64_t)~0;
+#if MD_STAGE_1_CAND_PRUNNING_TH
+    else
+        context_ptr->md_stage_1_cand_prune_th = sequence_control_set_ptr->static_config.md_stage_1_cand_prune_th;
+#else
     else if (picture_control_set_ptr->enc_mode <= ENC_M4)
         context_ptr->md_stage_1_cand_prune_th = sequence_control_set_ptr->static_config.md_stage_1_cand_prune_th;
     else
         context_ptr->md_stage_1_cand_prune_th = (uint64_t)~0;
+#endif
 #else
     if (MR_MODE)
         context_ptr->dist_base_md_stage_0_count_th = (uint64_t)~0;
@@ -2211,7 +2220,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if M0_OPT
 #if SC_PRESETS_OPT
 #if M1_OPT
+#if MD_STAGE_1_CLASS_PRUNNING_TH
+        if (picture_control_set_ptr->enc_mode <= ENC_M1 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#else
         if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
+#endif
 #else
         if (MR_MODE || (picture_control_set_ptr->enc_mode == ENC_M0) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
@@ -2222,23 +2235,35 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (MR_MODE || picture_control_set_ptr->enc_mode == ENC_M0 || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
         context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
+#if MD_STAGE_1_CLASS_PRUNNING_TH
+    else
+        context_ptr->md_stage_1_class_prune_th = sequence_control_set_ptr->static_config.md_stage_1_class_prune_th;
+#else
     else if (picture_control_set_ptr->enc_mode <= ENC_M4)
         context_ptr->md_stage_1_class_prune_th = sequence_control_set_ptr->static_config.md_stage_1_class_prune_th;
     else
         context_ptr->md_stage_1_class_prune_th = (uint64_t)~0;
-
+#endif
     // md_stage_2_cand_prune_th (for single candidate removal per class)
     // Remove candidate if deviation to the best is higher than md_stage_2_cand_prune_th
 #if MULTI_PASS_PD
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->md_stage_2_cand_prune_th = (uint64_t)~0;
     else if (context_ptr->pd_pass == PD_PASS_1)
+#if MD_STAGE_2_CAND_PRUNNING_TH
+        context_ptr->md_stage_2_cand_prune_th = 5;
+#else
         context_ptr->md_stage_2_cand_prune_th = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 5 : 3;
+#endif
     else
 #endif
 #if M0_OPT || PRESETS_TUNE
 #if (PRESETS_TUNE && !PRESETS_OPT) || M1_OPT
+#if MD_STAGE_2_CAND_PRUNNING_TH
+        if (picture_control_set_ptr->enc_mode <= ENC_M1 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#else
         if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #else
         if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M0)
 #endif
@@ -2250,13 +2275,19 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else if (picture_control_set_ptr->enc_mode <= ENC_M0)
         context_ptr->md_stage_2_cand_prune_th = sequence_control_set_ptr->static_config.md_stage_2_cand_prune_th;
 #endif
+#if MD_STAGE_2_CAND_PRUNNING_TH
+    else if (picture_control_set_ptr->enc_mode <= ENC_M2)
+        context_ptr->md_stage_2_cand_prune_th = 12;
+    else 
+        context_ptr->md_stage_2_cand_prune_th = 3;
+#else
     else if (picture_control_set_ptr->enc_mode <= ENC_M2)
         context_ptr->md_stage_2_cand_prune_th = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 15 : 12;
     else if (picture_control_set_ptr->enc_mode <= ENC_M4)
         context_ptr->md_stage_2_cand_prune_th = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 5 : 3;
     else
         context_ptr->md_stage_2_cand_prune_th = (uint64_t)~0;
-
+#endif
     // md_stage_2_class_prune_th (for class removal)
     // Remove class if deviation to the best is higher than md_stage_2_class_prune_th
 #if MULTI_PASS_PD
@@ -2281,7 +2312,13 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
         context_ptr->md_stage_2_class_prune_th = (uint64_t)~0;
     else if (picture_control_set_ptr->enc_mode <= ENC_M4)
+#if MD_STAGE_2_CLASS_PRUNNING_0
+        context_ptr->md_stage_2_class_prune_th = sequence_control_set_ptr->static_config.md_stage_2_class_prune_th - 10;
+#elif MD_STAGE_2_CLASS_PRUNNING_1
+        context_ptr->md_stage_2_class_prune_th = sequence_control_set_ptr->static_config.md_stage_2_class_prune_th - 20;
+#else
         context_ptr->md_stage_2_class_prune_th = sequence_control_set_ptr->static_config.md_stage_2_class_prune_th;
+#endif
     else // to be tested for m5-m8
         context_ptr->md_stage_2_class_prune_th = (uint64_t)~0;
 
@@ -2323,11 +2360,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
 #if M0_ADOPT_SQ_WEIGHT
-        // Adopt settings which aren't resolution-dependent
-        if (picture_control_set_ptr->enc_mode <= ENC_M3)
-            context_ptr->sq_weight = 105;
-        else
-            context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? sequence_control_set_ptr->static_config.sq_weight + 25 : sequence_control_set_ptr->static_config.sq_weight;
+        context_ptr->sq_weight = 105;
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ? sequence_control_set_ptr->static_config.sq_weight + 25 : sequence_control_set_ptr->static_config.sq_weight;
 #endif
