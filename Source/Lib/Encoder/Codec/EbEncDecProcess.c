@@ -2922,7 +2922,7 @@ void *enc_dec_kernel(void *input_ptr) {
         pcs_ptr->intra_coded_area += (uint32_t)context_ptr->tot_intra_coded_area;
 #if TILES_PARALLEL
         pcs_ptr->enc_dec_coded_sb_count += (uint32_t)context_ptr->coded_sb_count;
-        last_sb_flag = (scs_ptr->sb_tot_cnt == pcs_ptr->enc_dec_coded_sb_count);
+        last_sb_flag = (pcs_ptr->sb_total_count_pix == pcs_ptr->enc_dec_coded_sb_count);
 #endif
         eb_release_mutex(pcs_ptr->intra_mutex);
 
