@@ -32,7 +32,23 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+    // NON FEATURE
+    
+#define NON_SC_last_i_picture_sc_detection          0 // NO NEED:
+#define NON_SC_noiselevel_adj                       0 // NO NEED: 2pass
+#define NON_SC_max_qp_scaling_avg_comp_I            0 // NO NEED: qpm
+#define NON_SC                                      0
 
+    // SC FEATURE
+#define NON_SC_allow_screen_content_tools           0
+#define NON_SC_allow_intrabc                        0
+#define NON_SC_palette                              0
+#define NON_SC_HME                                  0//
+#define NON_SC_HME_ENABLE                           0
+#define NON_SC_DISTANCE_ME_FACTOR                   0//
+#define NON_SC_prune_references_sc                  0//
+    
+    // TOCHECK
 #define	NON_SC_intepolation_search                  0
 #define NON_SC_chroma_mode                          0 //crash
 #define NON_SC_unipred3x3_injection                 0
@@ -43,38 +59,27 @@ extern "C" {
 #define NON_SC_pic_filter_intra_mode                0
 #define NON_SC_enable_wm                            0 // tocheck
 #define NON_SC_NSQ_SEARCH                           0
-#define NON_SC_allow_intrabc                        0
 #define NON_SC_loop_filter_mode                     0
 #define NON_SC_cdef_filter_mode                     0
 #define NON_SC_cu8x8_mode                           0
 #define NON_SC_compound_mode                        0
 #define NON_SC_prune_unipred_at_me                  0
 #define NON_SC_gm_level                             0
-#define NON_SC_last_i_picture_sc_detection          0 // NO NEED: 
-#define NON_SC_noiselevel_adj                       0 // NO NEED: 2pass
-#define NON_SC_max_qp_scaling_avg_comp_I            0 // NO NEED: qpm
 #define NON_SC_altref_nframes                       0
-#define NON_SC_md_stage_count_nfc                   0 // NO NEED: OFF
+#define NON_SC_md_stage_count_nfc                   0 // 
 #define NON_SC_mfmv_enabled                         0
-
-#define NON_SC_DISTANCE_ME_FACTOR                   0//
-#define NON_SC_prune_references_sc                  0//
-#define NON_SC_HME                                  0//
-#define NON_SC_HME_ENABLE                           0
 #define NON_SC_full_pel_ref_window_width_th         0//
 #define NON_SC_MTH_PTH                              0//
 #define NON_SC_md_stage_1_cand_prune_th             0
-#define NON_SC_allow_screen_content_tools           0
 #define NON_SC_atb_mode                             0
 #define NON_SC_fractional_search_method             0
 #define NON_SC_enable_interintra                    0
 #define NON_SC_pic_depth_mode                       0
-#define NON_SC                                      0
 #define NON_SC_half_pel_mode                        0
 #define NON_SC_sb_size                              0
 #define NON_SC_fractional_search64x64               0
 
-
+///
 
 #define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip
 #define NIC_LEVEL_CLEANUP           1 // Temp nics level clean up
