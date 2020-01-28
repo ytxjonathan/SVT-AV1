@@ -126,6 +126,8 @@ void copy_buffer_info(EbPictureBufferDesc *src_ptr, EbPictureBufferDesc *dst_ptr
     dst_ptr->chroma_size = src_ptr->chroma_size;
 }
 
+void eb_av1_calculate_tile_cols(PictureParentControlSet *pcs_ptr);
+
 /***************************************************************************************************
  * Picture Manager Kernel
  *
@@ -855,9 +857,12 @@ void *picture_manager_kernel(void *input_ptr) {
                                       entry_scs_ptr->sb_size_pix);
 
 #if TILES_PARALLEL
+                        eb_av1_calculate_tile_cols(entry_pcs_ptr);
+
                         int      sb_size_log2    = entry_scs_ptr->seq_header.sb_size_log2;
-                        uint32_t encDecSegColCnt = entry_scs_ptr->enc_dec_segment_col_count_array
-                                                       [entry_pcs_ptr->temporal_layer_index];
+                        uint32_t encDecSegColCnt = (scs_ptr->static_config.super_block_size == 128) ?
+                                                 ((entry_pcs_ptr->aligned_width + 64) / 128) :
+                                                 ((entry_pcs_ptr->aligned_width + 32) / 64);
                         uint32_t encDecSegRowCnt = entry_scs_ptr->enc_dec_segment_row_count_array
                                                        [entry_pcs_ptr->temporal_layer_index];
 
