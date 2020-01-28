@@ -2174,7 +2174,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if M0_OPT
 #if M1_OPT
 #if MD_STAGE_1_CAND_PRUNNING_TH
-    if (picture_control_set_ptr->enc_mode <= ENC_M1 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+    if (picture_control_set_ptr->enc_mode <= ENC_M2 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #else
     if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1 && (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0)) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
@@ -2277,9 +2277,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #if MD_STAGE_2_CAND_PRUNNING_TH
     else if (picture_control_set_ptr->enc_mode <= ENC_M2)
-        context_ptr->md_stage_2_cand_prune_th = 12;
+        context_ptr->md_stage_2_cand_prune_th = 15;
     else 
-        context_ptr->md_stage_2_cand_prune_th = 3;
+        context_ptr->md_stage_2_cand_prune_th = 5;
 #else
     else if (picture_control_set_ptr->enc_mode <= ENC_M2)
         context_ptr->md_stage_2_cand_prune_th = sequence_control_set_ptr->input_resolution <= INPUT_SIZE_1080i_RANGE ? 15 : 12;

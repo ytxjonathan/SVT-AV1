@@ -213,11 +213,11 @@ extern "C" {
 #define TEST_PIC_MULTI_PASS_PD_MODE_4   0
 
 
-#define MD_STAGE_1_CAND_PRUNNING_TH     0
-#define MD_STAGE_1_CLASS_PRUNNING_TH    0
-#define MD_STAGE_2_CAND_PRUNNING_TH     0
+#define MD_STAGE_1_CAND_PRUNNING_TH     0 // to enable as part of blue towards bd-rate
+#define MD_STAGE_1_CLASS_PRUNNING_TH    0 // to enable as part of blue towards speed
+#define MD_STAGE_2_CAND_PRUNNING_TH     0 // to enable as part of blue towards bd-rate
 
-#define MD_STAGE_2_CLASS_PRUNNING_0     0 
+#define MD_STAGE_2_CLASS_PRUNNING_0     0 // to enable as part of blue towards speed
 #define MD_STAGE_2_CLASS_PRUNNING_1     0
 
 
