@@ -2311,7 +2311,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #endif
         context_ptr->md_stage_2_class_prune_th = (uint64_t)~0;
-    else if (picture_control_set_ptr->enc_mode <= ENC_M4)
+#if LOSSLESS_CLEAN_UP
+    else
 #if MD_STAGE_2_CLASS_PRUNNING_0
         context_ptr->md_stage_2_class_prune_th = sequence_control_set_ptr->static_config.md_stage_2_class_prune_th - 10;
 #elif MD_STAGE_2_CLASS_PRUNNING_1
@@ -2319,9 +2320,12 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #else
         context_ptr->md_stage_2_class_prune_th = sequence_control_set_ptr->static_config.md_stage_2_class_prune_th;
 #endif
+#else
+    else if (picture_control_set_ptr->enc_mode <= ENC_M4)
+        context_ptr->md_stage_2_class_prune_th = sequence_control_set_ptr->static_config.md_stage_2_class_prune_th;
     else // to be tested for m5-m8
         context_ptr->md_stage_2_class_prune_th = (uint64_t)~0;
-
+#endif
 #endif
 
 #if LESS_RECTANGULAR_CHECK_LEVEL
@@ -2541,6 +2545,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
        context_ptr->enable_auto_max_partition = 0;
     else if (context_ptr->pd_pass == PD_PASS_1)
         context_ptr->enable_auto_max_partition = 0;
+#if LOSSLESS_CLEAN_UP
+    else
+        context_ptr->enable_auto_max_partition = 0;
+#else
 #if ENHANCED_M0_SETTINGS
 #if TUNE_AUTO_MAX_PARTITION
 #if SHUT_AUTO_MAX_PARTITION
@@ -2558,6 +2566,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->enable_auto_max_partition = sequence_control_set_ptr->static_config.enable_auto_max_partition;
 #endif
+#endif
+
 #if MOVE_OPT
     context_ptr->chroma_search_opt = picture_control_set_ptr->enc_mode <= ENC_M0 ? 0 : 1;
 #endif

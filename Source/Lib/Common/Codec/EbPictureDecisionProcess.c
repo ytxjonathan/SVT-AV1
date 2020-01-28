@@ -843,7 +843,7 @@ EbErrorType signal_derivation_multi_processes_oq(
 #else
             picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_1;
 #endif
-#if MULTI_PASS_PD_TILL_M7
+#if LOSSLESS_CLEAN_UP
         else if (picture_control_set_ptr->enc_mode <= ENC_M7)
 #else
         else if (picture_control_set_ptr->enc_mode <= ENC_M2)
@@ -864,7 +864,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         //Jing: TODO:
         //In M3, sb_sz may be 128x128, and init_sq_non4_block only works for 64x64 sb size
 #endif
-#if !MULTI_PASS_PD_TILL_M7
+#if !LOSSLESS_CLEAN_UP
         else if (picture_control_set_ptr->enc_mode <= ENC_M6)
             picture_control_set_ptr->pic_depth_mode = PIC_SQ_NON4_DEPTH_MODE;
 #endif

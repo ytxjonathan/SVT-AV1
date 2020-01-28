@@ -204,7 +204,7 @@ extern "C" {
 #define SPATIAL_DOMAIN_ONLY_LAST_STAGE  1
 #endif
 
-#define MULTI_PASS_PD_TILL_M7           1
+#define LOSSLESS_CLEAN_UP               1  // Lossless for MR, M0, M1
 
 #define TEST_PIC_MULTI_PASS_PD_MODE_0   0
 #define TEST_PIC_MULTI_PASS_PD_MODE_1   0
