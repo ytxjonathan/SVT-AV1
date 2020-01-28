@@ -1314,6 +1314,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->interpolation_search_level = IT_SEARCH_OFF;
     else if (context_ptr->pd_pass == PD_PASS_1) {
+#if LAYER_CHECK_REMOVAL
+        context_ptr->interpolation_search_level = IT_SEARCH_OFF;
+#else
 #if IFS_TL
 #if M1_ADOPT_M0_INTERP_SEARCH_PD1
         if (picture_control_set_ptr->enc_mode <= ENC_M1)
@@ -1327,6 +1330,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP_UV_BLIND;
         else
             context_ptr->interpolation_search_level = IT_SEARCH_OFF;
+#endif
     }
     else
 #if !MR_MODE_CLEAN_UP
@@ -1374,7 +1378,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->chroma_level = CHROMA_MODE_2; // or CHROMA_MODE_3
     else if (context_ptr->pd_pass == PD_PASS_1) {
-#if CHROMA_OPT_0
+#if REMOVE_TEMPORAL_LAYER_CHECK
         context_ptr->chroma_level = CHROMA_MODE_1;
 #else
         if (picture_control_set_ptr->temporal_layer_index == 0)
@@ -1398,7 +1402,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
                     CHROMA_MODE_3;
         else
 #if PRESETS_TUNE
-#if ENHANCED_M0_SETTINGS && !M0_ADOPT_M1_CHROMA_LEVEL
+#if ENHANCED_M0_SETTINGS
             if (picture_control_set_ptr->enc_mode == ENC_M0)
                 context_ptr->chroma_level = CHROMA_MODE_0;
 #else
@@ -2113,6 +2117,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 
 #if SPEED_OPT
     // Derive INTER/INTER WEDGE variance TH
+
+#if MR_MODE_CLEAN_UP
+    // Phoenix: Active only when inter/inter compound is on
+    context_ptr->inter_inter_wedge_variance_th = 100;
+#else
 #if PRESETS_OPT
     // Phoenix: Active only when inter/inter compound is on
 #if COMPOUND_WEDGE_OPT
@@ -2205,7 +2214,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->dist_base_md_stage_0_count_th = 75;
 #endif
 #endif
-
+#endif
 #if INTER_INTRA_CLASS_PRUNING
 
     // md_stage_1_class_prune_th (for class removal)
@@ -2417,8 +2426,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     //0: OFF
     //1: If previous similar block is not compound, do not inject compound
     //2: If previous similar block is not compound, do not inject compound else consider the compound modes up the similar’s one
+#if! MR_MODE_CLEAN_UP
     context_ptr->comp_similar_mode = 0;
     if (!MR_MODE)
+#endif
         if( picture_control_set_ptr->enc_mode == ENC_M0)
             context_ptr->comp_similar_mode = 1;
         else 

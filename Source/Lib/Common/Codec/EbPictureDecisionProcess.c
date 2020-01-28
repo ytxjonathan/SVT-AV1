@@ -830,7 +830,11 @@ EbErrorType signal_derivation_multi_processes_oq(
 #endif
 #if MULTI_PASS_PD
         else if (MR_MODE)
+#if MR_MODE_CLEAN_UP
+            picture_control_set_ptr->pic_depth_mode = (picture_control_set_ptr->slice_type == I_SLICE) ? PIC_ALL_DEPTH_MODE : PIC_MULTI_PASS_PD_MODE_0;
+#else
             picture_control_set_ptr->pic_depth_mode = PIC_ALL_DEPTH_MODE;
+#endif
 #if M1_OPT
 #if M2_ADOPTIONS
         else if (picture_control_set_ptr->enc_mode <= ENC_M2)

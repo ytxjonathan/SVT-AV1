@@ -221,6 +221,7 @@ extern "C" {
 #define MD_STAGE_2_CLASS_PRUNNING_0     0 // to enable as part of blue towards speed
 #define MD_STAGE_2_CLASS_PRUNNING_1     0
 
+#define LAYER_CHECK_REMOVAL             1
 
 
 #define MR_MODE_CLEAN_UP                1 
@@ -248,7 +249,6 @@ extern "C" {
 #define M0_ADOPT_GM_LEVEL               1
 #define M0_ADOPT_SQ_WEIGHT              1
 #define M0_ME_ADOPT                     1
-#define M0_ADOPT_M1_CHROMA_LEVEL        1
 #define M0_ADOPT_M1_INTER_INTER_WEDGE   1
 #define M1_ADOPT_M0_INTERP_SEARCH_PD1   0
 #define M1_ADOPT_M0_MD_EXIT_TH          1
