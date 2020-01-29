@@ -139,7 +139,7 @@ extern "C" {
 
 
 #define DIST_BASED_ME_SEARCH_AREA    1
-
+#define ABILITY_BYPASS_HME_LEVEL_0   0
 #define ENABLE_HME_360P              1
 #define ENABLE_SB128_360P            1
 #define ENABLE_FULL_MRP_ME_SC        1
@@ -3944,7 +3944,11 @@ static const uint8_t enable_hme_flag[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORT
 //     M0    M1    M2    M3    M4    M5    M6    M7    M8    M9    M10    M11    M12
 static const uint8_t enable_hme_level0_flag[SC_MAX_LEVEL][INPUT_SIZE_COUNT][MAX_SUPPORTED_MODES] = {
     {
+#if ABILITY_BYPASS_HME_LEVEL_0
+        {   0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0,    0 },      // INPUT_SIZE_576p_RANGE_OR_LOWER
+#else
         {   1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1 },      // INPUT_SIZE_576p_RANGE_OR_LOWER
+#endif
         {   1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1 },      // INPUT_SIZE_720P_RANGE/INPUT_SIZE_1080i_RANGE
         {   1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1 },      // INPUT_SIZE_1080p_RANGE
         {   1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1,    1 }       // INPUT_SIZE_4K_RANGE

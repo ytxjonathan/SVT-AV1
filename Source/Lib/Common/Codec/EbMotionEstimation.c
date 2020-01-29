@@ -14834,6 +14834,19 @@ void hme_sb(
                                     // increase the search area width and height
                                     // for level 1 to (32x12) for Gold only
 
+
+#if ABILITY_BYPASS_HME_LEVEL_0
+                                    if (!enable_hme_level0_flag) {
+
+                                        xHmeLevel0SearchCenter
+                                            [searchRegionNumberInWidth]
+                                        [searchRegionNumberInHeight] = 0;
+                                            yHmeLevel0SearchCenter
+                                            [searchRegionNumberInWidth]
+                                        [searchRegionNumberInHeight] = 0;
+                                    }
+#endif
+
                                     hmeLevel1SearchAreaInWidth =
                                         (int16_t)context_ptr
                                         ->hme_level1_search_area_in_width_array
