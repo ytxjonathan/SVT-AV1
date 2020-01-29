@@ -1700,7 +1700,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 0: OFF
         // 1: ON
 #if M0_ADOPT_PRUNE_REF_BASED_ME
+#if M1_ADOPTIONS
+        if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M1)
+#else
         if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
 #else
         if (picture_control_set_ptr->sc_content_detected || MR_MODE)
 #endif

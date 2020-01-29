@@ -1403,7 +1403,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
 #if PRESETS_TUNE
 #if ENHANCED_M0_SETTINGS
+#if M1_ADOPTIONS
+            if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#else
             if (picture_control_set_ptr->enc_mode == ENC_M0)
+#endif
                 context_ptr->chroma_level = CHROMA_MODE_0;
 #else
             if (MR_MODE)
@@ -1547,7 +1551,12 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
 #if FIX_NEAREST_NEW
 #if NEW_NN_TL
+#if M0_ADOPTIONS
+            // adopt M1 setting in M0
+            if (MR_MODE)
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M0)
+#endif
 #else
             if (picture_control_set_ptr->enc_mode <= ENC_M0 && picture_control_set_ptr->parent_pcs_ptr->is_used_as_reference_flag)
 #endif
@@ -2282,7 +2291,12 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if M0_OPT || PRESETS_TUNE
 #if (PRESETS_TUNE && !PRESETS_OPT) || M1_OPT
 #if MD_STAGE_2_CAND_PRUNNING_TH
+#if M1_ADOPTIONS
+        // adopt M2 settings in M1
+        if (picture_control_set_ptr->enc_mode <= ENC_M0 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#else
         if (picture_control_set_ptr->enc_mode <= ENC_M1 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#endif
 #else
         if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M1)
 #endif
@@ -2375,7 +2389,6 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight + 5;
         else
             context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
-
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
 #endif
@@ -2425,7 +2438,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     context_ptr->comp_similar_mode = 0;
     if (!MR_MODE)
 #endif
+#if M1_ADOPTIONS
+        if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#else
         if( picture_control_set_ptr->enc_mode == ENC_M0)
+#endif
             context_ptr->comp_similar_mode = 1;
         else 
             context_ptr->comp_similar_mode = 2;

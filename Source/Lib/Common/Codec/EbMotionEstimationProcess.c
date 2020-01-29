@@ -269,7 +269,12 @@ EbErrorType signal_derivation_me_kernel_oq(
 #if !MR_MODE_CLEAN_UP
     else 
 #endif
+#if M1_ADOPTIONS
+        // adopt M2 setting in M1
+        if (enc_mode <= ENC_M0) {
+#else
         if (enc_mode <= ENC_M1) {
+#endif
 #else
     else if (enc_mode == ENC_M0) {
 #endif
@@ -291,7 +296,11 @@ EbErrorType signal_derivation_me_kernel_oq(
     }
 
 #if SWITCHED_HALF_PEL_MODE
+#if M1_ADOPTIONS
+    context_ptr->me_context_ptr->switched_half_pel_mode = enc_mode <= ENC_M1 ? 0 : 1;
+#else
     context_ptr->me_context_ptr->switched_half_pel_mode = enc_mode <= ENC_M0 ? 0 : 1;
+#endif
 #endif
 #if TUNE_SUBPEL_SEARCH
     context_ptr->me_context_ptr->h_pel_search_wind =  sequence_control_set_ptr->input_resolution <= INPUT_SIZE_576p_RANGE_OR_LOWER ?
@@ -663,7 +672,12 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
 #if !MR_MODE_CLEAN_UP
     else
 #endif
+#if M1_ADOPTIONS
+        // adopt M2 setting in M1
+        if (enc_mode <= ENC_M0) {
+#else
         if (enc_mode <= ENC_M1) {
+#endif
 #else
     else if (enc_mode == ENC_M0) {
 #endif
@@ -684,7 +698,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
     }
 
 #if SWITCHED_HALF_PEL_MODE
+#if M1_ADOPTIONS
+    context_ptr->me_context_ptr->switched_half_pel_mode = enc_mode <= ENC_M1 ? 0 : 1;
+#else
     context_ptr->me_context_ptr->switched_half_pel_mode = enc_mode <= ENC_M0 ? 0 : 1;
+#endif
 #endif
 
     // Set fractional search model

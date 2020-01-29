@@ -256,6 +256,8 @@ extern "C" {
 #define REMOVE_PIC_OBMC_MR_CHECK        1
 #define SHUT_AUTO_MAX_PARTITION         1
 #define M2_ADOPTIONS                    1
+#define M1_ADOPTIONS                    1
+#define M0_ADOPTIONS                    1
 
 /* Note: shutting the macro PAL_SUP will not give SS as pcs->palette_mode = 0
    rate estimation is changed for I frame + enabled sc for P (rate estimation
@@ -343,8 +345,13 @@ extern "C" {
 
 #if OPTIMISED_EX_SUBPEL
 #if TUNE_SUBPEL_SEARCH
+#if MR_MODE
+#define H_PEL_SEARCH_WIND_1 3  // 1/2-pel serach window 1 makes SR 7x7
+#define H_PEL_SEARCH_WIND_2 3  // 1/2-pel serach window 2 makes SR 7x7
+#else
 #define H_PEL_SEARCH_WIND_1 1  // 1/2-pel serach window 1 makes SR 3x3
 #define H_PEL_SEARCH_WIND_2 2  // 1/2-pel serach window 2 makes SR 5x5
+#endif
 #else
 #define H_PEL_SEARCH_WIND 3  // 1/2-pel serach window
 #endif
