@@ -5736,7 +5736,41 @@ void tx_type_search(
     if (picture_control_set_ptr->parent_pcs_ptr->tx_search_reduced_set == 2)
 #endif
         txk_end = 2;
-
+#if RESTRICT_TXT_FOR_NON_S_V_H
+    TxType tx_type_pred_0[17] = { 0 };
+    TxType tx_type_pred_1[17] = { 0 }; 
+    uint8_t txt_it = 0;
+    if (context_ptr->blk_geom->shape > PART_V) {
+        uint16_t parent_blk_mds = context_ptr->blk_geom->pi_mds;
+        uint16_t sq_blk_mds = context_ptr->blk_geom->sqi_mds;
+        CodingUnit *parent_cu = &context_ptr->md_cu_arr_nsq[parent_blk_mds];
+        CodingUnit *square_cu = &context_ptr->md_cu_arr_nsq[sq_blk_mds];    
+        TransformUnit *txb_ptr;
+        uint32_t txb_itr = 0;
+        uint32_t tuTotalCount;
+        if (context_ptr->md_local_cu_unit[parent_blk_mds].avail_blk_flag) {
+            tuTotalCount = context_ptr->blk_geom->txb_count[parent_cu->tx_depth];
+            assert(tuTotalCount > 0 && tuTotalCount <= 16);
+            do {
+                txb_ptr = &parent_cu->transform_unit_array[txb_itr];
+                if (txb_ptr->transform_type[PLANE_TYPE_Y] >= txk_start && txb_ptr->transform_type[PLANE_TYPE_Y] < txk_end)
+                    tx_type_pred_0[txb_itr + 1] = txb_ptr->transform_type[PLANE_TYPE_Y];
+                ++txb_itr;
+            } while (txb_itr < tuTotalCount);
+        }
+        txb_itr = 0;
+        if (context_ptr->md_local_cu_unit[sq_blk_mds].avail_blk_flag) {
+            tuTotalCount = context_ptr->blk_geom->txb_count[square_cu->tx_depth];
+            assert(tuTotalCount > 0 && tuTotalCount <= 16);
+            do {
+                txb_ptr = &square_cu->transform_unit_array[txb_itr];
+                if (txb_ptr->transform_type[PLANE_TYPE_Y] >= txk_start && txb_ptr->transform_type[PLANE_TYPE_Y] < txk_end)
+                    tx_type_pred_1[txb_itr + 1] = txb_ptr->transform_type[PLANE_TYPE_Y];
+                ++txb_itr;
+            } while (txb_itr < tuTotalCount);
+        }
+    }
+#endif
     TxType best_tx_type = DCT_DCT;
     for (tx_type = txk_start; tx_type < txk_end; ++tx_type) {
 
@@ -5787,6 +5821,22 @@ void tx_type_search(
         if (picture_control_set_ptr->parent_pcs_ptr->tx_search_reduced_set)
 #endif
             if (!allowed_tx_set_a[context_ptr->blk_geom->txsize[context_ptr->tx_depth][context_ptr->txb_itr]][tx_type]) continue;
+
+#if RESTRICT_TXT_FOR_NON_S_V_H
+            if (context_ptr->blk_geom->shape > PART_V && txt_it > 0) {
+                uint8_t check_tx_type = 0;
+                uint8_t fetch_tx_idx = 0;
+                for (fetch_tx_idx = 0; fetch_tx_idx < 17; fetch_tx_idx++) {
+                    if (tx_type == tx_type_pred_0[fetch_tx_idx])
+                        check_tx_type++;
+                    if (tx_type == tx_type_pred_1[fetch_tx_idx])
+                        check_tx_type++;
+                }
+                if (!check_tx_type)
+                    continue;
+            }
+            txt_it++;
+#endif
 
         // For Inter blocks, transform type of chroma follows luma transfrom type
         if (is_inter)
@@ -6625,7 +6675,16 @@ void tx_partitioning_path(
         is_inter,
         end_tx_depth);
 #endif
-
+#if RESTRICT_TXS_FOR_NON_S_V_H
+ if (context_ptr->blk_geom->shape > PART_V) {
+    uint16_t parent_blk_mds = context_ptr->blk_geom->pi_mds;
+    uint16_t sq_blk_mds = context_ptr->blk_geom->sqi_mds;
+    uint8_t pred_depth = MAX(context_ptr->md_cu_arr_nsq[sq_blk_mds].tx_depth, context_ptr->md_cu_arr_nsq[parent_blk_mds].tx_depth);
+    pred_depth = pred_depth + 1;
+    if(pred_depth < end_tx_depth && pred_depth >= start_tx_depth)
+        end_tx_depth = pred_depth;
+ }
+#endif
     // Transform Depth Loop
 #if TX_SIZE_ONLY_MD_STAGE_2
     for (context_ptr->tx_depth = start_tx_depth; context_ptr->tx_depth <= end_tx_depth; context_ptr->tx_depth++) {

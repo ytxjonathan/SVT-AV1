@@ -688,6 +688,17 @@ void md_scan_all_blks(uint32_t *idx_mds, uint32_t sq_size, uint32_t x, uint32_t 
 
             blk_geom_mds[*idx_mds].d1i = d1_it++;
             blk_geom_mds[*idx_mds].sqi_mds = sqi_mds;
+#if ADD_PARENT_IDX
+             blk_geom_mds[*idx_mds].pi_mds = blk_geom_mds[*idx_mds].d1i < 5 ? 0 :
+                 (blk_geom_mds[*idx_mds].d1i == 5 || blk_geom_mds[*idx_mds].d1i == 6 ||
+                  blk_geom_mds[*idx_mds].d1i == 8 || blk_geom_mds[*idx_mds].d1i == 17|| blk_geom_mds[*idx_mds].d1i == 18) ? 1 :
+                 (blk_geom_mds[*idx_mds].d1i == 7 || blk_geom_mds[*idx_mds].d1i == 9 ||
+                 blk_geom_mds[*idx_mds].d1i == 10 || blk_geom_mds[*idx_mds].d1i == 19|| blk_geom_mds[*idx_mds].d1i == 20) ? 2 :
+                 (blk_geom_mds[*idx_mds].d1i == 11 || blk_geom_mds[*idx_mds].d1i == 12 ||
+                 blk_geom_mds[*idx_mds].d1i == 14 || blk_geom_mds[*idx_mds].d1i == 21|| blk_geom_mds[*idx_mds].d1i == 22) ? 3 :
+                 (blk_geom_mds[*idx_mds].d1i == 13 || blk_geom_mds[*idx_mds].d1i == 15 ||
+                 blk_geom_mds[*idx_mds].d1i == 16 || blk_geom_mds[*idx_mds].d1i == 23|| blk_geom_mds[*idx_mds].d1i == 24) ? 4 : -1;
+#endif
             blk_geom_mds[*idx_mds].totns = tot_num_ns_per_part;
             blk_geom_mds[*idx_mds].nsi = nsq_it;
 

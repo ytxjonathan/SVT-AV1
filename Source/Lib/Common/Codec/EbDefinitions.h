@@ -32,6 +32,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
+#define ADD_PARENT_IDX                  0 // Add parent index in the geom - lossless
+#define RESTRICT_TXS_FOR_NON_S_V_H      0 // Restric tx_depth for non-SQ-H-V blocks
+#define RESTRICT_TXT_FOR_NON_S_V_H      0 // Restric tx_type for non-SQ-H-V blocks
 #define QPS_CHANGE              1 //QPS changes for 4L pictures
 #define PRED_DEBUG              0 //WIP
 #define PRED_DEBUG_L5           0
