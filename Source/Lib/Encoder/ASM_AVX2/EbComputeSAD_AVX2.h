@@ -108,11 +108,11 @@ void ext_all_sad_calculation_8x8_16x16_avx2(uint8_t *src, uint32_t src_stride, u
                                             uint32_t ref_stride, uint32_t mv,
                                             uint32_t *p_best_sad_8x8, uint32_t *p_best_sad_16x16,
                                             uint32_t *p_best_mv8x8, uint32_t *p_best_mv16x16,
-                                            uint32_t p_eight_sad16x16[16][8],
-                                            uint32_t p_eight_sad8x8[64][8]);
+                                            uint16_t p_eight_sad16x16[16][8],
+                                            uint16_t p_eight_sad8x8[64][8]);
 
 void ext_eigth_sad_calculation_nsq_avx2(
-    uint32_t p_sad8x8[64][8], uint32_t p_sad16x16[16][8], uint32_t p_sad32x32[4][8],
+    uint16_t p_sad8x8[64][8], uint16_t p_sad16x16[16][8], uint32_t p_sad32x32[4][8],
     uint32_t *p_best_sad_64x32, uint32_t *p_best_mv64x32, uint32_t *p_best_sad_32x16,
     uint32_t *p_best_mv32x16, uint32_t *p_best_sad_16x8, uint32_t *p_best_mv16x8,
     uint32_t *p_best_sad_32x64, uint32_t *p_best_mv32x64, uint32_t *p_best_sad_16x32,
@@ -121,7 +121,7 @@ void ext_eigth_sad_calculation_nsq_avx2(
     uint32_t *p_best_mv8x32, uint32_t *p_best_sad_64x16, uint32_t *p_best_mv64x16,
     uint32_t *p_best_sad_16x64, uint32_t *p_best_mv16x64, uint32_t mv);
 
-void ext_eight_sad_calculation_32x32_64x64_avx2(uint32_t  p_sad16x16[16][8],
+void ext_eight_sad_calculation_32x32_64x64_avx2(uint16_t  p_sad16x16[16][8],
                                                 uint32_t *p_best_sad_32x32,
                                                 uint32_t *p_best_sad_64x64,
                                                 uint32_t *p_best_mv32x32, uint32_t *p_best_mv64x64,
