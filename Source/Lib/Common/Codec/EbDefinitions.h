@@ -45,6 +45,7 @@ extern "C" {
 #define DISABLE_TXT_FOR_NON_S_V_H      0
 #define DISABLE_TXS_FOR_NON_S_V_H      0
 #define DISABLE_RDOQ_FOR_NON_S_V_H     0
+#define SKIP_DEPTH                     0
 #define ADD_PARENT_IDX                 1
 
 #define MD_SKIP_FIX            1 // Fix the crash in debug mode due to MD skip

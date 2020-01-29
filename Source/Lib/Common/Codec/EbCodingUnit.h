@@ -509,6 +509,9 @@ extern "C" {
 #if PAL_SUP
        PaletteInfo                          palette_info;
 #endif
+#if SKIP_DEPTH
+       uint8_t                      do_not_process_block;
+#endif
     } CodingUnit;
 
         typedef struct OisCandidate
