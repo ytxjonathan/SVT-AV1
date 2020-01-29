@@ -2110,7 +2110,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
     if (sequence_control_set_ptr->static_config.prune_ref_rec_part == DEFAULT)
 #if PRESETS_TUNE
+#if M2_ADOPTIONS
+        if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M2)
+#else
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #else
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected || picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
