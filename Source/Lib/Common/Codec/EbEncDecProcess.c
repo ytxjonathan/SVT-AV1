@@ -2143,7 +2143,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->inter_inter_wedge_variance_th = 0;
     else
         context_ptr->inter_inter_wedge_variance_th = 100;
-
+#endif
     // Derive MD Exit TH
 #if MULTI_PASS_PD // Shut md_exit_th
     if (context_ptr->pd_pass == PD_PASS_0)
@@ -2214,7 +2214,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->dist_base_md_stage_0_count_th = 75;
 #endif
 #endif
-#endif
+
 #if INTER_INTRA_CLASS_PRUNING
 
     // md_stage_1_class_prune_th (for class removal)
@@ -2234,7 +2234,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if SC_PRESETS_OPT
 #if M1_OPT
 #if MD_STAGE_1_CLASS_PRUNNING_TH
-        if (picture_control_set_ptr->enc_mode <= ENC_M1 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+        if (picture_control_set_ptr->enc_mode <= ENC_M2 || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #else
         if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1) || sequence_control_set_ptr->input_resolution == INPUT_SIZE_576p_RANGE_OR_LOWER)
 #endif
@@ -2326,13 +2326,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->md_stage_2_class_prune_th = (uint64_t)~0;
 #if LOSSLESS_CLEAN_UP
     else
-#if MD_STAGE_2_CLASS_PRUNNING_0
-        context_ptr->md_stage_2_class_prune_th = sequence_control_set_ptr->static_config.md_stage_2_class_prune_th - 10;
-#elif MD_STAGE_2_CLASS_PRUNNING_1
-        context_ptr->md_stage_2_class_prune_th = sequence_control_set_ptr->static_config.md_stage_2_class_prune_th - 20;
-#else
         context_ptr->md_stage_2_class_prune_th = sequence_control_set_ptr->static_config.md_stage_2_class_prune_th;
-#endif
 #else
     else if (picture_control_set_ptr->enc_mode <= ENC_M4)
         context_ptr->md_stage_2_class_prune_th = sequence_control_set_ptr->static_config.md_stage_2_class_prune_th;
