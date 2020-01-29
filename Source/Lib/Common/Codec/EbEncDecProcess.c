@@ -2515,10 +2515,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if  INTRA_SIMILAR
     //intra_similar_mode
     //0: OFF
-    //1: If previous similar block is intra, do not inject any inter    
-    context_ptr->intra_similar_mode = 0;
-    if (!MR_MODE)       
-        context_ptr->intra_similar_mode = 1;       
+    //1: If previous similar block is intra, do not inject any inter 
+    context_ptr->intra_similar_mode = 1;       
 #endif
 
 

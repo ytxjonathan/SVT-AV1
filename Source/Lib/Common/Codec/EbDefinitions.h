@@ -37,7 +37,7 @@ extern "C" {
 #define PRED_DEBUG_L5           0
 
 #define COMP_SIMILAR     1 //jan6
-#define INTRA_SIMILAR    1 //i0
+#define INTRA_SIMILAR    1 //If previous similar block is intra, do not inject any inter i0
 #define INTER_SIMILAR    0 //p0
 #define GL_SIMILAR       0 //g0
 

@@ -10407,8 +10407,7 @@ EbErrorType signal_derivation_block(
             context_ptr->compound_types_to_try = !is_src_compound ? MD_COMP_AVG : similar_cu->interinter_comp.type;
         }
     }
-    return return_error;
-
+  
 #if INTRA_SIMILAR
     context_ptr->inject_inter_candidates = 1;
     if (context_ptr->pd_pass>PD_PASS_1 && context_ptr->similar_blk_avail) {
@@ -10471,6 +10470,9 @@ EbErrorType signal_derivation_block(
         }
     }
 #endif
+
+  return return_error;
+
 }
 #endif
 void md_encode_block(
