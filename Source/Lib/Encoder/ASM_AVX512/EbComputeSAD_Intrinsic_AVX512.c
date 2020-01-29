@@ -3669,7 +3669,6 @@ void get_eight_horizontal_search_point_results_8x8_16x16_pu_avx512_intrin(
 	|  16x16_10 |  16x16_11 |  16x16_14 |  16x16_15 |
 	-----------------------   -----------------------
 	*/
-
     //8x8_0 & 8x8_1
     __m256i result1, result2, result3, result4;
     __m256i temp, temp1, temp2, temp3;
