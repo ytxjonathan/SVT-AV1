@@ -1470,6 +1470,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->full_loop_escape = 2;
 
+#if ! GL_SIMILAR
+
     // Set global MV injection
     // Level                Settings
     // 0                    Injection off (Hsan: but not derivation as used by MV ref derivation)
@@ -1516,6 +1518,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
         context_ptr->global_mv_injection = 0;
 #endif
+
+#endif
+
 #if MULTI_PASS_PD
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->new_nearest_injection = 0;
@@ -2493,7 +2498,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->md_atb_mode = 0;
     else
         context_ptr->md_atb_mode = picture_control_set_ptr->parent_pcs_ptr->atb_mode;
-
+#if  INTER_SIMILAR
+    //inter_similar_mode
+    //0: OFF
+   
+#else
     // Set md_filter_intra_mode @ MD
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->md_filter_intra_mode = 0;
@@ -2501,6 +2510,16 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         context_ptr->md_filter_intra_mode = 0;
     else
         context_ptr->md_filter_intra_mode = picture_control_set_ptr->pic_filter_intra_mode;
+#endif
+
+#if  INTRA_SIMILAR
+    //intra_similar_mode
+    //0: OFF
+    //1: If previous similar block is intra, do not inject any inter    
+    context_ptr->intra_similar_mode = 0;
+    if (!MR_MODE)       
+        context_ptr->intra_similar_mode = 1;       
+#endif
 
 
     // Set max_ref_count @ MD

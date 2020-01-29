@@ -6787,6 +6787,9 @@ EbErrorType generate_md_stage_0_cand(
 #if !ENHANCED_M0_SETTINGS
             if (inject_intra_candidate)
 #endif
+#if INTER_SIMILAR
+                if(context_ptr->inject_intra_candidates)
+#endif
                 inject_intra_candidates(
                     picture_control_set_ptr,
                     context_ptr,
@@ -6827,7 +6830,12 @@ EbErrorType generate_md_stage_0_cand(
         assert(context_ptr->fast_candidate_array[i].palette_info.pmi.palette_size[0] == 0);
         assert(context_ptr->fast_candidate_array[i].palette_info.pmi.palette_size[1] == 0);
     }
+
+#if INTER_SIMILAR
+    if (svt_av1_allow_palette(context_ptr->inject_palette_candidates, context_ptr->blk_geom->bsize)) {
+#else
     if (svt_av1_allow_palette(picture_control_set_ptr->parent_pcs_ptr->palette_mode, context_ptr->blk_geom->bsize)) {
+#endif
         inject_palette_candidates(
             picture_control_set_ptr,
             context_ptr,
@@ -6839,7 +6847,23 @@ EbErrorType generate_md_stage_0_cand(
     }
 #endif
 
+
+
+
+
+
+
+
+#if INTRA_SIMILAR
+
+    if (slice_type != I_SLICE && context_ptr->inject_inter_candidates) {
+#else
+
+
     if (slice_type != I_SLICE) {
+
+#endif
+
 #if !ENHANCED_M0_SETTINGS
         if (inject_inter_candidate)
 #endif

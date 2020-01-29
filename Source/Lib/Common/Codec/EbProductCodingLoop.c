@@ -10408,6 +10408,69 @@ EbErrorType signal_derivation_block(
         }
     }
     return return_error;
+
+#if INTRA_SIMILAR
+    context_ptr->inject_inter_candidates = 1;
+    if (context_ptr->pd_pass>PD_PASS_1 && context_ptr->similar_blk_avail) {
+        int32_t is_src_intra = similar_cu->pred_mode <= PAETH_PRED; 
+        if (context_ptr->intra_similar_mode)              
+            context_ptr->inject_inter_candidates = is_src_intra ? 0: context_ptr->inject_inter_candidates;
+}
+#endif
+
+#if INTER_SIMILAR
+
+    // Set md_filter_intra_mode @ MD
+    if (context_ptr->pd_pass == PD_PASS_0)
+        context_ptr->md_filter_intra_mode = 0;
+    else if (context_ptr->pd_pass == PD_PASS_1)
+        context_ptr->md_filter_intra_mode = 0;
+    else
+        context_ptr->md_filter_intra_mode = picture_control_set_ptr->pic_filter_intra_mode;
+
+    context_ptr->inject_palette_candidates = picture_control_set_ptr->parent_pcs_ptr->palette_mode;
+
+    context_ptr->inject_intra_candidates = 1;
+    if (context_ptr->pd_pass > PD_PASS_1 && context_ptr->similar_blk_avail) {
+        int32_t is_src_inter = similar_cu->pred_mode >= NEARESTMV;
+        if (is_src_inter) {        
+            context_ptr->inject_intra_candidates = 0;
+            context_ptr->md_filter_intra_mode = 0;
+            context_ptr->inject_palette_candidates = 0;         
+        }
+    }
+#endif
+
+
+#if  GL_SIMILAR
+    // Set global MV injection
+    // Level                Settings
+    // 0                    Injection off (Hsan: but not derivation as used by MV ref derivation)
+    // 1                    On
+    if (sequence_control_set_ptr->static_config.enable_global_motion == EB_TRUE)
+    {
+
+        if (context_ptr->pd_pass == PD_PASS_0)
+            context_ptr->global_mv_injection = 0;
+        else if (context_ptr->pd_pass == PD_PASS_1)
+            context_ptr->global_mv_injection = 0;
+        else
+            if (picture_control_set_ptr->enc_mode <= ENC_M1)
+
+                context_ptr->global_mv_injection = 1;
+            else
+                context_ptr->global_mv_injection = 0;
+    }
+    else
+        context_ptr->global_mv_injection = 0;
+
+    if (context_ptr->pd_pass > PD_PASS_1 && context_ptr->similar_blk_avail) {
+        int32_t is_src_not_global = similar_cu->pred_mode != GLOBALMV && similar_cu->pred_mode != GLOBAL_GLOBALMV;
+        if (is_src_not_global) {
+            context_ptr->global_mv_injection = 0;
+        }
+    }
+#endif
 }
 #endif
 void md_encode_block(
