@@ -1957,7 +1957,7 @@ void set_md_stage_counts(
         uint8_t nics_level = picture_control_set_ptr->enc_mode == ENC_M0 ? NIC_S8 : picture_control_set_ptr->enc_mode <= ENC_M3 ? NIC_S11 : NIC_S_OLD;
 #endif
 #if MR_MODE
-        nics_level = NIC_S4_5
+        nics_level = NIC_S4_5;
 #endif
 
         if (nics_level == NIC_S_OLD){
