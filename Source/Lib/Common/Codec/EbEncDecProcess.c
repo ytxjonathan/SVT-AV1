@@ -2441,7 +2441,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (!MR_MODE)
 #endif
 #if M1_ADOPTIONS
-        if (picture_control_set_ptr->enc_mode <= ENC_M1)
+        if (picture_control_set_ptr->enc_mode <= ENC_M2)
 #else
         if( picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
