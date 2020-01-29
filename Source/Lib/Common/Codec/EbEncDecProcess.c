@@ -2387,8 +2387,10 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
         if (picture_control_set_ptr->enc_mode <= ENC_M1)
             context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight + 5;
-        else
+        else if (picture_control_set_ptr->enc_mode <= ENC_M2)
             context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
+        else 
+            context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight - 5;
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
 #endif
