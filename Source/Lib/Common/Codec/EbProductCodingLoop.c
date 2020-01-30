@@ -6692,6 +6692,9 @@ void tx_partitioning_path(
         end_tx_depth = pred_depth;
  }
 #endif
+#if SKIP_TXS_BSAED_COEFF
+     uint16_t best_tx_count_non_zero_coeffs = ~0;
+#endif
     // Transform Depth Loop
 #if TX_SIZE_ONLY_MD_STAGE_2
     for (context_ptr->tx_depth = start_tx_depth; context_ptr->tx_depth <= end_tx_depth; context_ptr->tx_depth++) {
@@ -6704,8 +6707,14 @@ void tx_partitioning_path(
             if (best_tx_depth != 1 && context_ptr->tx_depth == 2)
                 continue;
 #endif
+#if SKIP_TXS_BSAED_COEFF
+            uint16_t txs_th = 1;
+            if (best_tx_count_non_zero_coeffs <= txs_th)
+                continue;
+#else
             if (!is_best_has_coeff)
                 continue;
+#endif
 
         }
 #endif
@@ -6873,9 +6882,16 @@ void tx_partitioning_path(
                 y_full_distortion[DIST_CALC_RESIDUAL] = tx_y_full_distortion[DIST_CALC_RESIDUAL];
                 y_full_distortion[DIST_CALC_PREDICTION] = tx_y_full_distortion[DIST_CALC_PREDICTION];
                 *y_coeff_bits = tx_y_coeff_bits;
+#if SKIP_TXS_BSAED_COEFF
+                best_tx_count_non_zero_coeffs = 0;
+#endif
                 for (context_ptr->txb_itr = 0; context_ptr->txb_itr < txb_count; context_ptr->txb_itr++) {
                     y_count_non_zero_coeffs[context_ptr->txb_itr] = tx_y_count_non_zero_coeffs[context_ptr->txb_itr];
+#if SKIP_TXS_BSAED_COEFF
+                    best_tx_count_non_zero_coeffs += y_count_non_zero_coeffs[context_ptr->txb_itr];
+#endif
                 }
+
             }
 
 #if LOSSLESS_TX_TYPE_OPT
@@ -12578,7 +12594,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
                 depth_cost[sequence_control_set_ptr->static_config.super_block_size == 128 ? context_ptr->blk_geom->depth : context_ptr->blk_geom->depth + 1] += nsq_cost[nsq_shape_table[0]];
 #if SKIP_DEPTH
                 if (sequence_control_set_ptr->sb_geom[lcuAddr].is_complete_sb) {
-                    if (context_ptr->pd_pass == PD_PASS_2) {
+                    if (1/*context_ptr->pd_pass >= PD_PASS_1*/) {
                         uint64_t sq_cost = nsq_cost[0]; // sq cost
                         uint64_t best_nsq_cost = MAX_CU_COST;
                         skip_next_depth = 0;
@@ -12587,7 +12603,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
                             if (nsq_cost[i] < best_nsq_cost)
                                 best_nsq_cost = nsq_cost[i];
                         // Compare sq vs best nsq
-                        uint64_t th = 2;
+                        uint64_t th = 30;
                         if (sq_cost < best_nsq_cost) {
                             if ((best_nsq_cost - sq_cost) * 100 > (sq_cost * th)) {
                                 set_child_to_be_skipped(
