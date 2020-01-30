@@ -96,8 +96,13 @@ extern "C" {
 #define COMPOUND_WEDGE_OPT       1   // optimize compound wedge For M1 and higher
 
 #define NSQ_ME_OPT               1
-
-
+/*************************************/
+#define ENABLE_PME_SAD              1
+#define SWITCH_XY_LOOPS_PME_SAD     1
+#if SWITCH_XY_LOOPS_PME_SAD
+#define RESTRUCTURE_SAD             1
+#endif
+/*************************************/
 #if 1
 #define OMARK_LAMBDA                1 // 2. fix lambda calculation for HBD0
 

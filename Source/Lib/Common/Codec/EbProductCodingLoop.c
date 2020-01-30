@@ -3739,12 +3739,17 @@ void predictive_me_full_pel_search(
     if ((context_ptr->cu_origin_y + (mvy >> 3) + search_position_end_y) > (ref_pic->origin_y + ref_pic->max_height - 1))
         search_position_end_y = (ref_pic->origin_y + ref_pic->max_height - 1) - (context_ptr->cu_origin_y + (mvy >> 3) + search_position_end_y);
 #endif
-
-    for (int32_t refinement_pos_x = search_position_start_x; refinement_pos_x <= search_position_end_x; ++refinement_pos_x) {
+#if RESTRUCTURE_SAD
+    if (use_ssd) {
+#if SWITCH_XY_LOOPS_PME_SAD
         for (int32_t refinement_pos_y = search_position_start_y; refinement_pos_y <= search_position_end_y; ++refinement_pos_y) {
+            for (int32_t refinement_pos_x = search_position_start_x; refinement_pos_x <= search_position_end_x; ++refinement_pos_x) {
+#else
+        for (int32_t refinement_pos_x = search_position_start_x; refinement_pos_x <= search_position_end_x; ++refinement_pos_x) {
+            for (int32_t refinement_pos_y = search_position_start_y; refinement_pos_y <= search_position_end_y; ++refinement_pos_y) {
+#endif
+                uint32_t ref_origin_index = ref_pic->origin_x + (context_ptr->cu_origin_x + (mvx >> 3) + refinement_pos_x) + (context_ptr->cu_origin_y + (mvy >> 3) + ref_pic->origin_y + refinement_pos_y) * ref_pic->stride_y;
 
-            uint32_t ref_origin_index = ref_pic->origin_x + (context_ptr->cu_origin_x + (mvx >> 3) + refinement_pos_x) + (context_ptr->cu_origin_y + (mvy >> 3) + ref_pic->origin_y + refinement_pos_y) * ref_pic->stride_y;
-            if (use_ssd) {
                 EbSpatialFullDistType spatial_full_dist_type_fun = hbd_mode_decision ?
                     full_distortion_kernel16_bits : spatial_full_distortion_kernel;
 
@@ -3757,36 +3762,91 @@ void predictive_me_full_pel_search(
                     ref_pic->stride_y,
                     context_ptr->blk_geom->bwidth,
                     context_ptr->blk_geom->bheight);
-            }
-            else {
-                assert((context_ptr->blk_geom->bwidth >> 3) < 17);
 
-                if (hbd_mode_decision) {
-                    distortion = sad_16b_kernel(
-                        ((uint16_t *)input_picture_ptr->buffer_y) + inputOriginIndex,
-                        input_picture_ptr->stride_y,
-                        ((uint16_t *)ref_pic->buffer_y) + ref_origin_index,
-                        ref_pic->stride_y,
-                        context_ptr->blk_geom->bheight,
-                        context_ptr->blk_geom->bwidth);
-                } else {
-                    distortion = nxm_sad_kernel_sub_sampled(
-                        input_picture_ptr->buffer_y + inputOriginIndex,
-                        input_picture_ptr->stride_y,
-                        ref_pic->buffer_y + ref_origin_index,
-                        ref_pic->stride_y,
-                        context_ptr->blk_geom->bheight,
-                        context_ptr->blk_geom->bwidth);
+                if (distortion < *best_distortion) {
+                    *best_mvx = mvx + (refinement_pos_x * search_step);
+                    *best_mvy = mvy + (refinement_pos_y * search_step);
+                    *best_distortion = distortion;
                 }
-            }
-
-            if (distortion < *best_distortion) {
-                *best_mvx = mvx + (refinement_pos_x * search_step);
-                *best_mvy = mvy + (refinement_pos_y * search_step);
-                *best_distortion = distortion;
             }
         }
     }
+    else
+    {
+        uint32_t ref_origin_index = ref_pic->origin_x + (context_ptr->cu_origin_x + (mvx >> 3) + search_position_start_x) + (context_ptr->cu_origin_y + (mvy >> 3) + ref_pic->origin_y + search_position_start_y) * ref_pic->stride_y;
+        assert((context_ptr->blk_geom->bwidth >> 3) < 17);
+        pme_sad_loop_kernel_c(
+            input_picture_ptr->buffer_y + inputOriginIndex,
+            input_picture_ptr->stride_y,
+            ref_pic->buffer_y + ref_origin_index,
+            ref_pic->stride_y,
+            context_ptr->blk_geom->bheight,
+            context_ptr->blk_geom->bwidth,
+            best_distortion,
+            best_mvx,
+            best_mvy,
+            search_position_start_x,
+            search_position_start_y,
+            search_position_end_x - search_position_start_x + 1,
+            search_position_end_y - search_position_start_y + 1,
+            search_step,
+            mvx,
+            mvy);
+    }
+#else
+#if SWITCH_XY_LOOPS_PME_SAD
+for (int32_t refinement_pos_y = search_position_start_y; refinement_pos_y <= search_position_end_y; ++refinement_pos_y) {
+    for (int32_t refinement_pos_x = search_position_start_x; refinement_pos_x <= search_position_end_x; ++refinement_pos_x) {
+#else
+for (int32_t refinement_pos_x = search_position_start_x; refinement_pos_x <= search_position_end_x; ++refinement_pos_x) {
+    for (int32_t refinement_pos_y = search_position_start_y; refinement_pos_y <= search_position_end_y; ++refinement_pos_y) {
+#endif
+        uint32_t ref_origin_index = ref_pic->origin_x + (context_ptr->cu_origin_x + (mvx >> 3) + refinement_pos_x) + (context_ptr->cu_origin_y + (mvy >> 3) + ref_pic->origin_y + refinement_pos_y) * ref_pic->stride_y;
+        if (use_ssd) {
+            EbSpatialFullDistType spatial_full_dist_type_fun = hbd_mode_decision ?
+                full_distortion_kernel16_bits : spatial_full_distortion_kernel;
+
+            distortion = (uint32_t)spatial_full_dist_type_fun(
+                input_picture_ptr->buffer_y,
+                inputOriginIndex,
+                input_picture_ptr->stride_y,
+                ref_pic->buffer_y,
+                ref_origin_index,
+                ref_pic->stride_y,
+                context_ptr->blk_geom->bwidth,
+                context_ptr->blk_geom->bheight);
+        }
+        else {
+            assert((context_ptr->blk_geom->bwidth >> 3) < 17);
+
+            if (hbd_mode_decision) {
+                distortion = sad_16b_kernel(
+                    ((uint16_t *)input_picture_ptr->buffer_y) + inputOriginIndex,
+                    input_picture_ptr->stride_y,
+                    ((uint16_t *)ref_pic->buffer_y) + ref_origin_index,
+                    ref_pic->stride_y,
+                    context_ptr->blk_geom->bheight,
+                    context_ptr->blk_geom->bwidth);
+            }
+            else {
+                distortion = nxm_sad_kernel_sub_sampled(
+                    input_picture_ptr->buffer_y + inputOriginIndex,
+                    input_picture_ptr->stride_y,
+                    ref_pic->buffer_y + ref_origin_index,
+                    ref_pic->stride_y,
+                    context_ptr->blk_geom->bheight,
+                    context_ptr->blk_geom->bwidth);
+            }
+        }
+
+        if (distortion < *best_distortion) {
+            *best_mvx = mvx + (refinement_pos_x * search_step);
+            *best_mvy = mvy + (refinement_pos_y * search_step);
+            *best_distortion = distortion;
+        }
+    }
+}
+#endif
 }
 
 void predictive_me_sub_pel_search(
@@ -4173,7 +4233,11 @@ void predictive_me_search(
                     context_ptr,
                     input_picture_ptr,
                     inputOriginIndex,
+#if ENABLE_PME_SAD
+                    0,
+#else
                     use_ssd,
+#endif
                     list_idx,
                     ref_idx,
                     best_mvp_x,

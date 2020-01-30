@@ -54,7 +54,24 @@ extern "C" {
         uint32_t  src_stride_raw,       // input parameter, source stride (no line skipping)
         int16_t   search_area_width,
         int16_t   search_area_height);
-
+#if RESTRUCTURE_SAD
+    void pme_sad_loop_kernel_c(
+        uint8_t  *src,                            // input parameter, source samples Ptr
+        uint32_t  src_stride,                      // input parameter, source stride
+        uint8_t  *ref,                            // input parameter, reference samples Ptr
+        uint32_t  ref_stride,                      // input parameter, reference stride
+        uint32_t  block_height,                   // input parameter, block height (M)
+        uint32_t  block_width,                    // input parameter, block width (N)
+        uint32_t *best_sad,
+        int16_t *best_mvx,
+        int16_t *best_mvy,
+        //uint32_t  src_stride_raw,                   // input parameter, source stride (no line skipping)
+        int16_t search_area_width,
+        int16_t search_area_height,
+        int16_t search_step,
+        int16_t mvx,
+        int16_t mvy);
+#endif
     uint32_t nxm_sad_kernel_helper_c(
         const uint8_t  *src,
         uint32_t  src_stride,
