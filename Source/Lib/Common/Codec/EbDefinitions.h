@@ -103,6 +103,7 @@ extern "C" {
 #define NSQ_ME_OPT               1
 
 #define PME_SEARCH_AREA_TUNE        1
+#define SC_REDUCE_DIFF              1 // Reduce feature diff to normal encoder
 #if 1
 #define OMARK_LAMBDA                1 // 2. fix lambda calculation for HBD0
 
@@ -166,27 +167,27 @@ extern "C" {
 #define FASTER_SQ_WEIGHT             0
 #define ENHANCED_SQ_WEIGHT           1
 
-#define LOSSLESS_TX_SIZE_OPT         1 
-#define LOSSLESS_TX_TYPE_OPT         1 
-#define LOSSY_TX_SIZE_OPT            0       
+#define LOSSLESS_TX_SIZE_OPT         1
+#define LOSSLESS_TX_TYPE_OPT         1
+#define LOSSY_TX_SIZE_OPT            0
 #define ATB_INTRA_2_DEPTH            1 // ATB INTRA Depth 2
 #define SHUT_TX_WEIGHT               0
 #define ATB_INTER_2_DEPTH            1 // ATB INTRA Depth 2
 #define TX_ORG_INTERINTRA            1
 #define ENABLE_BC                    0 // ATB for BC
 #define FASTER_RDOQ                  1
-#define UPGRAGDE_TX_WEIGHT           0 
+#define UPGRAGDE_TX_WEIGHT           0
 #define ADD_4TH_MD_STAGE             1
 #if ADD_4TH_MD_STAGE
 #define TX_SIZE_ONLY_MD_STAGE_2      1
 #if TX_SIZE_ONLY_MD_STAGE_2
 
 // Tx Size + Tx Type
-#define TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2           0     
+#define TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2           0
 
 
 // RDOQ + Tx Type
-#define RDOQ_LIGHT_TX_TYPE_MD_STAGE_2           1     
+#define RDOQ_LIGHT_TX_TYPE_MD_STAGE_2           1
 #if RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
 #define MD_STAGE_4_DEBUG   1
 #define NIC_TEST_0 0
@@ -228,7 +229,7 @@ extern "C" {
 #define LAYER_CHECK_REMOVAL             1
 
 
-#define MR_MODE_CLEAN_UP                1 
+#define MR_MODE_CLEAN_UP                1
 /*****************************************/
 #define RATE_ESTIMATION_UPDATE       1 // Adding the rate estimation updates used in MD for missing syntax elements
 #define HBD_CLEAN_UP                 1
@@ -872,7 +873,7 @@ typedef enum MD_STAGE {
 #define INTRA_NFL           24
 #define INTER_NEW_NFL       24
 #define INTER_PRED_NFL      24
-#define INTER_COMP_NFL		16
+#define INTER_COMP_NFL        16
 #else
 #define INTRA_NFL           16
 #define INTER_NEW_NFL       16

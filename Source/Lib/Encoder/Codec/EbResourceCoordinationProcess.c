@@ -745,7 +745,7 @@ void* resource_coordination_kernel(void *input_ptr)
             // 0                 OFF
             // 1                 ON
             if (sequence_control_set_ptr->static_config.enable_filter_intra)
-#if SC_PRESETS_OPT
+#if SC_PRESETS_OPT && !SC_REDUCE_DIFF //pic_filter_intra_mode
                 if (sequence_control_set_ptr->static_config.screen_content_mode == 1)
                     sequence_control_set_ptr->seq_header.enable_filter_intra = 0;
                 else

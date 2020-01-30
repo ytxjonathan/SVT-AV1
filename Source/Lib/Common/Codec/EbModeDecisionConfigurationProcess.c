@@ -2609,7 +2609,11 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
     //Filter Intra Mode : 0: OFF  1: ON
     if (sequence_control_set_ptr->seq_header.enable_filter_intra)
         #if F_INTRA_TL
+#if SC_REDUCE_DIFF //pic_filter_intra_mode
+        picture_control_set_ptr->pic_filter_intra_mode = 1;
+#else
         picture_control_set_ptr->pic_filter_intra_mode = picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0  ? 1 : 0;
+#endif
 #else
         picture_control_set_ptr->pic_filter_intra_mode = picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0 && picture_control_set_ptr->temporal_layer_index == 0 ? 1 : 0;
 #endif
@@ -2632,9 +2636,11 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #endif
 #if MULTI_PASS_PD
     EbBool enable_wm;
+#if !SC_REDUCE_DIFF //enable_wm
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
         enable_wm = EB_FALSE;
     else
+#endif
 #if WARP_UPDATE
 #if ENHANCED_M0_SETTINGS
 #if M1_OPT

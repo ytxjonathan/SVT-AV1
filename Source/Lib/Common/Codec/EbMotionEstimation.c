@@ -15421,7 +15421,7 @@ EbErrorType motion_estimate_lcu(
             sb_origin_y,
             context_ptr,
             input_ptr);
-#if SC_HME_PRUNING
+#if SC_HME_PRUNING && !SC_REDUCE_DIFF // prune_references_sc
     else if (picture_control_set_ptr->sc_content_detected)
         prune_references_sc(
             picture_control_set_ptr,

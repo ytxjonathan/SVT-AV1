@@ -1336,8 +1336,9 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if !MR_MODE_CLEAN_UP
     if (MR_MODE)
         context_ptr->interpolation_search_level = IT_SEARCH_FAST_LOOP;
-    else 
+    else
 #endif
+#if !SC_REDUCE_DIFF // interpolation_search_level
         if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #if SC_PRESETS_OPT
         if (picture_control_set_ptr->enc_mode <= ENC_M0)
@@ -1347,8 +1348,12 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #else
         context_ptr->interpolation_search_level = IT_SEARCH_OFF;
 #endif
+#endif
 #if PRESETS_TUNE
-    else if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#if !SC_REDUCE_DIFF // interpolation_search_level
+    else
+#endif
+        if (picture_control_set_ptr->enc_mode <= ENC_M2)
 #else
     else if (picture_control_set_ptr->enc_mode <= ENC_M1)
 #endif
@@ -1635,6 +1640,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     }
     else
 #endif
+#if !SC_REDUCE_DIFF //unipred3x3_injection
     if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
 #if PRESETS_TUNE
         if (picture_control_set_ptr->enc_mode <= ENC_M2)
@@ -1649,6 +1655,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
             context_ptr->unipred3x3_injection = 0;
     else
+#endif
 #if PRESETS_OPT
     if (picture_control_set_ptr->enc_mode <= ENC_M7)
             context_ptr->unipred3x3_injection = 1;
@@ -2167,13 +2174,21 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     if (context_ptr->pd_pass == PD_PASS_0)
         context_ptr->md_exit_th = 0;
     else if (context_ptr->pd_pass == PD_PASS_1)
+#if SC_REDUCE_DIFF //md_exit_th
+        context_ptr->md_exit_th = 18;
+#else
         context_ptr->md_exit_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) ? 10 : 18;
+#endif
     else
 #endif
 #if M0_OPT
 #if M1_ADOPT_M0_MD_EXIT_TH
 #if M2_ADOPTIONS
+#if SC_REDUCE_DIFF //md_exit_th
+    if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M2))
+#else
     if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M2 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0))
+#endif
 #else
     if (MR_MODE || (picture_control_set_ptr->enc_mode <= ENC_M1 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected == 0))
 #endif
@@ -2185,7 +2200,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #endif
         context_ptr->md_exit_th = 0;
     else
+#if SC_REDUCE_DIFF //md_exit_th
+        context_ptr->md_exit_th = 18;
+#else
         context_ptr->md_exit_th = (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected) ? 10 : 18;
+#endif
 
 #if INTER_INTRA_CLASS_PRUNING
 
@@ -2314,7 +2333,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if MD_STAGE_2_CAND_PRUNNING_TH
     else if (picture_control_set_ptr->enc_mode <= ENC_M2)
         context_ptr->md_stage_2_cand_prune_th = 15;
-    else 
+    else
         context_ptr->md_stage_2_cand_prune_th = 5;
 #else
     else if (picture_control_set_ptr->enc_mode <= ENC_M2)
@@ -2378,7 +2397,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
     else
 #endif
 #if ENHANCED_SQ_WEIGHT || FASTER_SQ_WEIGHT
+#if SC_REDUCE_DIFF //sq_weight
+    if (MR_MODE)
+#else
     if (MR_MODE || picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#endif
 #else
     if (MR_MODE)
 #endif
@@ -2389,7 +2412,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
             context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight + 5;
         else if (picture_control_set_ptr->enc_mode <= ENC_M2)
             context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
-        else 
+        else
             context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight - 5;
 #else
         context_ptr->sq_weight = sequence_control_set_ptr->static_config.sq_weight;
@@ -2451,7 +2474,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         if( picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
             context_ptr->comp_similar_mode = 1;
-        else 
+        else
             context_ptr->comp_similar_mode = 2;
 #else
     // set compound_types_to_try
@@ -2521,7 +2544,7 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if  INTER_SIMILAR
     //inter_similar_mode
     //0: OFF
-   
+
 #else
     // Set md_filter_intra_mode @ MD
     if (context_ptr->pd_pass == PD_PASS_0)
@@ -2535,8 +2558,8 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if  INTRA_SIMILAR
     //intra_similar_mode
     //0: OFF
-    //1: If previous similar block is intra, do not inject any inter 
-    context_ptr->intra_similar_mode = 1;       
+    //1: If previous similar block is intra, do not inject any inter
+    context_ptr->intra_similar_mode = 1;
 #endif
 
 

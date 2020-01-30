@@ -1214,6 +1214,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     assert(picture_control_set_ptr->palette_mode<7);
 #endif
     if (!picture_control_set_ptr->sequence_control_set_ptr->static_config.disable_dlf_flag && frm_hdr->allow_intrabc == 0) {
+#if !SC_REDUCE_DIFF //loop_filter_mode
     if (sc_content_detected)
 #if M0_OPT
         if (picture_control_set_ptr->enc_mode <= ENC_M1)
@@ -1226,6 +1227,7 @@ EbErrorType signal_derivation_multi_processes_oq(
         else
             picture_control_set_ptr->loop_filter_mode = 0;
     else
+#endif
 #if PRESETS_OPT
         if (picture_control_set_ptr->enc_mode <= ENC_M7)
             picture_control_set_ptr->loop_filter_mode = 3;
@@ -1252,6 +1254,7 @@ EbErrorType signal_derivation_multi_processes_oq(
     // 4                                            16 step refinement
     // 5                                            64 step refinement
     if (sequence_control_set_ptr->seq_header.enable_cdef && frm_hdr->allow_intrabc == 0) {
+#if !SC_REDUCE_DIFF //cdef_filter_mode
         if (sc_content_detected)
 #if PRESETS_TUNE
             if (picture_control_set_ptr->enc_mode <= ENC_M5)
@@ -1262,6 +1265,7 @@ EbErrorType signal_derivation_multi_processes_oq(
             else
                 picture_control_set_ptr->cdef_filter_mode = 0;
         else
+#endif
         if (picture_control_set_ptr->enc_mode <= ENC_M7)
 #if M0_OPT
 #if PRESETS_TUNE
@@ -1484,12 +1488,13 @@ EbErrorType signal_derivation_multi_processes_oq(
     // 0                                            OFF
     // 1                                            ON
     picture_control_set_ptr->skip_sub_blks =   0;
-
+#if !SC_REDUCE_DIFF //cu8x8_mode
         if (picture_control_set_ptr->sc_content_detected)
             picture_control_set_ptr->cu8x8_mode = (picture_control_set_ptr->temporal_layer_index > 0) ?
             CU_8x8_MODE_1 :
             CU_8x8_MODE_0;
         else
+#endif
         if (picture_control_set_ptr->enc_mode <= ENC_M8)
             picture_control_set_ptr->cu8x8_mode = CU_8x8_MODE_0;
         else
@@ -1646,7 +1651,11 @@ EbErrorType signal_derivation_multi_processes_oq(
 
         if (sequence_control_set_ptr->static_config.prune_unipred_me == DEFAULT)
 #if M0_OPT
+#if SC_REDUCE_DIFF //prune_unipred_at_me
+            if (picture_control_set_ptr->enc_mode >= ENC_M4)
+#else
             if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode >= ENC_M4)
+#endif
 #else
             if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode == ENC_M0 || picture_control_set_ptr->enc_mode >= ENC_M4)
 #endif
@@ -1670,9 +1679,12 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if GM_DOWNSAMPLED
 #if ENABLE_GM_TRANS
 #if M0_ADOPT_GM_LEVEL
+#if !SC_REDUCE_DIFF //gm_level
         if (picture_control_set_ptr->sc_content_detected)
             picture_control_set_ptr->gm_level = GM_TRAN_ONLY;
-        else if (picture_control_set_ptr->enc_mode <= ENC_M0)
+        else
+#endif
+        if (picture_control_set_ptr->enc_mode <= ENC_M0)
             picture_control_set_ptr->gm_level = GM_FULL;
         else
             picture_control_set_ptr->gm_level = GM_DOWN;
@@ -2826,7 +2838,7 @@ static void  Av1GenerateRpsInfo(
 #if PRED_DEBUG
             av1_rps->ref_dpb_index[ALT2] = lay2_1_idx;
             av1_rps->ref_dpb_index[ALT] = lay3_idx;
-#else            
+#else
             av1_rps->ref_dpb_index[ALT2] = av1_rps->ref_dpb_index[BWD];
             av1_rps->ref_dpb_index[ALT] = av1_rps->ref_dpb_index[BWD];
 #endif
@@ -4257,7 +4269,7 @@ void* picture_decision_kernel(void *input_ptr)
                                         picture_control_set_ptr->av1_cm->ref_frame_sign_bias[ALTREF2_FRAME],
                                         picture_control_set_ptr->av1_cm->ref_frame_sign_bias[BWDREF_FRAME]
                                     );
-     
+
                                 }
 
 #endif

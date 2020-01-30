@@ -225,9 +225,11 @@ EbErrorType signal_derivation_me_kernel_oq(
         else
             context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
     if (sequence_control_set_ptr->static_config.fract_search_64 == DEFAULT)
+#if !SC_REDUCE_DIFF //fractional_search64x64
         if (picture_control_set_ptr->sc_content_detected)
             context_ptr->me_context_ptr->fractional_search64x64 = EB_FALSE;
         else
+#endif
             context_ptr->me_context_ptr->fractional_search64x64 = EB_TRUE;
     else
         context_ptr->me_context_ptr->fractional_search64x64 = sequence_control_set_ptr->static_config.fract_search_64;
@@ -267,7 +269,7 @@ EbErrorType signal_derivation_me_kernel_oq(
 #endif
 #if M1_OPT
 #if !MR_MODE_CLEAN_UP
-    else 
+    else
 #endif
 #if M1_ADOPTIONS
         // adopt M2 setting in M1
@@ -630,6 +632,7 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
             context_ptr->me_context_ptr->fractional_search_method = FULL_SAD_SEARCH;
 
     if (sequence_control_set_ptr->static_config.fract_search_64 == DEFAULT)
+#if !SC_REDUCE_DIFF //fractional_search64x64
         if (picture_control_set_ptr->sc_content_detected)
 #if PRESETS_TUNE
             if (enc_mode <= ENC_M5)
@@ -640,6 +643,7 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
             else
                 context_ptr->me_context_ptr->fractional_search64x64 = EB_FALSE;
         else
+#endif
             context_ptr->me_context_ptr->fractional_search64x64 = EB_TRUE;
     else
         context_ptr->me_context_ptr->fractional_search64x64 = sequence_control_set_ptr->static_config.fract_search_64;

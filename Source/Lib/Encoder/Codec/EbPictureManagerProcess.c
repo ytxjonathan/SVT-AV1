@@ -825,12 +825,12 @@ void* picture_manager_kernel(void *input_ptr)
                                     if (entryPictureControlSetPtr->frame_end_cdf_update_mode) {
                                         ChildPictureControlSetPtr->ref_frame_context[svt_get_ref_frame_type(REF_LIST_1, refIdx) - LAST_FRAME] = ((EbReferenceObject*)referenceEntryPtr->reference_object_ptr->object_ptr)->frame_context;
 #if PRED_DEBUG
-                                        if (max_temporal_index < (int8_t)referenceEntryPtr->temporal_layer_index && referenceEntryPtr->slice_type != I_SLICE && 
+                                        if (max_temporal_index < (int8_t)referenceEntryPtr->temporal_layer_index && referenceEntryPtr->slice_type != I_SLICE &&
                                              (int8_t)referenceEntryPtr->temporal_layer_index <= ChildPictureControlSetPtr->temporal_layer_index) {
 
-#else                                        
+#else
                                         if (max_temporal_index < (int8_t)referenceEntryPtr->temporal_layer_index && referenceEntryPtr->slice_type != I_SLICE/* && ChildPictureControlSetPtr->temporal_layer_index != 0*/) {
-#endif     
+#endif
                                             max_temporal_index = (int8_t)referenceEntryPtr->temporal_layer_index;
                                             ref_index = svt_get_ref_frame_type(REF_LIST_1, refIdx) - LAST_FRAME;
                                             for (int frame = LAST_FRAME; frame <= ALTREF_FRAME; ++frame)
