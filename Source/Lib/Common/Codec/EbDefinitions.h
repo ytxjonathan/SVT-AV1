@@ -101,7 +101,7 @@ extern "C" {
 
 #define NSQ_ME_OPT               1
 
-
+#define PME_SEARCH_AREA_TUNE        1
 #if 1
 #define OMARK_LAMBDA                1 // 2. fix lambda calculation for HBD0
 
