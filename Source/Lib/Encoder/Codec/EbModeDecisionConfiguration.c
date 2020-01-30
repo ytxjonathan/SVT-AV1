@@ -253,7 +253,7 @@ void refinement_prediction_loop(
     ModeDecisionConfigurationContext     *context_ptr)
 {
     MdcpLocalBlkStruct    *local_blk_array         = context_ptr->local_blk_array;
-    SbParams               *sb_params            = &pcs_ptr->parent_pcs_ptr->sb_params_array[sb_index];
+    SbParams              *sb_params      = &pcs_ptr->parent_pcs_ptr->sb_params_array[sb_index];
     uint32_t                  blk_index             = 0;
     while (blk_index < CU_MAX_COUNT)
     {

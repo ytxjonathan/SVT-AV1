@@ -480,16 +480,16 @@ static void set_enable_overlays(const char *value, EbConfig *cfg) {
 };
 // --- end: ALTREF_FILTERING_SUPPORT
 // --- start: SUPER-RESOLUTION SUPPORT
-static void SetSuperresMode(const char *value, EbConfig *cfg) {
+static void set_superres_mode(const char *value, EbConfig *cfg) {
     cfg->superres_mode = (SUPERRES_MODE)strtoul(value, NULL, 0);
 };
-static void SetSuperresDenom(const char *value, EbConfig *cfg) {
+static void set_superres_denom(const char *value, EbConfig *cfg) {
     cfg->superres_denom = (uint8_t)strtoul(value, NULL, 0);
 };
-static void SetSuperresKfDenom(const char *value, EbConfig *cfg) {
+static void set_superres_kf_denom(const char *value, EbConfig *cfg) {
     cfg->superres_kf_denom = (uint8_t)strtoul(value, NULL, 0);
 };
-static void SetSuperresQthres(const char *value, EbConfig *cfg) {
+static void set_superres_qthres(const char *value, EbConfig *cfg) {
     cfg->superres_qthres = (uint8_t)strtoul(value, NULL, 0);
 };
 // --- end: SUPER-RESOLUTION SUPPORT
@@ -834,10 +834,10 @@ ConfigEntry config_entry[] = {
     {SINGLE_INPUT, ENABLE_OVERLAYS, "EnableOverlays", set_enable_overlays},
     // --- end: ALTREF_FILTERING_SUPPORT
     // Super-resolution support
-    { SINGLE_INPUT, SUPERRES_MODE_INPUT, "SuperresMode", SetSuperresMode },
-    { SINGLE_INPUT, SUPERRES_DENOM, "SuperresDenom", SetSuperresDenom },
-    { SINGLE_INPUT, SUPERRES_KF_DENOM, "SuperresKfDenom", SetSuperresKfDenom },
-    { SINGLE_INPUT, SUPERRES_QTHRES, "SuperresQthres", SetSuperresQthres },
+    { SINGLE_INPUT, SUPERRES_MODE_INPUT, "SuperresMode", set_superres_mode },
+    { SINGLE_INPUT, SUPERRES_DENOM, "SuperresDenom", set_superres_denom },
+    { SINGLE_INPUT, SUPERRES_KF_DENOM, "SuperresKfDenom", set_superres_kf_denom },
+    { SINGLE_INPUT, SUPERRES_QTHRES, "SuperresQthres", set_superres_qthres },
 
     {SINGLE_INPUT, SQ_WEIGHT_TOKEN, "SquareWeight", set_square_weight},
     {SINGLE_INPUT, ENABLE_AMP_TOKEN, "AutomaxPartition", set_enable_auto_max_partition},
