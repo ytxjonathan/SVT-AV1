@@ -31,7 +31,7 @@ EbErrorType largest_coding_unit_ctor(SuperBlock *larget_coding_unit_ptr, uint8_t
 
     larget_coding_unit_ptr->dctor = largest_coding_unit_dctor;
 
-    // ************ SB ***************
+    /*!< ************ SB *************** */
     /*!< Which borderLargestCuSize is not a power of two */
 
     /*!< Which borderLargestCuSize is not a power of two */

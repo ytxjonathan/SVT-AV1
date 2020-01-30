@@ -29,7 +29,7 @@ static const SEG_LVL_FEATURES seg_lvl_lf_lut[MAX_MB_PLANE][2] = {
     {SEG_LVL_ALT_LF_U, SEG_LVL_ALT_LF_U},
     {SEG_LVL_ALT_LF_V, SEG_LVL_ALT_LF_V}};
 
-//**********************************************************************************************************************//
+/**********************************************************************************************************************/
 
 //static const SEG_LVL_FEATURES seg_lvl_lf_lut[MAX_MB_PLANE][2] = {
 //    { SEG_LVL_ALT_LF_Y_V, SEG_LVL_ALT_LF_Y_H },
@@ -200,7 +200,7 @@ void eb_av1_loop_filter_frame_init(FrameHeader *frm_hdr, LoopFilterInfoN *lfi, i
         }
     }
 }
-//***************************************************************************************************//
+/***************************************************************************************************/
 
 static INLINE int32_t scaled_buffer_offset(int32_t x_offset, int32_t y_offset, int32_t stride/*,
     const struct scale_factors *sf*/) {
@@ -290,7 +290,7 @@ void eb_av1_setup_dst_planes(struct MacroblockdPlane *planes, BlockSize bsize,
 }
 
 
-//***************************************************************************************************//
+/***************************************************************************************************/
 
 static TxSize get_transform_size(const MacroBlockD *const xd, const MbModeInfo *const mbmi,
                                  const EdgeDir edge_dir, const int32_t mi_row, const int32_t mi_col,
@@ -393,7 +393,7 @@ static TxSize set_lpf_parameters(Av1DeblockingParameters *const params, const ui
                     //const ModeInfo *const mi_prev = *(mi - mode_step);
                     const ModeInfo *const   mi_prev_temp = *(mi - mode_step);
                     const MbModeInfo *const mi_prev      = &mi_prev_temp[0].mbmi;
-                    //
+
                     if (mi_prev == NULL) return TX_INVALID;
                     const int32_t pv_row =
                         (VERT_EDGE == edge_dir) ? (mi_row) : (mi_row - (1 << scale_vert));
@@ -640,7 +640,7 @@ void eb_av1_filter_block_plane_horz(const PictureControlSet *const pcs_ptr,
                 else
                     aom_lpf_horizontal_6(p, dst_stride, params.mblim, params.lim, params.hev_thr);
                 break;
-                // apply 8-tap filtering
+                /*!< apply 8-tap filtering */
             case 8:
                 if (is_16bit)
                     aom_highbd_lpf_horizontal_8((uint16_t *)(p), //CONVERT_TO_SHORTPTR(p),
@@ -1260,7 +1260,7 @@ static int32_t search_filter_level(
                 /*!< If value is close to the best so far then bias towards a lower loop
                  *   filter value. */
                 if (ss_err[filt_low] < (best_err + bias)) {
-                    // Was it actually better than the previous best?
+                    /*!< Was it actually better than the previous best? */
                     if (ss_err[filt_low] < best_err) best_err = ss_err[filt_low];
                     filt_best = filt_low;
                 }

@@ -3116,21 +3116,21 @@ void* picture_decision_kernel(void *input_ptr)
                                         encode_context_ptr->intra_period_position = 0;
                                     encode_context_ptr->elapsed_non_cra_count = 0;
 
-                                    //-------------------------------
+                                    /********************************/
                                     /*!< IDR */
-                                    //-------------------------------
+                                    /********************************/
                                     if (pcs_ptr->idr_flag == EB_TRUE) {
-                                        // Set CRA flag */
+                                        /*!< Set CRA flag */
                                         pcs_ptr->cra_flag = EB_FALSE;
 
-                                        // Reset the pictures since last IDR counter */
+                                        /*!< Reset the pictures since last IDR counter */
                                         encode_context_ptr->elapsed_non_idr_count = 0;
                                         /*!< log latest key frame poc */
                                         context_ptr->key_poc = pcs_ptr->picture_number;
                                     }
-                                    //-------------------------------
+                                    /*******************************/
                                     /*!< CRA */
-                                    //-------------------------------
+                                    /*******************************/
                                     else {
                                         /*!< Set a Random Access Point if not an IDR */
                                         pcs_ptr->cra_flag = EB_TRUE;

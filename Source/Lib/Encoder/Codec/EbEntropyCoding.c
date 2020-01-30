@@ -1475,7 +1475,7 @@ static void encode_pred_mode_av1(FRAME_CONTEXT *frame_context, AomWriter *ec_wri
     return;
 }
 
-//****************************************************************************************************//
+/****************************************************************************************************/
 
 /***********************************************************************/
 /*!< motion_mode_allowed
@@ -1539,7 +1539,7 @@ static void write_motion_mode(FRAME_CONTEXT *frame_context, AomWriter *ec_writer
 
     return;
 }
-//****************************************************************************************************//
+/****************************************************************************************************/
 extern int8_t av1_ref_frame_type(const MvReferenceFrame *const rf);
 uint16_t      compound_mode_ctx_map[3][COMP_NEWMV_CTXS] = {
     {0, 1, 1, 1, 1},
@@ -1669,10 +1669,8 @@ EbPtr entropy_coder_get_bitstream_ptr(EntropyCoder *entropy_coder_ptr) {
     return bitstream_ptr;
 }
 
-//*******************************************************************************************//
-//*******************************************************************************************//
-//*******************************************************************************************//
-//*******************************************************************************************//
+/*******************************************************************************************/
+/*******************************************************************************************/
 /*!< aom_integer.c */
 static const size_t   k_maximum_leb_128_size  = 8;
 static const uint64_t k_maximum_leb_128_value = 0xFFFFFFFFFFFFFF; /*!< 2 ^ 56 - 1 */
@@ -1735,7 +1733,7 @@ void eb_aom_wb_write_inv_signed_literal(struct AomWriteBitBuffer *wb, int32_t da
     eb_aom_wb_write_literal(wb, data, bits + 1);
 }
 
-//*******************************************************************************************//
+/*******************************************************************************************/
 
 static void write_inter_mode(FRAME_CONTEXT *frame_context, AomWriter *ec_writer,
                              PredictionMode mode, const int16_t mode_ctx, uint32_t blk_origin_x,
@@ -4311,7 +4309,7 @@ EbErrorType write_frame_header_av1(Bitstream *bitstream_ptr, SequenceControlSet 
                                            : pcs_ptr->entropy_coder_ptr->ec_frame_size);
         OutputBitstreamUnit *ec_output_bitstream_ptr =
             (OutputBitstreamUnit *)pcs_ptr->entropy_coder_ptr->ec_output_bitstream_ptr;
-        //****************************************************************//
+        /****************************************************************/
         /*!< Copy from EC stream to frame stream */
         memcpy(data + curr_data_size, ec_output_bitstream_ptr->buffer_begin_av1, frame_size);
         curr_data_size += (frame_size);

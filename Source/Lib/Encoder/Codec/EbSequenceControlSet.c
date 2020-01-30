@@ -173,9 +173,9 @@ EbErrorType eb_sequence_control_set_creator(EbPtr *object_dbl_ptr, EbPtr object_
     return EB_ErrorNone;
 }
 
-/************************************************
- * Sequence Control Set Copy
- ************************************************/
+/************************************************/
+/*!< Sequence Control Set Copy */
+/************************************************/
 EbErrorType copy_sequence_control_set(SequenceControlSet *dst, SequenceControlSet *src) {
     uint32_t write_count = 0;
 

@@ -491,7 +491,7 @@ void cdef_seg_search16bit(PictureControlSet *pcs_ptr, SequenceControlSet *scs_pt
 /*!< CDEF Kernel */
 /******************************************************/
 void *cdef_kernel(void *input_ptr) {
-    // Context & SCS & PCS
+    /*!< Context & SCS & PCS */
     EbThreadContext *   thread_context_ptr = (EbThreadContext *)input_ptr;
     CdefContext *       context_ptr        = (CdefContext *)thread_context_ptr->priv;
     PictureControlSet * pcs_ptr;

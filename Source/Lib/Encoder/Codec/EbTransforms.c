@@ -2660,7 +2660,7 @@ uint64_t handle_transform64x64_c(int32_t *output) {
 
     /*!< top - right 32x32 area. */
     three_quad_energy = energy_computation(output + 32, 64, 32, 32);
-    /*!<bottom 64x32 area. */
+    /*!< bottom 64x32 area. */
     three_quad_energy += energy_computation(output + 32 * 64, 64, 64, 32);
 
     /*!< zero out top-right 32x32 area. */
@@ -2730,9 +2730,9 @@ void av1_transform_two_d_4x4_c(int16_t *input, int32_t *output, uint32_t input_s
         input, input_stride, output, &cfg, intermediate_transform_buffer, bit_depth);
 }
 
-/*********************************************************************
-* Calculate CBF
-*********************************************************************/
+/*********************************************************************/
+/*!< Calculate CBF */
+/*********************************************************************/
 void eb_av1_fwd_txfm2d_64x32_c(int16_t *input, int32_t *output, uint32_t input_stride,
                                TxType transform_type, uint8_t bit_depth) {
     int32_t       intermediate_transform_buffer[64 * 32];
@@ -2915,11 +2915,11 @@ void eb_av1_fwd_txfm2d_4x8_c(int16_t *input, int32_t *output, uint32_t input_str
         input, input_stride, output, &cfg, intermediate_transform_buffer, bit_depth);
 }
 
-/*********************************************************************
-* Transform
-*   Note there is an implicit assumption that TU Size <= PU Size,
-*   which is different than the HEVC requirements.
-*********************************************************************/
+/*********************************************************************/
+/*!< * Transform
+ *   *   Note there is an implicit assumption that TU Size <= PU Size,
+ *   *   which is different than the HEVC requirements. */
+/*********************************************************************/
 EbErrorType av1_estimate_transform(int16_t *residual_buffer, uint32_t residual_stride,
                                    int32_t *coeff_buffer, uint32_t coeff_stride,
                                    TxSize transform_size, uint64_t *three_quad_energy,
@@ -5407,7 +5407,7 @@ void eb_av1_iidentity4_c(const int32_t *input, int32_t *output, int8_t cos_bit,
     (void)stage_range;
     for (int32_t i = 0; i < 4; ++i) {
         /*!< Normal input should fit into 32-bit. Cast to 64-bit here to avoid
-         * overflow with corrupted/fuzzed input. The same for av1_iidentity/16/64_c. */
+         *   overflow with corrupted/fuzzed input. The same for av1_iidentity/16/64_c. */
         output[i] = round_shift((int64_t)new_sqrt2 * input[i], new_sqrt2_bits);
     }
     assert(stage_range[0] + new_sqrt2_bits <= 32);
@@ -5842,7 +5842,7 @@ static INLINE int32_t range_check_value(int32_t value, int8_t bit) {
 void eb_av1_highbd_iwht4x4_16_add_c(const TranLow *input, uint8_t *dest8_r, int32_t stride_r,
                                     uint8_t *dest8_w, int32_t stride_w, int32_t bd) {
     /*!< 4-point reversible, orthonormal inverse Walsh-Hadamard in 3.5 adds,
-     *  0.5 shifts per pixel. */
+     *   0.5 shifts per pixel. */
     int32_t        i;
     TranLow        output[16];
     TranLow        a1, b1, c1, d1, e1;
@@ -6283,7 +6283,7 @@ static void highbd_inv_txfm_add(const TranLow *input, uint8_t *dest_r, int32_t s
         break;
     case TX_4X4:
         /*!< this is like av1_short_idct4x4 but has a special case around eob<=1
-         *\  which is significant (not just an optimization) for the lossless case. */
+         *   which is significant (not just an optimization) for the lossless case. */
         eb_av1_highbd_inv_txfm_add_4x4(input, dest_r, stride_r, dest_w, stride_w, txfm_param);
         break;
     case TX_16X4:

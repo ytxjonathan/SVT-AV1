@@ -1675,9 +1675,9 @@ static EbErrorType produce_temporally_filtered_pic(
                         altref_buffer_highbd_start[C_V] + blk_ch_src_offset;
                 }
 
-                // ------------
+                /**************/
                 /*!< Step 1: motion estimation + compensation */
-                // ------------
+                /**************/
 
                 /*!< if frame to process is the center frame */
                 if (frame_index == index_center) {
@@ -1791,9 +1791,9 @@ static EbErrorType produce_temporally_filtered_pic(
                                           is_highbd);
                 }
 
-                // ------------
+                /*****************/
                 /*!< Step 2: temporal filtering using the motion compensated blocks */
-                // ------------
+                /*****************/
 
                 /*!< if frame to process is the center frame */
                 if (frame_index == index_center) {

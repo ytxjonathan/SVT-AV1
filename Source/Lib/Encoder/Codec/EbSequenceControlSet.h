@@ -21,17 +21,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/************************************
+/************************************/
 /*!< Sequence Control Set */
 /************************************/
 typedef struct SequenceControlSet {
     EbDctor                  dctor;
     EbSvtAv1EncConfiguration static_config;
 
-    // Encoding Context */
+    /*!< Encoding Context */
     EncodeContext *encode_context_ptr;
 
-    // Profile & ID */
+    /*!< Profile & ID */
     uint32_t sps_id;
     uint32_t vps_id;
     uint32_t profile_space;
@@ -41,10 +41,10 @@ typedef struct SequenceControlSet {
     uint32_t chroma_format_idc;
     uint32_t max_temporal_layers;
     uint32_t bits_for_picture_order_count;
-    uint16_t subsampling_x; // add chroma subsampling parameters */
+    uint16_t subsampling_x; /*!< add chroma subsampling parameters */
     uint16_t subsampling_y;
 
-    // Picture deminsions */
+    /*!< Picture deminsions */
     uint16_t max_input_luma_width;
     uint16_t max_input_luma_height;
     uint16_t max_input_chroma_width;
@@ -63,40 +63,40 @@ typedef struct SequenceControlSet {
     uint32_t frame_rate;
     uint32_t encoder_bit_depth;
 
-    // Cropping Definitions */
+    /*!< Cropping Definitions */
     int32_t cropping_left_offset;
     int32_t cropping_right_offset;
     int32_t cropping_top_offset;
     int32_t cropping_bottom_offset;
 
-    // Conformance Window flag */
+    /*!< Conformance Window flag */
     uint32_t conformance_window_flag;
 
-    // Group of Pictures (GOP) Structure */
-    uint32_t max_ref_count; // Maximum number of reference pictures, however each pred */
-        //   entry can be less. */
+    /*!< Group of Pictures (GOP) Structure */
+    uint32_t max_ref_count; /*!< Maximum number of reference pictures, however each pred */
+        /*!<   entry can be less. */
     PredictionStructure *pred_struct_ptr;
-    int32_t              intra_period_length; // The frequency of intra pictures */
-    uint32_t             intra_refresh_type; // 1: CRA, 2: IDR */
+    int32_t              intra_period_length; /*!< The frequency of intra pictures */
+    uint32_t             intra_refresh_type; /*!< 1: CRA, 2: IDR */
 
-    // SB */
-    uint8_t sb_sz; // sb_size */
+    /*!< SB */
+    uint8_t sb_sz; /*!< sb_size */
     uint8_t max_sb_depth;
-    // Coding unit */
+    /*!< Coding unit */
     uint8_t max_blk_size;
     uint8_t min_blk_size;
     uint8_t max_intra_size;
     uint8_t min_intra_size;
     EbBool  intra4x4_flag;
-    // Rate Control */
+    /*!< Rate Control */
     uint32_t target_bitrate;
     uint32_t available_bandwidth;
 
-    // Picture Analysis */
+    /*!< Picture Analysis */
     uint32_t picture_analysis_number_of_regions_per_width;
     uint32_t picture_analysis_number_of_regions_per_height;
 
-    // Segments */
+    /*!< Segments */
     uint32_t me_segment_column_count_array[MAX_TEMPORAL_LAYERS];
     uint32_t me_segment_row_count_array[MAX_TEMPORAL_LAYERS];
     uint32_t enc_dec_segment_col_count_array[MAX_TEMPORAL_LAYERS];
@@ -110,8 +110,8 @@ typedef struct SequenceControlSet {
     uint32_t tf_segment_row_count;
     EbBool   enable_altrefs;
     uint32_t
-        scd_delay; // Number of delay frames needed to implement future window for algorithms such as SceneChange or TemporalFiltering */
-    // Buffers */
+        scd_delay; /*!< Number of delay frames needed to implement future window for algorithms such as SceneChange or TemporalFiltering */
+    /*!< Buffers */
     uint32_t picture_control_set_pool_init_count;
     uint32_t picture_control_set_pool_init_count_child;
     uint32_t pa_reference_picture_buffer_init_count;
@@ -151,8 +151,8 @@ typedef struct SequenceControlSet {
     uint8_t   pic_width_in_sb;
     uint8_t   picture_height_in_sb;
     uint16_t  sb_total_count;
-    uint16_t  sb_size_pix; // sb size in pixels 64/128 */
-    uint16_t  sb_tot_cnt; // sb total number */
+    uint16_t  sb_size_pix; /*!< sb size in pixels 64/128 */
+    uint16_t  sb_tot_cnt; /*!< sb total number */
     uint16_t  max_block_cnt;
     SbGeom *  sb_geom;
 
@@ -178,7 +178,7 @@ typedef struct SequenceControlSet {
      *     *
      *     * Default is 0. */
     uint8_t         down_sampling_method_me_search;
-    uint8_t         mfmv_enabled; // 1:Enabled  0:Disabled */
+    uint8_t         mfmv_enabled; /*!< 1:Enabled  0:Disabled */
     EbBlockMeanPrec block_mean_calc_prec;
     BitstreamLevel  level[MAX_NUM_OPERATING_POINTS];
     int32_t         film_grain_denoise_strength;

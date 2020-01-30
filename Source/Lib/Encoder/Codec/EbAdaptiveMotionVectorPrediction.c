@@ -2144,7 +2144,7 @@ int av1_is_dv_valid(const MV dv, const MacroBlockD *xd, int mi_row, int mi_col, 
     const int src_left_edge  = mi_col * MI_SIZE * scale_px_to_mv + dv.col;
     const int tile_left_edge = tile->mi_col_start * MI_SIZE * scale_px_to_mv;
     if (src_left_edge < tile_left_edge) return 0;
-    // Is the bottom right inside the current tile?
+    /*!< Is the bottom right inside the current tile? */
     const int src_bottom_edge  = (mi_row * MI_SIZE + bh) * scale_px_to_mv + dv.row;
     const int tile_bottom_edge = tile->mi_row_end * MI_SIZE * scale_px_to_mv;
     if (src_bottom_edge > tile_bottom_edge) return 0;

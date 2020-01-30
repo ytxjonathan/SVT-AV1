@@ -203,7 +203,7 @@ static int32_t grain_max;
 
 static uint16_t random_register = 0; /*!< random number generator register */
 
-//----------------------------------------------------------------------
+/*********************************************************************/
 /*!< todo: aomlib memory functions (to be replaced by Eb functions) */
 /*
 #define ADDRESS_STORAGE_SIZE sizeof(size_t)

@@ -3165,7 +3165,7 @@ if (use_filter_intra) {
                 use_intra_edge_upsample(txhpx, txwpx, p_angle - 180, filt_type);
             if (need_left && upsample_left) {
                 const int32_t n_px = txhpx + (need_bottom ? txwpx : 0);
-                //av1_upsample_intra_edge_high(left_col, n_px, bd);/*!< AMIR: to be replaced by optimized code */
+                //av1_upsample_intra_edge_high(left_col, n_px, bd); /*!< AMIR: to be replaced by optimized code */
                 eb_av1_upsample_intra_edge_high_c(left_col, n_px, bd);
             }
         }
@@ -3374,7 +3374,7 @@ void eb_av1_predict_intra_block(
         (yd > 0) &&
         (mi_row + ((row_off + txh) << pd->subsampling_y) < xd->tile.mi_row_end);
 
-    const PartitionType partition = from_shape_to_part[blk_geom->shape]; //blk_ptr->part;// PARTITION_NONE;/*!< CHKN this is good enough as the avail functions need to know if VERT part is used or not mbmi->partition; */
+    const PartitionType partition = from_shape_to_part[blk_geom->shape]; //blk_ptr->part;// PARTITION_NONE; /*!< CHKN this is good enough as the avail functions need to know if VERT part is used or not mbmi->partition; */
 
     /*!< force 4x4 chroma component block size. */
     bsize = scale_chroma_bsize(bsize, pd->subsampling_x, pd->subsampling_y);
@@ -3605,7 +3605,7 @@ void eb_av1_predict_intra_block_16bit(
         (yd > 0) &&
         (mi_row + ((row_off + txh) << pd->subsampling_y) < xd->tile.mi_row_end);
 
-    const PartitionType partition = from_shape_to_part[blk_geom->shape]; //blk_ptr->part;// PARTITION_NONE;/*!< CHKN this is good enough as the avail functions need to know if VERT part is used or not mbmi->partition; */
+    const PartitionType partition = from_shape_to_part[blk_geom->shape]; //blk_ptr->part;// PARTITION_NONE; /*!< CHKN this is good enough as the avail functions need to know if VERT part is used or not mbmi->partition; */
 
     /*!< force 4x4 chroma component block size. */
     bsize = scale_chroma_bsize(bsize, pd->subsampling_x, pd->subsampling_y);

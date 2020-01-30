@@ -1291,9 +1291,9 @@ static EbErrorType prediction_structure_ctor(
     //    }
     //}
 
-    //----------------------------------------
+    /********************************/
     /*!< CONSTRUCT DEPENDENT LIST 0 */
-    //----------------------------------------
+    /********************************/
 
     {
         int64_t  dep_index;
@@ -1439,9 +1439,9 @@ static EbErrorType prediction_structure_ctor(
         }
     }
 
-    //----------------------------------------
+    /********************************/
     /*!< CONSTRUCT DEPENDENT LIST 1 */
-    //----------------------------------------
+    /********************************/
 
     {
         int32_t  dep_index;
@@ -1599,9 +1599,9 @@ static EbErrorType prediction_structure_ctor(
                 : EB_FALSE;
     }
 
-    //----------------------------------------
+    /*******************************/
     /*!< CONSTRUCT THE RPSes */
-    //----------------------------------------
+    /*******************************/
     {
         /*!< Counts & Indicies */
         uint32_t ref_index;
@@ -1750,9 +1750,9 @@ static EbErrorType prediction_structure_ctor(
                               : entry_index + 1;
         }
 
-        //--------------------------------------------------------
+        /**********************************************************/
         /*!< Create the RPS for Prediction Structure Entry */
-        //--------------------------------------------------------
+        /**********************************************************/
 
         /*!< *Note- many of the below Syntax Elements are signaled
          *    in the Slice Header and not in the RPS.  These syntax

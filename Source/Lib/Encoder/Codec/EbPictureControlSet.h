@@ -683,7 +683,7 @@ typedef struct PictureParentControlSet {
     uint8_t            intra_pred_mode;
     uint8_t            tx_size_search_mode;
     uint8_t            frame_end_cdf_update_mode; /*!< mm-signal: 0: OFF, 1:ON */
-    //**********************************************************************************************************//
+    /**********************************************************************************************************/
     Av1RpsNode av1_ref_signal;
     EbBool     has_show_existing;
     int32_t    ref_frame_map[REF_FRAMES]; /*!< maps fb_idx to reference slot */

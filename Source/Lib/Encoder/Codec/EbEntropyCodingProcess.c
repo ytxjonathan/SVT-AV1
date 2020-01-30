@@ -187,7 +187,7 @@ static void reset_entropy_coding_picture(EntropyCodingContext *context_ptr,
     /*!< pass the ent */
     OutputBitstreamUnit *output_bitstream_ptr =
         (OutputBitstreamUnit *)(pcs_ptr->entropy_coder_ptr->ec_output_bitstream_ptr);
-    //****************************************************************//
+    /****************************************************************/
 
     uint8_t *data = output_bitstream_ptr->buffer_av1;
     pcs_ptr->entropy_coder_ptr->ec_writer.allow_update_cdf =
@@ -235,7 +235,7 @@ static void reset_ec_tile(uint32_t total_size, uint32_t is_last_tile_in_tg,
     /*!< pass the ent */
     OutputBitstreamUnit *output_bitstream_ptr =
         (OutputBitstreamUnit *)(pcs_ptr->entropy_coder_ptr->ec_output_bitstream_ptr);
-    //****************************************************************//
+    /****************************************************************/
 
     uint8_t *data = output_bitstream_ptr->buffer_av1 + total_size;
     pcs_ptr->entropy_coder_ptr->ec_writer.allow_update_cdf =

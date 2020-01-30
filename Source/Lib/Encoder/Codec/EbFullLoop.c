@@ -2343,8 +2343,8 @@ void product_full_loop_tx_search(ModeDecisionCandidateBuffer *candidate_buffer,
         //        break;
         //    }
         //}
-        ///*!< Skip transform type search when we found the block has been quantized to */
-        ///*!< all zero and at the same time, it has better rdcost than doing transform. */
+        // /*!< Skip transform type search when we found the block has been quantized to */
+        // /*!< all zero and at the same time, it has better rdcost than doing transform. */
         //if (cpi->sf.tx_type_search.skip_tx_search && !best_eob) break;
     }
     /*!< this kernel assumes no atb */

@@ -514,10 +514,10 @@ static int full_pixel_exhaustive(PictureControlSet *pcs, IntraBcContext *x,
     int                        range    = sf->mesh_patterns[0].range;
     int                        baseline_interval_divisor;
 
-    // Keep track of number of exhaustive calls (this frame in this thread).
+    /*!< Keep track of number of exhaustive calls (this frame in this thread). */
     //CHKN if (x->ex_search_count_ptr != NULL) ++(*x->ex_search_count_ptr);
 
-    // Trap illegal values for interval and range for this function.
+    /*!< Trap illegal values for interval and range for this function. */
     if ((range < MIN_RANGE) || (range > MAX_RANGE) || (interval < MIN_INTERVAL) ||
         (interval > range))
         return INT_MAX;
@@ -807,9 +807,9 @@ static unsigned int setup_obmc_center_error(const int32_t *mask, const MV *bestm
         v = INT_MAX;                                                                \
     }
 
-/*!</ TODO(yunqingwang): SECOND_LEVEL_CHECKS_BEST was a rewrote of
- *    SECOND_LEVEL_CHECKS, and SECOND_LEVEL_CHECKS should be rewritten
-*     later in the same way. */
+/*!< TODO(yunqingwang): SECOND_LEVEL_CHECKS_BEST was a rewrote of
+ *   SECOND_LEVEL_CHECKS, and SECOND_LEVEL_CHECKS should be rewritten
+ *   later in the same way. */
 #define SECOND_LEVEL_CHECKS_BEST(k)                                                  \
     {                                                                                \
         unsigned int second;                                                         \

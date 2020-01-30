@@ -10369,7 +10369,7 @@ EbErrorType check_00_center(EbPictureBufferDesc *ref_pic_ptr, MeContext *context
                            ? *y_search_center - ((origin_y + *y_search_center) -
                                                  ((int16_t)ref_pic_ptr->height - 1))
                            : *y_search_center;
-    //******************************************************************************//
+    /******************************************************************************/
 
     zero_mv_cost = zero_mv_sad << COST_PRECISION;
     search_region_index =

@@ -67,7 +67,7 @@ extern EbErrorType copy_payload(Bitstream *bitstream_ptr, EbByte output_buffer,
                                                   uint32_t *     output_buffer_size,
                                                   EncodeContext *encode_context_ptr);
 
-//**********************************************************************************************************//
+/**********************************************************************************************************/
 /*!< onyxc_int.h */
 static INLINE int32_t frame_is_intra_only(const PictureParentControlSet *const pcs_ptr) {
     return pcs_ptr->frm_hdr.frame_type == KEY_FRAME ||
@@ -99,7 +99,7 @@ static INLINE uint8_t major_minor_to_seq_level_idx(BitstreamLevel bl) {
     return ((bl.major - LEVEL_MAJOR_MIN) << LEVEL_MINOR_BITS) + bl.minor;
 }
 
-//**********************************************************************************************************//
+/**********************************************************************************************************/
 /*!< encoder.h */
 static INLINE int32_t get_ref_frame_map_idx(const PictureParentControlSet *pcs_ptr,
                                             MvReferenceFrame               ref_frame) {
@@ -169,7 +169,7 @@ static INLINE int get_palette_bsize_ctx(BlockSize bsize) {
     return num_pels_log2_lookup[bsize] - num_pels_log2_lookup[BLOCK_8X8];
 }
 
-//*******************************************************************************************//
+/*******************************************************************************************/
 /*!< bitwriter_buffer.h */
 struct AomWriteBitBuffer {
     uint8_t *bit_buffer;
@@ -183,7 +183,7 @@ void eb_aom_wb_write_bit(struct AomWriteBitBuffer *wb, int32_t bit);
 void eb_aom_wb_write_literal(struct AomWriteBitBuffer *wb, int32_t data, int32_t bits);
 
 void eb_aom_wb_write_inv_signed_literal(struct AomWriteBitBuffer *wb, int32_t data, int32_t bits);
-//*******************************************************************************************//
+/*******************************************************************************************/
 /*!< Bitstream.h */
 struct AomWriteBitBuffer;
 
@@ -194,7 +194,7 @@ uint32_t write_obu_header(ObuType ObuType, int32_t obuExtension, uint8_t *const 
 
 int32_t write_uleb_obu_size(uint32_t obu_header_size, uint32_t obu_payload_size, uint8_t *dest);
 
-//*******************************************************************************************//
+/*******************************************************************************************/
 /*!< blockd.h */
 static INLINE uint32_t have_nearmv_in_inter_mode(PredictionMode mode) {
     return (mode == NEARMV || mode == NEAR_NEARMV || mode == NEAR_NEWMV || mode == NEW_NEARMV);
@@ -275,7 +275,7 @@ extern EbErrorType write_frame_header_av1(Bitstream *bitstream_ptr, SequenceCont
 extern EbErrorType encode_td_av1(uint8_t *bitstream_ptr);
 extern EbErrorType encode_sps_av1(Bitstream *bitstream_ptr, SequenceControlSet *scs_ptr);
 
-//*******************************************************************************************//
+/*******************************************************************************************/
 
 MotionMode motion_mode_allowed(const PictureControlSet *pcs_ptr, const BlkStruct *blk_ptr,
                                const BlockSize bsize, MvReferenceFrame rf0, MvReferenceFrame rf1,

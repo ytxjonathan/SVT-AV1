@@ -8,7 +8,7 @@
 #include "EbNoiseExtractAVX2.h"
 #include "EbPictureControlSet.h"
 
-/***************************************
+/***************************************/
 /*!< Extern Function Declaration */
 /***************************************/
 EbErrorType picture_analysis_context_ctor(EbThreadContext *  thread_context_ptr,

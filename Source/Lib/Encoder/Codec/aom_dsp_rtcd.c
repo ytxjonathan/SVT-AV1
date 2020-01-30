@@ -133,15 +133,15 @@ static int32_t can_use_intel_avx512() {
     CPUID.(EAX=07H, ECX=0):EBX[bit 30] AVX512BW
     CPUID.(EAX=07H, ECX=0):EBX[bit 31] AVX512VL */
 
-    int avx512_ebx_mask = (1 << 16) // AVX-512F
-                          | (1 << 17) // AVX-512DQ
-                          | (1 << 28) // AVX-512CD
-                          | (1 << 30) // AVX-512BW
-                          | (1 << 31); // AVX-512VL
+    int avx512_ebx_mask = (1 << 16) /*!< AVX-512F */
+                          | (1 << 17) /*!< AVX-512DQ */
+                          | (1 << 28) /*!< AVX-512CD */
+                          | (1 << 30) /*!< AVX-512BW */
+                          | (1 << 31); /*!< AVX-512VL */
 
     if (!check_4thgen_intel_core_features()) return 0;
 
-    // ensure OS supports ZMM registers (and YMM, and XMM)
+    /*!< ensure OS supports ZMM registers (and YMM, and XMM) */
     if (!check_xcr0_zmm()) return 0;
 
     run_cpuid(7, 0, abcd);
@@ -507,7 +507,7 @@ void setup_rtcd_internal(CPU_FLAGS flags) {
         eb_aom_highbd_smooth_v_predictor_64x32 = aom_highbd_smooth_v_predictor_64x32_avx512;
         eb_aom_highbd_smooth_v_predictor_64x64 = aom_highbd_smooth_v_predictor_64x64_avx512;
     }
-#endif //*!< !NON_AVX512_SUPPORT */
+#endif // !NON_AVX512_SUPPORT
 
     eb_cfl_predict_lbd = eb_cfl_predict_lbd_c;
     if (flags & HAS_AVX2) eb_cfl_predict_lbd = eb_cfl_predict_lbd_avx2;

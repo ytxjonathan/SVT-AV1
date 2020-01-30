@@ -3822,9 +3822,9 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
             pcs_ptr, context_ptr, context_ptr->blk_geom->bsize, LAST_FRAME, -1, NEWMV) ==
         OBMC_CAUSAL;
     if (is_obmc_allowed) precompute_obmc_data(pcs_ptr, context_ptr);
-    /*!< *************
-         MVP
-    ************* */
+    /**************/
+    /*!< MVP */
+    /**************/
 
     uint32_t ref_it;
     if (context_ptr->new_nearest_injection)
@@ -3837,9 +3837,9 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                 context_ptr, pcs_ptr, context_ptr->blk_ptr, ref_frame_pair, &cand_total_cnt);
         }
 
-    //----------------------
+    /************************************************************/
     /*!<  NEAREST_NEWMV, NEW_NEARESTMV, NEAR_NEWMV, NEW_NEARMV. */
-    //----------------------
+    /************************************************************/
     if (context_ptr->new_nearest_near_comb_injection) {
         EbBool allow_compound =
             (frm_hdr->reference_mode == SINGLE_REFERENCE || context_ptr->blk_geom->bwidth == 4 ||
@@ -4353,9 +4353,9 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
     if (!coeff_based_nsq_cand_reduction) {
         if (is_compound_enabled) {
             if (allow_bipred) {
-                //----------------------
+                /******************/
                 /*!< Bipred2Nx2N */
-                //----------------------
+                /*****************/
                 if (context_ptr->bipred3x3_injection > 0)
                     if (pcs_ptr->slice_type == B_SLICE)
                         bipred_3x3_candidates_injection(scs_ptr,
@@ -4366,9 +4366,9 @@ void inject_inter_candidates(PictureControlSet *pcs_ptr, ModeDecisionContext *co
                                                         &cand_total_cnt);
             }
 
-            //----------------------
+            /******************/
             /*!< Unipred2Nx2N */
-            //----------------------
+            /******************/
             if (context_ptr->unipred3x3_injection > 0)
                 if (pcs_ptr->slice_type != I_SLICE)
                     unipred_3x3_candidates_injection(scs_ptr,
