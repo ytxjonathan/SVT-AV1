@@ -1108,6 +1108,9 @@ void init_sq_nsq_block(
             context_ptr->md_cu_arr_nsq[blk_idx].part = PARTITION_SPLIT;
             context_ptr->md_local_cu_unit[blk_idx].tested_cu_flag = EB_FALSE;
         }
+#if SKIP_DEPTH
+        context_ptr->md_cu_arr_nsq[blk_idx].do_not_process_block = 0;
+#endif
         ++blk_idx;
     } while (blk_idx < sequence_control_set_ptr->max_block_cnt);
 }
@@ -5832,7 +5835,7 @@ void tx_type_search(
                     if (tx_type == tx_type_pred_1[fetch_tx_idx])
                         check_tx_type++;
                 }
-                if (!check_tx_type)
+                if (check_tx_type)
                     continue;
             }
             txt_it++;
@@ -11842,7 +11845,89 @@ BlockSize av1_predict_max_partition(
     return (BlockSize)((result + 2) * 3);
 }
 #endif
+#if SKIP_DEPTH
+static void set_child_to_be_skipped(
+    ModeDecisionContext   *context_ptr,
+    uint32_t    blk_index,
+    int32_t     sb_size,
+    int8_t      depth_step) {
+    uint32_t child_block_idx_1, child_block_idx_2, child_block_idx_3, child_block_idx_4;
+    uint32_t tot_d1_blocks, block_1d_idx;
+    const BlockGeom * blk_geom = get_blk_geom_mds(blk_index);
+    tot_d1_blocks =
+        blk_geom->sq_size == 128 ? 17 :
+        blk_geom->sq_size > 8 ? 25 :
+        blk_geom->sq_size == 8 ? 5 : 1;
+    if (blk_geom->sq_size > 4) {
+        //Set first child to be considered
+        child_block_idx_1 = blk_index + d1_depth_offset[sb_size == BLOCK_128X128][blk_geom->depth];
+        const BlockGeom * child1_blk_geom = get_blk_geom_mds(child_block_idx_1);
+        uint32_t child1_tot_d1_blocks =
+            child1_blk_geom->sq_size == 128 ? 17 :
+            child1_blk_geom->sq_size > 8 ? 25 :
+            child1_blk_geom->sq_size == 8 ? 5 : 1;
 
+        for (block_1d_idx = 0; block_1d_idx < child1_tot_d1_blocks; block_1d_idx++) {
+            context_ptr->md_cu_arr_nsq[child_block_idx_1 + block_1d_idx].do_not_process_block = 1;
+        }
+        if (depth_step > 1)
+            set_child_to_be_skipped(
+                context_ptr,
+                child_block_idx_1,
+                sb_size,
+                depth_step - 1);
+        //Set second child to be considered
+        child_block_idx_2 = child_block_idx_1 + ns_depth_offset[sb_size == BLOCK_128X128][blk_geom->depth + 1];
+        const BlockGeom * child2_blk_geom = get_blk_geom_mds(child_block_idx_2);
+        uint32_t child2_tot_d1_blocks =
+            child2_blk_geom->sq_size == 128 ? 17 :
+            child2_blk_geom->sq_size > 8 ? 25 :
+            child2_blk_geom->sq_size == 8 ? 5 : 1;
+        for (block_1d_idx = 0; block_1d_idx < child2_tot_d1_blocks; block_1d_idx++) {
+            context_ptr->md_cu_arr_nsq[child_block_idx_2 + block_1d_idx].do_not_process_block = 1;
+        }
+        if (depth_step > 1)
+            set_child_to_be_skipped(
+                context_ptr,
+                child_block_idx_2,
+                sb_size,
+                depth_step - 1);
+        //Set third child to be considered
+        child_block_idx_3 = child_block_idx_2 + ns_depth_offset[sb_size == BLOCK_128X128][blk_geom->depth + 1];
+        const BlockGeom * child3_blk_geom = get_blk_geom_mds(child_block_idx_3);
+        uint32_t child3_tot_d1_blocks =
+            child3_blk_geom->sq_size == 128 ? 17 :
+            child3_blk_geom->sq_size > 8 ? 25 :
+            child3_blk_geom->sq_size == 8 ? 5 : 1;
+
+        for (block_1d_idx = 0; block_1d_idx < child3_tot_d1_blocks; block_1d_idx++) {
+            context_ptr->md_cu_arr_nsq[child_block_idx_3 + block_1d_idx].do_not_process_block = 1;
+        }
+        if (depth_step > 1)
+            set_child_to_be_skipped(
+                context_ptr,
+                child_block_idx_3,
+                sb_size,
+                depth_step - 1);
+        //Set forth child to be considered
+        child_block_idx_4 = child_block_idx_3 + ns_depth_offset[sb_size == BLOCK_128X128][blk_geom->depth + 1];
+        const BlockGeom * child4_blk_geom = get_blk_geom_mds(child_block_idx_4);
+        uint32_t child4_tot_d1_blocks =
+            child4_blk_geom->sq_size == 128 ? 17 :
+            child4_blk_geom->sq_size > 8 ? 25 :
+            child4_blk_geom->sq_size == 8 ? 5 : 1;
+        for (block_1d_idx = 0; block_1d_idx < child4_tot_d1_blocks; block_1d_idx++) {
+            context_ptr->md_cu_arr_nsq[child_block_idx_4 + block_1d_idx].do_not_process_block = 1;
+        }
+        if (depth_step > 1)
+            set_child_to_be_skipped(
+                context_ptr,
+                child_block_idx_4,
+                sb_size,
+                depth_step - 1);
+    }
+}
+#endif
 EB_EXTERN EbErrorType mode_decision_sb(
     SequenceControlSet                *sequence_control_set_ptr,
     PictureControlSet                 *picture_control_set_ptr,
@@ -12006,6 +12091,9 @@ EB_EXTERN EbErrorType mode_decision_sb(
         MAX_CU_COST, MAX_CU_COST,MAX_CU_COST,MAX_CU_COST,MAX_CU_COST };
     PART nsq_shape_table[NUMBER_OF_SHAPES] = { PART_N, PART_H, PART_V, PART_HA, PART_HB,
         PART_VA, PART_VB, PART_H4, PART_V4, PART_S };
+#endif
+#if SKIP_DEPTH
+    uint8_t skip_next_depth = 0;
 #endif
     do {
         skip_sub_blocks = 0;
@@ -12317,7 +12405,12 @@ EB_EXTERN EbErrorType mode_decision_sb(
 #if AUTO_MAX_PARTITION
             EbBool auto_max_partition_block_skip = (context_ptr->blk_geom->bwidth > block_size_wide[max_bsize] || context_ptr->blk_geom->bheight > block_size_high[max_bsize]) && (mdcResultTbPtr->leaf_data_array[cuIdx].split_flag == EB_TRUE);
 #if ENHANCED_SQ_WEIGHT
+#if SKIP_DEPTH
+            skip_next_depth = context_ptr->cu_ptr->do_not_process_block;
+            if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->sb_geom[lcuAddr].block_is_allowed[cu_ptr->mds_idx] && !skip_next_nsq && !skip_next_sq && !auto_max_partition_block_skip && !a_b_shapes_skip_flag && !skip_next_depth) {
+#else
             if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->sb_geom[lcuAddr].block_is_allowed[cu_ptr->mds_idx] && !skip_next_nsq && !skip_next_sq && !auto_max_partition_block_skip && !a_b_shapes_skip_flag) {
+#endif
 #else
             if (picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->sb_geom[lcuAddr].block_is_allowed[cu_ptr->mds_idx] && !skip_next_nsq && !skip_next_sq && !auto_max_partition_block_skip) {
 #endif
@@ -12336,7 +12429,11 @@ EB_EXTERN EbErrorType mode_decision_sb(
             }
 #if AUTO_MAX_PARTITION
 #if ENHANCED_SQ_WEIGHT
+#if SKIP_DEPTH
+            else if (auto_max_partition_block_skip || a_b_shapes_skip_flag || skip_next_depth) {
+#else
             else if (auto_max_partition_block_skip || a_b_shapes_skip_flag) {
+#endif
 #else
             else if (auto_max_partition_block_skip) {
 #endif
@@ -12475,6 +12572,30 @@ EB_EXTERN EbErrorType mode_decision_sb(
                     }
                 }
                 depth_cost[sequence_control_set_ptr->static_config.super_block_size == 128 ? context_ptr->blk_geom->depth : context_ptr->blk_geom->depth + 1] += nsq_cost[nsq_shape_table[0]];
+#if SKIP_DEPTH
+                if (sequence_control_set_ptr->sb_geom[lcuAddr].is_complete_sb) {
+                    if (context_ptr->pd_pass == PD_PASS_2) {
+                        uint64_t sq_cost = nsq_cost[0]; // sq cost
+                        uint64_t best_nsq_cost = MAX_CU_COST;
+                        skip_next_depth = 0;
+                        // Derive best nsq cost
+                        for (i = 1; i < NUMBER_OF_SHAPES; ++i)
+                            if (nsq_cost[i] < best_nsq_cost)
+                                best_nsq_cost = nsq_cost[i];
+                        // Compare sq vs best nsq
+                        uint64_t th = 2;
+                        if (sq_cost < best_nsq_cost) {
+                            if ((best_nsq_cost - sq_cost) * 100 > (sq_cost * th)) {
+                                set_child_to_be_skipped(
+                                    context_ptr,
+                                    context_ptr->blk_geom->sqi_mds,
+                                    sequence_control_set_ptr->seq_header.sb_size,
+                                    1);
+                            }
+                        }
+                    }
+                }
+#endif
             }
 #endif
             uint32_t  lastCuIndex_mds = d2_inter_depth_block_decision(
