@@ -1648,8 +1648,8 @@ void ext_eigth_sad_calculation_nsq_c(
     uint32_t *p_best_sad_16x64, uint32_t *p_best_mv16x64, uint32_t mv) {
     uint8_t  search_index;
     uint32_t sad;
-    uint32_t sad_16x8[32];
-    uint32_t sad_8x16[32];
+    uint16_t sad_16x8[32];
+    uint16_t sad_8x16[32];
     uint32_t sad_32x16[8];
     uint32_t sad_16x32[8];
 

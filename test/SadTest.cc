@@ -51,9 +51,9 @@ extern "C" void ext_all_sad_calculation_8x8_16x16_c(
     uint8_t *src, uint32_t src_stride, uint8_t *ref, uint32_t ref_stride,
     uint32_t mv, uint32_t *p_best_sad_8x8, uint32_t *p_best_sad_16x16,
     uint32_t *p_best_mv8x8, uint32_t *p_best_mv16x16,
-    uint32_t p_eight_sad16x16[16][8], uint32_t p_eight_sad8x8[64][8]);
+    uint16_t p_eight_sad16x16[16][8], uint16_t p_eight_sad8x8[64][8]);
 extern "C" void ext_eigth_sad_calculation_nsq_c(
-    uint32_t p_sad8x8[64][8], uint32_t p_sad16x16[16][8],
+    uint16_t p_sad8x8[64][8], uint16_t p_sad16x16[16][8],
     uint32_t p_sad32x32[4][8], uint32_t *p_best_sad_64x32,
     uint32_t *p_best_mv64x32, uint32_t *p_best_sad_32x16,
     uint32_t *p_best_mv32x16, uint32_t *p_best_sad_16x8,
@@ -65,7 +65,7 @@ extern "C" void ext_eigth_sad_calculation_nsq_c(
     uint32_t *p_best_sad_64x16, uint32_t *p_best_mv64x16,
     uint32_t *p_best_sad_16x64, uint32_t *p_best_mv16x64, uint32_t mv);
 extern "C" void ext_eight_sad_calculation_32x32_64x64_c(
-    uint32_t p_sad16x16[16][8], uint32_t *p_best_sad_32x32,
+    uint16_t p_sad16x16[16][8], uint32_t *p_best_sad_32x32,
     uint32_t *p_best_sad_64x64, uint32_t *p_best_mv32x32,
     uint32_t *p_best_mv64x64, uint32_t mv, uint32_t p_sad32x32[4][8]);
 
@@ -243,7 +243,36 @@ class SADTestBase : public ::testing::Test {
         default: break;
         }
     }
-
+    void prepare_sad_16x16_data_16b() {
+        const int32_t max = (1 << 16) - 1;
+        SVTRandom rnd1(0, 4 * max);
+        switch (test_sad_pattern_) {
+        case BUF_MAX: {
+            fill_buf_with_value_16b(&sad16x16_16b[0][0], 16 * 8, max);
+            break;
+        }
+        case BUF_MIN: {
+            fill_buf_with_value_16b(&sad16x16_16b[0][0], 16 * 8, 0);
+            break;
+        }
+        case BUF_SMALL: {
+            const int32_t mask = 256;
+            SVTRandom rnd_small(0, mask);
+            for (int i = 0; i < 16; i++)
+                for (int j = 0; j < 8; j++)
+                    sad16x16_16b[i][j] = rnd_small.random();
+            break;
+        }
+        case BUF_RANDOM: {
+            SVTRandom rnd(0, max);
+            for (int i = 0; i < 16; i++)
+                for (int j = 0; j < 8; j++)
+                    sad16x16_16b[i][j] = rnd.random();
+            break;
+        }
+        default: break;
+        }
+    }
     void prepare_sad_data_32b() {
         const int32_t mask = (1 << 8) - 1;
         SVTRandom rnd(0, mask);
@@ -275,18 +304,22 @@ class SADTestBase : public ::testing::Test {
     }
 
     void prepare_nsq_sad_data() {
-        const int32_t mask = (1 << 8) - 1;
-        SVTRandom rnd(0, mask);
+        const int32_t max_8x8 = 255 * 8 * 8;
+        SVTRandom rnd(0, max_8x8);
+        const int32_t max_16x16 = 255 * 16 * 16;
+        SVTRandom rnd1(0, 4 * max_16x16);
+        const int32_t max_32x32 = 255 * 32 * 32;
+        SVTRandom rnd2(0, 4 * max_32x32);
         switch (test_sad_pattern_) {
         case BUF_MAX: {
-            fill_buf_with_value(&sad8x8[0][0], 64 * 8, mask);
-            fill_buf_with_value(&sad16x16_32b[0][0], 16 * 8, mask);
-            fill_buf_with_value(&sad32x32[0][0], 4 * 8, mask);
+            fill_buf_with_value_16b(&sad8x8[0][0], 64 * 8, max_8x8);
+            fill_buf_with_value_16b(&sad16x16_16b[0][0], 16 * 8, max_16x16);
+            fill_buf_with_value(&sad32x32[0][0], 4 * 8, max_32x32);
             break;
         }
         case BUF_MIN: {
-            fill_buf_with_value(&sad8x8[0][0], 64 * 8, 0);
-            fill_buf_with_value(&sad16x16_32b[0][0], 16 * 8, 0);
+            fill_buf_with_value_16b(&sad8x8[0][0], 64 * 8, 0);
+            fill_buf_with_value_16b(&sad16x16_16b[0][0], 16 * 8, 0);
             fill_buf_with_value(&sad32x32[0][0], 4 * 8, 0);
             break;
         }
@@ -299,7 +332,7 @@ class SADTestBase : public ::testing::Test {
 
             for (int i = 0; i < 16; i++)
                 for (int j = 0; j < 8; j++)
-                    sad16x16_32b[i][j] = rnd_small.random();
+                    sad16x16_16b[i][j] = rnd_small.random();
 
             for (int i = 0; i < 4; i++)
                 for (int j = 0; j < 8; j++)
@@ -313,11 +346,11 @@ class SADTestBase : public ::testing::Test {
 
             for (int i = 0; i < 16; i++)
                 for (int j = 0; j < 8; j++)
-                    sad16x16_32b[i][j] = rnd.random();
+                    sad16x16_16b[i][j] = rnd1.random();
 
             for (int i = 0; i < 4; i++)
                 for (int j = 0; j < 8; j++)
-                    sad32x32[i][j] = rnd.random();
+                    sad32x32[i][j] = rnd2.random();
             break;
         }
         default: break;
@@ -360,7 +393,7 @@ class SADTestBase : public ::testing::Test {
     uint8_t *ref1_aligned_;
     uint8_t *ref2_aligned_;
     uint16_t sad16x16_16b[16][8];
-    uint32_t sad8x8[64][8];
+    uint16_t sad8x8[64][8];
     uint32_t sad16x16_32b[16][8];
     uint32_t sad32x32[4][8];
 };
@@ -1260,13 +1293,13 @@ class Allsad_CalculationTest
         uint32_t best_mv8x8[2][64] = {{0}};
         uint32_t best_sad16x16[2][16];
         uint32_t best_mv16x16[2][16] = {{0}};
-        uint32_t eight_sad16x16[2][16][8];
-        uint32_t eight_sad8x8[2][64][8];
+        uint16_t eight_sad16x16[2][16][8];
+        uint16_t eight_sad8x8[2][64][8];
 
         fill_buf_with_value(&best_sad8x8[0][0], 2 * 64, BEST_SAD_MAX);
         fill_buf_with_value(&best_sad16x16[0][0], 2 * 16, UINT_MAX);
-        fill_buf_with_value(&eight_sad16x16[0][0][0], 2 * 16 * 8, UINT_MAX);
-        fill_buf_with_value(&eight_sad8x8[0][0][0], 2 * 64 * 8, UINT_MAX);
+        fill_buf_with_value_16b(&eight_sad16x16[0][0][0], 2 * 16 * 8, _UI16_MAX);
+        fill_buf_with_value_16b(&eight_sad8x8[0][0][0], 2 * 64 * 8, _UI16_MAX);
 
         prepare_data();
 
@@ -1330,9 +1363,9 @@ class Allsad_CalculationTest
         fill_buf_with_value(&best_sad64x64[0], 2, UINT_MAX);
         fill_buf_with_value(&sad32x32[0][0][0], 2 * 4 * 8, UINT_MAX);
 
-        prepare_sad_data_32b();
+        prepare_sad_16x16_data_16b();
 
-        ext_eight_sad_calculation_32x32_64x64_c(sad16x16_32b,
+        ext_eight_sad_calculation_32x32_64x64_c(sad16x16_16b,
                                                 best_sad32x32[0],
                                                 &best_sad64x64[0],
                                                 best_mv32x32[0],
@@ -1340,7 +1373,7 @@ class Allsad_CalculationTest
                                                 0,
                                                 sad32x32[0]);
 
-        ext_eight_sad_calculation_32x32_64x64_avx2(sad16x16_32b,
+        ext_eight_sad_calculation_32x32_64x64_avx2(sad16x16_16b,
                                                    best_sad32x32[1],
                                                    &best_sad64x64[1],
                                                    best_mv32x32[1],
@@ -1392,8 +1425,8 @@ class Allsad_CalculationTest
         fill_buf_with_value(&best_sad32x64[0][0], 2 * 2, UINT_MAX);
         fill_buf_with_value(&best_sad32x16[0][0], 2 * 8, UINT_MAX);
         fill_buf_with_value(&best_sad16x32[0][0], 2 * 8, UINT_MAX);
-        fill_buf_with_value(&best_sad16x8[0][0], 2 * 32, UINT_MAX);
-        fill_buf_with_value(&best_sad8x16[0][0], 2 * 32, UINT_MAX);
+        fill_buf_with_value(&best_sad16x8[0][0], 2 * 32, _UI16_MAX);
+        fill_buf_with_value(&best_sad8x16[0][0], 2 * 32, _UI16_MAX);
         fill_buf_with_value(&best_sad32x8[0][0], 2 * 16, UINT_MAX);
         fill_buf_with_value(&best_sad8x32[0][0], 2 * 16, UINT_MAX);
         fill_buf_with_value(&best_sad64x16[0][0], 2 * 4, UINT_MAX);
@@ -1402,7 +1435,7 @@ class Allsad_CalculationTest
         prepare_nsq_sad_data();
 
         ext_eigth_sad_calculation_nsq_c(sad8x8,
-                                        sad16x16_32b,
+                                        sad16x16_16b,
                                         sad32x32,
                                         best_sad64x32[0],
                                         best_mv64x32[0],
@@ -1427,7 +1460,7 @@ class Allsad_CalculationTest
                                         0);
 
         ext_eigth_sad_calculation_nsq_avx2(sad8x8,
-                                           sad16x16_32b,
+                                           sad16x16_16b,
                                            sad32x32,
                                            best_sad64x32[1],
                                            best_mv64x32[1],
