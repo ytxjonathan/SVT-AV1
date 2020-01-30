@@ -5835,7 +5835,7 @@ void tx_type_search(
                     if (tx_type == tx_type_pred_1[fetch_tx_idx])
                         check_tx_type++;
                 }
-                if (check_tx_type)
+                if (!check_tx_type)
                     continue;
             }
             txt_it++;
