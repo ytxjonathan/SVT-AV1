@@ -65,7 +65,8 @@ extern "C" {
         uint32_t *best_sad,
         int16_t *best_mvx,
         int16_t *best_mvy,
-        //uint32_t  src_stride_raw,                   // input parameter, source stride (no line skipping)
+        int16_t search_position_start_x,
+        int16_t search_position_start_y,
         int16_t search_area_width,
         int16_t search_area_height,
         int16_t search_step,
