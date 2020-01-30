@@ -2,24 +2,24 @@
  * SPDX - License - Identifier: BSD - 2 - Clause - Patent */
 
 /*!< This is the header file for the MD5 message-digest algorithm.
- * The algorithm is due to Ron Rivest.  This code was
- * written by Colin Plumb in 1993, no copyright is claimed.
- * This code is in the public domain; do with it what you wish.
+ *   The algorithm is due to Ron Rivest.  This code was
+ *   written by Colin Plumb in 1993, no copyright is claimed.
+ *   This code is in the public domain; do with it what you wish.
  *
- * Equivalent code is available from RSA Data Security, Inc.
- * This code has been tested against that, and is equivalent,
- * except that you don't need to include two pages of legalese
- * with every copy.
+ *   Equivalent code is available from RSA Data Security, Inc.
+ *   This code has been tested against that, and is equivalent,
+ *   except that you don't need to include two pages of legalese
+ *   with every copy.
  *
- * To compute the message digest of a chunk of bytes, declare an
- * Md5Context structure, pass it to MD5Init, call MD5Update as
- * needed on buffers full of bytes, and then call MD5Final, which
- * will fill a supplied 16-byte array with the digest.
+ *   To compute the message digest of a chunk of bytes, declare an
+ *   Md5Context structure, pass it to MD5Init, call MD5Update as
+ *   needed on buffers full of bytes, and then call MD5Final, which
+ *   will fill a supplied 16-byte array with the digest.
  *
- * Changed so as no longer to depend on Colin Plumb's `usual.h'
- * header definitions
- *  - Ian Jackson <ian@chiark.greenend.org.uk>.
- * Still in the public domain. */
+ *   Changed so as no longer to depend on Colin Plumb's `usual.h'
+ *   header definitions
+ *    - Ian Jackson <ian@chiark.greenend.org.uk>.
+ *   Still in the public domain. */
 
 /**************/
 /*!< Includes */
@@ -54,8 +54,8 @@ static void byte_swap(unsigned int *buf, unsigned words) {
     } while (--words);
 }
 
-/*!< Start MD5 accumulation.  Set bit count to 0 and buffer to mysterious
- * initialization constants. */
+/*!< Start MD5 accumulation.  Set bit count to 0 and
+ *   buffer to mysterious initialization constants. */
 void md5_init(Md5Context *ctx) {
     ctx->buf[0] = 0x67452301;
     ctx->buf[1] = 0xefcdab89;
@@ -137,8 +137,8 @@ void md5_final(unsigned char digest[16], Md5Context *ctx) {
 }
 
 /*!< The core of the MD5 algorithm, this alters an existing MD5 hash to
- * reflect the addition of 16 longwords of new data.  MD5Update blocks
- * the data and converts bytes into longwords for this routine. */
+ *   reflect the addition of 16 longwords of new data.  MD5Update blocks
+ *   the data and converts bytes into longwords for this routine. */
 void md5_transform(unsigned int buf[4], unsigned int const in[16]) {
     register unsigned int a, b, c, d;
 

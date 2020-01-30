@@ -201,8 +201,7 @@ int eb_av1_get_mvpred_var(const IntraBcContext *x, const MV *best_mv, const MV *
                 : 0);
 }
 
-/*!< Exhuastive motion search around a given centre position with a given
- *   step size. */
+/*!< Exhuastive motion search around a given centre position with a given step size. */
 static int exhuastive_mesh_search(IntraBcContext *x, MV *ref_mv, MV *best_mv, int range, int step,
                                   int sad_per_bit, const AomVarianceFnPtr *fn_ptr,
                                   const MV *center_mv) {
@@ -499,8 +498,8 @@ static int full_pixel_diamond(PictureControlSet *pcs, IntraBcContext /*MACROBLOC
 #define MIN_RANGE 7
 #define MAX_RANGE 256
 #define MIN_INTERVAL 1
-/*!< Runs an limited range exhaustive mesh search using a pattern set
- *   according to the encode speed profile. */
+/*!< Runs an limited range exhaustive mesh search using
+ *   a pattern set according to the encode speed profile. */
 static int full_pixel_exhaustive(PictureControlSet *pcs, IntraBcContext *x,
                                  const MV *centre_mv_full, int sadpb, int *cost_list,
                                  const AomVarianceFnPtr *fn_ptr, const MV *ref_mv,

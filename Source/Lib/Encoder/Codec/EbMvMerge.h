@@ -10,8 +10,9 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/*!< This macro is used to compare if two PUs have the same mvs (same ref_pic_index, same MV_x and same MV_y)
- *       in a particular reference picture list. */
+/*!< This macro is used to compare if two PUs have the same mvs
+ *   (same ref_pic_index, same MV_x and same MV_y)
+ *   in a particular reference picture list. */
 #define CHECK_MV_EQUIVALENT(pu1_pred_dir,                                                   \
                             pu1_ref_idx,                                                    \
                             pu1_mv_x,                                                       \

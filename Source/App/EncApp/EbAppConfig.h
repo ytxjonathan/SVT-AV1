@@ -14,20 +14,18 @@
 #endif
 /*!< Define Cross-Platform 64-bit fseek() and ftell() */
 
-/*!< The AppExitConditionType type is used to define the App main loop exit
- *   conditions. */
+/*!< The AppExitConditionType type is used to define the App main loop exit conditions. */
 typedef enum AppExitConditionType {
     APP_ExitConditionNone = 0,
     APP_ExitConditionFinished,
     APP_ExitConditionError
 } AppExitConditionType;
 
-/*!< The AppPortActiveType type is used to define the state of output ports in
- *   the App. */
+/*!< The AppPortActiveType type is used to define the state of output ports in the App. */
 typedef enum AppPortActiveType { APP_PortActive = 0, APP_PortInactive } AppPortActiveType;
 
 /*!< The EbPtr type is intended to be used to pass pointers to and from the svt
- *   API.  This is a 32 bit pointer and is aligned on a 32 bit word boundary. */
+ *   API. This is a 32 bit pointer and is aligned on a 32 bit word boundary. */
 typedef void *EbPtr;
 
 /*!< The EB_NULL type is used to define the C style NULL pointer. */

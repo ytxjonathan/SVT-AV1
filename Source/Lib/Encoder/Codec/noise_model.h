@@ -102,12 +102,12 @@ int32_t eb_aom_noise_strength_solver_fit_piecewise(const AomNoiseStrengthSolver 
 
 /*!< brief Helper for holding precomputed data for finding flat blocks.
  *
- * Internally a block is modeled with a low-order polynomial model. A
- * planar model would be a bunch of equations like:
- * <[y_i x_i 1], [a_1, a_2, a_3]>  = b_i
- * for each point in the block. The system matrix A with row i as [y_i x_i 1]
- * is maintained as is the inverse, inv(A'*A), so that the plane parameters
- * can be fit for each block. */
+ *   Internally a block is modeled with a low-order polynomial model. A
+ *   planar model would be a bunch of equations like:
+ *   <[y_i x_i 1], [a_1, a_2, a_3]>  = b_i
+ *   for each point in the block. The system matrix A with row i as [y_i x_i 1]
+ *   is maintained as is the inverse, inv(A'*A), so that the plane parameters
+ *   can be fit for each block. */
 typedef struct {
     double *at_a_inv;
     double *A;

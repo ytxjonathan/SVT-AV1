@@ -1190,8 +1190,8 @@ void av1_cdef_frame16bit(EncDecContext *context_ptr, SequenceControlSet *scs_ptr
 
 static int32_t priconv[REDUCED_PRI_STRENGTHS] = {0, 1, 2, 3, 5, 7, 10, 13};
 
-/*!< Search for the best strength to add as an option, knowing we
- *   already selected nb_strengths options. */
+/*!< Search for the best strength to add as an option,
+ *   knowing we already selected nb_strengths options. */
 static uint64_t search_one(int32_t *lev, int32_t nb_strengths, uint64_t mse[][TOTAL_STRENGTHS],
                            int32_t sb_count, int32_t fast, int32_t start_gi, int32_t end_gi) {
     uint64_t tot_mse[TOTAL_STRENGTHS];
@@ -1226,8 +1226,8 @@ static uint64_t search_one(int32_t *lev, int32_t nb_strengths, uint64_t mse[][TO
     return best_tot_mse;
 }
 
-/*!< Search for the best luma+chroma strength to add as an option, knowing we
- *   already selected nb_strengths options. */
+/*!< Search for the best luma+chroma strength to add as an
+ *   option, knowing we already selected nb_strengths options. */
 uint64_t search_one_dual_c(int *lev0, int *lev1, int nb_strengths,
                            uint64_t (**mse)[TOTAL_STRENGTHS], int sb_count, int fast, int start_gi,
                            int end_gi) {

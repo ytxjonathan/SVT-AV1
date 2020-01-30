@@ -106,35 +106,35 @@ int32_t eb_aom_daala_stop_encode(DaalaWriter *br) {
 }
 
 /*!< A range encoder.
- * See entdec.c and the references for implementation details \cite{Mar79,MNW98}.
+ *   See entdec.c and the references for implementation details \cite{Mar79,MNW98}.
  *
- * @INPROCEEDINGS{Mar79,
- * author="Martin, G.N.N.",
- * title="Range encoding: an algorithm for removing redundancy from a digitised
- * message",
- * booktitle="Video \& Data Recording Conference",
- * year=1979,
- * address="Southampton",
- * month=Jul,
- * URL="http://www.compressconsult.com/rangecoder/rngcod.pdf.gz"
- * }
- * @ARTICLE{MNW98,
- * author="Alistair Moffat and Radford Neal and Ian H. Witten",
- * title="Arithmetic Coding Revisited",
- * journal="{ACM} Transactions on Information Systems",
- * year=1998,
- * volume=16,
- * number=3,
- * pages="256--294",
- * month=Jul,
- * URL="http://researchcommons.waikato.ac.nz/Bitstream/handle/10289/78/content.pdf"
+ *   @INPROCEEDINGS{Mar79,
+ *   author="Martin, G.N.N.",
+ *   title="Range encoding: an algorithm for removing redundancy from a digitised
+ *   message",
+ *   booktitle="Video \& Data Recording Conference",
+ *   year=1979,
+ *   address="Southampton",
+ *   month=Jul,
+ *   URL="http://www.compressconsult.com/rangecoder/rngcod.pdf.gz"
+ *   }
+ *   @ARTICLE{MNW98,
+ *   author="Alistair Moffat and Radford Neal and Ian H. Witten",
+ *   title="Arithmetic Coding Revisited",
+ *   journal="{ACM} Transactions on Information Systems",
+ *   year=1998,
+ *   volume=16,
+ *   number=3,
+ *   pages="256--294",
+ *   month=Jul,
+ *   URL="http://researchcommons.waikato.ac.nz/Bitstream/handle/10289/78/content.pdf"
  *  } */
 
 /*!< Takes updated low and range values, renormalizes them so that
- * 32768 <= rng < 65536 (flushing bytes from low to the pre-carry buffer if
- * necessary), and stores them back in the encoder context.
- * low: The new value of low.
- * rng: The new value of the range. */
+ *   32768 <= rng < 65536 (flushing bytes from low to the pre-carry buffer if
+ *   necessary), and stores them back in the encoder context.
+ *   low: The new value of low.
+ *   rng: The new value of the range. */
 static void od_ec_enc_normalize(OdEcEnc *enc, OdEcWindow low, unsigned rng) {
     int32_t d;
     int32_t c;
@@ -144,10 +144,10 @@ static void od_ec_enc_normalize(OdEcEnc *enc, OdEcWindow low, unsigned rng) {
     d = 16 - OD_ILOG_NZ(rng);
     s = c + d;
     /*!< TODO: Right now we flush every time we have at least one byte available.
-     * Instead we should use an OdEcWindow and flush right before we're about to
-     * shift bits off the end of the window.
-     * For a 32-bit window this is about the same amount of work, but for a 64-bit
-     * window it should be a fair win.*/
+     *   Instead we should use an OdEcWindow and flush right before we're about to
+     *   shift bits off the end of the window.
+     *   For a 32-bit window this is about the same amount of work, but for a 64-bit
+     *   window it should be a fair win.*/
     if (s >= 0) {
         uint16_t *buf;
         uint32_t  storage;
@@ -227,12 +227,10 @@ void eb_od_ec_enc_clear(OdEcEnc *enc) {
 }
 
 /*!< Encodes a symbol given its frequency in Q15.
- * fl: CDF_PROB_TOP minus the cumulative frequency of all symbols that come
- * before the
- * one to be encoded.
- * fh: CDF_PROB_TOP minus the cumulative frequency of all symbols up to and
- * including
- * the one to be encoded.*/
+ *   fl: CDF_PROB_TOP minus the cumulative frequency of all symbols that come
+ *   before the one to be encoded.
+ *   fh: CDF_PROB_TOP minus the cumulative frequency of all symbols up to and
+ *   including the one to be encoded.*/
 static void od_ec_encode_q15(OdEcEnc *enc, unsigned fl, unsigned fh, int32_t s, int32_t nsyms) {
     OdEcWindow l;
     unsigned   r;
@@ -287,13 +285,12 @@ void eb_od_ec_encode_bool_q15(OdEcEnc *enc, int32_t val, unsigned f) {
 }
 
 /*!< Encodes a symbol given a cumulative distribution function (CDF) table in Q15.
- * s: The index of the symbol to encode.
- * icdf: 32768 minus the CDF, such that symbol s falls in the range
- * [s > 0 ? (32768 - icdf[s - 1]) : 0, 32768 - icdf[s]).
- * The values must be monotonically decreasing, and icdf[nsyms - 1] must
- * be 0.
- * nsyms: The number of symbols in the alphabet.
- * This should be at most 16. */
+ *   s: The index of the symbol to encode.
+ *   icdf: 32768 minus the CDF, such that symbol s falls in the range
+ *   [s > 0 ? (32768 - icdf[s - 1]) : 0, 32768 - icdf[s]).
+ *   The values must be monotonically decreasing, and icdf[nsyms - 1] must be 0.
+ *   nsyms: The number of symbols in the alphabet.
+ *   This should be at most 16. */
 void eb_od_ec_encode_cdf_q15(OdEcEnc *enc, int32_t s, const uint16_t *icdf, int32_t nsyms) {
     (void)nsyms;
     assert(s >= 0);
@@ -381,26 +378,26 @@ uint8_t *eb_od_ec_enc_done(OdEcEnc *enc, uint32_t *nbytes) {
         c >>= 8;
     }
     /*!< Note: Unless there's an allocation error, if you keep encoding into the
-     * current buffer and call this function again later, everything will work
-     * just fine (you won't get a new packet out, but you will get a single
-     * buffer with the new data appended to the old).
-     * However, this function is O(N) where N is the amount of data coded so far,
-     * so calling it more than once for a given packet is a bad idea. */
+     *   current buffer and call this function again later, everything will work
+     *   just fine (you won't get a new packet out, but you will get a single
+     *   buffer with the new data appended to the old).
+     *   However, this function is O(N) where N is the amount of data coded so far,
+     *   so calling it more than once for a given packet is a bad idea. */
     return out;
 }
 
 /*!< Returns the number of bits "used" by the encoded symbols so far.
- * This same number can be computed in either the encoder or the decoder, and is
- * suitable for making coding decisions.
- * Warning: The value returned by this function can decrease compared to an
- * earlier call, even after encoding more data, if there is an encoding error
- * (i.e., a failure to allocate enough space for the output buffer).
- * Return: The number of bits.
- * This will always be slightly larger than the exact value (e.g., all
- * rounding error is in the positive direction). */
+ *   This same number can be computed in either the encoder or the decoder, and is
+ *   suitable for making coding decisions.
+ *   Warning: The value returned by this function can decrease compared to an
+ *   earlier call, even after encoding more data, if there is an encoding error
+ *   (i.e., a failure to allocate enough space for the output buffer).
+ *   Return: The number of bits.
+ *   This will always be slightly larger than the exact value (e.g., all
+ *   rounding error is in the positive direction). */
 int32_t eb_od_ec_enc_tell(const OdEcEnc *enc) {
     /*!< The 10 here counteracts the offset of -9 baked into cnt, and adds 1 extra
-     * bit, which we reserve for terminating the stream. */
+     *   bit, which we reserve for terminating the stream. */
     return (enc->cnt + 10) + enc->offs * 8;
 }
 /********************************************************************************************************************************/

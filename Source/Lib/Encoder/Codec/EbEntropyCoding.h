@@ -236,12 +236,12 @@ extern int32_t eb_av1_get_pred_context_comp_ref_p1(const MacroBlockD *xd);
  *   conditioning on that it is known either GOLDEN or LAST3. */
 extern int32_t eb_av1_get_pred_context_comp_ref_p2(const MacroBlockD *xd);
 
-/*!< Signal the 2nd reference frame for a compound mode be either
- *   ALTREF, or ALTREF2/BWDREF. */
+/*!< Signal the 2nd reference frame for a compound
+ *   mode be either ALTREF, or ALTREF2/BWDREF. */
 extern int32_t eb_av1_get_pred_context_comp_bwdref_p(const MacroBlockD *xd);
 
-/*!< Signal the 2nd reference frame for a compound mode be either
- *   ALTREF2 or BWDREF. */
+/*!< Signal the 2nd reference frame for a compound
+ *   mode be either ALTREF2 or BWDREF. */
 extern int32_t eb_av1_get_pred_context_comp_bwdref_p1(const MacroBlockD *xd);
 /*!< == Context functions for single ref ==
  *

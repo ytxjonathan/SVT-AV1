@@ -57,8 +57,8 @@ int uleb_decode(const uint8_t *buffer, size_t available, uint64_t *value, size_t
                 if (length) { *length = i + 1; }
 
                 /*!< Fail on values larger than 32-bits to ensure consistent
-                 * behavior on 32 and 64 bit targets: value is typically
-                 * used to determine buffer allocation size. */
+                 *   behavior on 32 and 64 bit targets: value is typically
+                 *   used to determine buffer allocation size. */
                 if (*value > UINT32_MAX) return -1;
 
                 return 0;
@@ -72,8 +72,8 @@ int uleb_decode(const uint8_t *buffer, size_t available, uint64_t *value, size_t
 }
 
 /*!< Reads unsigned LEB128 integer and returns 0 upon successful read and decode.
- * Stores raw bytes in 'value_buffer', length of the number in 'value_length',
- * and decoded value in 'value'. */
+ *   Stores raw bytes in 'value_buffer', length of the number in 'value_length',
+ *   and decoded value in 'value'. */
 static int obudec_read_leb128(FILE *f, uint8_t *value_buffer, size_t *value_length,
                               uint64_t *value) {
     if (!f || !value_buffer || !value_length || !value) return -1;
@@ -192,11 +192,11 @@ int svt_read_obu_header(uint8_t *buffer, size_t buffer_length, size_t *consumed,
 }
 
 /*!< Reads OBU header from 'f'. The 'buffer_capacity' passed in must be large
- * enough to store an OBU header with extension (2 bytes). Raw OBU data is
- * written to 'obu_data', parsed OBU header values are written to 'obu_header',
- * and total bytes read from file are written to 'bytes_read'. Returns 0 for
- * success, and non-zero on failure. When end of file is reached, the return
- * value is 0 and the 'bytes_read' value is set to 0. */
+ *   enough to store an OBU header with extension (2 bytes). Raw OBU data is
+ *   written to 'obu_data', parsed OBU header values are written to 'obu_header',
+ *   and total bytes read from file are written to 'bytes_read'. Returns 0 for
+ *   success, and non-zero on failure. When end of file is reached, the return
+ *   value is 0 and the 'bytes_read' value is set to 0. */
 static int obudec_read_obu_header(FILE *f, size_t buffer_capacity, uint32_t is_annexb,
                                   uint8_t *obu_data, ObuHeader *obu_header, size_t *bytes_read) {
     if (!f || buffer_capacity < (OBU_HEADER_SIZE + OBU_EXTENSION_SIZE) || !obu_data ||

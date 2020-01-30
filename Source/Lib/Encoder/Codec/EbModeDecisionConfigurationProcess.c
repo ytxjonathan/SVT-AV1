@@ -36,8 +36,7 @@ static MeshPattern good_quality_mesh_patterns[MAX_MESH_SPEED + 1][MAX_MESH_STEP]
     {{64, 16}, {24, 8}, {12, 4}, {7, 1}},
 };
 static unsigned char good_quality_max_mesh_pct[MAX_MESH_SPEED + 1] = {50, 50, 25, 15, 5, 1};
-/*!< TODO: These settings are pretty relaxed, tune them for
- *   each speed setting */
+/*!< TODO: These settings are pretty relaxed, tune them for each speed setting */
 static MeshPattern intrabc_mesh_patterns[MAX_MESH_SPEED + 1][MAX_MESH_STEP] = {
     {{256, 1}, {256, 1}, {0, 0}, {0, 0}},
     {{256, 1}, {256, 1}, {0, 0}, {0, 0}},

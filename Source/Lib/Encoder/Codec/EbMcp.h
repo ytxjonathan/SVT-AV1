@@ -21,31 +21,31 @@ typedef struct MotionCompensationPredictionContext {
 } MotionCompensationPredictionContext;
 
 /*!< InterpolationFilter()
-            is generally defined interpolation filter function.
-            There is a whole group of these functions, each of which corresponds to a particular
-            integer/fractional sample, and the function is indexed in a function pointer array
-            in terms of the frac_pos_x and frac_pos_y.
-
-        @param *ref_pic (8-bits input)
-            ref_pic is the pointer to the reference picture data that was chosen by
-            the integer pixel precision MV.
-        @param src_stride (input)
-        @param frac_pos_x (input)
-            frac_pos_x is the horizontal fractional position of the predicted sample
-        @param frac_pos_y (input)
-            frac_pos_y is the veritcal fractional position of the predicted sample
-        @param pu_width (input)
-        @param pu_height (input)
-        @param *dst (16-bits output)
-            dst is the pointer to the destination where the prediction result will
-            be stored.
-        @param dst_stride (input)
-        @param *first_pass_if_dst (16-bits input)
-            first_pass_if_dst is the pointer to the buffer where the result of the first
-            pass filtering of the 2D interpolation filter will be stored.
-        @param is_last (input)
-            is_last indicates if there is any further filtering (interpolation filtering)
-            afterwards. */
+ *           is generally defined interpolation filter function.
+ *           There is a whole group of these functions, each of which corresponds to a particular
+ *           integer/fractional sample, and the function is indexed in a function pointer array
+ *           in terms of the frac_pos_x and frac_pos_y.
+ *
+ *       @param *ref_pic (8-bits input)
+ *           ref_pic is the pointer to the reference picture data that was chosen by
+ *           the integer pixel precision MV.
+ *       @param src_stride (input)
+ *       @param frac_pos_x (input)
+ *           frac_pos_x is the horizontal fractional position of the predicted sample
+ *       @param frac_pos_y (input)
+ *           frac_pos_y is the veritcal fractional position of the predicted sample
+ *       @param pu_width (input)
+ *       @param pu_height (input)
+ *       @param *dst (16-bits output)
+ *           dst is the pointer to the destination where the prediction result will
+ *           be stored.
+ *       @param dst_stride (input)
+ *       @param *first_pass_if_dst (16-bits input)
+ *           first_pass_if_dst is the pointer to the buffer where the result of the first
+ *           pass filtering of the 2D interpolation filter will be stored.
+ *       @param is_last (input)
+ *           is_last indicates if there is any further filtering (interpolation filtering)
+ *           afterwards. */
 extern void generate_padding(EbByte src_pic, uint32_t src_stride, uint32_t original_src_width,
                              uint32_t original_src_height, uint32_t padding_width,
                              uint32_t padding_height);

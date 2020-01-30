@@ -67,8 +67,8 @@ void allocate_memory_table(uint32_t instance_idx) {
 
 /***********************************************/
 /*!< Copy configuration parameters from
- *  The config structure, to the
- *  callback structure to send to the library */
+ *   The config structure, to the
+ *   callback structure to send to the library */
 /**********************************************/
 EbErrorType copy_configuration_parameters(EbConfig *config, EbAppContext *callback_data,
                                           uint32_t instance_idx) {
@@ -458,7 +458,7 @@ EbErrorType init_encoder(EbConfig *config, EbAppContext *callback_data, uint32_t
 
     if (return_error != EB_ErrorNone) return return_error;
     /*!< STEP 4: Send over all configuration parameters
-     * Set the Parameters */
+     *   Set the Parameters */
     return_error = eb_svt_enc_set_parameter(callback_data->svt_encoder_handle,
                                             &callback_data->eb_enc_parameters);
 

@@ -284,8 +284,8 @@ ScaleFactors *get_ref_scale_factors(EbDecHandle *dec_handle_ptr, const MvReferen
     return (map_idx != INVALID_IDX) ? &dec_handle_ptr->ref_scale_factors[map_idx] : NULL;
 }
 
-/*!< Compares the sort_idx fields. If they are equal, then compares the map_idx
- *   fields to break the tie. This ensures a stable sort. */
+/*!< Compares the sort_idx fields. If they are equal, then compares
+ *   the map_idx fields to break the tie. This ensures a stable sort. */
 static int compare_ref_frame_info(const void *arg_a, const void *arg_b) {
     const RefFrameInfo *info_a = (RefFrameInfo *)arg_a;
     const RefFrameInfo *info_b = (RefFrameInfo *)arg_b;

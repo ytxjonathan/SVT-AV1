@@ -3562,10 +3562,10 @@ int eb_av1_count_colors(const uint8_t *src, int stride, int rows, int cols, int 
 }
 extern AomVarianceFnPtr mefn_ptr[BlockSizeS_ALL];
 
-/*!< This is used as a reference when computing the source variance for the
- *   purposes of activity masking. */
-/*!< Eventually this should be replaced by custom no-reference routines,
- *   which will be faster. */
+/*!< This is used as a reference when computing the source
+ *   variance for the purposes of activity masking. */
+/*!< Eventually this should be replaced by custom
+ *   no-reference routines, which will be faster. */
 const uint8_t eb_av1_var_offs[MAX_SB_SIZE] = {
     128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,
     128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128, 128,

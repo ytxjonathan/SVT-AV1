@@ -118,8 +118,8 @@ typedef struct FrameMiMap {
     int32_t num_mis_in_sb_wd;
 } FrameMiMap;
 
-/*!< Master Frame Buf containing all frame level bufs like ModeInfo
- *    for all the frames in parallel */
+/*!< Master Frame Buf containing all frame level bufs
+ *   like ModeInfo for all the frames in parallel */
 typedef struct MasterFrameBuf {
     CurFrameBuf cur_frame_bufs[DEC_MAX_NUM_FRM_PRLL];
 
@@ -180,22 +180,22 @@ typedef struct EbDecHandle {
     void *pv_pic_mgr;
 
     /*!<
-     * // * 'remapped_ref_idx[i - 1]' maps reference type 'i' (range: LAST_FRAME ...
-     * // EXTREF_FRAME) to a remapped index 'j' (in range: 0 ... REF_FRAMES - 1)
-     * // * Later, 'cm->ref_frame_map[j]' maps the remapped index 'j' to a pointer to
-     * // the reference counted buffer structure RefCntBuffer, taken from the buffer
-     * // pool cm->buffer_pool->frame_bufs.
-     * //
-     * // LAST_FRAME,                        ...,      EXTREF_FRAME
-     * //      |                                           |
-     * //      v                                           v
-     * // remapped_ref_idx[LAST_FRAME - 1],  ...,  remapped_ref_idx[EXTREF_FRAME - 1]
-     * //      |                                           |
-     * //      v                                           v
-     * // ref_frame_map[],                   ...,     ref_frame_map[]
-     * //
-     * // Note: INTRA_FRAME always refers to the current frame, so there's no need to
-     * // have a remapped index for the same. */
+     *  * 'remapped_ref_idx[i - 1]' maps reference type 'i' (range: LAST_FRAME ...
+     *  EXTREF_FRAME) to a remapped index 'j' (in range: 0 ... REF_FRAMES - 1)
+     *  * Later, 'cm->ref_frame_map[j]' maps the remapped index 'j' to a pointer to
+     *  the reference counted buffer structure RefCntBuffer, taken from the buffer
+     *  pool cm->buffer_pool->frame_bufs.
+     *
+     *  LAST_FRAME,                        ...,      EXTREF_FRAME
+     *       |                                           |
+     *       v                                           v
+     *  remapped_ref_idx[LAST_FRAME - 1],  ...,  remapped_ref_idx[EXTREF_FRAME - 1]
+     *       |                                           |
+     *       v                                           v
+     *  ref_frame_map[],                   ...,     ref_frame_map[]
+     * 
+     *  Note: INTRA_FRAME always refers to the current frame, so there's no need to
+     *  have a remapped index for the same. */
     int32_t remapped_ref_idx[REF_FRAMES];
 
     struct ScaleFactors ref_scale_factors[REF_FRAMES];

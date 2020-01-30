@@ -26,12 +26,12 @@ typedef struct PsnrStats {
 } PsnrStats;
 
 /*!< brief Converts SSE to PSNR
-     *
-     * Converts sum of squared errros (SSE) to peak signal-to-noise ratio (PNSR).
-     *
-     * \param[in]    samples       Number of samples
-     * \param[in]    peak          Max sample value
-     * \param[in]    sse           Sum of squared errors */
+ *
+ * Converts sum of squared errros (SSE) to peak signal-to-noise ratio (PNSR).
+ *
+ * \param[in]    samples       Number of samples
+ * \param[in]    peak          Max sample value
+ * \param[in]    sse           Sum of squared errors */
 double eb_aom_sse_to_psnr(double samples, double peak, double sse);
 
 int64_t eb_aom_get_y_sse_part(const Yv12BufferConfig *a, const Yv12BufferConfig *b, int32_t hstart,

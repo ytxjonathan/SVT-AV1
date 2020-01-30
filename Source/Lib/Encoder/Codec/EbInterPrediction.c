@@ -2219,25 +2219,25 @@ static const double interp_dgrid_curv[2][65] = {
 };
 
 /*!<
-  Precalucation factors to interp_cubic()
-    interp_cubic() OUT is: p[1] + 0.5 * x * (p[2] - p[0] +
-                      x * (2.0 * p[0] - 5.0 * p[1] + 4.0 * p[2] - p[3] +
-                      x * (3.0 * (p[1] - p[2]) + p[3] - p[0])));
-  Precalucation:
-    interp_cubic() OUT is: D + x * (C + x * (B + x * A))
-    For precalculated factors:
-    double A = 0.5 *(3.0 * (p[1] - p[2]) + p[3] - p[0]);
-    double B = 0.5 *(2.0 * p[0] - 5.0 * p[1] + 4.0 * p[2] - p[3]);
-    double C = 0.5 * (p[2] - p[0]);
-    double D = p[1];
-
-    Precalculated values of array factors:
-    A is: (0 to sizeof(ARRAY[])-1)
-    B is: (0 to sizeof(ARRAY[A][])-4)
-    PRECALC[A][B][0] = 0.5 *(3.0 * (ARRAY[A][B+1] - ARRAY[A][B+2]) + ARRAY[A][B+3] - ARRAY[A][B])
-    PRECALC[A][B][1] = 0.5 *(2.0 * p[0] - 5.0 * ARRAY[A][B+1] + 4.0 * ARRAY[A][B+2]) - ARRAY[A][B+3]);
-    PRECALC[A][B][2] = 0.5 * (ARRAY[A][B+2] - ARRAY[A][B]);
-    PRECALC[A][B][3] = ARRAY[A][B+1] */
+ * Precalucation factors to interp_cubic()
+ *   interp_cubic() OUT is: p[1] + 0.5 * x * (p[2] - p[0] +
+ *                     x * (2.0 * p[0] - 5.0 * p[1] + 4.0 * p[2] - p[3] +
+ *                     x * (3.0 * (p[1] - p[2]) + p[3] - p[0])));
+ * Precalucation:
+ *   interp_cubic() OUT is: D + x * (C + x * (B + x * A))
+ *   For precalculated factors:
+ *   double A = 0.5 *(3.0 * (p[1] - p[2]) + p[3] - p[0]);
+ *   double B = 0.5 *(2.0 * p[0] - 5.0 * p[1] + 4.0 * p[2] - p[3]);
+ *   double C = 0.5 * (p[2] - p[0]);
+ *   double D = p[1];
+ *
+ *   Precalculated values of array factors:
+ *   A is: (0 to sizeof(ARRAY[])-1)
+ *   B is: (0 to sizeof(ARRAY[A][])-4)
+ *   PRECALC[A][B][0] = 0.5 *(3.0 * (ARRAY[A][B+1] - ARRAY[A][B+2]) + ARRAY[A][B+3] - ARRAY[A][B])
+ *   PRECALC[A][B][1] = 0.5 *(2.0 * p[0] - 5.0 * ARRAY[A][B+1] + 4.0 * ARRAY[A][B+2]) - ARRAY[A][B+3]);
+ *   PRECALC[A][B][2] = 0.5 * (ARRAY[A][B+2] - ARRAY[A][B]);
+ *   PRECALC[A][B][3] = ARRAY[A][B+1] */
 
 void av1_model_rd_curvfit(BlockSize bsize, double sse_norm, double xqr, double *rate_f,
                           double *distbysse_f) {

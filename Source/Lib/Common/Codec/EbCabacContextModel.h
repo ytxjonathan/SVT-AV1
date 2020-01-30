@@ -42,8 +42,7 @@ typedef struct {
 #define CDF_SHIFT (15 - CDF_PROB_BITS)
 /*!< The value stored in an iCDF is CDF_PROB_TOP minus the actual cumulative
  *   probability (an "inverse" CDF).
- *   This function converts from one representation to the other (and is its own
- *   inverse). */
+ *   This function converts from one representation to the other (and is its own inverse). */
 #define AOM_ICDF(x) (CDF_PROB_TOP - (x))
 
 #define SEG_TEMPORAL_PRED_CTXS 3
@@ -580,8 +579,8 @@ static INLINE void update_cdf(AomCdfProb *cdf, int32_t val, int32_t nsymbs) {
 #define DCT_MAX_VALUE_HIGH10 65536
 #define DCT_MAX_VALUE_HIGH12 262144
 
-/*!< Coefficients are predicted via a 3-dimensional probability table indexed on
- *   REF_TYPES, COEF_BANDS and COEF_CONTEXTS. */
+/*!< Coefficients are predicted via a 3-dimensional probability
+ *   table indexed on REF_TYPES, COEF_BANDS and COEF_CONTEXTS. */
 #define REF_TYPES 2 /*!< intra=0, inter=1 */
 
 struct AV1Common;
@@ -699,9 +698,9 @@ typedef enum MvSubpelPrecision {
 #define INTER_COMPOUND_OFFSET(mode) (uint8_t)((mode)-NEAREST_NEARESTMV)
 
 /*!< Number of possible contexts for a color index.
- * As can be seen from av1_get_palette_color_index_context(), the possible
- * contexts are (2,0,0), (2,2,1), (3,2,0), (4,1,0), (5,0,0). These are mapped to
- * a value from 0 to 4 using 'palette_color_index_context_lookup' table. */
+ *   As can be seen from av1_get_palette_color_index_context(), the possible
+ *   contexts are (2,0,0), (2,2,1), (3,2,0), (4,1,0), (5,0,0). These are mapped to
+ *   a value from 0 to 4 using 'palette_color_index_context_lookup' table. */
 #define PALETTE_COLOR_INDEX_CONTEXTS 5
 
 /*!< Palette Y mode context for a block is determined by number of neighboring
@@ -712,10 +711,10 @@ typedef enum MvSubpelPrecision {
  * 2 if both left and top blocks use palette for Y plane. */
 #define PALETTE_Y_MODE_CONTEXTS 3
 
-/*!< Palette UV mode context for a block is determined by whether this block uses
- * palette for the Y plane. So, possible values are:
- * 0 if this block doesn't use palette for Y plane.
- * 1 if this block uses palette for Y plane (i.e. Y palette size > 0). */
+/*!< Palette UV mode context for a block is determined by whether
+ *   this block uses palette for the Y plane. So, possible values are:
+ *   0 if this block doesn't use palette for Y plane.
+ *   1 if this block uses palette for Y plane (i.e. Y palette size > 0). */
 #define PALETTE_UV_MODE_CONTEXTS 2
 
 /*!< Map the number of pixels in a block size to a context

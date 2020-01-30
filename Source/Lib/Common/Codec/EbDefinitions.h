@@ -201,8 +201,8 @@ enum {
 #define OP_POINTS_CNT_MINUS_1_BITS 5
 #define OP_POINTS_IDC_BITS 12
 #define TX_SIZE_LUMA_MIN (TX_4X4)
-/*!< We don't need to code a transform size unless the allowed size is at least
- * one more than the minimum. */
+/*!< We don't need to code a transform size unless the
+ *   allowed size is at least one more than the minimum. */
 #define TX_SIZE_CTX_MIN (TX_SIZE_LUMA_MIN + 1)
 
 /*!< Maximum tx_size categories */
@@ -229,8 +229,7 @@ enum {
 #define DIST_PRECISION_BITS 4
 #define DIST_PRECISION (1 << DIST_PRECISION_BITS) /*!< 16 */
 
-/*!< TODO(chengchen): Temporal flag serve as experimental flag for WIP
- *   bitmask construction.
+/*!< TODO(chengchen): Temporal flag serve as experimental flag for WIP bitmask construction.
  *   Shall be removed when bitmask code is completely checkedin */
 #define LOOP_FILTER_BITMASK 0
 #define PROFILE_BITS 3
@@ -715,8 +714,8 @@ typedef enum ATTRIBUTE_PACKED {
     ADST_1D,
     FLIPADST_1D,
     IDTX_1D,
-    /*!< TODO(sarahparker) need to eventually put something here for the */
-    /*!< mrc experiment to make this work with the ext-tx pruning functions */
+    /*!< TODO(sarahparker) need to eventually put something here for the
+     *   mrc experiment to make this work with the ext-tx pruning functions */
     TX_TYPES_1D,
 } TxType1D;
 
@@ -837,8 +836,7 @@ typedef enum ATTRIBUTE_PACKED {
     PALETTE_COLORS
 } PaletteColor;
 
-/*!< Note: All directional predictors must be between V_PRED and D67_PRED (both
- *         inclusive). */
+/*!< Note: All directional predictors must be between V_PRED and D67_PRED (both inclusive). */
 typedef enum ATTRIBUTE_PACKED {
     DC_PRED, /*!< Average of above and left pixels */
     V_PRED, /*!< Vertical */
@@ -1128,10 +1126,8 @@ typedef enum ATTRIBUTE_PACKED {
 
 /*!< 4 scratch frames for the new frames to support a maximum of 4 cores decoding
  *   in parallel, 3 for scaled references on the encoder.
- * TODO(hkuang): Add ondemand frame buffers instead of hardcoding the number
- *               of framebuffers.
- * TODO(jkoleszar): These 3 extra references could probably come from the
- *                  normal reference pool. */
+ *   TODO(hkuang): Add ondemand frame buffers instead of hardcoding the number of framebuffers.
+ *   TODO(jkoleszar): These 3 extra references could probably come from the normal reference pool. */
 #define FRAME_BUFFERS (REF_FRAMES + 7)
 
 /*!< Constant values while waiting for the sequence header */
@@ -1214,13 +1210,9 @@ typedef enum AomCodecErr
      * stream or \ref MAY be treated as fatal to the current GOP. If decoding
      * is continued for the current GOP, artifacts may be present. */
     AOM_CODEC_CORRUPT_FRAME,
-    /*!< brief An application-supplied parameter is not valid.
-     *
-     */
+    /*!< brief An application-supplied parameter is not valid. */
     AOM_CODEC_INVALID_PARAM,
-    /*!< brief An iterator reached the end of list.
-     *
-     */
+    /*!< brief An iterator reached the end of list. */
     AOM_CODEC_LIST_END
 } AomCodecErr;
 
@@ -1590,8 +1582,7 @@ typedef enum FrameContextIndex {
 /*!< Total number of QM sets stored */
 #define QM_LEVEL_BITS 4
 #define NUM_QM_LEVELS (1 << QM_LEVEL_BITS)
-/*!< Range of QMS is between first and last value, with offset applied to inter
-* blocks */
+/*!< Range of QMS is between first and last value, with offset applied to inter blocks */
 #define DEFAULT_QM_Y 10
 #define DEFAULT_QM_U 11
 #define DEFAULT_QM_V 12
@@ -1911,16 +1902,16 @@ typedef enum EbBitFieldMasks
 #define INPUT_SIZE_COUNT                   INPUT_SIZE_4K_RANGE + 1
 
 /*!< The EbPtr type is intended to be used to pass pointers to and from the eBrisk
- *   API.  This is a 32 bit pointer and is aligned on a 32 bit word boundary. */
+ *   API. This is a 32 bit pointer and is aligned on a 32 bit word boundary. */
 typedef void *EbPtr;
 
-/*!< The EbString type is intended to be used to pass "C" type strings to and
- *   from the eBrisk API.  The EbString type is a 32 bit pointer to a zero terminated
- *   string.  The pointer is word aligned and the string is byte aligned. */
+/*!< The EbString type is intended to be used to pass "C" type strings to and from
+ *   the eBrisk API. The EbString type is a 32 bit pointer to a zero terminated string.
+ *   The pointer is word aligned and the string is byte aligned. */
 typedef char * EbString;
 
 /*!< The EbByte type is intended to be used to pass arrays of bytes such as
- *   buffers to and from the eBrisk API.  The EbByte type is a 32 bit pointer.
+ *   buffers to and from the eBrisk API. The EbByte type is a 32 bit pointer.
  *   The pointer is word aligned and the buffer is byte aligned. */
 typedef uint8_t * EbByte;
 
@@ -1947,8 +1938,8 @@ typedef enum MD_BIT_DEPTH_MODE
     EB_DUAL_BIT_MD  = 2     /*!< Auto: 8bit & 10bit mode decision */
 } MD_BIT_DEPTH_MODE;
 
-/*!< The EB_GOP type is used to describe the hierarchical coding structure of
- *   Groups of Pictures (GOP) units. */
+/*!< The EB_GOP type is used to describe the hierarchical
+ *   coding structure of Groups of Pictures (GOP) units. */
 #define EbPred                 uint8_t
 #define EB_PRED_LOW_DELAY_P     0
 #define EB_PRED_LOW_DELAY_B     1

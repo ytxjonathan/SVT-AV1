@@ -26,8 +26,8 @@ extern "C" {
 
 /*!< We need to buffer three vertical lines. */
 #define CDEF_VBORDER (3)
-/*!< We only need to buffer three horizontal pixels too, but let's align to
- *   16 bytes (8 x 16 bits) to make vectorization easier. */
+/*!< We only need to buffer three horizontal pixels too, but let's
+ *    align to 16 bytes (8 x 16 bits) to make vectorization easier. */
 #define CDEF_HBORDER (8)
 #define CDEF_BSTRIDE ALIGN_POWER_OF_TWO((1 << MAX_SB_SIZE_LOG2) + 2 * CDEF_HBORDER, 3)
 

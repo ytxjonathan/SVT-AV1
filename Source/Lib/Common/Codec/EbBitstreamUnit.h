@@ -48,10 +48,10 @@ extern EbErrorType output_bitstream_rbsp_to_payload(OutputBitstreamUnit *bitstre
 #include "EbCabacContextModel.h"
 /********************************************************************************************************************************/
 /*!< bitops.h
-* These versions of get_msb() are only valid when n != 0 because all
-* of the optimized versions are undefined when n == 0:
-* https://gcc.gnu.org/onlinedocs/gcc/Other-Builtins.html
-* use GNU builtins where available. */
+ *   These versions of get_msb() are only valid when n != 0 because
+ *   all of the optimized versions are undefined when n == 0:
+ *   https://gcc.gnu.org/onlinedocs/gcc/Other-Builtins.html
+ *   use GNU builtins where available. */
 
 #if defined(__GNUC__) && ((__GNUC__ == 3 && __GNUC_MINOR__ >= 4) || __GNUC__ >= 4)
 static INLINE int32_t get_msb(uint32_t n) {
@@ -139,8 +139,8 @@ extern uint32_t od_divu_small_consts[OD_DIVU_DMAX][2];
 #define OD_COPY(dst, src, n) (memcpy((dst), (src), sizeof(*(dst)) * (n) + 0 * ((dst) - (src))))
 #endif
 
-/*!< Copy n elements of memory from src to dst, allowing overlapping regions.
- *   The 0* term provides compile-time type checking */
+/*!< Copy n elements of memory from src to dst, allowing overlapping
+ *   regions. The 0* term provides compile-time type checking */
 #if !defined(OVERRIDE_OD_MOVE)
 #define OD_MOVE(dst, src, n) (memmove((dst), (src), sizeof(*(dst)) * (n) + 0 * ((dst) - (src))))
 #endif
@@ -161,7 +161,7 @@ typedef uint32_t OdEcWindow;
 #define OD_EC_WINDOW_SIZE ((int32_t)sizeof(OdEcWindow) * CHAR_BIT)
 
 /*!< The resolution of fractional-precision bit usage measurements,
- * i.e., 3 => 1/8th bits.*/
+ *   i.e., 3 => 1/8th bits.*/
 #define OD_BITRES (3)
 
 #define OD_ICDF AOM_ICDF
