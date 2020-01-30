@@ -174,6 +174,7 @@ extern "C" {
 #define SHUT_TX_WEIGHT               0
 #define ATB_INTER_2_DEPTH            1 // ATB INTRA Depth 2
 #define TX_ORG_INTERINTRA            1
+#define SUPPORT_BC                   1   
 #define ENABLE_BC                    0 // ATB for BC
 #define FASTER_RDOQ                  1
 #define UPGRAGDE_TX_WEIGHT           0

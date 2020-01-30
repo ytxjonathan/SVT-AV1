@@ -114,6 +114,11 @@ void mode_decision_update_neighbor_arrays(
     context_ptr->mv_unit.mv[REF_LIST_1].mv_union = context_ptr->md_cu_arr_nsq[index_mds].prediction_unit_array[0].mv[REF_LIST_1].mv_union;
     uint8_t                    inter_pred_direction_index = (uint8_t)context_ptr->cu_ptr->prediction_unit_array->inter_pred_direction_index;
     uint8_t                    ref_frame_type = (uint8_t)context_ptr->cu_ptr->prediction_unit_array[0].ref_frame_type;
+
+#if TX_ORG_INTERINTRA
+    int32_t is_inter = (context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE || context_ptr->cu_ptr->av1xd->use_intrabc) ? EB_TRUE : EB_FALSE;
+#endif
+
 #if MULTI_PASS_PD
     if (context_ptr->interpolation_search_level != IT_SEARCH_OFF)
 #else
@@ -180,8 +185,8 @@ void mode_decision_update_neighbor_arrays(
                 context_ptr->luma_dc_sign_level_coeff_neighbor_array,
                 (uint8_t*)&dc_sign_level_coeff,
 #if TX_ORG_INTERINTRA
-                context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
-                context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
+                context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[is_inter][context_ptr->cu_ptr->tx_depth][txb_itr],
+                context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[is_inter][context_ptr->cu_ptr->tx_depth][txb_itr],
 #else
                 context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->tx_depth][txb_itr],
                 context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->tx_depth][txb_itr],
@@ -194,8 +199,8 @@ void mode_decision_update_neighbor_arrays(
                 picture_control_set_ptr->md_tx_depth_1_luma_dc_sign_level_coeff_neighbor_array[MD_NEIGHBOR_ARRAY_INDEX],
                 (uint8_t*)&dc_sign_level_coeff,
 #if TX_ORG_INTERINTRA
-                context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
-                context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->prediction_mode_flag == INTER_MODE][context_ptr->cu_ptr->tx_depth][txb_itr],
+                context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[is_inter][context_ptr->cu_ptr->tx_depth][txb_itr],
+                context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[is_inter][context_ptr->cu_ptr->tx_depth][txb_itr],
 #else
                 context_ptr->sb_origin_x + context_ptr->blk_geom->tx_org_x[context_ptr->cu_ptr->tx_depth][txb_itr],
                 context_ptr->sb_origin_y + context_ptr->blk_geom->tx_org_y[context_ptr->cu_ptr->tx_depth][txb_itr],
@@ -5351,16 +5356,11 @@ static void tx_search_update_recon_sample_neighbor_array(
 
     return;
 }
-#if ENABLE_BC
-uint8_t get_end_tx_depth(BlockSize bsize, EbBool is_inter) {
-#else
+
 uint8_t get_end_tx_depth(BlockSize bsize, uint8_t btype) {
-#endif
+
     uint8_t tx_depth = 0;
 #if 0//ATB_INTER_2_DEPTH
-    if (bsize == BLOCK_128X128)
-        printf("");
-
     if (bsize == BLOCK_128X128 ||
         bsize == BLOCK_64X64 ||
 #else
@@ -5392,11 +5392,7 @@ uint8_t get_end_tx_depth(BlockSize bsize, uint8_t btype) {
         bsize == BLOCK_8X32 ||
         bsize == BLOCK_16X4 ||
         bsize == BLOCK_4X16)
-#if ENABLE_BC
-        tx_depth = is_inter ? 1 : 1;
-#else
         tx_depth = (btype == INTRA_MODE) ? 1 : 1;
-#endif
     return tx_depth;
 }
 
@@ -7770,7 +7766,11 @@ void full_loop_core(
     uint8_t end_tx_depth = 0;
 
 #if LOSSLESS_TX_TYPE_OPT || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
+#if ENABLE_BC
+    if (context_ptr->md_atb_mode == 0) {
+#else
     if (context_ptr->md_atb_mode == 0 || candidate_buffer->candidate_ptr->use_intrabc) {
+#endif
         start_tx_depth = end_tx_depth = 0;
     }
     else if (context_ptr->md_staging_tx_size_mode == 0) {
@@ -7781,11 +7781,7 @@ void full_loop_core(
         // end_tx_depth set to zero for blocks which go beyond the picture boundaries
         if ((context_ptr->sb_origin_x + context_ptr->blk_geom->origin_x + context_ptr->blk_geom->bwidth < picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->seq_header.max_frame_width &&
             context_ptr->sb_origin_y + context_ptr->blk_geom->origin_y + context_ptr->blk_geom->bheight < picture_control_set_ptr->parent_pcs_ptr->sequence_control_set_ptr->seq_header.max_frame_height))
-#if ENABLE_BC
-            end_tx_depth = get_end_tx_depth(context_ptr->blk_geom->bsize, is_inter);
-#else
             end_tx_depth = get_end_tx_depth(context_ptr->blk_geom->bsize, candidate_buffer->candidate_ptr->type);
-#endif
         else
             end_tx_depth = 0;
 #if LOSSLESS_TX_TYPE_OPT || RDOQ_LIGHT_TX_TYPE_MD_STAGE_2
@@ -7804,9 +7800,9 @@ void full_loop_core(
 #else
         if (picture_control_set_ptr->parent_pcs_ptr->atb_mode && context_ptr->md_staging_skip_atb == EB_FALSE && end_tx_depth && candidate_buffer->candidate_ptr->use_intrabc == 0) {
 #endif
-#if !ENABLE_BC
+
             int32_t is_inter = (candidate_buffer->candidate_ptr->type == INTER_MODE || candidate_buffer->candidate_ptr->use_intrabc) ? EB_TRUE : EB_FALSE;
-#endif
+
             //Y Residual: residual for INTRA is computed inside the TU loop
             if (is_inter)
                 //Y Residual
