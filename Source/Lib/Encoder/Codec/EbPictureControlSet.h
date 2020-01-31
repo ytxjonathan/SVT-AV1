@@ -506,7 +506,7 @@ typedef struct PictureControlSet {
 
     ModeInfo *mip;
 
-    int32_t   mi_stride;
+    int32_t   mi_stride; // TODO: needs to be retired, use pcs_ptr->av1_cm->mi_stride instead
     EbReflist colocated_pu_ref_list;
     EbBool    is_low_delay;
 
