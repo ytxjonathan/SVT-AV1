@@ -5690,6 +5690,9 @@ void tx_type_search(
     PictureControlSet            *picture_control_set_ptr,
     ModeDecisionContext          *context_ptr,
     ModeDecisionCandidateBuffer  *candidate_buffer,
+#if SKIPT_TX_IN_STAGE3
+   uint8_t                        previous_stage_skip,
+#endif
     uint32_t                      qp)
 {
 #if NEW_MD_LAMBDA
@@ -5852,6 +5855,10 @@ void tx_type_search(
                     continue;
             }
             txt_it++;
+#endif
+#if SKIPT_TX_IN_STAGE3
+            if (previous_stage_skip && tx_type > txk_start)
+                continue;
 #endif
 
         // For Inter blocks, transform type of chroma follows luma transfrom type
@@ -6436,6 +6443,9 @@ void tx_partitioning_path(
     uint8_t                       start_tx_depth,
 #endif
     uint8_t                       end_tx_depth,
+#if SKIPT_TX_IN_STAGE3
+     uint8_t                     previous_stage_skip,
+#endif
     uint32_t                      qp,
     uint32_t                     *y_count_non_zero_coeffs,
     uint64_t                     *y_coeff_bits,
@@ -6707,6 +6717,12 @@ void tx_partitioning_path(
 #if SKIP_TXS_BSAED_COEFF
      uint16_t best_tx_count_non_zero_coeffs = ~0;
 #endif
+#if SKIPT_TX_IN_STAGE3
+     if (previous_stage_skip) {
+         start_tx_depth = 0;
+         end_tx_depth = 0;
+     }
+#endif
     // Transform Depth Loop
 #if TX_SIZE_ONLY_MD_STAGE_2
     for (context_ptr->tx_depth = start_tx_depth; context_ptr->tx_depth <= end_tx_depth; context_ptr->tx_depth++) {
@@ -6833,6 +6849,9 @@ void tx_partitioning_path(
                         picture_control_set_ptr,
                         context_ptr,
                         tx_candidate_buffer,
+#if SKIPT_TX_IN_STAGE3
+                        previous_stage_skip,
+#endif
                         qp);
 #if FREQUENCY_DOMAIN_TX_TYPE_SEARCH
                     context_ptr->md_staging_spatial_sse_full_loop = default_md_staging_spatial_sse_full_loop;
@@ -7725,6 +7744,9 @@ void full_loop_core(
     uint32_t                     inputCbOriginIndex,
     uint32_t                     cuOriginIndex,
     uint32_t                     cuChromaOriginIndex,
+#if SKIPT_TX_IN_STAGE3
+     uint8_t                     previous_stage_skip,
+#endif
     uint64_t                     ref_fast_cost)
 {
 #if NEW_MD_LAMBDA
@@ -7864,6 +7886,9 @@ void full_loop_core(
                 start_tx_depth,
 #endif
                 end_tx_depth,
+#if SKIPT_TX_IN_STAGE3
+                previous_stage_skip,
+#endif
                 context_ptr->cu_ptr->qp,
                 &(*count_non_zero_coeffs[0]),
                 &y_coeff_bits,
@@ -8392,6 +8417,9 @@ void md_stage_2(
             inputCbOriginIndex,
             cuOriginIndex,
             cuChromaOriginIndex,
+#if SKIPT_TX_IN_STAGE3
+            0,
+#endif
             ref_fast_cost);
     }
 }
@@ -8496,6 +8524,9 @@ void md_stage_2(
                     inputCbOriginIndex,
                     cuOriginIndex,
                     cuChromaOriginIndex,
+#if SKIPT_TX_IN_STAGE3
+                    candidate_ptr->skip_flag,
+#endif
                     ref_fast_cost);
         }
 }
@@ -8636,6 +8667,9 @@ void md_stage_3(
             inputCbOriginIndex,
             cuOriginIndex,
             cuChromaOriginIndex,
+#if SKIPT_TX_IN_STAGE3
+            candidate_ptr->skip_flag,
+#endif
             ref_fast_cost);
 
         if (context_ptr->full_loop_escape)

@@ -40,6 +40,7 @@ extern "C" {
 #define SKIP_TXS_BSAED_COEFF            0 // Early exit TXS search when the processed tx_depth returns a number of coeff less than threshold
 #define SKIP_TXT_BSAED_COEFF            0 // Early exit TXT search when the processed tx_type returns a number of coeff less than threshold
 #define SKIP_RDOQ_BSAED_COEFF           0 // Early exit RDOQ search when the processed tu returns a number of coeff less than threshold
+#define SKIPT_TX_IN_STAGE3              0 // Use previous md_stage skip decision to restrict the txs txt and rdoq complexity
 #if RESTRICT_TXS_FOR_NON_S_V_H || RESTRICT_TXT_FOR_NON_S_V_H || DISABLE_COMPOUND_FOR_NON_S_V_H
 #define ADD_PARENT_IDX                  0 // Add parent index in the geom - lossless
 #endif
