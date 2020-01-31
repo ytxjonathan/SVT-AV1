@@ -1802,7 +1802,7 @@ int32_t av1_quantize_inv_quantize(
     if (perform_rdoq) {
         // Perform Trellis
         uint16_t rdoq_th[2] = { 1,1 };
-        if (*eob >= rdoq_th[component_type == COMPONENT_LUMA ? 0 : 1]) {
+        if (*eob >= rdoq_th[component_type == COMPONENT_LUMA ? 0 : 1] && *eob <= ((width*height) - 0)) {
 #else
     if (perform_rdoq && *eob != 0) {
 

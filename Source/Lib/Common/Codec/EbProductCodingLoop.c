@@ -12614,7 +12614,7 @@ EB_EXTERN EbErrorType mode_decision_sb(
                 depth_cost[sequence_control_set_ptr->static_config.super_block_size == 128 ? context_ptr->blk_geom->depth : context_ptr->blk_geom->depth + 1] += nsq_cost[nsq_shape_table[0]];
 #if SKIP_DEPTH
                 if (sequence_control_set_ptr->sb_geom[lcuAddr].is_complete_sb) {
-                    if (1/*context_ptr->pd_pass >= PD_PASS_1*/) {
+                    if (context_ptr->pd_pass > PD_PASS_1) {
                         uint64_t sq_cost = nsq_cost[0]; // sq cost
                         uint64_t best_nsq_cost = MAX_CU_COST;
                         skip_next_depth = 0;
