@@ -4251,9 +4251,9 @@ void predictive_me_search(
                     +(full_pel_ref_window_height_th >> 1),
 #else
                    - (context_ptr->full_pel_ref_window_width_th >> 1),
-                    +(context_ptr->full_pel_ref_window_width_th >> 1),
+                    context_ptr->full_pel_ref_window_width_th - (context_ptr->full_pel_ref_window_width_th >> 1) - 1, //+(context_ptr->full_pel_ref_window_width_th >> 1),
                     -(context_ptr->full_pel_ref_window_height_th >> 1),
-                    +(context_ptr->full_pel_ref_window_height_th >> 1),
+                    context_ptr->full_pel_ref_window_height_th - (context_ptr->full_pel_ref_window_height_th >> 1) - 1, //+(context_ptr->full_pel_ref_window_height_th >> 1),
 #endif
 #else
                     - (full_pel_ref_window_width_th >> 1),
