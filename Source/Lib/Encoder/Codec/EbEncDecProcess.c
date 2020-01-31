@@ -2720,7 +2720,8 @@ void *enc_dec_kernel(void *input_ptr) {
                     if (pcs_ptr->update_cdf) {
                         pcs_ptr->rate_est_array[sb_index] = *pcs_ptr->md_rate_estimation_array;
 #if MD_RATE_EST_ENH
-                        if (scs_ptr->enc_dec_segment_row_count_array[pcs_ptr->temporal_layer_index] == 1 && scs_ptr->enc_dec_segment_col_count_array[pcs_ptr->temporal_layer_index] == 1) {
+                        if (scs_ptr->enc_dec_segment_row_count_array[pcs_ptr->temporal_layer_index] == 1 && 
+                            scs_ptr->enc_dec_segment_col_count_array[pcs_ptr->temporal_layer_index] == 1) {
                             if (sb_index == 0)
                                 pcs_ptr->ec_ctx_array[sb_index] = *pcs_ptr->coeff_est_entropy_coder_ptr->fc;
                             else
