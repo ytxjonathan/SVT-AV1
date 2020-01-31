@@ -3881,10 +3881,8 @@ void *picture_analysis_kernel(void *input_ptr) {
                 (EbPaReferenceObject *)pcs_ptr->pa_reference_picture_wrapper_ptr->object_ptr;
             input_padded_picture_ptr = (EbPictureBufferDesc *)pa_ref_obj_->input_padded_picture_ptr;
             // Variance
-            pic_width_in_sb =
-                (scs_ptr->seq_header.max_frame_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz;
-            pic_height_in_sb =
-                (scs_ptr->seq_header.max_frame_height + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz;
+            pic_width_in_sb = (pcs_ptr->aligned_width + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz;
+            pic_height_in_sb = (pcs_ptr->aligned_height + scs_ptr->sb_sz - 1) / scs_ptr->sb_sz;
             sb_total_count = pic_width_in_sb * pic_height_in_sb;
             generate_padding(input_picture_ptr->buffer_y,
                              input_picture_ptr->stride_y,

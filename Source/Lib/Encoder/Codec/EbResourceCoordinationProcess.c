@@ -1017,7 +1017,7 @@ void *resource_coordination_kernel(void *input_ptr) {
                 struct PictureParentControlSet *ppcs_ptr = pcs_ptr;
                 Av1Common *const                cm       = ppcs_ptr->av1_cm;
                 uint8_t                         pic_width_in_sb =
-                    (uint8_t)((scs_ptr->seq_header.max_frame_width + scs_ptr->sb_size_pix - 1) /
+                    (uint8_t)((pcs_ptr->aligned_width + scs_ptr->sb_size_pix - 1) /
                               scs_ptr->sb_size_pix);
                 int       tile_row, tile_col;
                 uint32_t  x_sb_index, y_sb_index;

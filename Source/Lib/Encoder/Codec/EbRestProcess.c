@@ -158,6 +158,10 @@ EbErrorType rest_context_ctor(EbThreadContext *  thread_context_ptr,
 }
 void get_own_recon(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
                    RestContext *context_ptr, EbBool is_16bit) {
+
+    const uint32_t ss_x = scs_ptr->subsampling_x;
+    const uint32_t ss_y = scs_ptr->subsampling_y;
+
     EbPictureBufferDesc *recon_picture_ptr;
     if (is_16bit) {
         if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
@@ -185,18 +189,18 @@ void get_own_recon(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
         uint16_t *org_ptr_cr = (uint16_t *)org_rec->buffer_cr + org_rec->origin_x / 2 +
                                org_rec->origin_y / 2 * org_rec->stride_cr;
 
-        for (int r = 0; r < scs_ptr->seq_header.max_frame_height; ++r)
+        for (int r = 0; r < recon_picture_ptr->height; ++r)
             memcpy(org_ptr + r * org_rec->stride_y,
                    rec_ptr + r * recon_picture_ptr->stride_y,
-                   scs_ptr->seq_header.max_frame_width << 1);
+                   recon_picture_ptr->width << 1);
 
-        for (int r = 0; r < scs_ptr->seq_header.max_frame_height / 2; ++r) {
+        for (int r = 0; r < recon_picture_ptr->height >> ss_x; ++r) {
             memcpy(org_ptr_cb + r * org_rec->stride_cb,
                    rec_ptr_cb + r * recon_picture_ptr->stride_cb,
-                   (scs_ptr->seq_header.max_frame_width / 2) << 1);
+                   (recon_picture_ptr->width >> ss_y) << 1);
             memcpy(org_ptr_cr + r * org_rec->stride_cr,
                    rec_ptr_cr + r * recon_picture_ptr->stride_cr,
-                   (scs_ptr->seq_header.max_frame_width / 2) << 1);
+                   (recon_picture_ptr->width >> ss_y) << 1);
         }
     } else {
         if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
@@ -228,18 +232,18 @@ void get_own_recon(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
         uint8_t *org_ptr_cr = &((org_rec->buffer_cr)[org_rec->origin_x / 2 +
                                                      org_rec->origin_y / 2 * org_rec->stride_cr]);
 
-        for (int r = 0; r < scs_ptr->seq_header.max_frame_height; ++r)
+        for (int r = 0; r < recon_picture_ptr->height; ++r)
             memcpy(org_ptr + r * org_rec->stride_y,
                    rec_ptr + r * recon_picture_ptr->stride_y,
-                   scs_ptr->seq_header.max_frame_width);
+                   recon_picture_ptr->width);
 
-        for (int r = 0; r < scs_ptr->seq_header.max_frame_height / 2; ++r) {
+        for (int r = 0; r < recon_picture_ptr->height >> ss_y; ++r) {
             memcpy(org_ptr_cb + r * org_rec->stride_cb,
                    rec_ptr_cb + r * recon_picture_ptr->stride_cb,
-                   (scs_ptr->seq_header.max_frame_width / 2));
+                   (recon_picture_ptr->width >> ss_x));
             memcpy(org_ptr_cr + r * org_rec->stride_cr,
                    rec_ptr_cr + r * recon_picture_ptr->stride_cr,
-                   (scs_ptr->seq_header.max_frame_width / 2));
+                   (recon_picture_ptr->width >> ss_x));
         }
     }
 }

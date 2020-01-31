@@ -740,6 +740,9 @@ uint64_t picture_sse_calculations(PictureControlSet *pcs_ptr, EbPictureBufferDes
     SequenceControlSet *scs_ptr  = pcs_ptr->parent_pcs_ptr->scs_ptr;
     EbBool              is_16bit = (scs_ptr->static_config.encoder_bit_depth > EB_8BIT);
 
+    const uint32_t ss_x = scs_ptr->subsampling_x;
+    const uint32_t ss_y = scs_ptr->subsampling_y;
+
     if (!is_16bit) {
         EbPictureBufferDesc *input_picture_ptr =
             (EbPictureBufferDesc *)pcs_ptr->parent_pcs_ptr->enhanced_picture_ptr;
@@ -760,9 +763,9 @@ uint64_t picture_sse_calculations(PictureControlSet *pcs_ptr, EbPictureBufferDes
 
             residual_distortion = 0;
 
-            while (row_index < pcs_ptr->parent_pcs_ptr->aligned_height) {
+            while (row_index < input_picture_ptr->height) {
                 column_index = 0;
-                while (column_index < pcs_ptr->parent_pcs_ptr->aligned_width) {
+                while (column_index < input_picture_ptr->width) {
                     residual_distortion += (int64_t)SQR((int64_t)(input_buffer[column_index]) -
                                                         (recon_coeff_buffer[column_index]));
                     ++column_index;
@@ -785,9 +788,9 @@ uint64_t picture_sse_calculations(PictureControlSet *pcs_ptr, EbPictureBufferDes
 
             residual_distortion = 0;
             row_index           = 0;
-            while (row_index < scs_ptr->chroma_height) {
+            while (row_index < input_picture_ptr->height >> ss_y) {
                 column_index = 0;
-                while (column_index < scs_ptr->chroma_width) {
+                while (column_index < input_picture_ptr->width >> ss_x) {
                     residual_distortion += (int64_t)SQR((int64_t)(input_buffer[column_index]) -
                                                         (recon_coeff_buffer[column_index]));
                     ++column_index;
@@ -806,12 +809,13 @@ uint64_t picture_sse_calculations(PictureControlSet *pcs_ptr, EbPictureBufferDes
             input_buffer        = &((input_picture_ptr->buffer_cr)[input_picture_ptr->origin_x / 2 +
                                                             input_picture_ptr->origin_y / 2 *
                                                                 input_picture_ptr->stride_cr]);
+
             residual_distortion = 0;
             row_index           = 0;
 
-            while (row_index < scs_ptr->chroma_height) {
+            while (row_index < input_picture_ptr->height >> ss_y) {
                 column_index = 0;
-                while (column_index < scs_ptr->chroma_width) {
+                while (column_index < input_picture_ptr->width >> ss_x) {
                     residual_distortion += (int64_t)SQR((int64_t)(input_buffer[column_index]) -
                                                         (recon_coeff_buffer[column_index]));
                     ++column_index;
@@ -846,9 +850,9 @@ uint64_t picture_sse_calculations(PictureControlSet *pcs_ptr, EbPictureBufferDes
 
             residual_distortion = 0;
 
-            while (row_index < pcs_ptr->parent_pcs_ptr->aligned_height) {
+            while (row_index < input_picture_ptr->height) {
                 column_index = 0;
-                while (column_index < pcs_ptr->parent_pcs_ptr->aligned_width) {
+                while (column_index < input_picture_ptr->width) {
                     residual_distortion +=
                         (int64_t)SQR(((int64_t)input_buffer[column_index]) -
                                      (int64_t)(recon_coeff_buffer[column_index]));
@@ -876,9 +880,9 @@ uint64_t picture_sse_calculations(PictureControlSet *pcs_ptr, EbPictureBufferDes
 
             residual_distortion = 0;
             row_index           = 0;
-            while (row_index < scs_ptr->chroma_height) {
+            while (row_index < input_picture_ptr->height >> ss_y) {
                 column_index = 0;
-                while (column_index < scs_ptr->chroma_width) {
+                while (column_index < input_picture_ptr->width >> ss_x) {
                     residual_distortion +=
                         (int64_t)SQR(((int64_t)input_buffer[column_index]) -
                                      (int64_t)(recon_coeff_buffer[column_index]));
@@ -904,9 +908,9 @@ uint64_t picture_sse_calculations(PictureControlSet *pcs_ptr, EbPictureBufferDes
             residual_distortion = 0;
             row_index           = 0;
 
-            while (row_index < scs_ptr->chroma_height) {
+            while (row_index < input_picture_ptr->height >> ss_y) {
                 column_index = 0;
-                while (column_index < scs_ptr->chroma_width) {
+                while (column_index < input_picture_ptr->height >> ss_x) {
                     residual_distortion +=
                         (int64_t)SQR(((int64_t)input_buffer[column_index]) -
                                      (int64_t)(recon_coeff_buffer[column_index]));

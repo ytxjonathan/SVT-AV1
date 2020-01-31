@@ -951,9 +951,13 @@ typedef struct PictureParentControlSet {
     uint16_t picture_sb_height;
     uint16_t sb_total_count_unscaled;
 
+    // Picture dimensions (resized or not)
+    // aligned to be a multiple of 8 pixels
     uint16_t aligned_width;
     uint16_t aligned_height;
 
+    // Picture dimensions (resized or not)
+    // --not-- aligned to be a multiple of 8 pixels
     uint16_t frame_width;
     uint16_t frame_height;
 
