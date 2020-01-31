@@ -32,11 +32,17 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-#define ADD_PARENT_IDX                  0 // Add parent index in the geom - lossless
-#define RESTRICT_TXS_FOR_NON_S_V_H      0 // Restrict tx_depth for non-SQ-H-V blocks
-#define RESTRICT_TXT_FOR_NON_S_V_H      0 // Restrict tx_type for non-SQ-H-V blocks
+
+#define RESTRICT_TXS_FOR_NON_S_V_H      0 // Restrict tx_depth for non-SQ-H-V blocks based on the parent block tx_size
+#define RESTRICT_TXT_FOR_NON_S_V_H      0 // Restrict tx_type for non-SQ-H-V blocks based on the parent block tx_type
+#define DISABLE_COMPOUND_FOR_NON_S_V_H  0 // Disable compound for non-SQ, H and V shapes based on the parent block compound mode
 #define SKIP_DEPTH                      0 // Skip the child blocks whenthe SQ block is better than the NSQ
 #define SKIP_TXS_BSAED_COEFF            0 // Early exit TXS search when the processed tx_depth returns a number of coeff less than threshold
+#define SKIP_TXT_BSAED_COEFF            0 // Early exit TXT search when the processed tx_type returns a number of coeff less than threshold
+#define SKIP_RDOQ_BSAED_COEFF           0 // Early exit RDOQ search when the processed tu returns a number of coeff less than threshold
+#if RESTRICT_TXS_FOR_NON_S_V_H || RESTRICT_TXT_FOR_NON_S_V_H || DISABLE_COMPOUND_FOR_NON_S_V_H
+#define ADD_PARENT_IDX                  0 // Add parent index in the geom - lossless
+#endif
 #define QPS_CHANGE              1 //QPS changes for 4L pictures
 #define QPS_CHANGE_P2           1 //QPS changes for CQP
 #define PRED_DEBUG              0 //WIP
@@ -80,7 +86,7 @@ extern "C" {
 #define OBMC_OPT2                0
 #define OBMC_OPT3                0
 #define OBMC_OPT4                0
-#define OBMC_OPT5                0
+#define OBMC_OPT5                0 // Inject new searched obmc mv as a simple translation candidate
 #define ALTREF_PACK               1 // pack the whole picture once for temporal filtering
 
 

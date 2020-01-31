@@ -1798,10 +1798,17 @@ int32_t av1_quantize_inv_quantize(
         }
     }
 
+#if SKIP_RDOQ_BSAED_COEFF
+    if (perform_rdoq) {
+        // Perform Trellis
+        uint16_t rdoq_th[2] = { 1,1 };
+        if (*eob >= rdoq_th[component_type == COMPONENT_LUMA ? 0 : 1]) {
+#else
     if (perform_rdoq && *eob != 0) {
 
         // Perform Trellis
         if (*eob != 0) {
+#endif
             eb_av1_optimize_b(
                 md_context,
                 txb_skip_context,

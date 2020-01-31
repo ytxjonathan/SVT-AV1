@@ -5779,11 +5779,20 @@ void tx_type_search(
     }
 #endif
     TxType best_tx_type = DCT_DCT;
+#if SKIP_TXT_BSAED_COEFF
+    uint32_t best_y_count_non_zero_coeffs = (uint32_t)~0;
+#endif
     for (tx_type = txk_start; tx_type < txk_end; ++tx_type) {
 
         uint64_t tuFullDistortion[3][DIST_CALC_TOTAL];
         uint64_t y_tu_coeff_bits = 0;
+#if SKIP_TXT_BSAED_COEFF
+        uint32_t txt_th = 1;
+        if(best_y_count_non_zero_coeffs <= txt_th)
+            continue;
+#endif
         uint32_t y_count_non_zero_coeffs;
+
 
 #if TX_SIZE_LIGHT_TX_TYPE_MD_STAGE_2
         if (context_ptr->md_stage <= MD_STAGE_2 && tx_type != DCT_DCT && tx_type != V_DCT && tx_type != H_DCT)
@@ -6027,6 +6036,9 @@ void tx_type_search(
         if (cost < best_cost_tx_search) {
             best_cost_tx_search = cost;
             best_tx_type = tx_type;
+#if SKIP_TXT_BSAED_COEFF
+            best_y_count_non_zero_coeffs = y_count_non_zero_coeffs;
+#endif
         }
     }
 
@@ -6708,7 +6720,7 @@ void tx_partitioning_path(
                 continue;
 #endif
 #if SKIP_TXS_BSAED_COEFF
-            uint16_t txs_th = 1;
+            uint16_t txs_th = 2;
             if (best_tx_count_non_zero_coeffs <= txs_th)
                 continue;
 #else
@@ -10560,6 +10572,14 @@ EbErrorType signal_derivation_block(
             context_ptr->compound_types_to_try = !is_src_compound ? MD_COMP_AVG : similar_cu->interinter_comp.type;
         }
     }
+ #if DISABLE_COMPOUND_FOR_NON_S_V_H
+    if (context_ptr->blk_geom->shape > PART_V && !context_ptr->similar_blk_avail) {
+        uint16_t parent_blk_mds = context_ptr->blk_geom->pi_mds;
+        CodingUnit *parent_cu = &context_ptr->md_cu_arr_nsq[parent_blk_mds];
+        int32_t is_parent_compound = parent_cu->pred_mode >= NEAREST_NEARESTMV;
+        context_ptr->compound_types_to_try = !is_parent_compound ? MD_COMP_AVG : context_ptr->compound_types_to_try;
+    }
+#endif
 
 #if INTRA_SIMILAR
     context_ptr->inject_inter_candidates = 1;
