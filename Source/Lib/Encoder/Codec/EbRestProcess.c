@@ -194,13 +194,13 @@ void get_own_recon(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
                    rec_ptr + r * recon_picture_ptr->stride_y,
                    recon_picture_ptr->width << 1);
 
-        for (int r = 0; r < recon_picture_ptr->height >> ss_x; ++r) {
+        for (int r = 0; r < (recon_picture_ptr->height >> ss_y); ++r) {
             memcpy(org_ptr_cb + r * org_rec->stride_cb,
                    rec_ptr_cb + r * recon_picture_ptr->stride_cb,
-                   (recon_picture_ptr->width >> ss_y) << 1);
+                   (recon_picture_ptr->width >> ss_x) << 1);
             memcpy(org_ptr_cr + r * org_rec->stride_cr,
                    rec_ptr_cr + r * recon_picture_ptr->stride_cr,
-                   (recon_picture_ptr->width >> ss_y) << 1);
+                   (recon_picture_ptr->width >> ss_x) << 1);
         }
     } else {
         if (pcs_ptr->parent_pcs_ptr->is_used_as_reference_flag == EB_TRUE)
@@ -237,7 +237,7 @@ void get_own_recon(SequenceControlSet *scs_ptr, PictureControlSet *pcs_ptr,
                    rec_ptr + r * recon_picture_ptr->stride_y,
                    recon_picture_ptr->width);
 
-        for (int r = 0; r < recon_picture_ptr->height >> ss_y; ++r) {
+        for (int r = 0; r < (recon_picture_ptr->height >> ss_y); ++r) {
             memcpy(org_ptr_cb + r * org_rec->stride_cb,
                    rec_ptr_cb + r * recon_picture_ptr->stride_cb,
                    (recon_picture_ptr->width >> ss_x));

@@ -799,7 +799,7 @@ void psnr_calculations(PictureControlSet *pcs_ptr, SequenceControlSet *scs_ptr) 
             const uint32_t pic_height_in_sb  = (luma_height + 64 - 1) / 64;
             const uint32_t luma_2bit_width   = luma_width / 4;
             const uint32_t chroma_height     = input_picture_ptr->height >> ss_y;
-            const uint32_t chroma_2bit_width = chroma_height / 4;
+            const uint32_t chroma_2bit_width = chroma_width / 4;
             uint32_t       sb_num_in_height, sb_num_in_width;
 
             EbByte input_buffer_org =
