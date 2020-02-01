@@ -820,9 +820,9 @@ static INLINE unsigned int lcg_rand16(unsigned int *state) {
 // encoding resolution
 void calc_superres_params(superres_params_type *spr_params, SequenceControlSet *scs_ptr,
                           PictureParentControlSet *pcs_ptr) {
-    spr_params->superres_denom  = SCALE_NUMERATOR;
-    static unsigned int seed    = 34567;
-    FrameHeader *       frm_hdr = &pcs_ptr->frm_hdr;
+    spr_params->superres_denom = SCALE_NUMERATOR;
+    static unsigned int seed = 34567;
+    FrameHeader *frm_hdr = &pcs_ptr->frm_hdr;
 
     uint8_t superres_mode = scs_ptr->static_config.superres_mode;
     uint8_t cfg_denom     = scs_ptr->static_config.superres_denom;
@@ -830,7 +830,12 @@ void calc_superres_params(superres_params_type *spr_params, SequenceControlSet *
     //uint8_t superres_qthres = scs_ptr->static_config.superres_qthres;
 
     // For now, super-resolution can only be enabled for key frames or intra only frames
-    if (frm_hdr->frame_type != KEY_FRAME && frm_hdr->frame_type != INTRA_ONLY_FRAME) { return; }
+    // In addition, it can only be enabled in case allow_intrabc is disabled and
+    // loop restoration is enabled
+    if ((frm_hdr->frame_type != KEY_FRAME &&
+        frm_hdr->frame_type != INTRA_ONLY_FRAME) ||
+        frm_hdr->allow_intrabc ||
+        !scs_ptr->seq_header.enable_restoration) { return; }
 
     // remove assertion when rest of the modes are implemented
     assert(superres_mode <= SUPERRES_RANDOM);
@@ -947,6 +952,10 @@ void init_resize_picture(SequenceControlSet *scs_ptr, PictureParentControlSet *p
     calc_superres_params(&spr_params, scs_ptr, pcs_ptr);
 
     if (spr_params.superres_denom != SCALE_NUMERATOR) {
+
+        scs_ptr->seq_header.enable_superres = 1; // enable sequence level super-res flag
+                                                 // if super-res is ON for any frame
+
         // Allocate downsampled picture buffer descriptor
         downscaled_source_buffer_desc_ctor(
             &pcs_ptr->enhanced_downscaled_picture_ptr, input_picture_ptr, spr_params);
