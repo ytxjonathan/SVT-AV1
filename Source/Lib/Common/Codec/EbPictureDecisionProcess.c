@@ -1010,7 +1010,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         else if (sc_content_detected)
 #if PRESETS_TUNE
 #if M0_OPT
+#if JAN31_M2
+            if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #else
             if (picture_control_set_ptr->enc_mode == ENC_M0)
                 picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
@@ -1058,9 +1062,17 @@ EbErrorType signal_derivation_multi_processes_oq(
 #if PRESETS_TUNE
         else if (picture_control_set_ptr->enc_mode <= ENC_M0)
             picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL6;
-        else if (picture_control_set_ptr->enc_mode <= ENC_M1)
-            picture_control_set_ptr->nsq_search_level = (picture_control_set_ptr->is_used_as_reference_flag) ? NSQ_SEARCH_LEVEL6 : NSQ_SEARCH_LEVEL3;
+#if JAN31_M2
         else if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#else
+        else if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
+            picture_control_set_ptr->nsq_search_level = (picture_control_set_ptr->is_used_as_reference_flag) ? NSQ_SEARCH_LEVEL6 : NSQ_SEARCH_LEVEL3;
+#if JAN31_M2
+        else if (picture_control_set_ptr->enc_mode <= ENC_M3)
+#else
+        else if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#endif
             if (picture_control_set_ptr->is_used_as_reference_flag)
                 picture_control_set_ptr->nsq_search_level = NSQ_SEARCH_LEVEL3;
             else
@@ -1202,7 +1214,11 @@ EbErrorType signal_derivation_multi_processes_oq(
             (sequence_control_set_ptr->static_config.encoder_bit_depth == EB_8BIT ||
             (sequence_control_set_ptr->static_config.encoder_bit_depth > EB_8BIT && sequence_control_set_ptr->static_config.enable_hbd_mode_decision == 0)) &&
 #if SC_PRESETS_OPT
+#if JAN31_M2
+            picture_control_set_ptr->enc_mode <= ENC_M2 ? 6 : 0;
+#else
             picture_control_set_ptr->enc_mode <= ENC_M1 ? 6 : 0;
+#endif
 #else
             picture_control_set_ptr->enc_mode == ENC_M0 ? 6 : 0;
 #endif
@@ -1576,7 +1592,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 3                 Fast: Mode 1 & Mode 2
 #if COMPOUND_WEDGE_OPT
 #if M1_OPT
+#if JAN31_M2
+    if (MR_MODE || picture_control_set_ptr->enc_mode <= ENC_M2)
+#else
     if (MR_MODE || picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #else
     if (MR_MODE || picture_control_set_ptr->enc_mode <= ENC_M0)
 #endif
@@ -1710,7 +1730,11 @@ EbErrorType signal_derivation_multi_processes_oq(
         // 1: ON
 #if M0_ADOPT_PRUNE_REF_BASED_ME
 #if M1_ADOPTIONS
+#if JAN31_M2
+        if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M2)
+#else
         if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #else
         if (picture_control_set_ptr->sc_content_detected || picture_control_set_ptr->enc_mode <= ENC_M0)
 #endif

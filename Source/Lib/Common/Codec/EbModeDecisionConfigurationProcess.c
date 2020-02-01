@@ -2682,7 +2682,11 @@ EbErrorType signal_derivation_mode_decision_config_kernel_oq(
 #if PRESETS_TUNE
 #if M0_OPT
 #if SC_PRESETS_OPT
+#if JAN31_M2
+        if (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0 || (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M2 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected))
+#else
         if (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0 || (picture_control_set_ptr->parent_pcs_ptr->enc_mode <= ENC_M1 && picture_control_set_ptr->parent_pcs_ptr->sc_content_detected))
+#endif
 #else
         if (picture_control_set_ptr->parent_pcs_ptr->enc_mode == ENC_M0)
 #endif

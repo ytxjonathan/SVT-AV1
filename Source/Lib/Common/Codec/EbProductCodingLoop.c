@@ -10764,7 +10764,11 @@ void md_encode_block(
 
 #if MULTI_PASS_PD
 #if M1_OPT
+#if JAN31_M2
+    is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M2                                         ||
+#else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode <= ENC_M1                                         ||
+#endif
 #else
     is_nsq_table_used = (picture_control_set_ptr->enc_mode == ENC_M0                                         ||
 #endif

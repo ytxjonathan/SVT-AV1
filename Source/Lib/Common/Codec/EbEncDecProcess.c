@@ -1409,7 +1409,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
 #if PRESETS_TUNE
 #if ENHANCED_M0_SETTINGS
 #if M1_ADOPTIONS
+#if JAN31_M2
+            if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#else
             if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #else
             if (picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
@@ -1496,7 +1500,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         else
 #endif
 #if PRESETS_OPT
+#if JAN31_M2
+        if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#else
         if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #else
         if (picture_control_set_ptr->enc_mode == ENC_M0)
 #endif
@@ -1731,7 +1739,11 @@ EbErrorType signal_derivation_enc_dec_kernel_oq(
         if (sequence_control_set_ptr->static_config.pred_me == DEFAULT) {
 #if PRESETS_TUNE
             if (picture_control_set_ptr->parent_pcs_ptr->sc_content_detected)
+#if JAN31_M2
+                if (picture_control_set_ptr->enc_mode <= ENC_M2)
+#else
                 if (picture_control_set_ptr->enc_mode <= ENC_M1)
+#endif
 #if M0_OPT
 #if SC_PRESETS_OPT
                     context_ptr->predictive_me_level = (picture_control_set_ptr->enc_mode <= ENC_M0) ? 3 : 4;

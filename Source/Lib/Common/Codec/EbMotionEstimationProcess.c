@@ -299,7 +299,11 @@ EbErrorType signal_derivation_me_kernel_oq(
 
 #if SWITCHED_HALF_PEL_MODE
 #if M1_ADOPTIONS
+#if JAN31_M2
+    context_ptr->me_context_ptr->switched_half_pel_mode = enc_mode <= ENC_M2 ? 0 : 1;
+#else
     context_ptr->me_context_ptr->switched_half_pel_mode = enc_mode <= ENC_M1 ? 0 : 1;
+#endif
 #else
     context_ptr->me_context_ptr->switched_half_pel_mode = enc_mode <= ENC_M0 ? 0 : 1;
 #endif
@@ -369,7 +373,11 @@ EbErrorType signal_derivation_me_kernel_oq(
     if (sequence_control_set_ptr->static_config.enable_global_motion == EB_TRUE)
     {
 #if PRESETS_OPT
+#if JAN31_M2
+        if (enc_mode <= ENC_M2)
+#else
         if (enc_mode <= ENC_M1)
+#endif
 #else
         if (enc_mode == ENC_M0)
 #endif
@@ -617,7 +625,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
 #endif
 
     if (picture_control_set_ptr->sc_content_detected)
+#if JAN31_M2
+        if (enc_mode <= ENC_M2)
+#else
         if (enc_mode <= ENC_M1)
+#endif
 #if M0_OPT
             context_ptr->me_context_ptr->fractional_search_method = (enc_mode == ENC_M0) ? FULL_SAD_SEARCH : FULL_SAD_SEARCH;
 #else
@@ -656,7 +668,11 @@ EbErrorType tf_signal_derivation_me_kernel_oq(
     if (sequence_control_set_ptr->static_config.enable_subpel == DEFAULT)
         // Set the default settings of subpel
         if (picture_control_set_ptr->sc_content_detected)
+#if JAN31_M2
+            if (enc_mode <= ENC_M2)
+#else
             if (enc_mode <= ENC_M1)
+#endif
                 context_ptr->me_context_ptr->use_subpel_flag = 1;
             else
                 context_ptr->me_context_ptr->use_subpel_flag = 0;

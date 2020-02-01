@@ -112,6 +112,7 @@ extern "C" {
 
 #define PME_SEARCH_AREA_TUNE        1
 #define SC_REDUCE_DIFF              1 // Reduce feature diff to normal encoder
+#define JAN31_M2                    1 // adopt new M2
 #if 1
 #define OMARK_LAMBDA                1 // 2. fix lambda calculation for HBD0
 
