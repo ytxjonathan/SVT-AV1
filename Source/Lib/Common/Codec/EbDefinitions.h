@@ -46,6 +46,12 @@ extern "C" {
 
 #define MR_MODE 0
 
+#define LOSSLESS_TX_SIZE_OPT 1
+#define LOSSLESS_TX_TYPE_OPT 1
+#define TX_SEARCH_REDUCED 1
+#define REMOVE_COEFF_BASED_SKIP_ATB 1
+#define TX_ORG_INTERINTRA 1
+
 #define HIGH_PRECISION_MV_QTHRESH 150
 // Actions in the second pass: Frame and SB QP assignment and temporal filtering strenght change
 //FOR DEBUGGING - Do not remove

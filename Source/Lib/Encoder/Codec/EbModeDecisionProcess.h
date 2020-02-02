@@ -296,7 +296,11 @@ typedef struct ModeDecisionContext {
     // full_loop_core signals
     EbBool
            md_staging_skip_full_pred; // 0: perform luma & chroma prediction + interpolation search, 2: nothing (use information from previous stages)
+#if LOSSLESS_TX_TYPE_OPT
+    EbBool md_staging_tx_size_mode; // 0: Tx Size recon only, 1:Tx Size search and recon
+#else
     EbBool md_staging_skip_atb;
+#endif
     EbBool md_staging_tx_search; // 0: skip, 1: use ref cost, 2: no shortcuts
     EbBool md_staging_skip_full_chroma;
     EbBool md_staging_skip_rdoq;
@@ -306,7 +310,9 @@ typedef struct ModeDecisionContext {
     uint64_t *   ref_best_cost_sq_table;
     uint32_t *   ref_best_ref_sq_table;
     uint8_t      edge_based_skip_angle_intra;
+#if !REMOVE_COEFF_BASED_SKIP_ATB
     EbBool       coeff_based_skip_atb;
+#endif
     uint8_t      prune_ref_frame_for_rec_partitions;
     unsigned int source_variance; // input block variance
     unsigned int inter_inter_wedge_variance_th;
