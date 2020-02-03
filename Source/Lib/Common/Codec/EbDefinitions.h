@@ -40,7 +40,9 @@ extern "C" {
 #define SKIP_TXS_BSAED_COEFF            0 // Early exit TXS search when the processed tx_depth returns a number of coeff less than threshold
 #define SKIP_TXT_BSAED_COEFF            0 // Early exit TXT search when the processed tx_type returns a number of coeff less than threshold
 #define SKIP_RDOQ_BSAED_COEFF           0 // Early exit RDOQ search when the processed tu returns a number of coeff less than threshold
-#define SKIPT_TX_IN_STAGE3              0 // Use previous md_stage skip decision to restrict the txs txt and rdoq complexity
+#define SKIPT_TXS_TXT_RDOQ_IN_STAGE3    0 // Use previous md_stage skip decision to skip the txs txt and rdoq in MD stage 3.
+#define MULTI_STAGE_TXT                 0 // Perform TXT without RDOQ and then perform RDOQ on the best N Tx types.
+#define LOSSY_TX_SIZE_OPT               0 // Early skip txs based on the cost of the of the already prcessed TUs
 #if RESTRICT_TXS_FOR_NON_S_V_H || RESTRICT_TXT_FOR_NON_S_V_H || DISABLE_COMPOUND_FOR_NON_S_V_H
 #define ADD_PARENT_IDX                  0 // Add parent index in the geom - lossless
 #endif
@@ -178,7 +180,7 @@ extern "C" {
 
 #define LOSSLESS_TX_SIZE_OPT         1
 #define LOSSLESS_TX_TYPE_OPT         1
-#define LOSSY_TX_SIZE_OPT            0
+
 #define ATB_INTRA_2_DEPTH            1 // ATB INTRA Depth 2
 #define SHUT_TX_WEIGHT               0
 #define ATB_INTER_2_DEPTH            1 // ATB INTRA Depth 2

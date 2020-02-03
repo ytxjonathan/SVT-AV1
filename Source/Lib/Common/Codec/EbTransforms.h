@@ -4003,7 +4003,7 @@ extern "C" {
         int32_t                       *quant_coeff,
         int32_t                       *recon_coeff,
         uint32_t                       qp,
-        int32_t              segmentation_qp_offset,
+        int32_t                        segmentation_qp_offset,
         uint32_t                       width,
         uint32_t                       height,
         TxSize                         txsize,
@@ -4019,6 +4019,9 @@ extern "C" {
         EbBool                         is_intra_bc,
 #if OMARK_HBD0_RDOQ
          uint32_t                      lambda,
+#endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+        uint8_t                       previous_stage_skip,
 #endif
         EbBool                         is_encode_pass);
 

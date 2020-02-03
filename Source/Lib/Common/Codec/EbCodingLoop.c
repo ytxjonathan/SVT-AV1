@@ -580,6 +580,9 @@ static void Av1EncodeLoop(
 #if OMARK_HBD0_RDOQ
             context_ptr->full_lambda,
 #endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+            0,
+#endif
             EB_TRUE);
 
         if (context_ptr->md_skip_blk) {
@@ -775,6 +778,9 @@ static void Av1EncodeLoop(
 #if OMARK_HBD0_RDOQ
             context_ptr->full_lambda,
 #endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+            0,
+#endif
             EB_TRUE);
 
         if (context_ptr->md_skip_blk) {
@@ -823,6 +829,9 @@ static void Av1EncodeLoop(
             cu_ptr->av1xd->use_intrabc,
 #if OMARK_HBD0_RDOQ
             context_ptr->full_lambda,
+#endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+            0,
 #endif
             EB_TRUE);
         if (context_ptr->md_skip_blk) {
@@ -1006,6 +1015,9 @@ static void Av1EncodeLoop16bit(
 #if OMARK_HBD0_RDOQ
                 context_ptr->full_lambda,
 #endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+                0,
+#endif
                 EB_TRUE);
             if (context_ptr->md_skip_blk) {
                 count_non_zero_coeffs[0] = 0;
@@ -1164,6 +1176,9 @@ static void Av1EncodeLoop16bit(
 #if OMARK_HBD0_RDOQ
                 context_ptr->full_lambda,
 #endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+                0,
+#endif
                 EB_TRUE);
 
             if (context_ptr->md_skip_blk) {
@@ -1213,6 +1228,9 @@ static void Av1EncodeLoop16bit(
                 cu_ptr->av1xd->use_intrabc,
 #if OMARK_HBD0_RDOQ
                 context_ptr->full_lambda,
+#endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+                0,
 #endif
                 EB_TRUE);
             if (context_ptr->md_skip_blk) {

@@ -1563,6 +1563,9 @@ int32_t av1_quantize_inv_quantize(
 #if OMARK_HBD0_RDOQ
     uint32_t                     lambda,
 #endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+    uint8_t                      previous_stage_skip,
+#endif
     EbBool                       is_encode_pass)
 {
     (void)candidate_buffer;
@@ -1738,6 +1741,10 @@ int32_t av1_quantize_inv_quantize(
 #endif
     } else
         perform_rdoq = (EbBool)sequence_control_set_ptr->static_config.enable_rdoq;
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+    if (previous_stage_skip)
+        perform_rdoq = EB_FALSE;
+#endif
 
 #if MULTI_PASS_PD
 #if FP_QUANT_BOTH_INTRA_INTER
@@ -1863,6 +1870,9 @@ void product_full_loop(
     uint32_t                     qp,
     uint32_t                     *y_count_non_zero_coeffs,
     uint64_t                     *y_coeff_bits,
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+    uint8_t                       previous_stage_skip,
+#endif
     uint64_t                     *y_full_distortion)
 {
     uint32_t                       tu_origin_index;
@@ -1963,6 +1973,9 @@ void product_full_loop(
 #else
             context_ptr->full_lambda,
 #endif
+#endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+            previous_stage_skip,
 #endif
             EB_FALSE);
 #if FREQUENCY_SPATIAL_DOMAIN
@@ -2593,6 +2606,9 @@ void encode_pass_tx_search(
 #if OMARK_HBD0_RDOQ
             context_ptr->full_lambda,
 #endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+            0,
+#endif
             EB_FALSE);
 
 
@@ -2791,6 +2807,9 @@ void encode_pass_tx_search_hbd(
             cu_ptr->av1xd->use_intrabc,
 #if OMARK_HBD0_RDOQ
             context_ptr->full_lambda,
+#endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+            0,
 #endif
             EB_FALSE);
 
@@ -3072,6 +3091,9 @@ void full_loop_r(
                 context_ptr->full_lambda,
 #endif
 #endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+                0,
+#endif
                 EB_FALSE);
 #if FREQUENCY_SPATIAL_DOMAIN
             if (context_ptr->md_staging_spatial_sse_full_loop) {
@@ -3169,6 +3191,9 @@ void full_loop_r(
 #else
                 context_ptr->full_lambda,
 #endif
+#endif
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+                0,
 #endif
                 EB_FALSE);
 #if FREQUENCY_SPATIAL_DOMAIN

@@ -64,6 +64,9 @@ extern "C" {
         uint32_t                      qp,
         uint32_t                     *y_count_non_zero_coeffs,
         uint64_t                     *y_coeff_bits,
+#if SKIPT_TXS_TXT_RDOQ_IN_STAGE3
+        uint8_t                       previous_stage_skip,
+#endif
         uint64_t                     *y_full_distortion);
 
 #if ADD_MDC_FULL_COST
