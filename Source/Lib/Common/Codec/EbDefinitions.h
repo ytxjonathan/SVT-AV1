@@ -43,6 +43,7 @@ extern "C" {
 #define SKIPT_TXS_TXT_RDOQ_IN_STAGE3    0 // Use previous md_stage skip decision to skip the txs txt and rdoq in MD stage 3.
 #define MULTI_STAGE_TXT                 0 // Perform TXT without RDOQ and then perform RDOQ on the best N Tx types.
 #define LOSSY_TX_SIZE_OPT               0 // Early skip txs based on the cost of the of the already prcessed TUs
+#define REDUCE_INTER_MODES              0 // Reduce the number of candidates with new mv based on the weight computed in mv pred.
 #if RESTRICT_TXS_FOR_NON_S_V_H || RESTRICT_TXT_FOR_NON_S_V_H || DISABLE_COMPOUND_FOR_NON_S_V_H
 #define ADD_PARENT_IDX                  0 // Add parent index in the geom - lossless
 #endif

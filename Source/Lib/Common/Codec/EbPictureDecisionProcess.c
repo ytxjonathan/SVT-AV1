@@ -1745,6 +1745,9 @@ EbErrorType signal_derivation_multi_processes_oq(
         else
             picture_control_set_ptr->prune_ref_based_me = 1;
 #endif
+#if REDUCE_INTER_MODES
+        picture_control_set_ptr->reduce_inter_modes = 1;
+#endif
     return return_error;
 }
 

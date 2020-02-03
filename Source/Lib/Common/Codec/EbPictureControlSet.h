@@ -958,6 +958,9 @@ extern "C" {
 #if MUS_ME
         uint8_t                                prune_ref_based_me;
 #endif
+#if REDUCE_INTER_MODES
+        uint8_t                                reduce_inter_modes;
+#endif
     } PictureParentControlSet;
 
     typedef struct PictureControlSetInitData

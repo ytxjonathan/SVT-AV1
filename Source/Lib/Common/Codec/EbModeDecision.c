@@ -1028,7 +1028,61 @@ EbBool mrp_is_already_injected_mv_bipred(
 int8_t ALLOW_REFINEMENT_FLAG[BIPRED_3x3_REFINMENT_POSITIONS] = {  1, 0, 1, 0, 1,  0,  1, 0 };
 int8_t BIPRED_3x3_X_POS[BIPRED_3x3_REFINMENT_POSITIONS] = { -1, -1, 0, 1, 1, 1, 0, -1 };
 int8_t BIPRED_3x3_Y_POS[BIPRED_3x3_REFINMENT_POSITIONS] = { 0, 1, 1, 1, 0, -1, -1, -1 };
+#if REDUCE_INTER_MODES
+// Decide whether this candidate can be skipped, based on initial
+// heuristics.
+static bool ref_mv_idx_early_breakout(
+    PictureControlSet            *picture_control_set_ptr,
+    ModeDecisionContext          *context_ptr,
+    const int8_t                 inter_direction,
+    const int8_t                 list_idx0,
+    const int8_t                 list_idx1,
+    const int8_t                 ref_idx0,
+    const int8_t                 ref_idx1,
+    const int8_t                 ref_mv_idx,
+    PredictionMode               pred_mode) {
 
+    if (inter_direction == UNI_PRED_LIST_0) {
+        if (picture_control_set_ptr->parent_pcs_ptr->reduce_inter_modes && ref_mv_idx > 0) {
+            MvReferenceFrame ref_frame_type = svt_get_ref_frame_type(list_idx0, ref_idx0);
+            if (ref_frame_type == LAST2_FRAME ||
+                ref_frame_type == LAST3_FRAME ) {
+                const int has_nearmv = have_nearmv_in_inter_mode(pred_mode) ? 1 : 0;
+                int32_t weight = context_ptr->md_local_cu_unit[context_ptr->blk_geom->blkidx_mds].ed_ref_mv_stack[ref_frame_type][ref_mv_idx + has_nearmv].weight;
+                if (weight < REF_CAT_LEVEL) {
+                    return true;
+                }
+            }
+        }
+    }else if (inter_direction == UNI_PRED_LIST_1) {
+        if (picture_control_set_ptr->parent_pcs_ptr->reduce_inter_modes && ref_mv_idx > 0) {
+            MvReferenceFrame ref_frame_type = svt_get_ref_frame_type(list_idx1, ref_idx1);
+            if (ref_frame_type == ALTREF2_FRAME ) {
+                const int has_nearmv = have_nearmv_in_inter_mode(pred_mode) ? 1 : 0;
+                int32_t weight = context_ptr->md_local_cu_unit[context_ptr->blk_geom->blkidx_mds].ed_ref_mv_stack[ref_frame_type][ref_mv_idx + has_nearmv].weight;
+                if (weight < REF_CAT_LEVEL) {
+                    return true;
+                }
+            }
+        }
+    }else if (inter_direction == BI_PRED) {
+        if ((picture_control_set_ptr->parent_pcs_ptr->reduce_inter_modes > 1) && ref_mv_idx > 0) {
+            MvReferenceFrame rf[2];
+            rf[0] = svt_get_ref_frame_type(list_idx0, ref_idx0);
+            rf[1] = svt_get_ref_frame_type(list_idx1, ref_idx1);
+            MvReferenceFrame ref_frame_type = av1_ref_frame_type(rf);
+            if (rf[0] == LAST2_FRAME || rf[0] == LAST3_FRAME || rf[1] == ALTREF2_FRAME ) {
+                const int has_nearmv = have_nearmv_in_inter_mode(pred_mode) ? 1 : 0;
+                int32_t weight = context_ptr->md_local_cu_unit[context_ptr->blk_geom->blkidx_mds].ed_ref_mv_stack[ref_frame_type][ref_mv_idx + has_nearmv].weight;
+                if (weight < REF_CAT_LEVEL) {
+                    return true;
+                }
+            }
+        }
+    }
+    return false;
+}
+#endif
 void Unipred3x3CandidatesInjection(
     const SequenceControlSet  *sequence_control_set_ptr,
     PictureControlSet         *picture_control_set_ptr,
@@ -1156,6 +1210,21 @@ void Unipred3x3CandidatesInjection(
                 0, 0,
                 &candidateArray[canTotalCnt].drl_index,
                 bestPredmv);
+
+#if REDUCE_INTER_MODES
+            uint8_t bypass_candidate = ref_mv_idx_early_breakout(
+                picture_control_set_ptr,
+                context_ptr,
+                candidateArray[canTotalCnt].prediction_direction[0],
+                REF_LIST_0,
+                -1,
+                list0_ref_index,
+                -1,
+                candidateArray[canTotalCnt].drl_index,
+                candidateArray[canTotalCnt].pred_mode);
+                if (bypass_candidate)
+                    continue;
+#endif
 
             candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_0] = bestPredmv[0].as_mv.col;
             candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_0] = bestPredmv[0].as_mv.row;
@@ -1300,6 +1369,21 @@ void Unipred3x3CandidatesInjection(
                     0, 0,
                     &candidateArray[canTotalCnt].drl_index,
                     bestPredmv);
+
+#if REDUCE_INTER_MODES
+                uint8_t bypass_candidate = ref_mv_idx_early_breakout(
+                    picture_control_set_ptr,
+                    context_ptr,
+                    candidateArray[canTotalCnt].prediction_direction[0],
+                    -1,
+                    REF_LIST_1,
+                    -1,
+                    list1_ref_index,
+                    candidateArray[canTotalCnt].drl_index,
+                    candidateArray[canTotalCnt].pred_mode);
+                if (bypass_candidate)
+                    continue;
+#endif
 
                 candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_1] = bestPredmv[0].as_mv.col;
                 candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_1] = bestPredmv[0].as_mv.row;
@@ -1518,7 +1602,20 @@ void Bipred3x3CandidatesInjection(
                 candidateArray[canTotalCnt].motion_vector_yl1,
                 &candidateArray[canTotalCnt].drl_index,
                 bestPredmv);
-
+#if REDUCE_INTER_MODES
+                uint8_t bypass_candidate = ref_mv_idx_early_breakout(
+                picture_control_set_ptr,
+                context_ptr,
+                candidateArray[canTotalCnt].prediction_direction[0],
+                me_block_results_ptr->ref0_list,
+                me_block_results_ptr->ref1_list,
+                list0_ref_index,
+                list1_ref_index,
+                candidateArray[canTotalCnt].drl_index,
+                candidateArray[canTotalCnt].pred_mode);
+                if (bypass_candidate)
+                    continue;
+#endif
             candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_0] = bestPredmv[0].as_mv.col;
             candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_0] = bestPredmv[0].as_mv.row;
             candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_1] = bestPredmv[1].as_mv.col;
@@ -1637,7 +1734,20 @@ void Bipred3x3CandidatesInjection(
                     candidateArray[canTotalCnt].motion_vector_yl1,
                     &candidateArray[canTotalCnt].drl_index,
                     bestPredmv);
-
+#if REDUCE_INTER_MODES
+                uint8_t bypass_candidate = ref_mv_idx_early_breakout(
+                    picture_control_set_ptr,
+                    context_ptr,
+                    candidateArray[canTotalCnt].prediction_direction[0],
+                    me_block_results_ptr->ref0_list,
+                    me_block_results_ptr->ref1_list,
+                    list0_ref_index,
+                    list1_ref_index,
+                    candidateArray[canTotalCnt].drl_index,
+                    candidateArray[canTotalCnt].pred_mode);
+                if (bypass_candidate)
+                    continue;
+#endif
                 candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_0] = bestPredmv[0].as_mv.col;
                 candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_0] = bestPredmv[0].as_mv.row;
                 candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_1] = bestPredmv[1].as_mv.col;
@@ -4110,7 +4220,20 @@ void inject_new_candidates(
                     0, 0,
                     &candidateArray[canTotalCnt].drl_index,
                     bestPredmv);
-
+#if REDUCE_INTER_MODES
+                uint8_t bypass_candidate = ref_mv_idx_early_breakout(
+                    picture_control_set_ptr,
+                    context_ptr,
+                    inter_direction,
+                    REF_LIST_0,
+                    -1,
+                    list0_ref_index,
+                    list1_ref_index,
+                    candidateArray[canTotalCnt].drl_index,
+                    candidateArray[canTotalCnt].pred_mode);
+               if (bypass_candidate)
+                   continue;
+#endif
                 candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_0] = bestPredmv[0].as_mv.col;
                 candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_0] = bestPredmv[0].as_mv.row;
 
@@ -4291,7 +4414,20 @@ void inject_new_candidates(
                         0, 0,
                         &candidateArray[canTotalCnt].drl_index,
                         bestPredmv);
-
+#if REDUCE_INTER_MODES
+                    uint8_t bypass_candidate = ref_mv_idx_early_breakout(
+                        picture_control_set_ptr,
+                        context_ptr,
+                        inter_direction,
+                        -1,
+                        REF_LIST_1,
+                        list0_ref_index,
+                        list1_ref_index,
+                        candidateArray[canTotalCnt].drl_index,
+                        candidateArray[canTotalCnt].pred_mode);
+               if (bypass_candidate)
+                   continue;
+#endif
                     candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_1] = bestPredmv[0].as_mv.col;
                     candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_1] = bestPredmv[0].as_mv.row;
 #if II_COMP_FLAG
@@ -4453,7 +4589,20 @@ void inject_new_candidates(
                             candidateArray[canTotalCnt].motion_vector_yl1,
                             &candidateArray[canTotalCnt].drl_index,
                             bestPredmv);
-
+#if REDUCE_INTER_MODES
+                        uint8_t bypass_candidate = ref_mv_idx_early_breakout(
+                            picture_control_set_ptr,
+                            context_ptr,
+                            inter_direction,
+                            me_block_results_ptr->ref0_list,
+                            me_block_results_ptr->ref1_list,
+                            list0_ref_index,
+                            list1_ref_index,
+                            candidateArray[canTotalCnt].drl_index,
+                            candidateArray[canTotalCnt].pred_mode);
+                       if (bypass_candidate)
+                           continue;
+#endif
                         candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_0] = bestPredmv[0].as_mv.col;
                         candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_0] = bestPredmv[0].as_mv.row;
                         candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_1] = bestPredmv[1].as_mv.col;
@@ -4610,7 +4759,20 @@ void inject_new_candidates(
                                 0, 0,
                                 &candidateArray[canTotalCnt].drl_index,
                                 bestPredmv);
-
+#if REDUCE_INTER_MODES
+                            uint8_t bypass_candidate = ref_mv_idx_early_breakout(
+                                picture_control_set_ptr,
+                                context_ptr,
+                                candidateArray[canTotalCnt].prediction_direction[0],
+                                REF_LIST_0,
+                                -1,
+                                ref_pic_index,
+                                -1,
+                                candidateArray[canTotalCnt].drl_index,
+                                candidateArray[canTotalCnt].pred_mode);
+                               if (bypass_candidate)
+                                   continue;
+#endif
                             candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_0] = bestPredmv[0].as_mv.col;
                             candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_0] = bestPredmv[0].as_mv.row;
 #if OBMC_FLAG
@@ -4745,7 +4907,20 @@ void inject_new_candidates(
                                     0, 0,
                                     &candidateArray[canTotalCnt].drl_index,
                                     bestPredmv);
-
+#if REDUCE_INTER_MODES
+                                uint8_t bypass_candidate = ref_mv_idx_early_breakout(
+                                    picture_control_set_ptr,
+                                    context_ptr,
+                                    candidateArray[canTotalCnt].prediction_direction[0],
+                                    -1,
+                                    REF_LIST_1,
+                                    -1,
+                                    ref_pic_index,
+                                    candidateArray[canTotalCnt].drl_index,
+                                    candidateArray[canTotalCnt].pred_mode);
+                               if (bypass_candidate)
+                                   continue;
+#endif
                                 candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_1] = bestPredmv[0].as_mv.col;
                                 candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_1] = bestPredmv[0].as_mv.row;
 #if OBMC_FLAG
@@ -4872,6 +5047,20 @@ void inject_new_candidates(
                                             candidateArray[canTotalCnt].motion_vector_yl1,
                                             &candidateArray[canTotalCnt].drl_index,
                                             bestPredmv);
+#if REDUCE_INTER_MODES
+                                        uint8_t bypass_candidate = ref_mv_idx_early_breakout(
+                                            picture_control_set_ptr,
+                                            context_ptr,
+                                            candidateArray[canTotalCnt].prediction_direction[0],
+                                            REF_LIST_0,
+                                            REF_LIST_1,
+                                            ref_pic_index_l0,
+                                            ref_pic_index_l1,
+                                            candidateArray[canTotalCnt].drl_index,
+                                            candidateArray[canTotalCnt].pred_mode);
+                                       if (bypass_candidate)
+                                           continue;
+#endif
                                         candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_0] = bestPredmv[0].as_mv.col;
                                         candidateArray[canTotalCnt].motion_vector_pred_y[REF_LIST_0] = bestPredmv[0].as_mv.row;
                                         candidateArray[canTotalCnt].motion_vector_pred_x[REF_LIST_1] = bestPredmv[1].as_mv.col;
