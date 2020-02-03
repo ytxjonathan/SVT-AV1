@@ -46,6 +46,8 @@ extern "C" {
 
 #define MR_MODE 0
 
+#define ENHANCED_SQ_WEIGHT 1
+
 #define HIGH_PRECISION_MV_QTHRESH 150
 // Actions in the second pass: Frame and SB QP assignment and temporal filtering strenght change
 //FOR DEBUGGING - Do not remove
