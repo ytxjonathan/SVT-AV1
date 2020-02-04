@@ -221,6 +221,9 @@ extern "C" {
         EbBool                                  use_input_stat_file;
         EbBool                                  use_output_stat_file;
 #endif
+#if CUTREE_LA
+        EbByte                                  save_picture0_ptr;
+#endif
     } SequenceControlSet;
 
     typedef struct EbSequenceControlSetInitData

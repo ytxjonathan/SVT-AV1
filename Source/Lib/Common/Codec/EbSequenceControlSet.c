@@ -107,6 +107,9 @@ EbErrorType eb_sequence_control_set_ctor(
     EB_MALLOC_ARRAY(sequence_control_set_ptr->sb_params_array,
         ((MAX_PICTURE_WIDTH_SIZE + sequence_control_set_ptr->sb_sz - 1) / sequence_control_set_ptr->sb_sz) *
         ((MAX_PICTURE_HEIGHT_SIZE + sequence_control_set_ptr->sb_sz - 1) / sequence_control_set_ptr->sb_sz));
+#if CUTREE_LA
+    sequence_control_set_ptr->save_picture0_ptr = 0;
+#endif
 
     sequence_control_set_ptr->seq_header.frame_width_bits = 16;
     sequence_control_set_ptr->seq_header.frame_height_bits = 16;
